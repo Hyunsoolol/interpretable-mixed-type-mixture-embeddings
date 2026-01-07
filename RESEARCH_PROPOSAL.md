@@ -51,7 +51,7 @@ $$
 \mathbf{v}_i = \text{LLM}(\mathbf{z}_i) \in \mathbb{R}^{D}
 $$
 
-*(여기서 $D$는 원본 임베딩 차원으로, 예: 768 또는 1536)*
+*(여기서 D는 원본 임베딩 차원으로, 예: 768 또는 1536)*
 
 * **차원 축소 (Dimensionality Reduction):** 가우시안 혼합 모형에서 공분산 행렬의 안정적인 추정을 위해(즉, $D \gg n$으로 인한 특이성 문제 방지), $\mathbf{v}_i$를 저차원 매니폴드 $\mathbb{R}^{d}$로 투영합니다 (예: $d \approx 20 \sim 50$).
 
