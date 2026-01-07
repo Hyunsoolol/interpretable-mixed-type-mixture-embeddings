@@ -1,5 +1,6 @@
-# Interpretable Mixed-type Mixture Modeling via De-embedding of Reduced LLM Vectors
+# Interpretable Mixed-type Mixture Modeling (IM3)
 
+![Repo Name](https://img.shields.io/badge/Repo-interpretable--mixed--mixture-blueviolet)
 ![Status](https://img.shields.io/badge/Status-Research%20Proposal-blue)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-green)
 ![Topic](https://img.shields.io/badge/Topic-Mixture%20Models%20%7C%20NLP%20%7C%20XAI-orange)
@@ -35,8 +36,8 @@ graph LR
     A[Raw Data] --> B{Preprocessing};
     B -->|Categorical X_cat| C[One-Hot Encoding];
     B -->|Text Z| D[LLM Embedding];
-    D -->|High-dim Vector| E[Dim Reduction (PCA/UMAP)];
-    E -->|Reduced Vector X_cont| F[Joint Mixture Modeling];
+    D -->|High-dim Vector| E["Dim Reduction (PCA/UMAP)"];
+    E -->|"Reduced Vector X_cont"| F[Joint Mixture Modeling];
     C --> F;
     F --> G[Latent Class Identification];
     G --> H[Interpretation via De-embedding];
