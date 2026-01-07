@@ -34,12 +34,11 @@ The proposed framework consists of three main stages:
 ```mermaid
 graph LR
     A[Raw Data] --> B{Preprocessing};
-    B -->|Categorical X_cat| C[One-Hot Encoding];
-    B -->|Text Z| D[LLM Embedding];
-    D -->|High-dim Vector| E["Dim Reduction (PCA/UMAP)"];
+    B -->|"Categorical X_cat"| C[Categorical Processing];
+    B -->|"Text Z"| D[LLM Embedding];
+    D -->|"High-dim Vector"| E["Dim Reduction (PCA/UMAP)"];
     E -->|"Reduced Vector X_cont"| F[Joint Mixture Modeling];
     C --> F;
     F --> G[Latent Class Identification];
-    G --> H[Interpretation via De-embedding];
+    G --> H["Interpretation via De-embedding"];
 ```
-1. Feature RepresentationLet the observed data for subject $i$ be $(\mathbf{x}^{(c)}_i, \mathbf{z}_i)$, where $\mathbf{x}^{(c)}_i$ is the categorical vector and $\mathbf{z}_i$ is the raw text.Text Embedding: $\mathbf{v}_i = \text{LLM}(\mathbf{z}_i) \in \mathbb{R}^{D}$ (where $D$ is large, e.g., 768 or 1536).Dimensionality Reduction: To ensure stable covariance estimation in GMM, we project $\mathbf{v}_i$ to a lower-dimensional space $\mathbb{R}^{d}$ (e.g., $d \approx 50$):
