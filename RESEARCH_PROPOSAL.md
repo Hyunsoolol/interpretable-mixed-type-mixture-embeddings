@@ -43,17 +43,21 @@ $$
 제안된 프레임워크는 크게 세 가지 단계로 구성됩니다:
 
 ```mermaid
-graph LR
-  A[원본 데이터 (x_cat, text, optional y)] --> B{전처리/정규화};
-  B -->|x_cat| C[범주형 인코딩/결측 처리];
-  B -->|text| D[LLM 임베딩 v in R^D];
-  D --> E[PCA로 d차원 축소 x_emb in R^d];
-  B -->|y (optional)| Y[연속형 지표 변환/스케일링];
-  C --> F[결합 혼합모형 적합];
-  E --> F;
-  Y --> F;
-  F --> G[잠재 클래스 posterior / 할당];
-  G --> H[디베딩: 프로토타입+키워드+라벨링];
+flowchart LR
+  A["원본 데이터<br/>(x_cat, text, optional y)"] --> B["전처리/정규화"]
+
+  B -->|x_cat| C["범주형 인코딩/결측 처리"]
+  B -->|text| D["LLM 임베딩 v in R<sup>D</sup>"]
+  D --> E["차원 축소(PCA) x_emb in R<sup>d</sup>"]
+  B -->|y (optional)| Y["성과지표 변환/스케일링"]
+
+  C --> F["결합 혼합모형 적합"]
+  E --> F
+  Y --> F
+
+  F --> G["잠재 클래스 추정<br/>posterior / 할당"]
+  G --> H["디베딩(해석)<br/>프로토타입 + 키워드 + 라벨링"]
+
 ```
 
 ### 1. Feature Representation
