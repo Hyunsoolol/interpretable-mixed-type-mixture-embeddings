@@ -55,14 +55,14 @@ graph LR
 #### 3.1. Feature Representation
 관측된 대상 $i$의 데이터를 $(\mathbf{x}^{(c)}_i, \mathbf{z}_i)$라고 합시다. 여기서 $\mathbf{x}^{(c)}_i$는 범주형 벡터(예: 인구통계 변수), $\mathbf{z}_i$는 원본 텍스트 데이터입니다.
 
-* - **텍스트 임베딩 (Text Embedding):** 먼저 사전 학습된 LLM을 사용하여 원본 텍스트를 밀집 벡터로 변환합니다.
+* **텍스트 임베딩 (Text Embedding):** 먼저 사전 학습된 LLM을 사용하여 원본 텍스트를 밀집 벡터로 변환합니다.
     
 
 $$\mathbf{v}_i = \text{LLM}(\mathbf{z}_i) \in \mathbb{R}^{D}$$
 
 _(여기서 D는 원본 임베딩 차원으로, 예: 768 또는 1536)_
 
-* - **차원 축소 (Dimensionality Reduction):** 가우시안 혼합 모형에서 공분산 행렬의 안정적인 추정을 위해(즉, $D \gg n$으로 인한 특이성 문제 방지), $\mathbf{v}_i$를 저차원 매니폴드 $\mathbb{R}^{d}$로 투영합니다 (예: $d \approx 20 \sim 50$).
+* **차원 축소 (Dimensionality Reduction):** 가우시안 혼합 모형에서 공분산 행렬의 안정적인 추정을 위해(즉, $D \gg n$으로 인한 특이성 문제 방지), $\mathbf{v}_i$를 저차원 매니폴드 $\mathbb{R}^{d}$로 투영합니다 (예: $d \approx 20 \sim 50$).
     
 
 $$\mathbf{x}^{(e)}_i = \phi(\mathbf{v}_i) \in \mathbb{R}^d$$
@@ -331,4 +331,3 @@ Method A/B의 텍스트 해석과 모델의 다른 변수(범주형 $\mathbf{x}^
 *Author: Hyunsoo Shin*
 
 *Affiliation: Department of Statistics, Sungkyunkwan University*
-
