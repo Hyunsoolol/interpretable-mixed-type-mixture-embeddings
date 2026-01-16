@@ -1,0 +1,27 @@
+(venv) (base) C:\Users\shs7021\llm_embedding_example>python run_gmm_deembedding.py
+=== 1. Data Created: 30 samples ===
+
+=== 2. Loading Embedding Model: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 ===
+   Generating embeddings...
+   Original Embedding Shape: (30, 384)
+
+=== 3. Dimensionality Reduction (PCA, d=20) ===
+   Reduced Shape: (30, 20)
+
+=== 4. Joint Mixture Modeling (GMM, K=2) ===
+
+=== 5. Interpretation via De-embedding (Method A) ===
+
+[Cluster 0] Analysis
+  ▶ Centroid (first 5 dims): [-0.303  1.751  0.576 -0.551 -0.113] ...
+  ▶ Prototype (Anchor): "선착순 1000명에게 구글 기프트카드 증정."
+  ▶ Members Count: 1
+  ▶ Examples: ['선착순 1000명에게 구글 기프트카드 증정.']
+
+[Cluster 1] Analysis
+  ▶ Centroid (first 5 dims): [ 0.01  -0.06  -0.02   0.019  0.004] ...
+  ▶ Prototype (Anchor): "원작의 감동을 그대로, 리마스터 업데이트."
+  ▶ Members Count: 29
+  ▶ Examples: ['지금 접속 시 전설 장비 100% 확정 지급!', '신규 유저 환영! 10만원 상당의 아이템 무료 증정.', '오늘만 드리는 혜택, SSR 영웅 소환권 즉시 지급.', '주말 한정 로그인 보너스로 다이아 3000개 받아가세요.', '복귀 유저를 위한 스페셜 패키지 무료 제공.']
+
+=== Result saved to 'result_gmm_d20.csv' ===
