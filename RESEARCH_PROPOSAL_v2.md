@@ -32,26 +32,26 @@
 
 ```mermaid
 graph TD
-    subgraph Phase 1: Feature Representation
-    A[Raw Text Z] -->|SBERT Embedding| B(Dense Vectors V)
-    B -->|PCA Reduction| C(Reduced Embeddings X_e)
-    D[Categorical Data X_c] --> E{Input Data}
+    subgraph P1 ["Phase 1: Feature Representation"]
+    A["Raw Text Z"] -->|"SBERT Embedding"| B("Dense Vectors V")
+    B -->|"PCA Reduction"| C("Reduced Embeddings X_e")
+    D["Categorical Data X_c"] --> E{"Input Data"}
     C --> E
     end
 
-    subgraph Phase 2: Heterogeneity-Pursuing Joint Modeling
-    E --> F[Generalized EM Algorithm]
-    F -->|E-Step| G(Calculate Posteriors)
-    F -->|M-Step| H[Update Parameters with Penalty]
-    H --> I{Sparsity Estimation}
-    I -->|Delta approx 0| J[Common Feature]
-    I -->|Delta != 0| K[Heterogeneous Feature]
+    subgraph P2 ["Phase 2: Heterogeneity-Pursuing Joint Modeling"]
+    E --> F["Generalized EM Algorithm"]
+    F -->|"E-Step"| G("Calculate Posteriors")
+    F -->|"M-Step"| H["Update Parameters with Penalty"]
+    H --> I{"Sparsity Estimation"}
+    I -->|"Delta ≈ 0"| J["Common Feature"]
+    I -->|"Delta ≠ 0"| K["Heterogeneous Feature"]
     end
 
-    subgraph Phase 3: Interpretation
-    K -->|Targeted De-embedding| L[Extract Semantic Keywords]
-    J --> M[Ignore (Background Noise)]
-    L --> N[Final Segment Profiling]
+    subgraph P3 ["Phase 3: Interpretation"]
+    K -->|"Targeted De-embedding"| L["Extract Semantic Keywords"]
+    J --> M["Ignore (Background Noise)"]
+    L --> N["Final Segment Profiling"]
     end
 ```
 
@@ -83,7 +83,9 @@ $$\boldsymbol{\mu}_k = \boldsymbol{\mu}_0 + \boldsymbol{\delta}_k, \quad \text{s
 
 불필요한 차원의 편차를 0으로 만들기 위해, 로그 우도 함수에 **적응형 라소(Adaptive Lasso)** 페널티를 적용한 목적 함수 $\mathcal{Q}$를 최대화합니다.
 
+
 $$\max_{\Theta} \left\{ \sum_{i=1}^{n} \log f(\mathbf{x}_i | \Theta) - n\lambda \sum_{j=1}^{D} \sum_{k=1}^{K} w_{jk} |\delta_{jk}| \right\}$$
+
 
 이를 위해 **Generalized EM 알고리즘**을 수행합니다.
 
