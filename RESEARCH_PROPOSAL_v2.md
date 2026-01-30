@@ -116,7 +116,7 @@ $$\gamma_{ik} = \frac{\pi_k f_{\text{cat}}(\mathbf{x}_i^{(c)} | \boldsymbol{\alp
 
 **(2) M-step: closed-form pieces**
 
-- **Mixing proportions:** $$\pi_k \leftarrow \frac{1}{n} \sum_{i=1}^n \gamma_{ik}$$
+- **Mixing proportions:** $\pi_k \leftarrow \frac{1}{n} \sum_{i=1}^n \gamma_{ik}$
     
 - **Categorical parameters:** $\alpha_{kmr} \leftarrow \frac{\sum_{i=1}^n \gamma_{ik} I(x_{im}=r)}{\sum_{i=1}^n \gamma_{ik}}$
     
@@ -128,9 +128,9 @@ $$\gamma_{ik} = \frac{\pi_k f_{\text{cat}}(\mathbf{x}_i^{(c)} | \boldsymbol{\alp
         
         $$\delta_{kj} \leftarrow S\left( \bar{x}_{kj} - \mu_{0j}, \frac{n\lambda w_{jk} \sigma_{kj}^2}{N_k} \right), \quad S(a, \tau) = \text{sign}(a)\max(|a|-\tau, 0)$$
         
-    - **(b) Update $\mu_{0j}$:** $\mu_{0j} \leftarrow \sum_{k=1}^K \pi_k (\bar{x}_{kj} - \delta_{kj})$
+    - **(b) Update $\mu_{0j}$:** $$\mu_{0j} \leftarrow \sum_{k=1}^K \pi_k (\bar{x}_{kj} - \delta_{kj})$$
         
-    - **(c) Update $\sigma_{kj}^2$:** $\sigma_{kj}^2 \leftarrow \frac{1}{N_k} \sum_{i=1}^n \gamma_{ik} (x_{ij}^{(e)} - \mu_{0j} - \delta_{kj})^2$ (수치 안정성을 위해 $\sigma_{\min}^2$ floor 적용)
+    - **(c) Update $\sigma_{kj}^2$:** $$\sigma_{kj}^2 \leftarrow \frac{1}{N_k} \sum_{i=1}^n \gamma_{ik} (x_{ij}^{(e)} - \mu_{0j} - \delta_{kj})^2$$ (수치 안정성을 위해 $\sigma_{\min}^2$ floor 적용)
         
 
 ---
