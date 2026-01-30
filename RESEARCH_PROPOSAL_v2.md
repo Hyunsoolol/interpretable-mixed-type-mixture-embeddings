@@ -1,187 +1,202 @@
-# Interpretable Mixed-type Mixture Modeling via Heterogeneity Pursuit
-
 ## 1. Overview
 
-본 프로젝트는 범주형 변수(예: 인구통계, 캠페인 속성)와 텍스트(비정형)로부터 얻어지는 고차원 임베딩을 결합하여, **설명 가능한 군집화(Interpretable Clustering)**를 수행하는 새로운 통계적 프레임워크를 제안합니다.
+본 프로젝트는 범주형 변수(예: 인구통계, 캠페인 속성)와 텍스트(비정형)로부터 얻어지는 고차원 임베딩을 결합하여, **설명 가능한 군집화(Interpretable Clustering)**를 수행하는 통계적 프레임워크를 제안한다.
 
-기존 연구들이 임베딩의 모든 차원을 사용하여 군집화를 수행함으로써 "어떤 의미적 특징 때문에 군집이 나뉘었는지" 설명하기 어려웠던 문제(Black-box)를 해결하기 위해, 본 연구는 **이질성 탐색(Heterogeneity Pursuit)** 기법을 도입합니다. 이를 통해 군집을 구분 짓는 **핵심 의미 차원(Heterogeneous Feature)**과 모든 군집이 공유하는 **공통 차원(Common Feature)**을 통계적으로 분리하고, 선별된 차원만을 **디베딩(De-embedding)**하여 명확한 해석을 제공합니다.
+기존의 임베딩 기반 군집화는 (i) 임베딩의 모든 차원이 군집 형성에 관여하여 사후 해석이 불가능하고, (ii) 고차원에서 공분산 추정/최적화가 불안정해지는 문제가 있다. 본 연구는 **이질성 탐색(Heterogeneity Pursuit)**을 혼합모형 내부의 **벌점화 추정(penalized estimation)**으로 구현하여, 군집을 구분하는 **핵심 의미 차원(Heterogeneous Feature)**과 모든 군집이 공유하는 **공통 차원(Common Feature)**을 통계적으로 분리한다.
+
+특히 본 연구에서는 **PCA를 반드시 포함**한다. 이유는 (a) 고차원 임베딩을 선형 구조로 요약하여 추정을 안정화하고, (b) PCA 로딩 행렬 $\mathbf{V}$를 통해 **Targeted De-embedding**(“이 PC는 어떤 단어/구문 방향과 정렬되는가?”)을 수식적으로 정의할 수 있기 때문이다.
 
 ---
+
 ## 2. Motivation
 
-### 기존 방법론의 한계
+### 2.1 기존 방법론의 한계
 
-1. **BoW/나이브 베이즈의 한계:** [Shi et al. (2024)](https://www.google.com/search?q=https://doi.org/10.1214/24-AOAS1893) 등은 텍스트를 이진 벡터로 가정하여 문맥(Context)과 의미론적 뉘앙스를 놓칩니다.
+1. **BoW/Naive Bayes 기반 텍스트 모형의 한계** 단어 빈도 기반 표현은 문맥(Context)과 의미론적 뉘앙스를 충분히 반영하지 못하며, 고차원 희소 벡터에서의 독립성 가정이 강하게 요구된다.
     
-2. **임베딩 군집화의 한계:** LLM 임베딩을 그대로 GMM에 적용할 경우, 수백 개의 차원이 모두 군집 형성에 관여하므로 사후 해석이 불가능하며, 차원의 저주로 인한 추정 불안정성이 발생합니다.
-
-### 제안하는 접근법 (Our Approach)
-
-우리는 **"PCA 차원 축소"**와 **"벌점화된 혼합 모형(Penalized Mixture Model)"**을 결합한 통합 프레임워크를 제안합니다.
-
-- **PCA:** 선형성을 유지하면서 고차원 임베딩을 '잠재 의미 단위(PC)'로 압축합니다.
+2. **Embedding + GMM의 한계** SBERT/LLM 임베딩을 그대로 GMM에 적용하면, 수백 차원이 동시에 군집 형성에 관여해 해석이 사실상 불가능하며, 차원의 저주로 인해 공분산 추정이 불안정하고 EM이 특이행렬/로컬 최적점에 민감해진다.
     
-- **Heterogeneity Pursuit:** 군집 간 차이가 없는 PC는 0으로 수축(Shrinkage)시키고, 실제 군집을 가르는 PC만 선별합니다.
+
+### 2.2 제안하는 접근(Our Approach)
+
+본 연구는 다음 두 축을 결합한 통합 프레임워크를 제안한다.
+
+- **PCA(선형 차원축소):** 고차원 임베딩을 선형 구조(PC)로 압축하여 추정 안정성을 확보하고, PC 로딩 $\mathbf{V}$를 통해 디코딩(semantic direction decoding)을 가능하게 한다.
+    
+- **Heterogeneity Pursuit(벌점화 혼합모형):** 평균을 $\mu_k = \mu_0 + \delta_k$로 분해하고 $\delta$에 벌점을 부여하여, 군집 간 평균 차이가 없는 PC를 0으로 수축시키고(공통 차원), 실제로 군집을 가르는 PC만 선택(이질 차원)한다.
+    
 
 ---
 
+## 3. Methodology: Heterogeneity-Pursuing Joint Mixture Model (PCA + Diagonal $\Sigma_k$)
 
-## 3. Methodology: Heterogeneity-Pursuing Joint Mixture Model
+관측치 $i$는 범주형 데이터 $\mathbf{x}^{(c)}_i$와 텍스트 $\mathbf{z}_i$로 구성된다. 제안 프레임워크는 **표현(Representation)–모형 적합(Modeling)–해석(Interpretation)**의 3단계로 구성된다.
 
-관측치 $i$는 범주형 데이터 $\mathbf{x}^{(c)}_i$와 텍스트 데이터 $\mathbf{z}_i$로 구성됩니다. 제안된 프레임워크는 **특징 추출(Feature Representation)**, **모형 적합(Modeling)**, **해석(Interpretation)**의 3단계로 구성됩니다.
 
 ```mermaid
 graph TD
-    subgraph P1 ["Phase 1: Feature Representation"]
-    A["Raw Text Z"] -->|"SBERT Embedding"| B("Dense Vectors V")
-    B -->|"PCA Reduction"| C("Reduced Embeddings X_e")
-    D["Categorical Data X_c"] --> E{"Input Data"}
+    subgraph P1 ["Phase 1: Feature Representation (PCA is mandatory)"]
+    A["Raw Text Z"] -->|"SBERT Embedding"| B("Sentence Embedding v_i in R^{d0}")
+    B -->|"Centering + PCA"| C("PC scores x_i^(e)=V^T(v_i-vbar) in R^D")
+    D["Categorical Data x_i^(c)"] --> E{"Joint Input (x_i^(c), x_i^(e))"}
     C --> E
     end
 
     subgraph P2 ["Phase 2: Heterogeneity-Pursuing Joint Modeling"]
-    E --> F["Generalized EM Algorithm"]
-    F -->|"E-Step"| G("Calculate Posteriors")
-    F -->|"M-Step"| H["Update Parameters with Penalty"]
-    H --> I{"Sparsity Estimation"}
-    I -->|"Delta ≈ 0"| J["Common Feature"]
-    I -->|"Delta ≠ 0"| K["Heterogeneous Feature"]
+    E --> F["Generalized EM (Penalized)"]
+    F -->|"E-Step"| G("Responsibilities γ_ik")
+    F -->|"M-Step"| H["Update: π_k, α_k, μ_0, δ_k, Ψ_k (diagonal)"]
+    H --> I{"Heterogeneity Selection via δ"}
+    I -->|"δ_{k j} = 0 ∀k"| J["Common PC j"]
+    I -->|"∃k: δ_{k j} ≠ 0"| K["Heterogeneous PC j"]
     end
 
-    subgraph P3 ["Phase 3: Interpretation"]
-    K -->|"Targeted De-embedding"| L["Extract Semantic Keywords"]
-    J --> M["Ignore (Background Noise)"]
+    subgraph P3 ["Phase 3: Interpretation (Targeted De-embedding)"]
+    K -->|"Use PCA loading V_{·j}"| L["Direction-based decoding (keywords/phrases)"]
+    K -->|"Exemplar retrieval by PC scores"| M["Representative texts per cluster"]
     L --> N["Final Segment Profiling"]
+    M --> N
+    J --> O["Ignored in interpretation (background)"]
     end
 ```
 
-### 3.1. Feature Representation (PCA-based)
 
-- **텍스트 임베딩:** 사전 학습된 LLM(SBERT 등)을 사용하여 텍스트 $\mathbf{z}_i$를 고차원 벡터 $\mathbf{v}_i \in \mathbb{R}^{768}$로 변환합니다.
+
+### 3.1 Feature Representation (PCA-based; formal definition)
+
+**SBERT Embedding** 각 텍스트 $\mathbf{z}_i$를 SBERT 등으로 임베딩하여 $\mathbf{v}_i \in \mathbb{R}^{d_0}$ (예: $d_0=768$)을 얻는다.
+
+**Centering + PCA (mandatory)** 전체 평균 $\bar{\mathbf{v}} = \frac{1}{n} \sum_{i=1}^n \mathbf{v}_i$로 중심화한 후 PCA를 수행한다. 로딩 행렬을 $\mathbf{V} \in \mathbb{R}^{d_0 \times D}$로 두고 $\mathbf{V}^\top \mathbf{V} = \mathbf{I}_D$ (orthonormal)로 정규화한다.
+
+$$\mathbf{x}_i^{(e)} = \mathbf{V}^\top (\mathbf{v}_i - \bar{\mathbf{v}}) \in \mathbb{R}^D$$
+
+여기서 $\mathbf{V}_{\cdot j}$는 “PC $j$의 의미 방향(semantic direction)”으로 해석되며, 이후 Targeted De-embedding의 핵심 객체가 된다.
+
+### 3.2 Model Specification (Joint mixture with diagonal covariance)
+
+잠재 클래스 $z_i \in {1, \dots, K}$를 도입하여 결합 밀도를 다음과 같이 정의한다.
+
+$$f(\mathbf{x}_i | \Theta) = \sum_{k=1}^K \pi_k f_{\text{cat}}(\mathbf{x}_i^{(c)} | \boldsymbol{\alpha}_k) f_{\text{cont}}(\mathbf{x}_i^{(e)} | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$$
+
+**(a) Categorical part: LCA-style (conditional independence)** 범주형 변수를 $m=1, \dots, M$로 두고, 각 변수의 범주를 $r=1, \dots, R_m$라 하면:
+
+$$f_{\text{cat}}(\mathbf{x}_i^{(c)} | \boldsymbol{\alpha}_k) = \prod_{m=1}^M \prod_{r=1}^{R_m} (\alpha_{kmr})^{I(x_{im}=r)}$$
+
+**(b) Continuous part: Penalized Gaussian mixture in PCA space** 연속형(PCA score) 부분은 군집별 평균과 군집별 대각 공분산을 갖는 정규분포로 둔다.
+
+$$\mathbf{x}_i^{(e)} | z_i = k \sim N(\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k), \quad \boldsymbol{\Sigma}_k = \boldsymbol{\Psi}_k = \text{diag}(\sigma_{k1}^2, \dots, \sigma_{kD}^2)$$
+
+핵심 아이디어는 평균을 공통+편차로 분해하는 것이다.
+
+$$\boldsymbol{\mu}_k = \boldsymbol{\mu}_0 + \boldsymbol{\delta}_k$$
+
+식별을 위해 본 연구는 다음 제약을 권장한다(혼합 가중치 기반 식별).
+
+$$\sum_{k=1}^K \pi_k \boldsymbol{\delta}_k = \mathbf{0}$$
+
+- $\boldsymbol{\mu}_0$: mixture-weighted overall mean (Common Mean)
     
-- **선형 차원 축소 (PCA):** 이질성 탐색 모형의 선형성 가정($\mu_0 + \delta_k$)을 유지하고 공분산 추정의 안정성을 확보하기 위해, PCA를 사용하여 상위 $D$개(예: $D=50$)의 주성분으로 축소합니다.
-    
-    $$\mathbf{x}^{(e)}_i = \text{PCA}(\mathbf{v}_i) \in \mathbb{R}^{D}$$
+- $\boldsymbol{\delta}_k$: 군집 $k$의 평균 편차(Cluster-specific deviation). $\delta_{kj} \neq 0$인 PC 좌표 $j$가 **이질성의 원인(heterogeneous feature)**이 된다.
     
 
-### 3.2. Model Specification (Heterogeneity Pursuit)
+### 3.3 Penalized Estimation via Generalized EM
 
-전체 모집단이 $K$개의 잠재 클래스로 구성된다고 가정합니다. 결합 확률 밀도 함수는 다음과 같습니다.
+불필요한 차원의 편차를 0으로 수축시키기 위해, $\boldsymbol{\delta}$에 Adaptive Lasso 벌점을 부여한다.
 
-$$f(\mathbf{x}_i | \Theta) = \sum_{k=1}^{K} \pi_k \cdot f_{\text{cat}}(\mathbf{x}^{(c)}_i | \boldsymbol{\alpha}_k) \cdot f_{\text{cont}}(\mathbf{x}^{(e)}_i | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$$
+$$\max_{\Theta} \left\{ \sum_{i=1}^n \log f(\mathbf{x}_i | \Theta) - n\lambda \sum_{j=1}^D \sum_{k=1}^K w_{jk} |\delta_{kj}| \right\}$$
 
-여기서 **연속형 부분(Penalized GMM)**에 핵심 아이디어가 적용됩니다. 각 군집의 평균 벡터 $\boldsymbol{\mu}_k$를 다음과 같이 분해합니다.
-
-$$\boldsymbol{\mu}_k = \boldsymbol{\mu}_0 + \boldsymbol{\delta}_k, \quad \text{subject to } \sum_{k=1}^{K} \boldsymbol{\delta}_k = \mathbf{0}$$
-
-- $\boldsymbol{\mu}_0$: 전체 모집단의 **공통 평균 (Common Mean)**
+- $w_{jk}$: adaptive weight ($w_{jk} = 1/(|\tilde{\delta}_{kj}| + \epsilon)^\nu$)
     
-- $\boldsymbol{\delta}_k$: 군집 $k$의 **특이 편차 (Cluster-specific Deviation)**. 즉, **이질성의 원인**입니다.
+- $\lambda$: sparsity strength
     
 
-### 3.3. Penalized Estimation via Generalized EM
+**(1) E-step: responsibilities**
 
-불필요한 차원의 편차를 0으로 만들기 위해, 로그 우도 함수에 **적응형 라소(Adaptive Lasso)** 페널티를 적용한 목적 함수 $\mathcal{Q}$를 최대화합니다.
+$$\gamma_{ik} = \frac{\pi_k f_{\text{cat}}(\mathbf{x}_i^{(c)} | \boldsymbol{\alpha}_k) \phi(\mathbf{x}_i^{(e)}; \boldsymbol{\mu}_0 + \boldsymbol{\delta}_k, \boldsymbol{\Psi}_k)}{\sum_{\ell=1}^K \pi_\ell f_{\text{cat}}(\mathbf{x}_i^{(c)} | \boldsymbol{\alpha}_\ell) \phi(\mathbf{x}_i^{(e)}; \boldsymbol{\mu}_0 + \boldsymbol{\delta}_\ell, \boldsymbol{\Psi}_\ell)}$$
 
+**(2) M-step: closed-form pieces**
 
-$$\max_{\Theta} \{ \sum_{i=1}^{n} \log f(\mathbf{x}_i | \Theta) - n\lambda \sum_{j=1}^{D} \sum_{k=1}^{K} w_{jk} |\delta_{jk}|\}$$
-
-이를 위해 **Generalized EM 알고리즘**을 수행합니다.
-
-1. **E-step:** 각 관측치의 군집 소속 확률(Responsibility) $\gamma_{ik}$ 계산.
+- **Mixing proportions:** $\pi_k \leftarrow \frac{1}{n} \sum_{i=1}^n \gamma_{ik}$
     
-2. **M-step (Coordinate Descent):**
+- **Categorical parameters:** $\alpha_{kmr} \leftarrow \frac{\sum_{i=1}^n \gamma_{ik} I(x_{im}=r)}{\sum_{i=1}^n \gamma_{ik}}$
     
-    - $\pi_k, \boldsymbol{\alpha}_k, \boldsymbol{\Sigma}_k$는 기존 방식대로 업데이트.
+- **Continuous parameters (Coordinate-wise updates):**
+    
+    - $N_k = \sum_{i=1}^n \gamma_{ik}$, $\bar{x}_{kj} = \frac{1}{N_k} \sum_{i=1}^n \gamma_{ik} x_{ij}^{(e)}$
         
-    - $\boldsymbol{\mu}_0, \boldsymbol{\delta}_k$는 제약 조건($\sum \delta=0$) 하에서 벌점화된 가중 최소자승 문제를 푸는 **좌표 하강법**으로 업데이트.
+    - **(a) Update $\delta_{kj}$ (Soft-thresholding):**
         
-    - 결과적으로 중요하지 않은 차원 $j$에 대해 $\hat{\delta}_{jk}$는 정확히 **0으로 수축(Shrinkage)**됩니다.
+        $$\delta_{kj} \leftarrow S\left( \bar{x}_{kj} - \mu_{0j}, \frac{n\lambda w_{jk} \sigma_{kj}^2}{N_k} \right), \quad S(a, \tau) = \text{sign}(a)\max(|a|-\tau, 0)$$
+        
+    - **(b) Update $\mu_{0j}$:** $\mu_{0j} \leftarrow \sum_{k=1}^K \pi_k (\bar{x}_{kj} - \delta_{kj})$
+        
+    - **(c) Update $\sigma_{kj}^2$:** $\sigma_{kj}^2 \leftarrow \frac{1}{N_k} \sum_{i=1}^n \gamma_{ik} (x_{ij}^{(e)} - \mu_{0j} - \delta_{kj})^2$ (수치 안정성을 위해 $\sigma_{\min}^2$ floor 적용)
         
 
 ---
 
 ## 4. Interpretation via Targeted De-embedding
 
-모델링 결과 살아남은(Non-zero) $\delta$를 가진 차원만을 대상으로 해석을 수행합니다. 이는 해석의 노이즈를 획기적으로 줄여줍니다.
+### 4.1 Identification of common vs heterogeneous PCs
 
-### 4.1. 이질성 원인 식별 (Identification)
-
-- **Common Dimensions ($\hat{\delta} \approx 0$):** 군집 간 차이가 없는 배경 정보(Background Noise). 해석에서 제외합니다.
+- **Common PC $j$:** $\delta_{1j} = \dots = \delta_{Kj} = 0$. 군집 구분에 기여하지 않는 배경 차원.
     
-- **Heterogeneous Dimensions ($\hat{\delta} \neq 0$):** 군집을 나누는 핵심 요인. 집중 해석 대상입니다.
+- **Heterogeneous PC $j$:** $\exists k$ s.t. $\delta_{kj} \neq 0$. 군집을 가르는 핵심 의미 차원.
     
 
-### 4.2. Targeted Method B: Linear Decoder
+### 4.2 Targeted De-embedding: Direction-based decoding
 
-선별된 **이질성 차원(PC)**에 대해서만 원본 단어와의 관계를 역추적합니다.
+- **Dictionary projection:** 후보 표현 집합 $\mathcal{T}$의 각 $t$에 대해 SBERT 임베딩 $\mathbf{e}(t)$ 생성.
+    
+    $$s_j(t) = \mathbf{V}_{\cdot j}^\top (\mathbf{e}(t) - \bar{\mathbf{v}})$$
+    
+- **Cluster-level profiling:** - $\delta_{kj} > 0$: 군집 $k$는 PC $j$의 $+$방향 키워드들과 정렬.
+    
+    - $\delta_{kj} < 0$: 군집 $k$는 PC $j$의 $-$방향 키워드들과 정렬.
+        
 
-$$\text{Keywords}(PC_j) = \text{Top-weighted words in } \mathbf{w}_j = \mathbf{V}^T \mathbf{e}_j$$
+### 4.3 Exemplar retrieval
 
-_(여기서 $\mathbf{V}$는 PCA 로딩 행렬)_
-
-이를 통해 **"PC 3는 '보상'과 관련되며, 군집 1에서 양의 값($\delta_1 > 0$)을 가지므로 군집 1은 보상 지향 그룹이다"**와 같은 명확한 해석이 가능합니다.
+- PC score $x_{ij}^{(e)}$를 이용하여 각 군집에서 해당 PC를 잘 대변하는 상위 $\rho\%$ 텍스트 추출 및 제시.
+    
 
 ---
 
 ## 5. Simulation Study Plan
 
-본 방법론의 우수성을 검증하기 위해 다음의 비교 실험을 설계합니다.
-
-1. **DGP (Data Generating Process):** * $p=50$개의 임베딩 차원 중 $q=5$개 차원만 군집별 평균이 다르고($\delta \neq 0$), 나머지는 동일($\delta = 0$)하게 데이터 생성.
+1. **DGP:** PCA score space에서 $D$개 차원 중 $q$개만 $\delta \neq 0$으로 생성. 필요 시 원공간 임베딩 $\mathbf{v}_i = \bar{\mathbf{v}} + \mathbf{V}\mathbf{x}_i^{(e)} + \epsilon_i$로 확장.
     
-2. **Comparison Models:**
+2. **Comparison Models:** Standard GMM, Two-step PCA+GMM, Proposed Model.
     
-    - **Model A (Standard GMM):** 모든 차원을 사용하여 군집화 (Over-fitting 예상).
-        
-    - **Model B (Two-step PCA+GMM):** 분산 기준 상위 PC만 선택 (중요하지만 분산이 작은 변수 누락 위험).
-        
-    - **Model C (Proposed):** PCA + Heterogeneity Pursuit 적용.
-        
-3. **Metrics:**
-    
-    - **Selection Consistency:** 실제 이질적 차원($q=5$)을 정확히 $\delta \neq 0$으로 추정했는지 여부 (TPR/FPR).
-        
-    - **Clustering Accuracy:** ARI (Adjusted Rand Index).
-        
-
----
+3. **Metrics:** TPR/FPR (Selection consistency), ARI (Clustering accuracy), Jaccard similarity (Stability).
 
 ## 6. Case Study: 게임 마케팅 데이터 적용 예시
 
-### 6.1. 가상의 분석 결과 (Expected Outcome)
+### 6.1 예상 산출물: Heterogeneity table
 
-모바일 RPG 게임 광고 데이터(1,000건)에 본 방법론을 적용했을 때의 예상 결과입니다.
-
-**[Table 1] 이질성 탐색 결과 ($\hat{\delta}$ 추정치)**
-
-|**임베딩 차원**|**δ^1​ (Cluster A)**|**δ^2​ (Cluster B)**|**δ^3​ (Cluster C)**|**판단 (Decision)**|
+|**PC**|**δ^1 (Cluster A)**|**δ^2 (Cluster B)**|**δ^3 (Cluster C)**|**Decision**|
 |---|---|---|---|---|
-|**PC 1**|**+2.5**|**-1.2**|**-1.3**|**이질성 원인 (Heterogeneous)**|
-|**PC 3**|-0.8|-0.2|**+1.0**|**이질성 원인 (Heterogeneous)**|
-|**PC 4**|0.0|0.0|0.0|**공통 차원 (Common)** $\rightarrow$ _제외_|
-|**PC 5**|0.0|0.0|0.0|**공통 차원 (Common)** $\rightarrow$ _제외_|
-### 6.2. 최종 프로파일링 (Profiling)
+|**PC 1**|**+2.5**|-1.2|-1.3|**Heterogeneous**|
+|**PC 3**|-0.8|-0.2|**+1.0**|**Heterogeneous**|
+|**PC 4**|0.0|0.0|0.0|Common|
+### 6.2 Updated profiling
 
-선별된 PC 1, PC 3에 대해서만 디베딩을 수행하여 군집을 정의합니다.
-
-- **PC 4, 5 (공통):** 'RPG', '설치', '레벨업' 등 일반적인 게임 용어로 판명됨. (세그먼트 구분에 무의미)
+- **PC 1:** “보상/쿠폰/지급” 정렬. Cluster A ($\delta_{A1} > 0$) $\rightarrow$ **보상 지향 세그먼트**.
     
-- **Cluster A (PC 1 $\uparrow$):** 키워드 '보상, 쿠폰, 100% 지급' $\rightarrow$ **"체리피커형 보상 그룹"**
+- **PC 3:** “그래픽/타격감” 정렬. Cluster C ($\delta_{C3} > 0$) $\rightarrow$ **비주얼/액션 지향**.
     
-- **Cluster C (PC 3 $\uparrow$):** 키워드 '타격감, 그래픽, 엔진' $\rightarrow$ **"비주얼 중시 하드코어 그룹"**
 
 ---
 
 ## 7. Conclusion & Contribution
 
-본 연구는 **이질성 탐색(Heterogeneity Pursuit)**을 비지도 학습 영역으로 확장하여, 텍스트 임베딩 군집화의 고질적인 문제인 **해석 불가능성**을 해결했습니다.
-
-1. **통계적 변수 선택:** 주관적인 판단이 아닌, 벌점화 우도(Penalized Likelihood)를 통해 군집을 가르는 핵심 의미 차원을 자동으로 선별합니다.
+1. **Penalized likelihood 기반 이질성 탐색:** 비지도 군집화에서 통계적 변수 선택 구현.
     
-2. **효율적 해석:** 모든 차원을 해석하려 드는 비효율을 제거하고, 통계적으로 유의미한 차이($\delta \neq 0$)에만 집중하여 설명의 정확도(XAI)를 높였습니다.
+2. **추정 안정성 확보:** PCA + diagonal covariance 제약을 통해 고차원 수치 문제 해결.
     
-3. **안정적 프레임워크:** PCA와 결합하여 고차원 데이터에서도 안정적인 공분산 추정과 선형성 유지를 달성했습니다.
+3. **Targeted De-embedding:** PCA 로딩 기반 수식적 디코딩으로 XAI 성능 강화.
+    
+4. **실무 적용:** 게임 마케팅 데이터의 실행 가능한 세그먼트 프로파일링 제공.
+    
 
----
-_Author: Hyunsoo Shin_ _Affiliation: Department of Statistics, Sungkyunkwan University_
+**Extension:** Group penalty ($\lambda \sum_j w_j \|\boldsymbol{\delta}_{j \cdot}\|_2$)를 통한 PC 단위 직접 선택 및 MFA 확장.
