@@ -116,7 +116,7 @@ $$\gamma_{ik} = \frac{\pi_k f_{\text{cat}}(\mathbf{x}_i^{(c)} | \boldsymbol{\alp
 
 **(2) M-step: closed-form pieces**
 
-- **Mixing proportions:** $\pi_k \leftarrow \frac{1}{n} \sum_{i=1}^n \gamma_{ik}$
+- **Mixing proportions:** $$\pi_k \leftarrow \frac{1}{n} \sum_{i=1}^n \gamma_{ik}$$
     
 - **Categorical parameters:** $\alpha_{kmr} \leftarrow \frac{\sum_{i=1}^n \gamma_{ik} I(x_{im}=r)}{\sum_{i=1}^n \gamma_{ik}}$
     
