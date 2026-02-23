@@ -2,8 +2,6 @@
 
 > ## 💡 [요약] 지도교수님 공유용: Mix-HP-AL 알고리즘 구조 개선 및 성능 검증 결과
 > 
-> 교수님, 지난번 논의했던 Adaptive Lasso의 **Pilot Estimator 구조적 불일치 문제**를 해결하고, 보다 안정적인 환경($R=30$)에서 시뮬레이션을 재수행한 결과입니다.
-> 
 > ### 1. 핵심 개선 사항 (Pilot 구조 일치화)
 > * 기존 일반 Mix-Lasso 기반의 Pilot 대신, **HP 구조가 반영된 Mix-HP-L(Adaptive=False)**을 Pilot으로 사용하여 계층적 구조를 일치시켰습니다.
 > * 이를 통해 산출된 가중치로 Adaptive Penalty를 부여하고, 양질의 초기값(Warm Start)을 본 학습에 적용하여 Local Optima 문제를 방지했습니다.
