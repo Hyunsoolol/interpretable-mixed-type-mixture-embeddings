@@ -226,7 +226,7 @@ $$\max_{\Theta}\{\sum_{i=1}^n\log f(X_i\mid\Theta) - n\lambda \sum_{k=1}^K\sum_{
         
     - 선택된 $\widehat{S}$에서 $\lambda=0$으로 refit하면 수축이 사라져 ARI가 급상승함.
         
-    - 실제로 $\mathrm{ARI}_{\mathrm{refit}} \approx \mathrm{ARI}_{\mathrm{oracle GMM}}$
+    - 실제로 refit의 ARI가 oracle의 ARI에 수렴하는 것을 확인
         
     - $\rightarrow$ HP는 차원선택용, 최종 군집은 선택 후 refit이 최적이라는 결론이 자연스럽게 도출됨.
 
