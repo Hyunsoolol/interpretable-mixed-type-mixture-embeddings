@@ -73,7 +73,8 @@ $$f(X_i)=\sum_{k=1}^K \pi_k \phi\big(X_i;\mu_0+\delta_k,\Psi\big),\quad \Psi=\ma
 
 **벌점화 추정(Penalized Estimation):**
 
-$$\max_{\Theta}\left\{\sum_{i=1}^n\log f(X_i\mid\Theta) - n\lambda \sum_{k=1}^K\sum_{j=1}^p|\delta_{kj}|\right\}$$
+$$\max_{\Theta}\{\sum_{i=1}^n\log f(X_i\mid\Theta) - n\lambda \sum_{k=1}^K\sum_{j=1}^p|\delta_{kj}|\}$$
+
 
 - **추정 (penalized EM):**
     
