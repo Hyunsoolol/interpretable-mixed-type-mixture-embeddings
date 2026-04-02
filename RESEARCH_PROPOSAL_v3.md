@@ -1,6 +1,3 @@
-GitHub에서 수식이 정상적으로 렌더링되고 가독성이 좋도록, 마크다운 코드 블록(```)으로 감싸지 않고 본문에 직접 GitHub 호환 마크다운 양식을 적용하여 재작성해 드립니다. 수식이 깨지지 않도록 인라인 수식 양식(`$`)과 블록 수식 양식(`$$`) 전후의 띄어쓰기 및 줄바꿈을 조정했습니다.
-
----
 
 **국문 제목** 고차원 데이터에서 이질성 유발 변수를 탐색하는 희소 혼합평균효과 기반 클러스터링 방법론
 **영문 제목** High-Dimensional Clustering via Sparse Mixture Mean-Effects for Heterogeneity Pursuit
