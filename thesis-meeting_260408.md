@@ -110,8 +110,7 @@ $$\Sigma_j = \Sigma = \text{diag}(\sigma_1^2, \dots, \sigma_p^2)$$
 모수
 $$\Theta = (\pi_1, \dots, \pi_K, \mu_0, \delta_1, \dots, \delta_K, \Sigma)$$
 에 대해 다음과 같은 normalized penalized log-likelihood를 고려한다.
-
-$$\mathcal{L}_n(\Theta) = \frac{1}{n} \sum_{i=1}^n \log [ \sum_{j=1}^K \pi_j \phi_p(X_i; \mu_0 + \delta_j, \Sigma) ] - \lambda_n \sum_{k=1}^p w_k \|\delta_{\cdot k}\|_2$$
+$$\mathcal{L}_n(\Theta) = \frac{1}{n} \sum_{i=1}^n \log [ \sum_{j=1}^K \pi_j \phi_p(X_i; \mu_0 + \delta_j, \Sigma)] - \lambda_n \sum_{k=1}^p w_k \|\delta_{\cdot k}\|_2$$
 여기서 $w_k$는 adaptive weight이며 예를 들면
 $$w_k = (\|\tilde{\delta}_{\cdot k}\|_2 + \varepsilon)^{-\gamma}$$
 와 같이 pilot estimator로부터 구성할 수 있다.
