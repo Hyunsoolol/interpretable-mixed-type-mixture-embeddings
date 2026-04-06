@@ -204,49 +204,7 @@ $$X_i = \mu_0 + \Lambda f_i + \delta_{Z_i} + \varepsilon_i, \quad \varepsilon_i 
 
 본 절의 시뮬레이션은 제안 모형이 "모든 형태의 군집 형성 변수"를 찾는지 검증하는 것이 아니라, 공통 공분산 구조 하에서 군집 간 평균 차이를 유발하는 변수(mean-heterogeneity-driving variables)를 얼마나 정확히 식별하는지, 그리고 그러한 선택이 실제 군집 성능 개선으로 이어지는지를 경험적으로 확인하는 데 목적이 있다. 이는 원 논문이 혼합회귀에서 relevant predictor와 source of heterogeneity를 구분하고, heterogeneity pursuit가 보다 parsimonious한 모형을 제공할 수 있다고 논의한 문제의식을 비지도 평균혼합모형으로 옮겨온 것이다. 다만 원 논문은 회귀 setting과 fixed **p, m** 이론에 초점을 두고 있으므로, 본 절의 시뮬레이션은 그 이론을 직접 재현하는 것이 아니라 mean-shift clustering 상황에서의 경험적 타당성을 검토하는 단계로 이해하는 것이 적절하다.
 
-### 1. 1차 시뮬레이션: 연속형 혼합모형에서의 pilot 검증
-
-#### 1.1 실험 목적
-1차 시뮬레이션의 목적은 텍스트·범주형 결합 모형으로 확장하기 전에, 연속형 혼합모형에서 heterogeneity pursuit가 최소한 다음 세 가지를 달성하는지 확인하는 것이다.
-* 첫째, 군집 간 평균 차이를 유발하는 좌표를 정확히 선택하는가.
-* 둘째, 그러한 선택이 실제 군집 성능 향상으로 이어지는가.
-* 셋째, 벌점화 추정으로 인해 발생하는 shrinkage bias를 post-selection refit이 얼마나 복구할 수 있는가.
-
-#### 1.2 실험 세팅
-표본 크기는 **n=500**, 군집 수는 **K=3**, 전체 차원은 **p=100**, 진짜 mean-heterogeneity 좌표 수는 **q=5**, 반복 횟수는 **R=10**으로 두었다. 잠재 군집은
-$$c_i \sim \text{Cat}(\pi_1, \pi_2, \pi_3), \quad \pi_k = \frac{1}{3}$$
-로 생성하였고, 각 군집에서의 관측치는
-$$X_i \mid (c_i=k) \sim N_p(\mu_k, \Psi), \quad \mu_k = \mu_0 + \delta_k, \quad \mu_0 = \mathbf{0}$$
-로 생성하였다. 이때 진짜 신호 좌표는 $S = \{1, \dots, 5\}$로 두고, 해당 좌표에서만 군집 간 평균 차이가 존재하도록 설계하였다. 공분산은 $\Psi = I_p$인 공통 대각 구조를 사용하였다. 따라서 본 실험은 분산 또는 공분산 이질성이 아니라 평균 구조의 희소한 이질성만을 평가하는 pilot setting이다.
-
-#### 1.3 비교 방법과 평가 지표
-비교 방법으로는 k-means, 공통 대각 가정의 unpenalized GMM, HP, HP+refit, 그리고 true signal coordinates만 알고 있다고 가정한 oracle k-means 및 oracle GMM을 포함하였다. 여기서 HP+refit은 HP로 선택한 $\hat{S}$를 이용해 **λ=0**의 GMM을 다시 적합하는 post-selection debiasing 절차이다. 평가 지표는 군집 성능에 대해 ARI를 사용하였고, 선택 성능에 대해서는
-$$\text{TPR} = \frac{|S \cap \hat{S}|}{|S|}, \quad \text{FPR} = \frac{|\hat{S} \setminus S|}{p - |S|}$$
-및 $|\hat{S}|$를 사용하였다.
-
-#### 1.4 결과 요약
-
-| 방법 | 사용 차원 | 페널티 | 선택 여부 | ARI | TPR | FPR | $\hat{S}$ |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| k-means | 100 | 없음 | 없음 | 0.296 | - | - | - |
-| GMM | 100 | 없음 | 없음 | 0.370 | - | - | - |
-| HP | 100 | 있음 | 있음 | 0.415 | 1.000 | 0.002 | 5.2 |
-| HP + refit | $\hat{S}$ | 없음 | 있음 | 0.535 | HP와 동일 | HP와 동일 | 5.2 |
-| Oracle k-means | 5 | 없음 | 이상적 기준 | 0.539 | - | - | - |
-| Oracle GMM | 5 | 없음 | 이상적 기준 | 0.537 | - | - | - |
-
-수치적으로 보면, HP는 평균적으로 **TPR=1.000**, **FPR≈0.002**, **$|\hat{S}| \approx 5.2$**를 보여 진짜 mean-heterogeneity 좌표 **q=5**를 거의 정확히 복원하였다. 반면 전체 차원을 모두 사용하는 k-means와 unpenalized GMM은 고차원 잡음의 영향을 직접적으로 받아 ARI가 각각 0.296, 0.370 수준에 머물렀다. HP는 변수선택을 통해 ARI를 0.415까지 개선하였으나, 벌점화에 따른 평균 차이 추정의 수축 때문에 군집 분리가 완전히 최적화되지는 않았다. 그러나 HP가 선택한 $\hat{S}$에서 refit을 수행하면 ARI가 0.535로 상승하였고, 이는 oracle GMM의 0.537과 사실상 동일한 수준이다. 따라서 이 실험은 HP가 선택 단계에서는 매우 정확하게 mean-heterogeneity coordinates를 찾고, 최종 군집 추정은 refit 단계에서 수행하는 것이 바람직함을 보여준다. 다만 이는 "oracle consistency를 증명했다"는 의미가 아니라, 현재 설정에서 near-oracle empirical behavior를 관찰했다는 의미로 해석해야 한다.
-
-#### 1.5 1차 시뮬레이션의 해석
-1차 시뮬레이션의 핵심 메시지는 두 가지이다.
-* **첫째,** 제안 접근은 공통 공분산 구조 하에서 군집 간 평균 차이를 유발하는 좌표를 매우 정확하게 식별할 수 있다.
-* **둘째,** HP 자체는 selection-oriented estimator이므로 shrinkage bias가 남지만, 선택된 좌표에서 refit을 수행하면 군집 복원이 크게 개선된다.
-
-즉, 1차 실험은 "HP가 곧 최종 clustering estimator"라는 결론보다, HP는 mean-heterogeneity selection을 수행하고, 최종 군집은 refit으로 정제하는 2단계 파이프라인이 합리적임을 보여주는 pilot evidence로 이해하는 것이 적절하다.
-
----
-
-### 2. 2차 시뮬레이션: 신호 강도 변화에 따른 phase transition 검증
+### 1. 시뮬레이션: 신호 강도 변화에 따른 phase transition 검증
 
 #### 2.1 실험 목적
 2차 시뮬레이션의 목적은 노이즈 좌표의 분산이 커진 환경에서 신호 강도 **a**를 점진적으로 약화시켰을 때, 제안 모형과 비교 모형의 성능이 어떻게 변하는지를 확인하는 것이다. 특히 이 실험은 다음 세 가지를 검토한다.
