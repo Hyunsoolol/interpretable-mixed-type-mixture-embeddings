@@ -2,7 +2,7 @@
 
 ### High-Dimensional Clustering via Sparse Mixture Mean-Effects for Heterogeneity Pursuit
 
-#### 1.연구배경 및 문제의식
+### 1.연구배경 및 문제의식
 
 혼합모형 기반 회귀에서는 단순히 중요한 설명변수를 찾는 것만으로 충분하지 않고, 그중에서도 실제로 군집 간 차이를 만들어내는 변수, 즉 source of heterogeneity를 구분하는 것이 더 해석가능하고 더 간명한 모형을 만든다. 최근의 선행 연구는 바로 이 점을 겨냥하여 predictor effect를 공통효과와 군집특이효과로 분해하고, 이를 통해 relevant predictor와 heterogeneity-driving predictor를 동시에 식별하는 regularized finite mixture effects regression을 제안하였다. 저자들은 이 접근이 모형 복잡도를 줄이고 해석력을 높이며, 실제 응용에서도 더 의미 있는 과학적 해석을 제공한다고 강조한다.
 
