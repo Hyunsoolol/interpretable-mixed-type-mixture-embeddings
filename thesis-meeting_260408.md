@@ -8,7 +8,8 @@
 
 ### 1. 모델 구조 및 알고리즘의 핵심 개선
 
-- **변수 단위 선택의 명확성 확보 (Group Lasso 도입):** - _과거:_ 개별 파라미터($|\delta_{kj}|$)에 $\ell_1$ 페널티 적용 $\rightarrow$ 하나의 변수 내에서도 특정 군집만 0이 되는 파편화(Fragmentation) 발생.
+- **변수 단위 선택의 명확성 확보 (Group Lasso 도입):**
+	- _과거:_ 개별 파라미터($|\delta_{kj}|$)에 $\ell_1$ 페널티 적용 $\rightarrow$ 하나의 변수 내에서도 특정 군집만 0이 되는 파편화(Fragmentation) 발생.
     
     - _현재:_ 변수 단위의 군집 편차 벡터 전체($\|\delta_{\cdot k}\|_2$)에 **Group Lasso($\ell_2$) 페널티 적용** $\rightarrow$ 특정 변수를 통째로 살리거나 0으로 만들어 '이질성 유발 변수 집합($S_H$)'을 완벽하게 식별.
         
@@ -290,13 +291,13 @@ $$X_i = \mu_0 + \Lambda f_i + \delta_{Z_i} + \varepsilon_i, \quad \varepsilon_i 
 
 이때 $a=1.3$ 구간에서는 True-parameter oracle의 ARI도 0.730 (0.009), Oracle-feature baseline이 0.694 (0.012)로 하락하므로, 이 시나리오는 "완전 복원 가능 영역"이 아니라 강한 overlap이 존재하는 약신호 영역으로 해석하는 것이 맞다.
 
-#### 2.4 2차 시뮬레이션의 해석
+#### #### 2.4 2차 시뮬레이션의 해석
 
-**첫째,** 제안 모형은 중간 신호 구간까지 mean-heterogeneity selection 측면에서 매우 안정적이다. $a=1.8$에서 HP는 평균 **TPR=1.000 (0.000)**, **FPR=0.007 (0.007)**, **$\hat{S}=5.100 (0.100)$**를 보여 true signal coordinates를 완벽에 가깝게 복원하였다. 이 상태에서 refit을 수행하면 ARI가 0.913으로 상승하여 oracle baseline과 동일한 수치를 보였다. 제안된 HP 방법론은 $a=1.5$ 구간에서도 노이즈 변수를 거의 대부분 걸러내며, 진짜 변수만 사용한 Oracle 모형에 필적하는(asymptotically equivalent to the oracle) 성능을 보였다.
+**첫째,** 제안 모형은 중간 신호 구간까지 mean-heterogeneity selection 측면에서 매우 안정적이다. $a=1.8$에서 HP는 평균 **TPR=1.000 (0.000)**, **FPR=0.007 (0.007)**, **$\hat{S}=5.100 (0.100)$**를 보여 true signal coordinates를 완벽에 가깝게 복원하였다. 이 상태에서 refit을 수행하면, 페널티(penalty)로 인해 발생했던 수축 편향(shrinkage bias)이 제거되면서 ARI가 0.913으로 상승하여 oracle baseline과 동일한 수치를 보였다. 여기서 `+ Refit` 모형들이 변수 선택 지표(TPR, FPR, $\hat{S}$)를 그대로 물려받는다는 점은, ARI 성능 향상이 변수 조합의 변화가 아니라 이미 훌륭하게 선택된 Support 집합 내에서의 순수 추정(unbiased estimation) 성능 개선 덕분임을 명확히 보여준다. 제안된 HP 방법론은 $a=1.5$ 구간에서도 노이즈 변수를 거의 대부분 걸러내며, 진짜 변수만 사용한 Oracle 모형에 필적하는(asymptotically equivalent to the oracle) 성능을 보였다.
 
 **둘째,** 오라클 성능 역전 현상은 유한 표본(Finite sample) 환경의 경험적 특성이다. $a=1.5$ 및 $a=1.8$ 구간에서 Proposed HP나 Oracle-feature baseline이 True-parameter oracle(모집단 기준 완벽한 모수 사용)과 거의 동일하거나 미세하게 높은 ARI를 기록하는 것을 볼 수 있다. 이는 주어진 300개의 데이터셋에 경험적 모수가 미세하게 적응(overfitting)하여 경계선의 애매한 샘플들을 한두 개 더 맞추면서 생기는 자연스러운 통계적 변동(Random Fluctuation)이며, 두 값의 차이가 표준오차(SE) 이내이므로 실질적으로 오라클 성능 상한에 도달했음을 의미한다.
 
-**셋째,** Sparse K-means는 현재 구현과 tuning rule 하에서는 가짜 희소성(fake sparsity)을 보였다. 세 시나리오 모두에서 ARI 자체는 비교적 높게 나타났지만, FPR이 거의 1.0에 육박하고 평균 선택 변수 수가 $19 \sim 20$개로 유지되었다. 즉, 노이즈 변수에 작은 가중치를 줄 뿐 완전한 제거는 수행하지 못하였다. 이 상태에서 refit을 하면 모든 차원을 다시 사용하는 일반 GMM과 동일한 수준으로 성능이 내려갔다.
+**셋째,** 변수 선택 기능이 없는 전통적 모형들(K-means, Unpenalized GMM)은 20개의 변수를 모두 사용하여 $\hat{S}=20.000$, FPR=1.000을 기록하였고, 노이즈가 누적되어 전체적인 군집화 성능이 크게 저하되었다. 반면 Sparse K-means는 변수 선택을 목표로 하지만, 현재 구현과 tuning rule 하에서는 가짜 희소성(fake sparsity)을 보였다. 세 시나리오 모두에서 ARI 자체는 비교적 높게 나타났지만, FPR이 거의 1.0에 육박하고 평균 선택 변수 수가 $19 \sim 20$개로 유지되었다. 즉, 노이즈 변수에 작은 가중치를 줄 뿐 완전한 제거는 수행하지 못하였다. 이 상태에서 refit을 수행하면, 사실상 모든 차원을 다시 사용하는 결과가 되어 일반 GMM과 동일한 수준으로 성능이 내려감을 확인할 수 있다.
 
 **넷째,** Naive Lasso는 대칭적이고 강한 신호에서는 작동할 수 있으나, 신호가 약해지면 빠르게 붕괴한다. $a=1.8$에서는 **$\hat{S}=6.900$**, **FPR=0.127**로 과선택이 눈에 띄며, $a=1.3$에서는 **$\hat{S}=7.500$**, **FPR=0.167**로 더 증가한다. 이는 element-wise shrinkage와 강제 centering 조합이 변수 단위의 안정적인 selection을 보장하지 못한다는 점을 뚜렷하게 보여준다. 따라서 본 실험은 왜 group-wise penalty와 $Q$-basis 재파라미터화가 필수적인지를 입증하는 강력한 ablation evidence로 작용한다.
 
