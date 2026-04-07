@@ -6,7 +6,7 @@
 
 ## [핵심 요약] 참고 논문을 반영한 현재 버전의 위치
 
-본 보고서는 Li et al.의 heterogeneity pursuit 논문을 직접 복제하는 것이 아니라, 그 핵심 문제의식인 “어떤 변수가 군집 간 차이를 실제로 유발하는가?”를 비지도 평균혼합모형(mean-mixture)으로 재구성한 1차 연구 구상을 담고 있다.
+본 보고서는 Li et al.의 heterogeneity pursuit 논문에서의 핵심 문제의식인 “어떤 변수가 군집 간 차이를 실제로 유발하는가?”를 비지도 평균혼합모형(mean-mixture)으로 재구성한 1차 연구 구상을 담고 있다.
 
 원 논문은 혼합회귀에서 공통효과와 군집특이효과를 분해하고, adaptive $\ell_1$ penalty 및 generalized lasso 표현을 통해 relevant predictor와 source of heterogeneity를 동시에 식별한다. 반면 본 연구의 현재 범위는 outcome이 없는 평균혼합모형에서 군집 간 평균 차이를 유발하는 좌표(mean-heterogeneity-driving coordinates)를 식별하는 데 초점을 둔다. 따라서 본 연구는 원 논문의 직접적 비지도화라기보다, 그 문제의식을 mean-shift clustering으로 옮긴 방법론이라고 이해하는 가장 정확하다.
 
