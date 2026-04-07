@@ -153,12 +153,12 @@ subject to
 
 $$\sum_{j=1}^K \delta_{jk} = 0$$
 
-실제 구현에서는 $\mathbf{1}_K$의 직교여공간 basis $Q$를 써서 $\delta_{\cdot k} = Q \alpha_k$로 재파라미터화하면 제약이 사라져 unconstrained group lasso 문제로 바뀐다. 이는 수치적 안정성과 희소성 보존 측면에서 유리하다.
+실제 구현에서는 $\mathbf{1}_K$ 의 직교여공간 basis $Q$ 를 써서 $\delta_{\cdot k} = Q \alpha_k$ 로 재파라미터화하면 제약이 사라져 unconstrained group lasso 문제로 바뀐다. 이는 수치적 안정성과 희소성 보존 측면에서 유리하다.
 
-튜닝 파라미터 $\lambda_n$와 군집 수 $K$는 BIC, ICL, 혹은 clustering stability 기준으로 선택할 수 있다. 원 논문에서도 mixture component 수와 penalty parameter 선택에 BIC를 사용한다.
+튜닝 파라미터 $\lambda_n$ 와 군집 수 $K$ 는 BIC, ICL, 혹은 clustering stability 기준으로 선택할 수 있다. 원 논문에서도 mixture component 수와 penalty parameter 선택에 BIC를 사용한다.
 
 ---
-
+ 
 ## 6. 이론적 연구목표
 
 기존 연구는 fixed $p, m$ 설정에서 adaptive estimator의 $\sqrt{n}$-consistency와 selection consistency를 제시하였다. 본 연구의 박사논문 기여는 이 결과를 비지도 high-dimensional setting으로 확장하는 데 있다. 다만 현재 단계에서 직접적으로 "misclustering rate가 항상 0으로 간다"는 식의 강한 주장을 두는 것은 과도하므로, 이론 목표를 다음과 같이 정교하게 설정하는 것이 바람직하다.
