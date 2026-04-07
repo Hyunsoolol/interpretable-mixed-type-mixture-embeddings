@@ -4,26 +4,25 @@
 
 ## [핵심 요약] 과거 버전 대비 모델 개선 사항
 
-본 보고서는 고차원 환경에서 "어떤 변수가 군집의 이질성을 유발하는가(Source of Heterogeneity)?"를 식별하기 위해 기존에 구상했던 모델의 수학적/알고리즘적 한계를 대폭 개선한 이론적 배경과 제안 모형을 담고 있습니다.
 
 ### 1. 모델 구조 및 알고리즘의 핵심 개선
 
 - **변수 단위 선택의 명확성 확보 (Group Lasso 도입):**
-	- _과거:_ 개별 파라미터($|\delta_{kj}|$)에 $\ell_1$ 페널티 적용 $\rightarrow$ 하나의 변수 내에서도 특정 군집만 0이 되는 파편화(Fragmentation) 발생.
+	- _수정 전:_ 개별 파라미터($|\delta_{kj}|$)에 $\ell_1$ 페널티 적용 $\rightarrow$ 하나의 변수 내에서도 특정 군집만 0이 되는 파편화(Fragmentation) 발생.
     
-    - _현재:_ 변수 단위의 군집 편차 벡터 전체($\|\delta_{\cdot k}\|_2$)에 **Group Lasso($\ell_2$) 페널티 적용** $\rightarrow$ 특정 변수를 통째로 살리거나 0으로 만들어 '이질성 유발 변수 집합($S_H$)'을 완벽하게 식별.
+    - _수정 후:_ 변수 단위의 군집 편차 벡터 전체($\|\delta_{\cdot k}\|_2$)에 **Group Lasso($\ell_2$) 페널티 적용** $\rightarrow$ 특정 변수를 통째로 살리거나 0으로 만들어 '이질성 유발 변수 집합($S_H$)'을 완벽하게 식별.
         
 - **식별성 제약(Identifiability Constraint)의 안정화:**
     
-    - _과거:_ 혼합 비율을 포함한 $\sum_k \pi_k\delta_k = \mathbf{0}$ 제약 $\rightarrow$ EM 반복마다 $\pi_k$가 변하여 기준이 흔들림.
+    - _수정 전:_ 혼합 비율을 포함한 $\sum_k \pi_k\delta_k = \mathbf{0}$ 제약 $\rightarrow$ EM 반복마다 $\pi_k$가 변하여 기준이 흔들림.
         
-    - _현재:_ 혼합 비율과 독립적인 $\sum_{j=1}^K \delta_{jk} = 0$ 제약 $\rightarrow$ 전통적 분산분석(ANOVA)처럼 파라미터 해석이 직관적이며 수치적으로 안정됨.
+    - _수정 후:_ 혼합 비율과 독립적인 $\sum_{j=1}^K \delta_{jk} = 0$ 제약 $\rightarrow$ 전통적 분산분석(ANOVA)처럼 파라미터 해석이 직관적이며 수치적으로 안정됨.
         
 - **최적화 알고리즘의 우아함 및 희소성 보존:**
     
-    - _과거:_ Soft-thresholding 후 매번 강제 재정렬(re-centering) $\rightarrow$ 강제 조정 시 0으로 만든 값이 다시 뒤틀려 유도된 희소성(Sparsity)이 파괴됨.
+    - _수정 전:_ Soft-thresholding 후 매번 강제 재정렬(re-centering) $\rightarrow$ 강제 조정 시 0으로 만든 값이 다시 뒤틀려 유도된 희소성(Sparsity)이 파괴됨.
         
-    - _현재:_ 직교여공간 Basis $Q$를 활용한 **재파라미터화($\delta_{\cdot k} = Q \alpha_k$)** $\rightarrow$ 제약식을 만족하면서도 희소성을 완벽히 보존하는 안정적인 최적화 구현.
+    - _수정 후:_ 직교여공간 Basis $Q$를 활용한 **재파라미터화($\delta_{\cdot k} = Q \alpha_k$)** $\rightarrow$ 제약식을 만족하면서도 희소성을 완벽히 보존하는 안정적인 최적화 구현.
         
 
 ---
