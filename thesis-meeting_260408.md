@@ -291,6 +291,7 @@ $$X_i = \mu_0 + \Lambda f_i + \delta_{Z_i} + \varepsilon_i, \quad \varepsilon_i 
 
 이때 $a=1.3$ 구간에서는 True-parameter oracle의 ARI도 0.730 (0.009), Oracle-feature baseline이 0.694 (0.012)로 하락하므로, 이 시나리오는 "완전 복원 가능 영역"이 아니라 강한 overlap이 존재하는 약신호 영역으로 해석하는 것이 맞다.
 
+
 #### 2.4 2차 시뮬레이션의 해석
 
 **첫째,** 제안 모형은 중간 신호 구간까지 mean-heterogeneity selection 측면에서 매우 안정적이다. $a=1.8$에서 HP는 평균 **TPR=1.000 (0.000)**, **FPR=0.007 (0.007)**, **$\hat{S}=5.100 (0.100)$**를 보여 true signal coordinates를 완벽에 가깝게 복원하였다. 이 상태에서 refit을 수행하면, 페널티(penalty)로 인해 발생했던 수축 편향(shrinkage bias)이 제거되면서 ARI가 0.913으로 상승하여 oracle baseline과 동일한 수치를 보였다. 여기서 `+ Refit` 모형들이 변수 선택 지표(TPR, FPR, $\hat{S}$)를 그대로 물려받는다는 점은, ARI 성능 향상이 변수 조합의 변화가 아니라 이미 훌륭하게 선택된 Support 집합 내에서의 순수 추정(unbiased estimation) 성능 개선 덕분임을 명확히 보여준다. 제안된 HP 방법론은 $a=1.5$ 구간에서도 노이즈 변수를 거의 대부분 걸러내며, 진짜 변수만 사용한 Oracle 모형에 필적하는(asymptotically equivalent to the oracle) 성능을 보였다.
