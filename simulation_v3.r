@@ -23,9 +23,9 @@ library(sparcl)
 
 options(stringsAsFactors = FALSE)
 
-base_seed <- 2026
+base_seed <- 20260407
 n_rep <- 10
-signal_grid <- c(1.8, 1.5, 1.3)
+signal_grid <- c(1.6, 1.4, 1.2)
 print_each_run <- FALSE
 
 all_results <- list()
@@ -45,7 +45,7 @@ for (rep_idx in 1:n_rep) {
     # Step 1. 시뮬레이션 세팅
     # ==============================================================================
     n <- 300
-    p <- 20
+    p <- 300
     K <- 3
     q <- 5
     a <- signal_grid[scenario_idx]
