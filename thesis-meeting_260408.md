@@ -447,6 +447,8 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat S_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{|
 | Oracle-feature baseline    | 5.000     | 0.698     | 1.000     | 0.000     | 5.000     |
 | True-parameter oracle      | 5.000     | 0.712     | 1.000     | 0.000     | 5.000     |
 
+<img width="1038" height="670" alt="image" src="https://github.com/user-attachments/assets/2b47a56c-410b-4278-9c38-f1b30f4fe505" />
+
 ### 6.3 해석
 
 차원이 $p=100$으로 늘어나자 unpenalized GMM은 현재 working implementation에서 사실상 0에 가까운 ARI를 보였고, Sparse K-means는 많은 노이즈 변수를 남긴 채 refit을 수행하면서 크게 불안정해졌다.
