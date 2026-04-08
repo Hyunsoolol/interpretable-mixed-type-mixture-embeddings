@@ -322,6 +322,7 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat{S}_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{
 주의할 점은, Oracle-feature baseline은 변수 집합만 알고 있을 뿐 실제로는 다시 적합을 수행하므로 local optimum과 초기값 영향으로 인해 true upper bound가 아니다. true upper bound에 더 가까운 기준은 true-parameter oracle이다.
 
 또한 Sparse K-means의 "사용 차원"은 clustering 단계에서 실제 사용된 변수 수가 아니라, 가중치 threshold를 기준으로 후처리한 유효 선택 변수 수이다.
+
 (※ 표 컬럼 해석 주의사항) 사용 차원(알고리즘 입력 차원)은 EM 업데이트에 투입된 변수 수를 의미한다. Proposed HP는 모든 변수를 매 iteration에 포함하므로 전체 차원 $p$와 같다. 반면 실질적인 선택 결과는 $\hat{S}$ (선택 변수 수) 컬럼을 기준으로 해석해야 한다. $\hat{S} = |\{ k : \|\hat{\delta}_{\cdot k}\|_2 > \text{threshold} \}|$ 이며, TPR과 FPR 역시 $\hat{S}$를 기준으로 계산된다.
 
 ---
