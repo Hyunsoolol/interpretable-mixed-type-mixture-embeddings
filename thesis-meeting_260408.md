@@ -674,3 +674,6 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat S_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{|
 $\Sigma=I_p$ 환경에서는 noise variables의 분산이 작아져 K-means류가 상대적으로 유리해지는 경향이 관찰된다. 또한 HP에서 $\hat S$가 다소 커지는 구간이 있었는데, 이는 분산 추정, penalty scale, tuning, finite-sample variability가 복합적으로 작용한 결과일 수 있다.
 
 따라서 이 부록 결과는 “HP가 분산 정보에 의해 실제 선택 강도가 달라질 가능성”을 시사하는 흥미로운 보조 관찰로 해석하는 것이 적절하다. 다만 이를 일반적인 “분산-적응형 메커니즘의 실증적 입증”으로 단정하려면, 더 큰 반복 수와 $\lambda$ 재튜닝, 그리고 체계적인 민감도 분석이 추가로 필요하다.
+
+
+<img width="1370" height="670" alt="image" src="https://github.com/user-attachments/assets/c57249f3-e8d6-44a8-9099-6859581555cf" />
