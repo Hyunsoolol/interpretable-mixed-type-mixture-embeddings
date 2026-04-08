@@ -511,7 +511,7 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat{S}_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{
 
 #### 7.3 해석
 
-초고차원 환경에서는 HP가 선택 성능 측면에서 여전히 매우 낮은 FPR을 유지하며 안정적인 패턴을 보인다. 특히 $a=1.2$ 구간에서 HP의 ARI는 0.652, feature-oracle baseline은 0.625, true-parameter oracle은 0.680이다. HP가 feature-oracle baseline보다 높은 값을 보인 것은, 고차원 유한표본 환경에서 regularization이 추정 분산을 낮추는 finite-sample stabilization effect 때문일 수 있다. true-parameter oracle은 여전히 0.680으로, feature-oracle baseline을 상회하는 empirical regularization benefit이 관찰되었다.
+초고차원 환경에서는 HP가 선택 성능 측면에서 여전히 매우 낮은 FPR을 유지하며 안정적인 패턴을 보인다. 특히 $a=1.2$ 구간에서 HP의 ARI는 0.652, feature-oracle baseline은 0.625, true-parameter oracle은 0.680이다. HP가 feature-oracle baseline보다 높은 값을 보인 것은, 고차원 유한표본 환경에서 regularization이 추정 분산을 낮추는 finite-sample stabilization effect 때문일 수 있다. true-parameter oracle은 여전히 0.680으로, HP가 feature-oracle baseline을 소폭 상회한 것은, oracle-feature baseline이 local optimum 영향으로 불안정하다는 점을 고려하면 HP의 우수성보다는 강한 정규화 구조가 추정 분산을 낮추는 finite-sample 안정화 효과로 해석하는 것이 더 적절하다. 성능의 주된 기준은 true-parameter oracle 대비 gap으로, 현재 HP는 이 gap을 좁히는 방향으로 작동하고 있다.
 
 ---
 
