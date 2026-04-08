@@ -381,7 +381,7 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat S_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{|
 | True-parameter oracle      | 3.000     | 0.498     | 1.000     | 0.000     | 3.000     |
 
 
-<img width="1370" height="670" alt="image" src="https://github.com/user-attachments/assets/748ebf11-3d44-481f-88f6-7b5bc9a523d9" />
+<img width="1370" height="670" alt="image" src="https://github.com/user-attachments/assets/87261bce-ab6c-4383-a559-04e12d08fb5e" />
 
 
 ### 5.3 해석
