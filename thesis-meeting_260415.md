@@ -113,6 +113,8 @@ _(기존 내용 유지: 4.1 기본 모형, 4.2 스케일 보정 이질성 정의
 | Oracle-feature baseline            | 3.000 (0.000)  | 0.463 (0.019)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
 | True-parameter oracle              | 3.000 (0.000)  | 0.498 (0.015)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
 
+<img width="1251" height="640" alt="image" src="https://github.com/user-attachments/assets/19bd0fa8-d238-49dc-a71f-d72f3e2f96b9" />
+
 <img width="1251" height="640" alt="image" src="https://github.com/user-attachments/assets/02c193f1-6d67-4795-8f29-59748ce31d37" />
 
 #### 1.3 해석
