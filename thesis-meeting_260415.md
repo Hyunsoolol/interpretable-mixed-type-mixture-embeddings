@@ -21,9 +21,13 @@
 
 ---
 
-## 1. 연구배경 및 문제의식 (동일일)
+## 1. 연구배경 및 문제의식
 
-_(기존 내용 유지: Li et al.의 지도학습 기반 이질성 추적 아이디어를 비지도 학습으로 확장하고, 비지도 환경에 맞는 Group Penalty의 필요성 서술)_
+혼합모형 기반 회귀에서는 단순히 중요한 설명변수를 찾는 것만으로 충분하지 않고, 그중에서도 실제로 군집 간 차이를 만들어내는 변수, 즉 source of heterogeneity를 구분하는 것이 더 해석가능하고 더 간명한 모형을 만든다. Li et al.의 혼합회귀 연구는 predictor effect를 공통효과와 군집특이효과로 분해하고, relevant predictor와 heterogeneity-driving predictor를 동시에 식별하는 regularized finite mixture effects regression을 제안하였다. 특히 이 연구는 component variance가 다를 때 raw effect와 scaled effect를 구분해야 함을 강조하고, adaptive penalty, generalized lasso, generalized EM, BIC tuning, fixed $p, m$ 이론, 그리고 correlated predictors·unequal mixing·all-heterogeneous setting까지 폭넓게 다루었다.
+
+그러나 비지도학습, 특히 고차원 클러스터링에서는 이와 같은 이질성의 원천 추적이 상대적으로 덜 정식화되어 있다. 기존 sparse clustering이나 model-based clustering은 주로 군집 복원 자체나 변수선택에 초점을 맞추는 경우가 많고, 군집 평균을 공통 부분과 군집특이 부분으로 분해하여 어떤 좌표가 mean heterogeneity를 실제로 유발하는지 직접 추적하는 effects-style parameterization은 상대적으로 부족하다.
+
+본 연구는 이러한 문제의식을 비지도학습으로 확장한다. 즉, 반응변수 $Y_i$ 가 없는 상황에서 군집 평균을 latent mean structure로 보고, 이를 공통 평균 파라미터와 군집특이 편차로 분해하여 "어떤 변수들이 군집 간 평균 차이를 만들어내는가"를 직접 추적하는 클러스터링 방법론을 개발하고자 한다. 다만 현재 1차 범위는 "모든 형태의 군집 형성 변수"가 아니라, 공통 공분산 구조 하에서 mean shift를 통해 군집 분리를 유발하는 변수를 식별하는 데 한정된다. 분산 차이나 상관구조 차이만으로 군집이 갈리는 경우는 현재 baseline model의 범위 밖에 있다.
 
 ---
 
@@ -56,11 +60,121 @@ _(기존 내용 유지: 4.1 기본 모형, 4.2 스케일 보정 이질성 정의
 
 ---
 
-## 5. 시뮬레이션 결과
+## 5. 추정방법
+
+### 5.1 정규화된 목적함수
+
+모수
+
+$$\Theta=(\pi_1,\dots,\pi_K,\mu_0,\delta_1,\dots,\delta_K,\Sigma)$$
+
+에 대해 다음과 같은 normalized penalized log-likelihood를 고려한다.
+
+$$\mathcal{L}_n(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p w_k \|\delta_{\cdot k}\|_2$$
+
+여기서 $w_k$ 는 adaptive weight이며, 예를 들면
+
+$$w_k=(\|\tilde{\delta}_{\cdot k}\|_2+\varepsilon)^{-\gamma}$$
+
+와 같이 pilot estimator로부터 구성할 수 있다.
+
+실제 구현에서는 이론에서의 $\lambda_n$ 과 완전히 동일한 스케일의 튜닝 파라미터를 쓰기보다, raw penalty parameter를 grid search와 heuristic BIC를 통해 선택한다. 따라서 이론 표기와 구현상 penalty scale은 구분해서 해석하는 것이 필요하다.
+
+또한 현재 모형에서는 variable-wise selection을 위해 element-wise $\ell_1$ 보다 $\|\delta_{\cdot k}\|_2$ 형태의 group penalty를 사용하는 것이 더 자연스럽다. 하나의 변수는 모든 군집에서 함께 살아남거나 함께 0이 되므로, "어떤 변수 전체가 mean heterogeneity를 유발하는가"라는 질문에 직접 대응할 수 있다.
+
+### 5.2 식별성 제약
+
+$$\mu_j=\mu_0+\delta_j$$
+
+만으로는 $\mu_0$ 와 $\delta_j$ 의 분해가 유일하지 않다. 따라서 다음과 같은 sum-to-zero 제약이 필요하다.
+
+$$\sum_{j=1}^K \delta_{jk}=0,\qquad k=1,\dots,p$$
+
+이는 원 논문에서의 effects-model parameterization과 동일한 역할을 수행하는 식별성 제약이다.
+
+### 5.3 계산 알고리즘
+
+계산은 EM 알고리즘을 기본 골격으로 한다.
+
+E-step에서는 책임도(responsibility)를 계산한다.
+
+$$\tau_{ij} = P(Z_i=j\mid X_i,\Theta) = \frac{\pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma)}{\sum_{\ell=1}^K \pi_\ell \phi_p(X_i;\mu_0+\delta_\ell,\Sigma)}$$
+
+M-step에서는 $\pi_j, \Sigma, \mu_0, \delta_j$ 를 갱신한다. 특히 $\Sigma = \mathrm{diag}(\sigma_1^2, \dots, \sigma_p^2)$ 일 때, 각 변수 $k$ 에 대한 $(\mu_{0k}, \delta_{\cdot k})$ 의 M-step 업데이트 문제는 다른 변수의 파라미터와 완전히 분리되어 다음과 같이 독립적으로 풀 수 있다.
+
+$$\min_{\mu_{0k},\delta_{\cdot k}} \frac{1}{2}\sum_{i=1}^n\sum_{j=1}^K \tau_{ij}\sigma_k^{-2}(x_{ik}-\mu_{0k}-\delta_{jk})^2 + \lambda_n w_k \|\delta_{\cdot k}\|_2$$
+
+subject to
+
+$$\sum_{j=1}^K \delta_{jk}=0$$
+
+실제 구현에서는 $\mathbf{1}_K$ 의 직교여공간 basis $Q \in \mathbb{R}^{K \times (K-1)}$ 를 사용하여 $\delta_{\cdot k} = Q\alpha_k$ 로 재파라미터화하면 제약이 사라진다. $Q$ 가 column-orthonormal이면 $\|\delta_{\cdot k}\|_2 = \|Q\alpha_k\|_2 = \|\alpha_k\|_2$ 가 성립하므로, group penalty의 형태가 재파라미터화 전후로 보존된다.
+
+**Adaptive weight의 일관성:** adaptive weight $w_k = (\|\tilde{\delta}_{\cdot k}\|_2 + \varepsilon)^{-\gamma}$ 를 구성하는 pilot estimator $\tilde{\delta}_{\cdot k}$ 역시 동일한 $Q$ 재파라미터화를 통해 얻어야 한다. 즉, pilot 단계에서 $\tilde{\alpha}_k$ 를 먼저 추정한 후 $\tilde{\delta}_{\cdot k} = Q\tilde{\alpha}_k$ 로 복원하여 $w_k$ 를 계산한다. 이는 수치적 안정성과 희소성 보존 측면에서 유리하다.
+
+### 5.4 구현상 튜닝과 해석 주의점
+
+- 구현에서는 exact BIC라기보다 heuristic BIC를 사용한다.
+    
+- **본 연구에서 제안하는 방법론의 명칭은 다음과 같이 정리한다.**
+
+	- **HP-L: Non-adaptive Group Lasso (M3 대응)**
+    
+	- **HP-AL: Adaptive Group Lasso (M4 대응, 제안 모형)**
+    
+- Sparse K-means의 "사용 차원"은 실제 clustering 단계에서 사용한 변수 수가 아니라, 가중치 threshold를 기준으로 후처리한 유효 선택 변수 수로 해석하는 것이 맞다.
+    
+- HP+Refit은 진단 목적의 보조 실험으로 계산할 수 있으나, 본 보고서의 주표에서는 single-stage HP 성능을 중심으로 제시한다.
+    
+
+
+---
+## 6. 시뮬레이션 결과
 
 본 실험은 $R=10$회의 pilot Monte Carlo 평균을 기반으로 한다.
 
 이번 미팅에서는 M3(Non-adaptive Group Lasso)를 독립적인 비교 방법론으로 추가하여, Adaptive weight의 유무가 군집 성능(ARI)과 변수 선택 수($\hat{S}$)에 미치는 영향을 직접적으로 대조하였다. 또한, 각 모델의 **Single-stage(No Refit)** 성능을 주 지표로 삼아 모델 자체의 수축 편향 억제 능력을 평가하였다.
+
+### 0. 비교 방법론 및 벤치마크
+
+**1) 전통적 비지도 학습**
+
+- K-means
+    
+- PCA + K-means
+    
+- GMM (Unpenalized)
+    
+
+**2) 기존 변수 선택 군집화 및 절제(Ablation) 모형**
+
+- Sparse K-means (sparcl)
+    
+- Naive Lasso (element-wise $\ell_1$ + sum-to-zero)
+    
+- **Element-wise L1 (no constraint)**
+    
+- **HP-L: Non-adaptive Group Lasso (M3 대응)**
+    
+
+**3) 제안 모형**
+
+- **HP-AL: Adaptive Group Lasso (M4 대응)**
+            
+
+**4) 오라클 벤치마크**
+
+- Oracle-feature baseline (True Vars): 정답 변수 집합만 알고 GMM을 다시 추정한 baseline
+    
+- True-parameter oracle: 생성에 사용한 진짜 모수 $(\pi,\mu,\Sigma)$ 를 알고 있다고 가정한 Bayes-like benchmark
+    
+
+주의할 점은, Oracle-feature baseline은 변수 집합만 알고 있을 뿐 실제로는 다시 적합을 수행하므로 local optimum과 초기값 영향으로 인해 true upper bound가 아니다. true upper bound에 더 가까운 기준은 true-parameter oracle이다.
+
+또한 Sparse K-means의 "사용 차원"은 clustering 단계에서 실제 사용된 변수 수가 아니라, 가중치 threshold를 기준으로 후처리한 유효 선택 변수 수이다.
+
+(※ 표 컬럼 해석 주의사항) 사용 차원(알고리즘 입력 차원)은 EM 업데이트에 투입된 변수 수를 의미한다. Proposed HP는 모든 변수를 매 iteration에 포함하므로 전체 차원 $p$와 같다. 반면 실질적인 선택 결과는 $\hat{S}$ (선택 변수 수) 컬럼을 기준으로 해석해야 한다. $\hat{S} = |\{ k : \|\hat{\delta}_{\cdot k}\|_2 > \text{threshold} \}|$ 이며, TPR과 FPR 역시 $\hat{S}$를 기준으로 계산된다.
+
 
 ### 1. 기본 환경 ($p=20, q=3$)
 
@@ -303,7 +417,7 @@ _(기존 내용 유지: 4.1 기본 모형, 4.2 스케일 보정 이질성 정의
     
 - **셋째, 유한 표본 안정화(Finite-sample Stabilization)의 실증:** 제안 모형(HP-AL)이 a=1.2에서 ARI 0.652(0.015)를 기록하여 Oracle-feature baseline(0.625)을 소폭 상회하였다. 이는 HP-AL의 절대적 우위라기보다, 강한 정규화 구조가 추정 분산을 낮추는 finite-sample 안정화 효과로 해석하는 것이 적절하다. Oracle-feature baseline은 정답 변수 집합을 알고 다시 GMM을 추정하지만 local optimum 영향을 받는 불안정한 기준값이므로 true upper bound가 아님에 유의해야 한다. 성능의 주된 기준은 true-parameter oracle(0.680) 대비 gap이며, 현재 HP-AL은 이 gap을 좁히는 방향으로 작동하고 있다.
 
-## 5. 결론 및 향후 계획
+## 6. 결론 및 향후 계획
 
 1. **Adaptive Group 구조의 당위성 확보:** 시뮬레이션을 통해 단순 Group Lasso(M3)보다 Adaptive Group Lasso(M4)가 고차원 비지도 학습에서 더 정교한 변수 선택과 높은 군집 성능을 제공함을 입증하였다.
     
