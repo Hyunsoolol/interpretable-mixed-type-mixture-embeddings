@@ -303,10 +303,9 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat S_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{|
 **2) 기존 변수 선택 군집화 및 절제(Ablation) 모형**
 
 - Sparse K-means (sparcl)
-    
+	- Refit (보조 진단용)
 - Naive Lasso (element-wise $\ell_1$ + $\mu_0$)
-    
-- - Refit (보조 진단용)
+	- Refit (보조 진단용)
         
 
 **3) 제안 모형**
