@@ -49,7 +49,7 @@ $$\mu_j=\mu_0+\delta_j$$
 
 형태로 분해하는 parsimonious mixture mean-effects model을 구축한다.
 
-**셋째,** $p \gg n$ 환경에서 support recovery와 mean structure estimation error에 대한 이론적 보장을 우선적으로 제시하고, 군집 성능에 대해서는 separation-dependent clustering bound 또는 Bayes rule 대비 excess risk consistency를 목표로 한다.
+**셋째,** $p \gg n$ 환경에서 support recovery와 mean structure estimation error에 대한 이론적 보장을 우선적으로 제시하고, 군집 성능에 대해서는 군집 간 분리도(Separation)의 Regime에 따라 Bayes rule 대비 excess risk consistency와 zero-misclustering consistency 두 가지 목표를 구분하여 설정한다.
 
 ---
 
@@ -322,6 +322,7 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat{S}_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{
 주의할 점은, Oracle-feature baseline은 변수 집합만 알고 있을 뿐 실제로는 다시 적합을 수행하므로 local optimum과 초기값 영향으로 인해 true upper bound가 아니다. true upper bound에 더 가까운 기준은 true-parameter oracle이다.
 
 또한 Sparse K-means의 “사용 차원”은 clustering 단계에서 실제 사용된 변수 수가 아니라, 가중치 threshold를 기준으로 후처리한 유효 선택 변수 수이다.
+(※ 표 컬럼 해석 주의사항) 사용 차원(알고리즘 입력 차원)은 EM 업데이트에 투입된 변수 수를 의미한다. Proposed HP는 모든 변수를 매 iteration에 포함하므로 전체 차원 $p$와 같다. 반면 실질적인 선택 결과는 $\hat{S}$ (선택 변수 수) 컬럼을 기준으로 해석해야 한다. $\hat{S} = \|\delta_{\cdot k}\|_2 > \text{threshold}$ 를 만족하는 변수의 수이며, TPR과 FPR 역시 $\hat{S}$를 기준으로 계산된다.
 
 ---
 
@@ -448,9 +449,8 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat{S}_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{
 
 #### 6.3 해석
 
-차원이 $p=100$ 으로 늘어나자 unpenalized GMM은 현재 working implementation에서 사실상 0에 가까운 ARI를 보였고, Sparse K-means는 많은 노이즈 변수를 남긴 채 refit을 수행하면서 크게 불안정해졌다.
-
-약신호 $a=1.2$ 구간에서 HP의 ARI는 0.700, feature-oracle baseline은 0.698, true-parameter oracle은 0.712이다. 따라서 HP가 feature-oracle baseline을 소폭 상회하는 finite-sample regularization benefit을 보였다고는 말할 수 있지만, true-parameter oracle보다 여전히 낮으므로 오라클을 능가하진 못했다. 즉, HP는 strong regularization과 구조적 제약 덕분에 정답 변수만 알고 무벌점으로 다시 적합한 baseline보다 더 안정적일 수 있다.
+차원이 $p=100$ 으로 늘어나자 unpenalized GMM의 ARI가 0으로 수렴하는 현상이 관찰되었다. 이는 $p \ge n$ 근방에서 공분산 행렬 추정이 singular해지고 EM이 degenerate solution으로 수렴하는 구현 수준의 원인, 또는 고차원에서 노이즈 변수로 인해 군집 신호가 희석되는 통계적 원인 중 하나 또는 복합으로 발생할 수 있다. 현재 실험에서는 이 둘을 구분하지 않으므로, GMM 결과는 "해당 구현 조건 하의 관찰 결과"로 해석한다. (초고차원 $p=300$ 환경에서는 ARI가 0이 아닌 점(0.221~0.385)과의 일관성도 추후 확인이 필요하다.) 한편, Sparse K-means는 많은 노이즈 변수를 남긴 채 refit을 수행하면서 크게 불안정해졌다.
+약신호 $a=1.2$ 구간에서 HP의 ARI는 0.700, feature-oracle baseline은 0.698, true-parameter oracle은 0.712이다. HP가 feature-oracle baseline을 소폭 상회한 것은, oracle-feature baseline이 local optimum 영향으로 불안정하다는 점을 고려하면 HP의 우수성보다는 강한 정규화 구조가 추정 분산을 낮추는 finite-sample 안정화 효과로 해석하는 것이 더 적절하다. 성능의 주된 기준은 true-parameter oracle 대비 gap으로, 현재 HP는 이 gap을 좁히는 방향으로 작동하고 있다.
 
 ---
 
@@ -523,7 +523,7 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat{S}_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{
     
 - **Naive Lasso 대비 구조적 안정성:** Naive Lasso는 선택 자체는 잘 될 수 있으나, 수축 편향으로 인해 refit에 더 강하게 의존한다. 반면 HP는 single-stage에서도 강한 성능을 보인다.
     
-- **feature-oracle baseline 대비 경쟁력:** 여러 구간에서 HP는 feature-oracle baseline에 매우 근접하거나 이를 소폭 상회하였다. 이는 structured regularization의 finite-sample benefit 가능성을 시사한다.
+- **feature-oracle baseline 대비 경쟁력:** 여러 구간에서 HP는 feature-oracle baseline에 매우 근접하거나 이를 소폭 상회하였다.이는 HP 모형 자체의 절대적 우위라기보다는, 강한 정규화 구조가 추정 분산을 낮추어 local optimum에 빠지기 쉬운 oracle-feature baseline의 불안정성을 극복하는 유한 표본 안정화(finite-sample stabilization) 효과로 해석함이 타당하다.
     
 - **true-parameter oracle과의 차이 유지:** true-parameter oracle은 여전히 가장 높은 기준으로 남아 있다. 따라서 현재 결과는 near-oracle empirical behavior로 해석해야 하며, asymptotic guarantee로 일반화해서는 안 된다.
     
@@ -662,5 +662,4 @@ $$\mathrm{TPR} = \frac{|S_H\cap \hat{S}_H|}{|S_H|} ,\qquad \mathrm{FPR} = \frac{
 ### A.4 보조 해석
 
 $\Sigma=I_p$ 환경에서는 noise variables의 분산이 작아져 K-means류가 상대적으로 유리해지는 경향이 관찰된다. 또한 HP에서 $\hat{S}$ 가 다소 커지는 구간이 있었는데, 이는 분산 추정, penalty scale, tuning, finite-sample variability가 복합적으로 작용한 결과일 수 있다.
-
-따라서 이 부록 결과는 “HP가 분산 정보에 의해 실제 선택 강도가 달라질 가능성”을 시사하는 흥미로운 보조 관찰로 해석하는 것이 적절하다. 다만 이를 일반적인 “분산-적응형 메커니즘의 실증적 입증”으로 단정하려면, 더 큰 반복 수와 $\lambda$ 재튜닝, 그리고 체계적인 민감도 분석이 추가로 필요하다.
+현재 결과는 분산 구조가 선택 성능에 영향을 줄 수 있음을 시사한다. 다만 이를 일반적 결론으로 확장하려면 반복 수 확대와 체계적인 민감도 분석이 선행되어야 한다.
