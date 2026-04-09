@@ -6,17 +6,17 @@
 
 ## 핵심 요약
 
-본 보고서는 고차원 비지도 학습 환경에서 군집 간 평균 차이를 유발하는 변수(mean-heterogeneity-driving variables)를 식별하기 위한 최적의 정규화 구조를 제안한다. 특히 이번 업데이트에서는 기존 모형에 **Non-adaptive Group Lasso(M3)** 대조군을 추가하여 본 연구의 핵심인 'Adaptive' 구조의 통계적 우위를 실증적으로 규명하였다.
+본 보고서는 고차원 비지도 학습 환경에서 군집 간 평균 차이를 유발하는 변수(mean-heterogeneity-driving variables)를 식별하기 위한 더 적합한 정규화 구조를 제안한다. 특히 이번 업데이트에서는 기존 모형에 **Non-adaptive Group Lasso(M3)** 대조군을 추가하여 본 연구의 핵심인 'Adaptive' 구조가 ARI와 추정 안정성 측면에서 일관된 개선 경향을 보임을 예비 실험에서 확인하였다.
 
 현재 버전에서의 핵심 개선 및 수정 사항은 다음과 같다.
 
 - **Non-adaptive Group Lasso(M3) 대조군 추가:** Adaptive weight 없이 모든 변수에 동일한 페널티를 부여하는 M3 대응 모형을 추가하였다. 이를 통해 **개별 페널티(L1) → 그룹 페널티(Group L2) → 적응형 그룹 페널티(Adaptive Group L2)**로 이어지는 단계적 성능 향상 논리를 완성하였다.
-
-* **한계 신호 환경 탐색:** 제안 모형의 작동 한계를 파악하기 위해 저차원 환경($p=20$)에서 신호 강도를 $a \in \{1.0, 0.8, 0.6\}$으로 추가 확장하였다. $a=0.8$ 이하에서는 모든 penalized 방법의 TPR이 급격히 하락하여 signal variable 복원에 실패하였으며, 이는 beta-min 조건이 위반되는 regime으로 어떤 방법도 selection consistency를 보장할 수 없는 구간에 해당한다. 이에 따라 본 연구의 주 시뮬레이션 구간은 $a \in \{1.6, 1.4, 1.2\}$로 설정한다.
-
-- 단일 단계(Single-stage) 추정의 완결성 강조: Naive Lasso가 수축 편향(Shrinkage Bias) 해결을 위해 반드시 Refit(재적합)을 요구하는 것과 달리, 제안 모형(HP-AL)은 Q-basis 재파라미터화를 통해 **별도의 Refit 없이도 오라클 수준에 근접하는 near-oracle empirical behavior를 확인하였다.** 이에 따라 연구의 초점을 번거로운 2단계 추정에서 효율적인 단일 단계 추정으로 전환하였다.
     
-- **변수 선택 기준의 엄밀화:** $\hat{S}$ (선택 변수 수) 산출 시 그룹 노름에 임계값(threshold)을 적용하여, 수치적 파편화 문제를 해결하고 TPR/FPR 지표의 신뢰도를 높였다.
+- **한계 신호 환경 탐색:** 제안 모형의 작동 한계를 파악하기 위해 저차원 환경($p=20$)에서 신호 강도를 $a \in \{1.0, 0.8, 0.6\}$으로 추가 확장하였다. $a=0.8$ 이하에서는 본 실험의 penalized selection 절차들이 support recovery에 실패하기 시작하였다. 이는 penalized selection이 현저히 어려워지는 경계 구간으로 파악되며, 이에 따라 본 연구의 주 시뮬레이션 구간은 $a \in \{1.6, 1.4, 1.2\}$로 설정한다.
+    
+- **단일 단계(Single-stage) 추정의 완결성 강조:** Naive Lasso가 수축 편향(Shrinkage Bias) 해결을 위해 반드시 Refit(재적합)을 요구하는 것과 달리, 제안 모형(HP-AL)은 group penalty, adaptive weight, Q-basis 재파라미터화의 결합을 통해 별도의 Refit 없이도 오라클 수준에 근접하는 near-oracle empirical behavior를 확인하였다.
+    
+- **변수 선택 기준의 엄밀화:** 선택 변수 산출 시 그룹 노름에 고정 임계값(threshold)을 적용하여, 수치적 파편화 문제를 해결하고 지표의 신뢰도를 높였다.
     
 
 ---
@@ -35,7 +35,7 @@
 
 본 연구의 목표는 고차원 데이터에서 군집 구조 추정과 변수 선택을 동시에 수행하는 완결된 단일 파이프라인 방법론을 구축하는 것이다.
 
-**첫째,** Non-adaptive와 Adaptive Group Lasso의 비교를 통해, 고차원 노이즈 환경에서 적응형 가중치가 어떻게 수축 편향을 억제하고 변수 선택의 정확도(Selection Consistency)를 높이는지 증명한다.
+**첫째,** Non-adaptive와 Adaptive Group Lasso의 비교를 통해, 고차원 노이즈 환경에서 적응형 가중치가 어떻게 수축 편향을 억제하고 변수 선택의 support recovery accuracy와 군집 추정 안정성을 어떻게 개선하는지 이론적으로 보일 수 있는 조건을 정립한다.
 
 **둘째,** 기존의 Refit 기반 2단계 추정법의 한계를 지적하고, 제안하는 HP 모형이 단 한 번의 EM 알고리즘 수행만으로도 **오라클 수준에 근접하는 near-oracle empirical behavior를 달성할 수 있음을** 보인다.
 
@@ -43,20 +43,52 @@
 
 ---
 
-## 3. 핵심 연구질문 (업데이트)
+## 3. 핵심 연구질문
 
-- **Q1.** 왜 개별 Lasso(L1)나 단순 Group Lasso(L2)보다 **Adaptive Group Lasso(AL2)**가 비지도 학습의 이질성 탐색에 더 최적인가?
+- **Q1.** 왜 개별 Lasso(L1)나 단순 Group Lasso(L2)보다 **Adaptive Group Lasso(AL2)**가 비지도 학습의 이질성 탐색에 더 적합한가?
     
-- **Q2.** 제안 모형이 **Refit 과정 없이도** 수축 편향을 이겨내고 정답 중심점을 정확히 복원할 수 있는 수학적 근거($Q-basis$)는 무엇인가?
+- **Q2.** 제안 모형이 **Refit 과정 없이도** 수축 편향을 완화하고 near-oracle behavior를 달성할 수 있는 근거는 무엇인가? 특히 group penalty, adaptive weight, $Q$-basis 재파라미터화의 결합이 single-stage 추정 성능을 어떻게 개선하는가?
     
-- **Q3.** 고차원 노이즈 환경에서 Adaptive weight가 FPR(오탐지율)을 낮추는 데 어떤 결정적 역할을 하는가?
+- **Q3.** Adaptive weight가 고차원 노이즈 환경에서 ARI와 추정 안정성을 개선하는 데 어떤 핵심적 역할을 하는가?
     
 
 ---
 
-## 4. 제안모형 및 추정방법 (동일)
+## 4. 제안모형
 
-_(기존 내용 유지: 4.1 기본 모형, 4.2 스케일 보정 이질성 정의, 5.1~5.3 계산 알고리즘 및 Q-basis 재파라미터화 내용 포함)_
+### 4.1 기본 모형
+
+관측치 $X_i = (X_{i1}, \dots, X_{ip})^\top \in \mathbb{R}^p$, 잠재 군집 $Z_i \in \{1, \dots, K\}$ 에 대하여 다음 baseline model을 제안한다.
+
+$$P(Z_i=j)=\pi_j,\qquad j=1,\dots,K$$
+
+$$X_i\mid Z_i=j \sim N_p(\mu_j,\Sigma)$$
+
+$$\mu_j=\mu_0+\delta_j,\qquad \sum_{j=1}^K \delta_{jk}=0,\qquad k=1,\dots,p$$
+
+여기서 $\mu_0 \in \mathbb{R}^p$ 는 sum-to-zero coding 하의 grand mean parameter이고, $\delta_j \in \mathbb{R}^p$ 는 군집 $j$ 의 mean deviation vector이다. 따라서 각 군집의 중심은 $\mu_j=E(X_i\mid Z_i=j)=\mu_0+\delta_j$ 로 표현된다.
+
+다만 중요한 점은, 현재 선택한 제약 $\sum_{j=1}^K \delta_{jk}=0$ 하에서 $\mu_0$ 는 일반적으로 marginal population mean과 동일하지 않다는 것이다. 실제로 $E(X_i)=\sum_{j=1}^K \pi_j\mu_j=\mu_0+\sum_{j=1}^K \pi_j\delta_j$ 이므로, $\mu_0$ 는 $\pi_j$ 가 모두 같거나 $\sum_j \pi_j\delta_j=0$ 인 특수한 경우에만 marginal mean과 일치한다. 따라서 본 연구에서 $\mu_0$ 는 "전체 평균"이라기보다 effects-style parameterization에서의 기준점 역할을 하는 grand mean parameter로 해석하는 것이 정확하다.
+
+특히 sum-to-zero 제약 하에서
+
+$$\mu_0 = \frac{1}{K} \sum_{j=1}^K \mu_j$$
+
+가 성립하므로, $\mu_0$는 군집 평균들의 균등평균(unweighted mean of component means)으로 해석할 수 있다. 이는 $\pi_j$에 의존하는 marginal mean과 구별되는 점이다.
+
+### 4.2 이질적 변수의 정의
+
+변수 $k$ 에 대하여 $\delta_{\cdot k}=(\delta_{1k},\dots,\delta_{Kk})^\top$ 라 두면, mean heterogeneity를 유발하는 변수 집합을 다음과 같이 정의한다.
+
+$$S_\Delta=\{k:\|\delta_{\cdot k}\|_2\neq 0\}$$
+
+즉, $\delta_{1k}=\cdots=\delta_{Kk}=0$ 이면 변수 $k$ 는 모든 군집에서 평균이 동일하므로 군집 간 mean difference를 유발하지 않는다. 반대로 $\|\delta_{\cdot k}\|_2>0$ 이면 변수 $k$ 는 적어도 하나의 군집에서 평균 차이를 만들어내므로 mean-heterogeneity-driving variable이다.
+
+위 정의는 "현재 baseline model 하에서의 평균 기반 이질성"을 의미한다. 따라서 본 모형이 직접 식별하는 것은 variance heterogeneity나 covariance heterogeneity를 포함한 일반적 의미의 cluster-forming variable 전체가 아니라, 공통 공분산 구조 아래에서 mean shift를 통해 군집 분리를 유발하는 변수이다.
+
+### 4.3 공분산 구조: 왜 diagonal covariance부터 시작하는가
+
+본 연구의 초기 모델 설정 및 1차 시뮬레이션에서는 $\Sigma_j = \Sigma = \mathrm{diag}(\sigma_1^2, \dots, \sigma_p^2)$ 또는 가장 단순하게 $\Sigma=I_p$ 로 두는 것이 타당하다. 이 가정 아래에서는 군집이 주어졌을 때 각 좌표가 조건부 독립이므로, mean heterogeneity selection 문제를 가장 선명하게 분리하여 볼 수 있다.
 
 ---
 
@@ -64,74 +96,55 @@ _(기존 내용 유지: 4.1 기본 모형, 4.2 스케일 보정 이질성 정의
 
 ### 5.1 정규화된 목적함수
 
-모수
+모수 $\Theta=(\pi_1,\dots,\pi_K,\mu_0,\delta_1,\dots,\delta_K,\Sigma)$ 에 대해 페널티 구조별로 다음과 같은 세 가지 목적함수를 명시적으로 분리하여 고려한다.
 
-$$\Theta=(\pi_1,\dots,\pi_K,\mu_0,\delta_1,\dots,\delta_K,\Sigma)$$
+**Element-wise L1 (no constraint):**
 
-에 대해 다음과 같은 normalized penalized log-likelihood를 고려한다.
+$$\mathcal{L}_n^{EW}(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p \sum_{j=1}^K |\delta_{jk}|$$
 
-$$\mathcal{L}_n(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p w_k \|\delta_{\cdot k}\|_2$$
+> ※ 이 모형은 $\mu_j = \mu_0 + \delta_j$ 파라미터화를 유지하되 sum-to-zero 제약을 부과하지 않으므로, $\mu_0$와 $\delta_j$의 분해가 유일하지 않다. 따라서 변수 선택 후 결과는 group norm $\|\delta_{\cdot k}\|_2$ 기준으로 후처리하여 해석한다.
 
-여기서 $w_k$ 는 adaptive weight이며, 예를 들면
+**HP-L (Non-adaptive Group Lasso, M3 대응):**
 
-$$w_k=(\|\tilde{\delta}_{\cdot k}\|_2+\varepsilon)^{-\gamma}$$
+$$\mathcal{L}_n^{HP-L}(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p \|\delta_{\cdot k}\|_2$$
 
-와 같이 pilot estimator로부터 구성할 수 있다.
+> subject to $\sum_{j=1}^K \delta_{jk}=0, \quad k=1,\dots,p$
 
-실제 구현에서는 이론에서의 $\lambda_n$ 과 완전히 동일한 스케일의 튜닝 파라미터를 쓰기보다, raw penalty parameter를 grid search와 heuristic BIC를 통해 선택한다. 따라서 이론 표기와 구현상 penalty scale은 구분해서 해석하는 것이 필요하다.
+**HP-AL (Adaptive Group Lasso, M4, 제안 모형):**
 
-또한 현재 모형에서는 variable-wise selection을 위해 element-wise $\ell_1$ 보다 $\|\delta_{\cdot k}\|_2$ 형태의 group penalty를 사용하는 것이 더 자연스럽다. 하나의 변수는 모든 군집에서 함께 살아남거나 함께 0이 되므로, "어떤 변수 전체가 mean heterogeneity를 유발하는가"라는 질문에 직접 대응할 수 있다.
+$$\mathcal{L}_n^{HP-AL}(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p w_k \|\delta_{\cdot k}\|_2$$
 
-### 5.2 식별성 제약
+> subject to $\sum_{j=1}^K \delta_{jk}=0, \quad k=1,\dots,p$
 
-$$\mu_j=\mu_0+\delta_j$$
+여기서 $w_k=(\|\tilde{\delta}_{\cdot k}\|_2+\varepsilon)^{-\gamma}$ 는 pilot estimator로부터 구성된 adaptive weight이다.
 
-만으로는 $\mu_0$ 와 $\delta_j$ 의 분해가 유일하지 않다. 따라서 다음과 같은 sum-to-zero 제약이 필요하다.
+### 5.2 식별성 제약 및 계산 알고리즘
 
-$$\sum_{j=1}^K \delta_{jk}=0,\qquad k=1,\dots,p$$
+$\mu_j=\mu_0+\delta_j$ 만으로는 분해가 유일하지 않으므로, $\sum_{j=1}^K \delta_{jk}=0$ 이라는 sum-to-zero 제약이 필수적이다.
 
-이는 원 논문에서의 effects-model parameterization과 동일한 역할을 수행하는 식별성 제약이다.
-
-### 5.3 계산 알고리즘
-
-계산은 EM 알고리즘을 기본 골격으로 한다.
-
-E-step에서는 책임도(responsibility)를 계산한다.
-
-$$\tau_{ij} = P(Z_i=j\mid X_i,\Theta) = \frac{\pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma)}{\sum_{\ell=1}^K \pi_\ell \phi_p(X_i;\mu_0+\delta_\ell,\Sigma)}$$
-
-M-step에서는 $\pi_j, \Sigma, \mu_0, \delta_j$ 를 갱신한다. 특히 $\Sigma = \mathrm{diag}(\sigma_1^2, \dots, \sigma_p^2)$ 일 때, 각 변수 $k$ 에 대한 $(\mu_{0k}, \delta_{\cdot k})$ 의 M-step 업데이트 문제는 다른 변수의 파라미터와 완전히 분리되어 다음과 같이 독립적으로 풀 수 있다.
-
-$$\min_{\mu_{0k},\delta_{\cdot k}} \frac{1}{2}\sum_{i=1}^n\sum_{j=1}^K \tau_{ij}\sigma_k^{-2}(x_{ik}-\mu_{0k}-\delta_{jk})^2 + \lambda_n w_k \|\delta_{\cdot k}\|_2$$
-
-subject to
-
-$$\sum_{j=1}^K \delta_{jk}=0$$
-
-실제 구현에서는 $\mathbf{1}_K$ 의 직교여공간 basis $Q \in \mathbb{R}^{K \times (K-1)}$ 를 사용하여 $\delta_{\cdot k} = Q\alpha_k$ 로 재파라미터화하면 제약이 사라진다. $Q$ 가 column-orthonormal이면 $\|\delta_{\cdot k}\|_2 = \|Q\alpha_k\|_2 = \|\alpha_k\|_2$ 가 성립하므로, group penalty의 형태가 재파라미터화 전후로 보존된다.
+실제 계산(EM 알고리즘) 구현에서는 $\mathbf{1}_K$ 의 직교여공간 basis $Q \in \mathbb{R}^{K \times (K-1)}$ 를 사용하여 $\delta_{\cdot k} = Q\alpha_k$ 로 재파라미터화하면 제약이 사라진다. $Q$ 가 column-orthonormal이면 $\|\delta_{\cdot k}\|_2 = \|Q\alpha_k\|_2 = \|\alpha_k\|_2$ 가 성립하므로, group penalty의 형태가 재파라미터화 전후로 보존된다.
 
 **Adaptive weight의 일관성:** adaptive weight $w_k = (\|\tilde{\delta}_{\cdot k}\|_2 + \varepsilon)^{-\gamma}$ 를 구성하는 pilot estimator $\tilde{\delta}_{\cdot k}$ 역시 동일한 $Q$ 재파라미터화를 통해 얻어야 한다. 즉, pilot 단계에서 $\tilde{\alpha}_k$ 를 먼저 추정한 후 $\tilde{\delta}_{\cdot k} = Q\tilde{\alpha}_k$ 로 복원하여 $w_k$ 를 계산한다. 이는 수치적 안정성과 희소성 보존 측면에서 유리하다.
 
-### 5.4 구현상 튜닝과 해석 주의점
+### 5.3 구현상 튜닝과 해석 주의점
 
 - 구현에서는 exact BIC라기보다 heuristic BIC를 사용한다.
     
 - **본 연구에서 제안하는 방법론의 명칭은 다음과 같이 정리한다.**
-
-	- **HP-L: Non-adaptive Group Lasso (M3 대응)**
     
-	- **HP-AL: Adaptive Group Lasso (M4 대응, 제안 모형)**
-    
+    - **HP-L: Non-adaptive Group Lasso (M3 대응)**
+        
+    - **HP-AL: Adaptive Group Lasso (M4 대응, 제안 모형)**
+        
 - Sparse K-means의 "사용 차원"은 실제 clustering 단계에서 사용한 변수 수가 아니라, 가중치 threshold를 기준으로 후처리한 유효 선택 변수 수로 해석하는 것이 맞다.
     
 - HP+Refit은 진단 목적의 보조 실험으로 계산할 수 있으나, 본 보고서의 주표에서는 single-stage HP 성능을 중심으로 제시한다.
     
-
+* 선택 변수 집합은 $\hat{S}_\tau = \{k : \|\hat{\delta}_{\cdot k}\|_2 > \tau\}, \quad \tau = 10^{-4}$ 으로 정의한다. 여기서 $\tau$는 수치적 파편화를 제거하기 위한 고정 tolerance이며, $\lambda$의 함수가 아닌 상수로 설정하였다. TPR과 FPR은 모두 $\hat{S}_\tau$를 기준으로 계산된다.
 
 ---
-## 6. 시뮬레이션 결과
 
-본 실험은 $R=10$회의 pilot Monte Carlo 평균을 기반으로 한다.
+## Part II. 시뮬레이션 결과
 
 이번 미팅에서는 M3(Non-adaptive Group Lasso)를 독립적인 비교 방법론으로 추가하여, Adaptive weight의 유무가 군집 성능(ARI)과 변수 선택 수($\hat{S}$)에 미치는 영향을 직접적으로 대조하였다. 또한, 각 모델의 **Single-stage(No Refit)** 성능을 주 지표로 삼아 모델 자체의 수축 편향 억제 능력을 평가하였다.
 
@@ -160,58 +173,60 @@ $$\sum_{j=1}^K \delta_{jk}=0$$
 **3) 제안 모형**
 
 - **HP-AL: Adaptive Group Lasso (M4 대응)**
-            
+    
 
 **4) 오라클 벤치마크**
 
-- Oracle-feature baseline (True Vars): 정답 변수 집합만 알고 GMM을 다시 추정한 baseline
+- Oracle-feature baseline (True Vars)
     
-- True-parameter oracle: 생성에 사용한 진짜 모수 $(\pi,\mu,\Sigma)$ 를 알고 있다고 가정한 Bayes-like benchmark
+- True-parameter oracle
     
 
-주의할 점은, Oracle-feature baseline은 변수 집합만 알고 있을 뿐 실제로는 다시 적합을 수행하므로 local optimum과 초기값 영향으로 인해 true upper bound가 아니다. true upper bound에 더 가까운 기준은 true-parameter oracle이다.
+> **(※ 표 컬럼 해석 주의사항)** > $p_{\mathrm{fit}}$ (사용 차원)은 fitting에 투입된 차원이며, HP 계열은 $p_{\mathrm{fit}}=p$ 이다. 실질적 선택 결과는 $\hat{S}_\tau$ (선택 변수 수)를 기준으로 해석한다. 선택 변수 집합은
+> 
+> $$\hat{S}_\tau = \{k : \|\hat{\delta}_{\cdot k}\|_2 > \tau\}, \quad \tau = 10^{-4}$$
+> 
+> 으로 정의한다. 여기서 $\tau$는 수치적 파편화(numerical fragmentation)를 제거하기 위한 고정 tolerance이며, $\lambda$의 함수가 아닌 상수로 설정하였다. TPR과 FPR은 모두 $\hat{S}_\tau$를 기준으로 계산된다.
 
-또한 Sparse K-means의 "사용 차원"은 clustering 단계에서 실제 사용된 변수 수가 아니라, 가중치 threshold를 기준으로 후처리한 유효 선택 변수 수이다.
-
-(※ 표 컬럼 해석 주의사항) 사용 차원(알고리즘 입력 차원)은 EM 업데이트에 투입된 변수 수를 의미한다. Proposed HP는 모든 변수를 매 iteration에 포함하므로 전체 차원 $p$와 같다. 반면 실질적인 선택 결과는 $\hat{S}$ (선택 변수 수) 컬럼을 기준으로 해석해야 한다. $\hat{S} = |\{ k : \|\hat{\delta}_{\cdot k}\|_2 > \text{threshold} \}|$ 이며, TPR과 FPR 역시 $\hat{S}$를 기준으로 계산된다.
-
+---
 
 ### 1. 기본 환경 ($p=20, q=3$)
 
 #### 1.1 실험 세팅
 
 표본 수는 $n=300$, 총 차원 $p=20$, 정답 변수는 $q=3$ 개이다. 신호 강도는 $a \in \{1.6, 1.4, 1.2, 1.0, 0.8, 0.6\}$으로 설정하였으며, $a \in \{1.6, 1.4, 1.2\}$를 주 분석 구간으로, $a \in \{1.0, 0.8, 0.6\}$을 한계 신호 보조 분석 구간으로 구분한다.
+
 #### 1.2 시나리오별 결과표 (평균 및 표준오차)
 
 **[시나리오 1] 신호 환경 (a=1.6)**
 
-|**방법론 (Single-stage)**|**사용 차원**|**ARI**|**TPR**|**FPR**|**S^**|
-|---|---|---|---|---|---|
-|K-means|20.000 (0.000)|0.413 (0.013)|-|-|-|
-|PCA + K-means|14.000 (0.000)|0.400 (0.015)|-|-|-|
-|GMM (Unpenalized)|20.000 (0.000)|0.522 (0.038)|-|-|-|
-|Sparse K-means|19.600 (0.221)|0.679 (0.014)|1.000 (0.000)|0.976 (0.013)|19.600 (0.221)|
-|Element-wise L1 (no constraint)|4.800 (0.327)|0.643 (0.024)|1.000 (0.000)|0.106 (0.019)|4.800 (0.327)|
-|Naive Lasso (EW-L1 + SumZero)|5.000 (0.298)|0.660 (0.011)|1.000 (0.000)|0.118 (0.018)|5.000 (0.298)|
-|**HP-L: Non-adaptive Group Lasso**|20.000 (0.000)|0.634 (0.021)|1.000 (0.000)|0.059 (0.033)|4.000 (0.558)|
-|**HP-AL: Adaptive Group Lasso**|20.000 (0.000)|**0.673 (0.010)**|1.000 (0.000)|0.059 (0.033)|4.000 (0.558)|
-|Oracle-feature baseline|3.000 (0.000)|0.682 (0.009)|1.000 (0.000)|0.000 (0.000)|3.000 (0.000)|
-|True-parameter oracle|3.000 (0.000)|0.705 (0.012)|1.000 (0.000)|0.000 (0.000)|3.000 (0.000)|
+| **방법론 (Single-stage)**             | **사용 차원**      | **ARI**           | **TPR**       | **FPR**       | **S^**         |
+| ---------------------------------- | -------------- | ----------------- | ------------- | ------------- | -------------- |
+| K-means                            | 20.000 (0.000) | 0.413 (0.013)     | -             | -             | -              |
+| PCA + K-means                      | 14.000 (0.000) | 0.400 (0.015)     | -             | -             | -              |
+| GMM (Unpenalized)                  | 20.000 (0.000) | 0.522 (0.038)     | -             | -             | -              |
+| Sparse K-means                     | 19.600 (0.221) | 0.679 (0.014)     | 1.000 (0.000) | 0.976 (0.013) | 19.600 (0.221) |
+| Element-wise L1 (no constraint)    | 4.800 (0.327)  | 0.643 (0.024)     | 1.000 (0.000) | 0.106 (0.019) | 4.800 (0.327)  |
+| Naive Lasso (EW-L1 + SumZero)      | 5.000 (0.298)  | 0.660 (0.011)     | 1.000 (0.000) | 0.118 (0.018) | 5.000 (0.298)  |
+| **HP-L: Non-adaptive Group Lasso** | 20.000 (0.000) | 0.634 (0.021)     | 1.000 (0.000) | 0.059 (0.033) | 4.000 (0.558)  |
+| **HP-AL: Adaptive Group Lasso**    | 20.000 (0.000) | **0.673 (0.010)** | 1.000 (0.000) | 0.059 (0.033) | 4.000 (0.558)  |
+| Oracle-feature baseline            | 3.000 (0.000)  | 0.682 (0.009)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
+| True-parameter oracle              | 3.000 (0.000)  | 0.705 (0.012)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
 
 **[시나리오 2] 중간 신호 환경 (a=1.4)**
 
-|**방법론 (Single-stage)**|**사용 차원**|**ARI**|**TPR**|**FPR**|**S^**|
-|---|---|---|---|---|---|
-|K-means|20.000 (0.000)|0.350 (0.015)|-|-|-|
-|PCA + K-means|14.000 (0.000)|0.346 (0.013)|-|-|-|
-|GMM (Unpenalized)|20.000 (0.000)|0.456 (0.029)|-|-|-|
-|Sparse K-means|19.800 (0.133)|0.601 (0.010)|1.000 (0.000)|0.988 (0.008)|19.800 (0.133)|
-|Element-wise L1 (no constraint)|4.900 (0.657)|0.489 (0.023)|1.000 (0.000)|0.112 (0.039)|4.900 (0.657)|
-|Naive Lasso (EW-L1 + SumZero)|3.300 (0.213)|0.472 (0.025)|1.000 (0.000)|0.018 (0.013)|3.300 (0.213)|
-|**HP-L: Non-adaptive Group Lasso**|20.000 (0.000)|0.476 (0.028)|1.000 (0.000)|0.065 (0.032)|4.100 (0.547)|
-|**HP-AL: Adaptive Group Lasso**|20.000 (0.000)|**0.591 (0.017)**|1.000 (0.000)|0.065 (0.032)|4.100 (0.547)|
-|Oracle-feature baseline|3.000 (0.000)|0.596 (0.017)|1.000 (0.000)|0.000 (0.000)|3.000 (0.000)|
-|True-parameter oracle|3.000 (0.000)|0.626 (0.016)|1.000 (0.000)|0.000 (0.000)|3.000 (0.000)|
+| **방법론 (Single-stage)**             | **사용 차원**      | **ARI**           | **TPR**       | **FPR**       | **S^**         |
+| ---------------------------------- | -------------- | ----------------- | ------------- | ------------- | -------------- |
+| K-means                            | 20.000 (0.000) | 0.350 (0.015)     | -             | -             | -              |
+| PCA + K-means                      | 14.000 (0.000) | 0.346 (0.013)     | -             | -             | -              |
+| GMM (Unpenalized)                  | 20.000 (0.000) | 0.456 (0.029)     | -             | -             | -              |
+| Sparse K-means                     | 19.800 (0.133) | 0.601 (0.010)     | 1.000 (0.000) | 0.988 (0.008) | 19.800 (0.133) |
+| Element-wise L1 (no constraint)    | 4.900 (0.657)  | 0.489 (0.023)     | 1.000 (0.000) | 0.112 (0.039) | 4.900 (0.657)  |
+| Naive Lasso (EW-L1 + SumZero)      | 3.300 (0.213)  | 0.472 (0.025)     | 1.000 (0.000) | 0.018 (0.013) | 3.300 (0.213)  |
+| **HP-L: Non-adaptive Group Lasso** | 20.000 (0.000) | 0.476 (0.028)     | 1.000 (0.000) | 0.065 (0.032) | 4.100 (0.547)  |
+| **HP-AL: Adaptive Group Lasso**    | 20.000 (0.000) | **0.591 (0.017)** | 1.000 (0.000) | 0.065 (0.032) | 4.100 (0.547)  |
+| Oracle-feature baseline            | 3.000 (0.000)  | 0.596 (0.017)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
+| True-parameter oracle              | 3.000 (0.000)  | 0.626 (0.016)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
 
 **[시나리오 3] 약한 신호 환경 (a=1.2)**
 
@@ -230,33 +245,33 @@ $$\sum_{j=1}^K \delta_{jk}=0$$
 
 **[시나리오 4] 한계 신호 환경 (a=1.0)**
 
-|**방법론 (Single-stage)**|**사용 차원**|**ARI**|**TPR**|**FPR**|**S^**|
-|---|---|---|---|---|---|
-|K-means|20.000 (0.000)|0.211 (0.015)|-|-|-|
-|PCA + K-means|14.000 (0.000)|0.213 (0.014)|-|-|-|
-|GMM (Unpenalized)|20.000 (0.000)|0.343 (0.012)|-|-|-|
-|Sparse K-means|19.600 (0.163)|0.176 (0.040)|1.000 (0.000)|0.976 (0.010)|19.600 (0.163)|
-|Element-wise L1 (no constraint)|3.500 (0.224)|0.373 (0.011)|1.000 (0.000)|0.029 (0.013)|3.500 (0.224)|
-|Naive Lasso (EW-L1 + SumZero)|3.200 (0.133)|0.373 (0.010)|1.000 (0.000)|0.012 (0.008)|3.200 (0.133)|
-|**HP-L: Non-adaptive Group Lasso**|20.000 (0.000)|0.375 (0.011)|1.000 (0.000)|0.006 (0.006)|3.100 (0.100)|
-|**HP-AL: Adaptive Group Lasso**|20.000 (0.000)|**0.364 (0.012)**|1.000 (0.000)|0.006 (0.006)|3.100 (0.100)|
-|Oracle-feature baseline|3.000 (0.000)|0.357 (0.024)|1.000 (0.000)|0.000 (0.000)|3.000 (0.000)|
-|True-parameter oracle|3.000 (0.000)|0.405 (0.014)|1.000 (0.000)|0.000 (0.000)|3.000 (0.000)|
+| **방법론 (Single-stage)**             | **사용 차원**      | **ARI**           | **TPR**       | **FPR**       | **S^**         |
+| ---------------------------------- | -------------- | ----------------- | ------------- | ------------- | -------------- |
+| K-means                            | 20.000 (0.000) | 0.211 (0.015)     | -             | -             | -              |
+| PCA + K-means                      | 14.000 (0.000) | 0.213 (0.014)     | -             | -             | -              |
+| GMM (Unpenalized)                  | 20.000 (0.000) | 0.343 (0.012)     | -             | -             | -              |
+| Sparse K-means                     | 19.600 (0.163) | 0.176 (0.040)     | 1.000 (0.000) | 0.976 (0.010) | 19.600 (0.163) |
+| Element-wise L1 (no constraint)    | 3.500 (0.224)  | 0.373 (0.011)     | 1.000 (0.000) | 0.029 (0.013) | 3.500 (0.224)  |
+| Naive Lasso (EW-L1 + SumZero)      | 3.200 (0.133)  | 0.373 (0.010)     | 1.000 (0.000) | 0.012 (0.008) | 3.200 (0.133)  |
+| **HP-L: Non-adaptive Group Lasso** | 20.000 (0.000) | 0.375 (0.011)     | 1.000 (0.000) | 0.006 (0.006) | 3.100 (0.100)  |
+| **HP-AL: Adaptive Group Lasso**    | 20.000 (0.000) | **0.364 (0.012)** | 1.000 (0.000) | 0.006 (0.006) | 3.100 (0.100)  |
+| Oracle-feature baseline            | 3.000 (0.000)  | 0.357 (0.024)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
+| True-parameter oracle              | 3.000 (0.000)  | 0.405 (0.014)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
 
 **[시나리오 5] 붕괴 시작 환경 (a=0.8)**
 
-|**방법론 (Single-stage)**|**사용 차원**|**ARI**|**TPR**|**FPR**|**S^**|
-|---|---|---|---|---|---|
-|K-means|20.000 (0.000)|0.066 (0.015)|-|-|-|
-|PCA + K-means|14.000 (0.000)|0.076 (0.015)|-|-|-|
-|GMM (Unpenalized)|20.000 (0.000)|0.219 (0.014)|-|-|-|
-|Sparse K-means|19.000 (0.789)|0.017 (0.015)|0.900 (0.071)|0.959 (0.035)|19.000 (0.789)|
-|Element-wise L1 (no constraint)|4.500 (1.108)|0.203 (0.036)|0.800 (0.133)|0.124 (0.052)|4.500 (1.108)|
-|Naive Lasso (EW-L1 + SumZero)|2.800 (0.854)|0.162 (0.045)|0.600 (0.163)|0.059 (0.028)|2.800 (0.854)|
-|**HP-L: Non-adaptive Group Lasso**|20.000 (0.000)|0.140 (0.048)|0.500 (0.167)|0.029 (0.016)|2.000 (0.699)|
-|**HP-AL: Adaptive Group Lasso**|20.000 (0.000)|**0.139 (0.048)**|0.500 (0.167)|0.029 (0.016)|2.000 (0.699)|
-|Oracle-feature baseline|3.000 (0.000)|0.232 (0.016)|1.000 (0.000)|0.000 (0.000)|3.000 (0.000)|
-|True-parameter oracle|3.000 (0.000)|0.327 (0.014)|1.000 (0.000)|0.000 (0.000)|3.000 (0.000)|
+| **방법론 (Single-stage)**             | **사용 차원**      | **ARI**           | **TPR**       | **FPR**       | **S^**         |
+| ---------------------------------- | -------------- | ----------------- | ------------- | ------------- | -------------- |
+| K-means                            | 20.000 (0.000) | 0.066 (0.015)     | -             | -             | -              |
+| PCA + K-means                      | 14.000 (0.000) | 0.076 (0.015)     | -             | -             | -              |
+| GMM (Unpenalized)                  | 20.000 (0.000) | 0.219 (0.014)     | -             | -             | -              |
+| Sparse K-means                     | 19.000 (0.789) | 0.017 (0.015)     | 0.900 (0.071) | 0.959 (0.035) | 19.000 (0.789) |
+| Element-wise L1 (no constraint)    | 4.500 (1.108)  | 0.203 (0.036)     | 0.800 (0.133) | 0.124 (0.052) | 4.500 (1.108)  |
+| Naive Lasso (EW-L1 + SumZero)      | 2.800 (0.854)  | 0.162 (0.045)     | 0.600 (0.163) | 0.059 (0.028) | 2.800 (0.854)  |
+| **HP-L: Non-adaptive Group Lasso** | 20.000 (0.000) | 0.140 (0.048)     | 0.500 (0.167) | 0.029 (0.016) | 2.000 (0.699)  |
+| **HP-AL: Adaptive Group Lasso**    | 20.000 (0.000) | **0.139 (0.048)** | 0.500 (0.167) | 0.029 (0.016) | 2.000 (0.699)  |
+| Oracle-feature baseline            | 3.000 (0.000)  | 0.232 (0.016)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
+| True-parameter oracle              | 3.000 (0.000)  | 0.327 (0.014)     | 1.000 (0.000) | 0.000 (0.000) | 3.000 (0.000)  |
 
 **[시나리오 6] 노이즈 동화 환경 (a=0.6)**
 
@@ -276,15 +291,16 @@ $$\sum_{j=1}^K \delta_{jk}=0$$
 <img width="1251" height="640" alt="image" src="https://github.com/user-attachments/assets/19bd0fa8-d238-49dc-a71f-d72f3e2f96b9" />
 
 <img width="1251" height="640" alt="image" src="https://github.com/user-attachments/assets/02c193f1-6d67-4795-8f29-59748ce31d37" />
-
 #### 1.3 해석
 
-- **첫째, Adaptive weight의 결정적 기여:** 중간 신호($a=1.4$) 환경에서 Non-adaptive(HP-L)의 ARI는 0.476(0.028)에 머물렀으나, 적응형 가중치를 적용한 HP-AL은 **0.591(0.017)**로 성능이 극적으로 상승하며 변동성(SE) 또한 줄어들었다. 이는 Adaptive weight가 수축 편향을 억제하고 정답 변수의 신호를 온전히 보존하는 핵심 기제임을 실증한다.
+- **첫째, Adaptive weight의 기여:** 중간 신호($a=1.4$) 환경에서 Non-adaptive(HP-L)의 ARI는 0.476(0.028)에 머물렀으나, 적응형 가중치를 적용한 HP-AL은 **0.591(0.017)**로 성능이 크게 상승하며 변동성(SE) 또한 줄어들었다. 이는 Adaptive weight가 추정 안정성과 ARI를 개선하는 핵심 기제임을 시사한다. 단, 현재 threshold($\tau=10^{-4}$) 기준에서 HP-L과 HP-AL의 TPR/FPR/$\hat{S}_\tau$는 유사하게 나타났으며, support metric에서의 추가 개선 여부는 threshold sensitivity 분석 이후 확인이 필요하다.
     
-- **둘째, L1 계열 페널티의 구조적 한계:** 제약 조건이 없는 `Element-wise L1`은 모든 구간에서 가장 높은 $\hat{S}$ (약 4.2~4.9개)를 보이며 노이즈를 다수 포함하는 파편화 현상을 보였다. 제약을 강제한 `Naive Lasso` 역시 $a=1.4$ 구간에서 ARI가 0.472로 떨어지며 극심한 수축 편향을 드러냈다.
+- **둘째, L1 계열 페널티의 구조적 한계:** 제약 조건이 없는 `Element-wise L1`은 모든 주 분석 구간에서 가장 높은 $\hat{S}_\tau$ (약 4.2~4.9개)를 보이며 노이즈를 다수 포함하는 현상을 보였다. 제약을 강제한 `Naive Lasso` 역시 $a=1.4$ 구간에서 ARI가 0.472로 떨어지며 수축 편향을 드러냈다.
     
-- **셋째, Single-stage의 완결성**: 제안 모형(HP-AL)은 번거로운 2단계 Refit 과정 없이 단 한 번의 추정만으로 Oracle-feature baseline(0.596) 수준에 도달하여 우수한 구조적 안정성을 시사하였다.
-- 넷째, 한계 신호 구간의 거동: a=1.0 구간에서는 모든 방법의 TPR이 1.000을 유지하지만 HP-AL의 ARI(0.364)가 HP-L(0.375), Naive Lasso(0.373)와 유사한 수준으로 수렴하였다. 이는 신호가 beta-min 조건의 임계값 근방에 도달하면 adaptive weight의 차별적 효과가 감소함을 시사한다. a=0.8 이하에서는 HP-L과 HP-AL 모두 TPR이 0.500으로 하락하고 a=0.6에서는 ARI=0으로 완전 붕괴하였다. 이 구간은 어떤 penalized 방법도 selection consistency를 보장할 수 없는 regime에 해당하므로 본 연구의 주 비교 구간에서 제외하고 보조 분석으로 위치시킨다.
+- **셋째, Single-stage의 완결성:** 제안 모형(HP-AL)은 번거로운 2단계 Refit 과정 없이 단 한 번의 추정만으로 Oracle-feature baseline(0.596) 수준에 도달하여 우수한 구조적 안정성을 시사하였다.
+    
+- **넷째, 한계 신호 구간의 거동:** $a=0.8$ 이하에서는 본 실험의 penalized selection 절차들이 support recovery에 실패하기 시작하였다. 이는 beta-min 조건의 경계 근방에 해당하는 구간으로 해석할 수 있으나, oracle benchmark는 해당 구간에서도 양의 ARI를 유지하였으므로 신호 자체가 소멸한 것은 아니다. 따라서 이 구간을 'penalized selection이 현저히 어려워지는 경계'로 위치시키되, 일반적 불가능성 주장으로 확대하지는 않는다.
+    
 
 ---
 
@@ -340,21 +356,21 @@ $$\sum_{j=1}^K \delta_{jk}=0$$
 | **HP-AL: Adaptive Group Lasso**    | 100.000 (0.000) | **0.700 (0.018)** | 1.000 (0.000) | 0.008 (0.003) | 5.800 (0.249)  |
 | Oracle-feature baseline            | 5.000 (0.000)   | 0.698 (0.019)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)  |
 | True-parameter oracle              | 5.000 (0.000)   | 0.712 (0.021)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)  |
-
 <img width="1251" height="640" alt="image" src="https://github.com/user-attachments/assets/adca8d16-4050-45cc-a9f1-1202874ba602" />
 
 #### 2.3 해석
 
 - **첫째, 차원의 저주와 GMM의 붕괴:** 차원이 $p=100$ 으로 늘어나자 unpenalized GMM의 ARI가 0으로 수렴하는 현상이 관찰되었다. 이는 $p \ge n$ 근방에서 공분산 행렬 추정이 singular해지고 EM이 degenerate solution으로 수렴하는 구현 수준의 원인, 또는 고차원에서 노이즈 변수로 인해 군집 신호가 희석되는 통계적 원인 중 하나 또는 복합으로 발생할 수 있다. 현재 실험에서는 이 둘을 구분하지 않으므로, GMM 결과는 "해당 구현 조건 하의 관찰 결과"로 해석한다. (초고차원 $p=300$ 환경에서는 ARI가 0이 아닌 점과의 일관성도 추후 확인이 필요하다.)
     
-- 둘째, Adaptive weight의 효과: 고차원 노이즈 환경(p=100)에서 Adaptive 구조의 위력이 극대화되었다. 약신호(a=1.2) 구간을 보면 Non-adaptive(HP-L) 모형의 ARI는 0.505(0.040)로 급락한 반면, 제안 모형인 Adaptive(HP-AL)는 0.700(0.018)을 기록하며 두드러진 성능 향상과 좁은 변동성을 보여주었다.
+- **둘째, Adaptive weight의 효과:** 고차원 노이즈 환경($p=100$)에서 Adaptive 구조의 위력이 극대화되었다. 약신호($a=1.2$) 구간을 보면 Non-adaptive(HP-L) 모형의 ARI는 0.505(0.040)로 급락한 반면, 제안 모형인 Adaptive(HP-AL)는 0.700(0.018)을 기록하며 두드러진 성능 향상과 좁은 변동성을 보여주었다.
     
-- **셋째, L1 계열 모형의 고차원 한계:** 제약 조건이 없는 `Element-wise L1`은 중간 신호($a=1.4$)에서 $\hat{S}$ 가 무려 15.100개에 달하며 심각한 변수 과선택 현상을 보였다. 제약 조건을 강제한 `Naive Lasso` 역시 약신호($a=1.2$) 환경에서 수축 편향을 이기지 못하고 ARI가 0.439까지 추락하였다.
+- **셋째, L1 계열 모형의 고차원 한계:** 제약 조건이 없는 `Element-wise L1`은 중간 신호($a=1.4$)에서 $\hat{S}_\tau$ 가 무려 15.100개에 달하며 변수 과선택 현상을 보였다. 제약 조건을 강제한 `Naive Lasso` 역시 약신호($a=1.2$) 환경에서 수축 편향을 이기지 못하고 ARI가 0.439까지 하락하였다.
     
-- **넷째, 오라클 도달 및 유한 표본 안정화:** 제안 모형(HP-AL)은 $a=1.2$ 구간에서 ARI 0.700을 기록하여 정답 변수만 투입한 Oracle-feature baseline(0.698)을 소폭 상회하였다. 이는 HP 모형 자체의 절대적 우위라기보다, 강한 정규화 구조가 추정 분산을 낮추는 유한 표본 안정화(finite-sample stabilization) 효과로 해석하는 것이 적절하다. HP-AL은 어떠한 Refit 없이도 단 한 번의 파이프라인만으로 최고 수준의 안정성을 담보하였다.
-
+- **넷째, 오라클 도달 및 유한 표본 안정화:** 제안 모형(HP-AL)은 $a=1.2$ 구간에서 ARI 0.700을 기록하여 정답 변수만 투입한 Oracle-feature baseline(0.698)을 소폭 상회하였다. 이는 HP-AL의 절대적 우위라기보다, 강한 정규화 구조가 추정 분산을 낮추는 유한 표본 안정화(finite-sample stabilization) 효과로 해석하는 것이 적절하다. HP-AL은 어떠한 Refit 없이도 단 한 번의 파이프라인만으로 우수한 안정성을 담보하였다.
+    
 
 ---
+
 ### 3. 초고차원 환경 ($p=300, q=5$)
 
 #### 3.1 실험 세팅
@@ -362,6 +378,7 @@ $$\sum_{j=1}^K \delta_{jk}=0$$
 표본 수 $n=300$, 차원 $p=300$, 정답 변수 $q=5$ 인 ultra-high-dimensional setting이다. 표의 수치는 반복 실험의 평균 (표준오차)를 나타낸다.
 
 #### 3.2 시나리오별 결과표 (평균 및 표준오차)
+
 **[시나리오 1] 신호 환경 (a=1.6)**
 
 | **방법론 (Single-stage)**             | **사용 차원**        | **ARI**           | **TPR**       | **FPR**       | **S^**           |
@@ -371,11 +388,11 @@ $$\sum_{j=1}^K \delta_{jk}=0$$
 | GMM (Unpenalized)                  | 300.000 (0.000)  | 0.385 (0.045)     | -             | -             | -                |
 | Sparse K-means                     | 195.700 (31.628) | 0.845 (0.009)     | 1.000 (0.000) | 0.646 (0.107) | 195.700 (31.628) |
 | Element-wise L1 (no constraint)    | 13.800 (5.897)   | 0.666 (0.056)     | 1.000 (0.000) | 0.030 (0.020) | 13.800 (5.897)   |
-| Naive Lasso (EW-L1 + SumZero)      | 5.000 (0.000)    | 0.798 (0.019)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)    |
-| **HP-L: Non-adaptive Group Lasso** | 300.000 (0.000)  | 0.822 (0.016)     | 1.000 (0.000) | 0.009 (0.001) | 7.600 (0.400)    |
-| **HP-AL: Adaptive Group Lasso**    | 300.000 (0.000)  | **0.832 (0.014)** | 1.000 (0.000) | 0.009 (0.001) | 7.600 (0.400)    |
-| Oracle-feature baseline            | 5.000 (0.000)    | 0.845 (0.013)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)    |
-| True-parameter oracle              | 5.000 (0.000)    | 0.851 (0.009)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)    |
+| Naive Lasso (EW-L1 + SumZero)      | 5.000<br>(0.000) | 0.798 (0.019)     | 1.000 (0.000) | 0.000 (0.000) | 5.000<br>(0.000) |
+| **HP-L: Non-adaptive Group Lasso** | 300.000 (0.000)  | 0.822 (0.016)     | 1.000 (0.000) | 0.009 (0.001) | 7.600<br>(0.400) |
+| **HP-AL: Adaptive Group Lasso**    | 300.000 (0.000)  | **0.832 (0.014)** | 1.000 (0.000) | 0.009 (0.001) | 7.600<br>(0.400) |
+| Oracle-feature baseline            | 5.000<br>(0.000) | 0.845 (0.013)     | 1.000 (0.000) | 0.000 (0.000) | 5.000<br>(0.000) |
+| True-parameter oracle              | 5.000<br>(0.000) | 0.851 (0.009)     | 1.000 (0.000) | 0.000 (0.000) | 5.000<br>(0.000) |
 
 **[시나리오 2] 중간 신호 환경 (a=1.4)**
 
@@ -385,12 +402,12 @@ $$\sum_{j=1}^K \delta_{jk}=0$$
 | PCA + K-means                      | 115.700 (0.153)  | 0.345 (0.017)     | -             | -             | -                |
 | GMM (Unpenalized)                  | 300.000 (0.000)  | 0.377 (0.042)     | -             | -             | -                |
 | Sparse K-means                     | 179.300 (22.366) | 0.782 (0.019)     | 1.000 (0.000) | 0.591 (0.076) | 179.300 (22.366) |
-| Element-wise L1 (no constraint)    | 5.200 (0.133)    | 0.512 (0.022)     | 1.000 (0.000) | 0.001 (0.000) | 5.200 (0.133)    |
-| Naive Lasso (EW-L1 + SumZero)      | 5.100 (0.100)    | 0.620 (0.028)     | 1.000 (0.000) | 0.000 (0.000) | 5.100 (0.100)    |
-| **HP-L: Non-adaptive Group Lasso** | 300.000 (0.000)  | 0.745 (0.014)     | 1.000 (0.000) | 0.009 (0.002) | 7.600 (0.653)    |
-| **HP-AL: Adaptive Group Lasso**    | 300.000 (0.000)  | **0.771 (0.016)** | 1.000 (0.000) | 0.009 (0.002) | 7.600 (0.653)    |
-| Oracle-feature baseline            | 5.000 (0.000)    | 0.773 (0.017)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)    |
-| True-parameter oracle              | 5.000 (0.000)    | 0.800 (0.017)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)    |
+| Element-wise L1 (no constraint)    | 5.200<br>(0.133) | 0.512 (0.022)     | 1.000 (0.000) | 0.001 (0.000) | 5.200<br>(0.133) |
+| Naive Lasso (EW-L1 + SumZero)      | 5.100<br>(0.100) | 0.620 (0.028)     | 1.000 (0.000) | 0.000 (0.000) | 5.100<br>(0.100) |
+| **HP-L: Non-adaptive Group Lasso** | 300.000 (0.000)  | 0.745 (0.014)     | 1.000 (0.000) | 0.009 (0.002) | 7.600<br>(0.653) |
+| **HP-AL: Adaptive Group Lasso**    | 300.000 (0.000)  | **0.771 (0.016)** | 1.000 (0.000) | 0.009 (0.002) | 7.600<br>(0.653) |
+| Oracle-feature baseline            | 5.000<br>(0.000) | 0.773 (0.017)     | 1.000 (0.000) | 0.000 (0.000) | 5.000<br>(0.000) |
+| True-parameter oracle              | 5.000<br>(0.000) | 0.800 (0.017)     | 1.000 (0.000) | 0.000 (0.000) | 5.000<br>(0.000) |
 
 **[시나리오 3] 약한 신호 환경 (a=1.2)**
 
@@ -400,27 +417,30 @@ $$\sum_{j=1}^K \delta_{jk}=0$$
 | PCA + K-means                      | 115.900 (0.100)  | 0.240 (0.007)     | -             | -             | -                |
 | GMM (Unpenalized)                  | 300.000 (0.000)  | 0.221 (0.047)     | -             | -             | -                |
 | Sparse K-means                     | 230.200 (29.559) | 0.641 (0.021)     | 1.000 (0.000) | 0.763 (0.100) | 230.200 (29.559) |
-| Element-wise L1 (no constraint)    | 5.400 (0.163)    | 0.451 (0.010)     | 1.000 (0.000) | 0.001 (0.001) | 5.400 (0.163)    |
-| Naive Lasso (EW-L1 + SumZero)      | 5.400 (0.163)    | 0.452 (0.010)     | 1.000 (0.000) | 0.001 (0.001) | 5.400 (0.163)    |
-| **HP-L: Non-adaptive Group Lasso** | 300.000 (0.000)  | 0.514 (0.023)     | 1.000 (0.000) | 0.004 (0.001) | 6.300 (0.367)    |
-| **HP-AL: Adaptive Group Lasso**    | 300.000 (0.000)  | **0.652 (0.015)** | 1.000 (0.000) | 0.004 (0.001) | 6.300 (0.367)    |
-| Oracle-feature baseline            | 5.000 (0.000)    | 0.625 (0.030)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)    |
-| True-parameter oracle              | 5.000 (0.000)    | 0.680 (0.014)     | 1.000 (0.000) | 0.000 (0.000) | 5.000 (0.000)    |
+| Element-wise L1 (no constraint)    | 5.400<br>(0.163) | 0.451 (0.010)     | 1.000 (0.000) | 0.001 (0.001) | 5.400<br>(0.163) |
+| Naive Lasso (EW-L1 + SumZero)      | 5.400<br>(0.163) | 0.452 (0.010)     | 1.000 (0.000) | 0.001 (0.001) | 5.400<br>(0.163) |
+| **HP-L: Non-adaptive Group Lasso** | 300.000 (0.000)  | 0.514 (0.023)     | 1.000 (0.000) | 0.004 (0.001) | 6.300<br>(0.367) |
+| **HP-AL: Adaptive Group Lasso**    | 300.000 (0.000)  | **0.652 (0.015)** | 1.000 (0.000) | 0.004 (0.001) | 6.300<br>(0.367) |
+| Oracle-feature baseline            | 5.000<br>(0.000) | 0.625 (0.030)     | 1.000 (0.000) | 0.000 (0.000) | 5.000<br>(0.000) |
+| True-parameter oracle              | 5.000<br>(0.000) | 0.680 (0.014)     | 1.000 (0.000) | 0.000 (0.000) | 5.000<br>(0.000) |
 
 <img width="1251" height="640" alt="image" src="https://github.com/user-attachments/assets/b10db616-c97f-4915-8827-f830751b8ec6" />
 
 #### 3.3 해석
 
-- **첫째, 차원의 저주 속 Adaptive 구조의 우위:** 노이즈가 정답 변수보다 무려 59배 많은 초고차원 극한 환경($p=300$)에서 Adaptive weight의 효과가 가장 극적으로 드러났다. 약신호($a=1.2$) 구간을 보면, Non-adaptive(HP-L)의 ARI는 0.514에 그친 반면 제안 모형인 Adaptive(HP-AL)는 **0.652**로 비약적인 성능 향상을 보였다. **다수의 노이즈 변수를 효과적으로 억제하는** 적응형 가중치가 없다면 고차원 클러스터링이 불가능함을 시사한다.
+- **첫째, 차원의 저주 속 Adaptive 구조의 우위:** 노이즈가 정답 변수보다 무려 59배 많은 초고차원 극한 환경($p=300$)에서 Adaptive weight의 효과가 가장 극적으로 드러났다. 약신호($a=1.2$) 구간을 보면, Non-adaptive(HP-L)의 ARI는 0.514에 그친 반면 제안 모형인 Adaptive(HP-AL)는 **0.652**로 비약적인 성능 향상을 보였다. 다수의 노이즈 변수를 효과적으로 억제하는 적응형 가중치가 없다면 고차원 클러스터링이 불가능함을 시사한다.
     
-- **둘째, L1 계열 편향성의 극대화**: 초고차원의 높은 분산 하에서 Naive Lasso와 Element-wise L1 모형은 모두 단일 단계(Single-stage) 기준 ARI 0.452 수준으로 붕괴하였다. group 단위의 일관된 선택과 adaptive weight가 뒷받침되지 않으면, 고차원에서는 element-wise 페널티 기반 방법이 심각한 수축 편향에 빠짐을 보여준다.
+- **둘째, L1 계열 편향성의 극대화:** 초고차원의 높은 분산 하에서 Naive Lasso와 Element-wise L1 모형은 모두 단일 단계(Single-stage) 기준 ARI 0.452 수준으로 하락하였다. group 단위의 일관된 선택과 adaptive weight가 뒷받침되지 않으면, 고차원에서는 element-wise 페널티 기반 방법이 심각한 수축 편향에 빠짐을 보여준다.
     
-- **셋째, 유한 표본 안정화(Finite-sample Stabilization)의 실증:** 제안 모형(HP-AL)이 a=1.2에서 ARI 0.652(0.015)를 기록하여 Oracle-feature baseline(0.625)을 소폭 상회하였다. 이는 HP-AL의 절대적 우위라기보다, 강한 정규화 구조가 추정 분산을 낮추는 finite-sample 안정화 효과로 해석하는 것이 적절하다. Oracle-feature baseline은 정답 변수 집합을 알고 다시 GMM을 추정하지만 local optimum 영향을 받는 불안정한 기준값이므로 true upper bound가 아님에 유의해야 한다. 성능의 주된 기준은 true-parameter oracle(0.680) 대비 gap이며, 현재 HP-AL은 이 gap을 좁히는 방향으로 작동하고 있다.
+- **셋째, 유한 표본 안정화(Finite-sample Stabilization)의 실증:** 제안 모형(HP-AL)이 $a=1.2$에서 ARI 0.652(0.015)를 기록하여 Oracle-feature baseline(0.625)을 소폭 상회하였다. 이는 HP-AL의 절대적 우위라기보다, 강한 정규화 구조가 추정 분산을 낮추는 finite-sample 안정화 효과로 해석하는 것이 적절하다. Oracle-feature baseline은 정답 변수 집합을 알고 다시 GMM을 추정하지만 local optimum 영향을 받는 불안정한 기준값이므로 true upper bound가 아님에 유의해야 한다. 성능의 주된 기준은 true-parameter oracle(0.680) 대비 gap이며, 현재 HP-AL은 이 gap을 좁히는 방향으로 작동하고 있다.
+    
 
-## 6. 결론 및 향후 계획
+---
 
-1. **Adaptive Group 구조의 당위성 확보:** 시뮬레이션을 통해 단순 Group Lasso(M3)보다 Adaptive Group Lasso(M4)가 고차원 비지도 학습에서 더 정교한 변수 선택과 높은 군집 성능을 제공함을 입증하였다.
+## 4. 결론 및 향후 계획
+
+1. **Adaptive Group 구조의 유용성 확인:** 시뮬레이션을 통해 단순 Group Lasso(M3)보다 Adaptive Group Lasso(M4)가 고차원 비지도 학습에서 추정 안정성과 ARI를 개선하는 핵심 기제임을 시사한다. 단, 현재 threshold($\tau=10^{-4}$) 기준에서 HP-L과 HP-AL의 TPR/FPR/$\hat{S}_\tau$는 유사하게 나타났으며, support metric에서의 추가 개선 여부는 threshold sensitivity 분석 이후 확인이 필요하다.
     
-2. **효율적 알고리즘 제안:** **Refit 없이 단일 단계로 오라클 수준에 근접하는 성능을 보이는** 본 모형은 대규모 고차원 데이터 처리 시 계산 비용 면에서 큰 강점을 가질 것으로 기대된다.
+2. **효율적 알고리즘 제안:** Refit 없이 단일 단계로 오라클 수준에 근접하는 성능을 보이는 본 모형은 대규모 고차원 데이터 처리 시 계산 비용 면에서 큰 강점을 가질 것으로 기대된다.
     
-3. **차기 단계:** 현재 R=10 pilot 결과를 R=200 이상으로 확대하고, correlated predictors 및 unequal mixing 시나리오를 추가하여 결과의 안정성을 재검증한다.
+3. **차기 단계:** 현재 $R=10$ pilot 결과를 $R=200$ 이상으로 확대하고, correlated predictors 및 unequal mixing 시나리오를 추가하여 결과의 안정성을 재검증한다.
