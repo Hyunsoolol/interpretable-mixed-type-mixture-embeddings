@@ -10,7 +10,7 @@
 
 현재 버전에서의 핵심 개선 및 수정 사항은 다음과 같다.
 
-- **Non-adaptive Group Lasso(M3) 대조군 추가:** Adaptive weight 없이 모든 변수에 동일한 페널티를 부여하는 M3 대응 모형을 추가하였다. 이를 통해 **개별 페널티(L1) → 그룹 페널티(Group L2) → 적응형 그룹 페널티(Adaptive Group L2)**로 이어지는 단계적 성능 향상 논리를 완성하였다.
+- **Non-adaptive Group Lasso(M3) 대조군 추가:** Adaptive weight 없이 모든 변수에 동일한 페널티를 부여하는 M3 대응 모형을 추가하였다. 이를 통해 **element-wise $\ell_1$ penalty → group lasso penalty → adaptive group lasso penalty**로 이어지는 단계적 성능 향상 논리를 완성하였다.
     
 - **한계 신호 환경 탐색:** 제안 모형의 작동 한계를 파악하기 위해 저차원 환경($p=20$)에서 신호 강도를 $a \in \{1.0, 0.8, 0.6\}$으로 추가 확장하였다. $a=0.8$ 이하에서는 본 실험의 penalized selection 절차들이 support recovery에 실패하기 시작하였다. 이는 penalized selection이 현저히 어려워지는 경계 구간으로 파악되며, 이에 따라 본 연구의 주 시뮬레이션 구간은 $a \in \{1.6, 1.4, 1.2\}$로 설정한다.
     
@@ -36,7 +36,7 @@
 
 본 연구의 목표는 고차원 데이터에서 군집 구조 추정과 변수 선택을 동시에 수행하는 완결된 단일 파이프라인 방법론을 구축하는 것이다.
 
-**첫째,** Non-adaptive와 Adaptive Group Lasso의 비교를 통해, 고차원 노이즈 환경에서 적응형 가중치가 어떻게 수축 편향을 억제하고 변수 선택의 support recovery accuracy와 군집 추정 안정성을 어떻게 개선하는지 이론적으로 보일 수 있는 조건을 정립한다.
+**첫째,** Non-adaptive와 Adaptive Group Lasso의 비교를 통해, 현재 threshold ($\tau=10^{-4}$) 기준에서는 support metric 차이는 제한적이나, adaptive weighting이 고차원 노이즈 환경에서 ARI와 추정 안정성 개선에 기여하는 조건을 이론적으로 정립한다.
 
 **둘째,** 기존의 Refit 기반 2단계 추정법의 한계를 지적하고, 제안하는 HP 모형이 단 한 번의 EM 알고리즘 수행만으로도 **오라클 수준에 근접하는 near-oracle empirical behavior를 달성할 수 있음을** 보인다.
 
@@ -46,7 +46,7 @@
 
 ## 3. 핵심 연구질문
 
-- **Q1.** 왜 개별 Lasso(L1)나 단순 Group Lasso(L2)보다 **Adaptive Group Lasso(AL2)**가 비지도 학습의 이질성 탐색에 더 적합한가?
+- **Q1.** 왜 **element-wise $\ell_1$ penalty나 단순 group lasso penalty보다 adaptive group lasso penalty**가 비지도 학습의 이질성 탐색에 더 적합한가?
     
 - **Q2.** 제안 모형이 **Refit 과정 없이도** 수축 편향을 완화하고 near-oracle behavior를 달성할 수 있는 근거는 무엇인가? 특히 group penalty, adaptive weight, $Q$-basis 재파라미터화의 결합이 single-stage 추정 성능을 어떻게 개선하는가?
     
@@ -91,6 +91,8 @@ $$S_\Delta=\{k:\|\delta_{\cdot k}\|_2\neq 0\}$$
 
 본 연구의 초기 모델 설정 및 1차 시뮬레이션에서는 $\Sigma_j = \Sigma = \mathrm{diag}(\sigma_1^2, \dots, \sigma_p^2)$ 또는 가장 단순하게 $\Sigma=I_p$ 로 두는 것이 타당하다. 이 가정 아래에서는 군집이 주어졌을 때 각 좌표가 조건부 독립이므로, mean heterogeneity selection 문제를 가장 선명하게 분리하여 볼 수 있다.
 
+특히 이와 같은 공통 대각 공분산 가정 하에서는 $\delta_{\cdot k}=0 \iff \sigma_k^{-1}\delta_{\cdot k}=0$ 이 성립하므로, 현 단계에서 scaling은 support 정의 자체보다는 군집 간 분리도(separation)와 변수 중요도(importance)에 더 직접적으로 관련된다.
+
 ---
 
 ## 5. 추정방법
@@ -103,7 +105,7 @@ $$S_\Delta=\{k:\|\delta_{\cdot k}\|_2\neq 0\}$$
 
 $$\mathcal{L}_n^{EW}(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p \sum_{j=1}^K |\delta_{jk}|$$
 
-> ※ 이 모형은 $\mu_j = \mu_0 + \delta_j$ 파라미터화를 유지하되 sum-to-zero 제약을 부과하지 않으므로, $\mu_0$와 $\delta_j$의 분해가 유일하지 않다. 따라서 변수 선택 후 결과는 group norm $\|\delta_{\cdot k}\|_2$ 기준으로 후처리하여 해석한다.
+> ※ 이 모형은 sum-to-zero 제약의 당위성을 보이기 위해 인위적으로 설정한 절제(ablation) 대조군이다. $\mu_j = \mu_0 + \delta_j$ 파라미터화를 유지하면서 sum-to-zero 제약을 부과하지 않으므로 $\mu_0$와 $\delta_j$가 식별되지 않는다. 따라서 이 모형의 선택 결과는 group norm $\|\delta_{\cdot k}\|_2$ 기준으로 후처리하여 보조적으로만 해석한다.
 
 **HP-L (Non-adaptive Group Lasso, M3 대응):**
 
@@ -199,11 +201,15 @@ $$w_k = (\|\tilde{\delta}_{\cdot k}\|_2 + \varepsilon)^{-\gamma}$$
 - True-parameter oracle
     
 
-> **(※ 표 컬럼 해석 주의사항)** > $p_{\mathrm{fit}}$ (사용 차원)은 fitting에 투입된 차원이며, HP 계열은 $p_{\mathrm{fit}}=p$ 이다. 실질적 선택 결과는 $\hat{S}_\tau$ (선택 변수 수)를 기준으로 해석한다. 선택 변수 집합은
+> **※ 표 컬럼 해석 주의사항**
+> 
+> 1) 표의 '사용 차원'은 각 알고리즘이 군집화에 실질적으로 투입한 유효 변수의 수를 의미하며, penalty 기반 모형의 경우 선택 변수 수 $\hat{S}_\tau$ 와 동일하다. (HP 계열은 알고리즘 입력 차원은 $p$이나, 실질적 선택 결과는 $\hat{S}_\tau$ 기준으로 해석한다).** 선택 변수 집합은
 > 
 > $$\hat{S}_\tau = \{k : \|\hat{\delta}_{\cdot k}\|_2 > \tau\}, \quad \tau = 10^{-4}$$
 > 
 > 으로 정의한다. 여기서 $\tau$는 수치적 파편화(numerical fragmentation)를 제거하기 위한 고정 tolerance이며, $\lambda$의 함수가 아닌 상수로 설정하였다. TPR과 FPR은 모두 $\hat{S}_\tau$를 기준으로 계산된다.
+
+2) 표 내 굵은 글씨(Bold) 모형명은 최고 성능 표기가 아닌, 본 연구의 주요 비교 대상(HP 계열)을 시각적으로 구분하기 위한 표기이다.
 
 ---
 
@@ -447,7 +453,7 @@ $$w_k = (\|\tilde{\delta}_{\cdot k}\|_2 + \varepsilon)^{-\gamma}$$
 
 ### 4.3 해석
 
-- **첫째, 차원의 저주 속 Adaptive 구조의 우위:** 노이즈가 정답 변수보다 무려 59배 많은 초고차원 극한 환경($p=300$)에서 Adaptive weight의 효과가 가장 극적으로 드러났다. 약신호($a=1.2$) 구간을 보면, Non-adaptive(HP-L)의 ARI는 0.514에 그친 반면 제안 모형인 Adaptive(HP-AL)는 **0.652**로 비약적인 성능 향상을 보였다. 다수의 노이즈 변수를 효과적으로 억제하는 적응형 가중치가 없다면 고차원 클러스터링이 불가능함을 시사한다.
+- **첫째, 차원의 저주 속 Adaptive 구조의 우위:** 노이즈가 정답 변수보다 무려 59배 많은 초고차원 극한 환경($p=300$)에서 Adaptive weight의 효과가 가장 극적으로 드러났다. 약신호($a=1.2$) 구간을 보면, Non-adaptive(HP-L)의 ARI는 0.514에 그친 반면 제안 모형인 Adaptive(HP-AL)는 **0.652**로 비약적인 성능 향상을 보였다. 다수의 노이즈 변수가 존재하는 초고차원 약신호 환경에서는, adaptive weighting이 없을 때 성능 저하가 현저해짐을 시사한다.
     
 - **둘째, L1 계열 편향성의 극대화:** 초고차원의 높은 분산 하에서 Naive Lasso와 Element-wise L1 모형은 모두 단일 단계(Single-stage) 기준 ARI 0.452 수준으로 하락하였다. group 단위의 일관된 선택과 adaptive weight가 뒷받침되지 않으면, 고차원에서는 element-wise 페널티 기반 방법이 심각한 수축 편향에 빠짐을 보여준다.
     
