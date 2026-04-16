@@ -17,6 +17,7 @@
 | --- | ------- | ---- | ---- | ---- | ------ | ---- |
 | A   | 단일 스파이크 | +2   | 0    | 0    | 2.0    | 2.00 |
 | B   | 고루 분포   | +1.3 | -1.3 | +1.3 | 1.3    | 2.25 |
+
 1-1) $\lambda=0$ 인 경우
 
 <img width="734" height="421" alt="image" src="https://github.com/user-attachments/assets/41b05573-af0c-49b2-bf51-1d0909d1ff3a" />
