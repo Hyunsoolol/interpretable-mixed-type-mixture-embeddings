@@ -19,7 +19,7 @@
 | B   | 고루 분포   | +1.3 | -1.3 | +1.3 | 1.3    | 2.25 |
 1-1) $\lambda=0$ 인 경우
 
-![[Pasted image 20260416102918.png]]
+<img width="734" height="421" alt="image" src="https://github.com/user-attachments/assets/41b05573-af0c-49b2-bf51-1d0909d1ff3a" />
 
 - $\lambda=0$ 인 경우, 두 방법 모두 모든 계수를 원래 값 그대로 유지함
 - 변수 선택
@@ -27,7 +27,8 @@
 	- 그룹 Lasso: 변수 A, B
 
 1-2) $\lambda=1.5$ 인 경우
-![[Pasted image 20260416102842.png]]
+
+<img width="736" height="429" alt="image" src="https://github.com/user-attachments/assets/302cfbd9-d31c-437d-bc84-49eafad89bf8" />
 
 - $\lambda=1.5$ 인 경우, 일반 라쏘는 변수 B의 계수(1.3)를 전부 0으로 만들어 탈락시키고 변수 A만 선택합니다. 그룹 라쏘는 아직 변수 B의 norm(≈2.25)이 페널티를 견디므로 두 변수를 모두 유지합니다.
 - 변수 선택
@@ -35,7 +36,9 @@
 	- 그룹 Lasso: 변수 A, B
 
 1-3) $\lambda=2.1$ 인 경우
-![[Pasted image 20260416103057.png]]
+
+<img width="735" height="419" alt="image" src="https://github.com/user-attachments/assets/6ee7b892-fa5c-445a-88f3-2a195c125571" />
+
 - $\lambda=2.1$ 인 경우, 일반 라쏘는 모든 변수를 탈락시켰지만, 그룹 라쏘는 아직 일부 변수를 유지합니다.
 - 변수 선택
 	- 일반 Lasso: 모두 탈락
@@ -53,7 +56,7 @@
 
 2-1) $\lambda=0$ 인 경우
 
-![[Pasted image 20260416103220.png]]
+<img width="738" height="419" alt="image" src="https://github.com/user-attachments/assets/def00c27-7f93-4862-883f-870ae0425759" />
 
 - $\lambda=0$ 인 경우, 두 방법 모두 모든 계수를 원래 값 그대로 유지함
 - 변수 선택
@@ -61,7 +64,9 @@
 	- 그룹 Lasso: 변수 A, B
 
 2-2) $\lambda=1.0$ 인 경우
-![[Pasted image 20260416103658.png]]
+
+<img width="734" height="418" alt="image" src="https://github.com/user-attachments/assets/50a0690f-cfcb-496e-ad7f-6728a890861f" />
+
 -  $\lambda=1.0$ 인 경우, 일반 라쏘는 변수 A의 C2에 대한 작은 계수(0.8)만 먼저 탈락시켜 C1 계수(1.2)만 남기는 반쪽짜리 선택이 발생합니다. 그룹 라쏘는 변수 단위로 통째로 선택하거나 탈락시키기 때문에 이런 파편화가 구조적으로 발생하지 않습니다. 이것이 본 연구에서 $\delta_{\cdot k}$​에 group penalty를 부여하는 핵심 동기입니다.
 - 변수 선택
 	- 일반 Lasso: 변수 A
