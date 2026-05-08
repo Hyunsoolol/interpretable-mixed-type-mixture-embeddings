@@ -1,442 +1,523 @@
-# [연구 미팅 보고서] 고차원 혼합 평균 효과 클러스터링을 위한 Debiased Sum-to-Zero Lasso
+# 연구 미팅 보고서
 
-**미팅 일자:** 2026년 5월 8일
+**Debiased Sum-to-Zero Lasso Mixture Clustering for High-Dimensional Mean-Heterogeneity Selection**
 
----
+**미팅 일자:** 2026년 5월 13일
 
-## 핵심 요약
-
-본 보고서는 고차원 비지도 학습 환경에서 군집 간 평균 차이를 유발하는 변수(mean-heterogeneity-driving variables)를 식별하기 위한 **Debiased Sum-to-Zero Lasso Mixture Clustering** 방법론을 제안한다. 직전 미팅에서 검토된 group penalty 기반 설계(HP-L, HP-AL)에 대한 지도교수 의견과 기존 시뮬레이션 결과를 종합 재검토한 결과, 본 연구의 메인 contribution을 다음 구조로 재정립하였다.
-
-$$\text{Sum-to-zero constrained lasso screening} ;\longrightarrow; \text{variable-level aggregation} ;\longrightarrow; \text{unpenalized GMM refit} ;\longrightarrow; \text{refit-likelihood EBIC tuning}$$
-
-이번 재설계의 핵심 변경 및 근거는 다음과 같다.
-
-- **메인 방법의 전환:** 기존 보고서의 메인 제안 모형이었던 HP-AL(Adaptive Group Lasso)을 메인 contribution에서 제외한다. Group penalty 계열은 (1) 지도교수 의견과의 정합성, (2) Pan-Shen, Xie-Pan-Shen, Guo et al. 등 선행연구와의 중복 위험, (3) sum-to-zero 제약 하에서 element-wise selection이 자연스럽게 variable-level selection을 유도한다는 구조적 사실을 종합 고려하여 메인에서 제외한다.
-    
-- **Naive Lasso 결과의 재해석을 통한 메인 메시지 전환:** 기존 보고서에서 Naive Lasso는 주 분석 구간($a \in {1.6, 1.4, 1.2}$)에서 TPR이 1.000, FPR이 0.001~0.019 수준으로 **변수 선택 자체는 거의 완벽**했음에도 ARI는 oracle-feature baseline 대비 0.15~0.20 낮은 값에 머물렀다. 이는 실패의 원인이 screening의 약함이 아니라 **선택 변수의 mean contrast가 lasso shrinkage로 과소추정된 데** 있음을 시사한다. 따라서 본 연구의 메인 메시지는 다음으로 정립된다.
-    
-    > "Lasso는 최종 추정기가 아니라 mean-heterogeneity 변수의 screening 도구로 사용하고, 선택 변수 위에서 unpenalized refit을 수행함으로써 shrinkage-induced clustering error를 줄인다."
-    
-- **Adaptive lasso의 위치 조정:** Adaptive lasso는 메인이 아닌 **secondary extension**으로 둔다. Pilot estimator 안정화 문제가 메인 contribution을 침범하지 않도록 분리하며, plain version으로 oracle gap이 충분히 메워지지 않는 저신호 구간에 대한 robustness variant 역할을 부여한다.
-    
-- **이론 챕터의 재구성:** 이론은 (i) sure screening, (ii) selection size control, (iii) oracle refit equivalence의 세 정리로 닫는다. 점근 정규성과 post-selection inference는 selection consistency 조건 하의 corollary 또는 future work로 미룬다.
-    
-- **변수 단위 aggregation 기준의 정교화:** 기존 $|\hat\delta_{\cdot k}|_2 > \tau$ 기준을 유지하되, 본문 정의는 **standardized max-pairwise contrast** 기준으로 통일하여 "변수 $k$에서 군집 평균이 갈라지는가"라는 연구 질문과 직접 정합되도록 한다.
-    
+**미팅 목적:** group-lasso 계열을 현재 메인 설계에서 제외하고, sum-to-zero constrained lasso를 screening 도구로 사용하는 two-stage debiased mixture clustering framework를 검토한다.
 
 ---
 
-# Part I. 연구 방법론
+## 0. 미팅 핵심 의사결정 사항
 
-## 1. 연구배경 및 문제의식
+이번 미팅에서 확인하고 싶은 핵심은 다음 세 가지이다.
 
-혼합모형 기반 회귀에서는 단순히 중요한 설명변수를 찾는 것만으로 충분하지 않고, 그중에서도 실제로 군집 간 차이를 만들어내는 변수, 즉 source of heterogeneity를 구분하는 것이 더 해석가능하고 더 간명한 모형을 만든다. Li et al.의 혼합회귀 연구는 predictor effect를 공통효과와 군집특이효과로 분해하고, relevant predictor와 heterogeneity-driving predictor를 동시에 식별하는 regularized finite mixture effects regression을 제안하였다.
+**1) 메인 방법을 Plain SZL-Refit으로 둘 것인가?**
 
-그러나 비지도학습, 특히 고차원 클러스터링에서는 이와 같은 이질성의 원천 추적이 상대적으로 덜 정식화되어 있다. Pan and Shen(2007)의 $\ell_1$-penalized model-based clustering 이후 Xie, Pan and Shen(2008), Zhou, Pan and Shen(2009), Guo, Levina, Michailidis and Zhu(2010)의 pairwise variable selection, Witten and Tibshirani(2010)의 sparse $K$-means, Celeux et al.(2018)의 SelvarMix, Liu et al.(2023)의 SC-FS 등 다양한 sparse clustering 방법론이 제안되었으나, 다음 두 가지 측면이 통합적으로 다루어진 사례는 드물다.
+$$\text{Sum-to-zero lasso screening} \longrightarrow \text{unpenalized GMM refit} \longrightarrow \text{refit-likelihood EBIC tuning}$$
 
-**첫째, effects-style mean parameterization의 부재.** 기존 sparse clustering 방법론은 대체로 군집 평균 $\mu_j$를 직접 다루거나, 사전 centering을 통해 처리한다. 군집 평균을 공통 평균과 군집특이 편차로 분해하여 "어떤 좌표가 mean heterogeneity를 실제로 유발하는가"를 직접 추적하는 effects-style parameterization $\mu_j = \mu_0 + \delta_j$ with $\sum_j \delta_{jk}=0$ 은 비지도 mixture 문헌에서 명시적으로 강조된 바 없다.
+**2) Adaptive SZL-Refit은 secondary extension으로 둘 것인가?**
 
-**둘째, screening과 estimation 분리의 부재.** Pan-Shen 계열의 penalized GMM은 penalty estimator 자체를 최종 estimator로 사용한다. 따라서 선택된 변수에서도 mean contrast가 shrinkage된다. 회귀 문헌에서는 Belloni and Chernozhukov(2013)의 post-lasso, Meinshausen(2007)의 relaxed lasso 등 "screening과 unpenalized refit의 분리" 원리가 잘 정립되어 있으나, 비지도 mixture clustering에 명시적으로 이 원리를 적용하고 shrinkage debiasing 효과를 직접 추적한 사례는 찾기 어렵다.
+$$\lambda \sum_{k=1}^p \sum_{j=1}^K a_{jk} |\delta_{jk}|$$
 
-본 연구는 이 두 결손 지점을 정면으로 다룬다. 즉, 반응변수 $Y_i$ 가 없는 상황에서 군집 평균을 latent mean structure로 보고, 이를 공통 평균 파라미터와 군집특이 편차로 분해하여 "어떤 변수들이 군집 간 평균 차이를 만들어내는가"를 직접 추적하는 effects-style 클러스터링 방법론을 개발하되, lasso는 screening 도구로만 사용하고 unpenalized refit으로 shrinkage bias를 제거하는 **두 단계 debiased pipeline**을 구성한다.
+형태의 component-wise adaptive lasso는 가능하나, pilot estimator 안정성 문제가 따라온다. 따라서 메인이 아니라 보조 확장으로 검토한다.
 
-다만 현재 1차 범위는 "모든 형태의 군집 형성 변수"가 아니라, 공통 공분산 구조 하에서 mean shift를 통해 군집 분리를 유발하는 변수를 식별하는 데 한정된다. 분산 차이나 상관구조 차이만으로 군집이 갈리는 경우는 현재 baseline model의 범위 밖에 있다.
+**3) Critical sanity check를 먼저 수행한 뒤 최종 메인 방법을 확정할 것인가?**
 
----
-
-## 2. 연구목표
-
-본 연구의 목표는 고차원 데이터에서 mean-heterogeneity-driving variable selection과 군집 구조 추정을 동시에 수행하되, 추정 단계에서 shrinkage bias가 cluster assignment를 왜곡하지 않도록 설계된 완결된 단일 파이프라인 방법론을 구축하는 것이다.
-
-**첫째,** 비지도 Gaussian mixture에 effects-style mean parameterization $\mu_j = \mu_0 + \delta_j$ 와 sum-to-zero 식별성 제약 $\sum_j \delta_{jk}=0$ 을 명시적으로 도입하고, 이를 통해 mean-heterogeneity-driving variable set $S_0 = {k : \delta_{\cdot k}^0 \neq 0}$ 을 자연스럽게 정의한다.
-
-**둘째,** sum-to-zero constrained lasso screening과 unpenalized post-selection refit을 결합한 **debiased two-stage pipeline**을 구축하고, 이 pipeline이 Naive Lasso의 shrinkage-induced clustering error를 직접적으로 제거함을 시뮬레이션과 이론 양측면에서 보인다.
-
-**셋째,** screening의 sure screening property, 선택집합 size control, oracle refit equivalence를 결합한 **two-stage oracle property**를 본 연구의 메인 정리로 제시한다.
+기존 결과는 Naive Lasso가 변수선택은 잘하지만 ARI가 낮은 패턴을 보인다. 즉 $p=100, a=1.2$, $p=300, a=1.2$ 등 고차원 약신호 구간에서도 TPR이 거의 1이고 FPR이 매우 낮으나 ARI는 oracle-feature baseline보다 낮았다. 이는 screening 실패보다 lasso shrinkage로 인한 mean contrast 과소추정 가능성을 시사한다. 따라서 먼저 "Naive Lasso + Refit"이 oracle gap을 얼마나 회복하는지 확인한 뒤 메인을 확정한다.
 
 ---
 
-## 3. 핵심 연구질문
+## 1. 연구 배경 및 문제의식
 
-- **Q1.** 비지도 Gaussian mixture에서 sum-to-zero constrained $\ell_1$ penalty는 sure screening property를 가지며, 그 선택집합의 크기는 참 support 크기에 비례하여 제어되는가?
-    
-- **Q2.** Naive Lasso가 변수는 잘 찾으면서도 ARI가 oracle-feature baseline에 미달하는 현상은 shrinkage bias로 설명되는가? 그리고 unpenalized refit은 이 gap을 어디까지 메우는가?
-    
-- **Q3.** Refit estimator는 어떤 조건에서 oracle GMM MLE와 점근적으로 동등한가? 그리고 이 동등성은 어떤 의미에서 mean contrast의 효과 크기 회복(recovery ratio $R_k \to 1$)으로 시각화되는가?
-    
+고차원 비지도 클러스터링에서는 단순히 군집 label을 복원하는 것뿐 아니라, 어떤 변수가 군집 간 평균 차이를 실제로 만들어내는지를 식별하는 것이 중요하다. 본 연구에서는 이를 mean-heterogeneity-driving variable selection 문제로 정의한다.
 
----
+기존 model-based clustering variable selection 문헌에서는 $\ell_1$-penalized likelihood를 이용해 고차원 Gaussian mixture에서 변수선택을 수행하는 방법이 제안되어 왔다. Pan and Shen은 공통 대각 공분산 Gaussian mixture에서 $\ell_1$ penalty를 이용해 sparse solution과 variable selection을 얻는 penalized likelihood approach를 제안하였다. 이후 Xie, Pan and Shen은 cluster-specific diagonal covariance와 grouped variables를 고려하는 penalized model-based clustering 방법을 제안하였다. SelvarMix는 model-based clustering과 discriminant analysis에서 regularization 기반 변수선택을 수행하는 R package로, lasso-like ranking과 변수 역할 정의 절차를 사용한다. 또한 SC-FS는 spectral clustering으로 초기 label을 얻은 뒤 label 설명력 $R^2$가 큰 feature를 선택하고 재클러스터링하는 feature selection clustering 절차이다.
 
-## 4. 제안모형
+본 연구의 차별점은 기존 penalized mixture estimator 자체를 최종 estimator로 쓰지 않는다는 점이다. Lasso는 변수 후보를 찾는 screening estimator로만 사용하고, 선택된 변수 위에서 unpenalized GMM refit을 수행하여 shrinkage bias를 줄인다. 이 아이디어는 회귀 문헌의 post-lasso principle과 연결된다. Belloni and Chernozhukov는 first-step penalized estimator가 선택한 model 위에서 least squares refit을 수행하는 post-lasso estimator를 분석했고, post-lasso가 lasso보다 bias 측면에서 유리할 수 있음을 보였다.
 
-### 4.1 기본 모형
-
-관측치 $X_i = (X_{i1}, \dots, X_{ip})^\top \in \mathbb{R}^p$, 잠재 군집 $Z_i \in {1, \dots, K}$ 에 대하여 다음 baseline model을 사용한다.
-
-$$P(Z_i=j)=\pi_j,\qquad j=1,\dots,K$$
-
-$$X_i\mid Z_i=j \sim N_p(\mu_j,\Sigma)$$
-
-$$\mu_j=\mu_0+\delta_j,\qquad \sum_{j=1}^K \delta_{jk}=0,\qquad k=1,\dots,p$$
-
-여기서 $\mu_0 \in \mathbb{R}^p$ 는 sum-to-zero coding 하의 grand mean parameter이고, $\delta_j \in \mathbb{R}^p$ 는 군집 $j$ 의 mean deviation vector이다.
-
-선택한 제약 $\sum_{j=1}^K \delta_{jk}=0$ 하에서 $\mu_0$ 는 일반적으로 marginal population mean과 동일하지 않다. 실제로 $E(X_i)=\sum_{j=1}^K \pi_j\mu_j=\mu_0+\sum_{j=1}^K \pi_j\delta_j$ 이므로, $\mu_0$ 는 $\pi_j$ 가 모두 같거나 $\sum_j \pi_j\delta_j=0$ 인 특수한 경우에만 marginal mean과 일치한다. 본 연구에서 $\mu_0$ 는 effects-style parameterization에서의 기준점 역할을 하는 grand mean parameter로 해석한다. 특히 sum-to-zero 제약 하에서
-
-$$\mu_0 = \frac{1}{K} \sum_{j=1}^K \mu_j$$
-
-가 성립하므로, $\mu_0$는 군집 평균들의 균등평균(unweighted mean of component means)이다.
-
-### 4.2 이질적 변수의 정의
-
-변수 $k$ 에 대하여 $\delta_{\cdot k}=(\delta_{1k},\dots,\delta_{Kk})^\top$ 라 두면, mean heterogeneity를 유발하는 변수 집합은 다음과 같이 정의된다.
-
-$$S_0={k:\exists j\neq \ell,\ \mu_{jk}\neq \mu_{\ell k}}={k:|\delta_{\cdot k}|_2 \neq 0}$$
-
-본 모형이 직접 식별하는 것은 variance heterogeneity나 covariance heterogeneity를 포함한 일반적 의미의 cluster-forming variable 전체가 아니라, 공통 공분산 구조 아래에서 mean shift를 통해 군집 분리를 유발하는 변수이다.
-
-### 4.3 공분산 구조
-
-본 연구의 1차 시뮬레이션에서는 $\Sigma=\mathrm{diag}(\sigma_1^2, \dots, \sigma_p^2)$ 또는 $\Sigma=I_p$로 두는 것이 타당하다. 이 가정 아래에서는 군집이 주어졌을 때 각 좌표가 조건부 독립이므로, mean heterogeneity selection 문제를 가장 선명하게 분리하여 볼 수 있다. 특히 공통 대각 공분산 가정 하에서는 $\delta_{\cdot k}=0 \iff \sigma_k^{-1}\delta_{\cdot k}=0$ 이 성립하므로, 현 단계에서 scaling은 support 정의 자체보다는 군집 간 분리도(separation)와 변수 중요도(importance)에 더 직접적으로 관련된다.
-
-### 4.4 Sum-to-zero 제약의 핵심적 의미
-
-기존 보고서가 식별성 확보를 위해 sum-to-zero 제약을 도입했다면, 본 보고서에서는 이 제약이 **element-wise lasso로도 variable-level selection이 가능하다는 핵심 구조**를 제공한다는 점을 추가로 강조한다. 즉, 제약 하에서
-
-$$\delta_{jk}=0\ \forall j \iff |\delta_{\cdot k}|_2 = 0$$
-
-이 성립하므로, "모든 좌표가 0"과 "그룹 norm이 0"이 동치이다. 따라서 element-wise penalty $\sum_j |\delta_{jk}|$ 만으로도 group penalty $|\delta_{\cdot k}|_2$ 와 동일한 selection target을 달성할 수 있다. 이 관찰이 본 연구가 group penalty를 명시적으로 사용하지 않는 구조적 근거이다.
+본 연구는 이 post-selection refit 원리를 비지도 Gaussian mixture clustering의 mean-heterogeneity selection 문제로 옮긴다.
 
 ---
 
-## 5. 추정방법: Debiased Sum-to-Zero Lasso Pipeline
+## 2. 연구 목표
 
-### 5.1 정규화된 목적함수
+본 연구의 목표는 다음과 같다.
 
-모수 $\Theta=(\pi_1,\dots,\pi_K,\mu_0,\delta_1,\dots,\delta_K,\Sigma)$ 에 대해 본 연구에서 고려하는 목적함수는 다음 두 가지로 단순화된다.
+**첫째,** Gaussian mixture mean structure를 effects-style로 분해한다.
 
-**Naive Lasso (Pan-Shen type, sum-to-zero, ablation):**
+$$\mu_j = \mu_0 + \delta_j, \qquad j = 1, \dots, K.$$
 
-$$\mathcal{L}_n^{\mathrm{Naive}}(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p \sum_{j=1}^K |\delta_{jk}|$$
+식별성을 위해 각 변수 $k$에 대해
 
-> subject to $\sum_{j=1}^K \delta_{jk}=0, \quad k=1,\dots,p$
+$$\sum_{j=1}^K \delta_{jk} = 0$$
 
-이 모형은 본 연구에서 **shrinkage bias의 직접적 비교 baseline**으로만 사용한다(refit 없음).
+를 둔다.
 
-**SZL-Screen (제안 메인의 Stage 1):**
+**둘째,** mean-heterogeneity-driving variable set을 다음과 같이 정의한다.
 
-$$\mathcal{L}_n^{\mathrm{SZL}}(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p \sum_{j=1}^K |\delta_{jk}|$$
+$$S_0 = {k : \exists j \neq \ell,\ \mu_{jk}^0 \neq \mu_{\ell k}^0}.$$
 
-> subject to $\sum_{j=1}^K \delta_{jk}=0, \quad k=1,\dots,p$
+sum-to-zero parameterization에서는
 
-수식 형태는 Naive Lasso와 동일하나, **이 단계에서 얻은 추정치는 final estimator가 아니라 screening estimator**임을 명시한다. 즉
+$$S_0 = {k : \delta_{\cdot k}^0 \neq 0}$$
 
-$$\hat{\Theta}_\lambda^{\mathrm{SZL}} \text{ is a screening estimator, not the final estimator.}$$
+이다.
 
-**ASZL-Screen (Secondary extension의 Stage 1):**
+**셋째,** sum-to-zero constrained lasso를 final estimator가 아니라 screening estimator로 사용한다.
 
-$$\mathcal{L}_n^{\mathrm{ASZL}}(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right] - \lambda_n \sum_{k=1}^p \sum_{j=1}^K a_{jk}|\delta_{jk}|$$
+**넷째,** 선택된 변수 집합 $\hat S$ 위에서 unpenalized GMM MLE를 refit한다.
 
-> subject to $\sum_{j=1}^K \delta_{jk}=0$, $;a_{jk} = (|\tilde\delta_{jk}|+\varepsilon_n)^{-\gamma}$
-
-Adaptive weight는 component-wise로 부여한다(Zou 2006의 정의). Pilot $\tilde\delta_{jk}$ 는 plain SZL screening 결과를 사용하여 pilot 안정화 문제를 추가 모형으로 끌어들이지 않는다.
-
-### 5.2 식별성 제약 및 계산 알고리즘
-
-$\mu_j = \mu_0 + \delta_j$ 만으로는 분해가 유일하지 않으므로, $\sum_{j=1}^K \delta_{jk}=0$ 이라는 sum-to-zero 제약이 필수적이다. 실제 EM 구현에서는 $\mathbf{1}_K$ 의 직교여공간 basis $Q \in \mathbb{R}^{K \times (K-1)}$ 를 사용하여
-
-$$\delta_{\cdot k} = Q\alpha_k$$
-
-로 재파라미터화하면 제약이 사라진다. $Q$ 가 column-orthonormal이면
-
-$$\sum_{j=1}^K |\delta_{jk}| = \sum_{j=1}^K \left| \sum_{m=1}^{K-1} Q_{jm}\alpha_{km} \right|$$
-
-이 되어 element-wise lasso의 KKT는 $\alpha_k$ 좌표 단위 soft-thresholding의 변형으로 닫힌 형태에 가깝게 풀린다. 이는 group penalty + Q-basis 결합이 강제했던 무거운 block-wise update를 회피하면서 식별성을 자연스럽게 처리하는 구조이다.
-
-### 5.3 Stage 1.5: Variable-level Aggregation
-
-Lasso는 개별 $\delta_{jk}$ 를 0으로 만들지만, 본 연구의 선택 대상은 변수 $k$ 이다. 따라서 lasso 결과를 변수 단위로 aggregate한다. 본 연구는 standardized max-pairwise contrast 기준을 사용한다.
-
-$$\hat S_\lambda = \left{ k : \max_{j<\ell} \frac{|\hat\mu_{jk,\lambda}^{\mathrm{SZL}} - \hat\mu_{\ell k,\lambda}^{\mathrm{SZL}}|}{\hat\sigma_{k,\lambda}} > \tau_{\mathrm{num}} \right}$$
-
-이 기준은 "변수 $k$에서 군집 평균이 실제로 갈라지는가"라는 연구 질문과 직접 정합한다. 여기서 $\tau_{\mathrm{num}}$은 통계적 tuning parameter가 아니라 수치적 파편화 제거를 위한 고정 tolerance이며, 기존 보고서의 $10^{-4}$ 수준을 그대로 유지한다.
-
-### 5.4 Stage 2: Unpenalized Post-Selection Refit (핵심)
-
-각 $\lambda$가 만든 $\hat S_\lambda$ 를 고정하고, penalty 없이 mixture likelihood를 다시 최대화한다.
-
-$$\hat\Theta_\lambda^{\mathrm{refit}} = \arg\max_{\Theta:,\delta_{\cdot k}=0,\ k\notin \hat S_\lambda} \frac{1}{n}\sum_{i=1}^n \log\left[ \sum_{j=1}^K \pi_j\phi_p(X_i;\mu_0+\delta_j,\Sigma) \right]$$
-
-즉, $k \in \hat S_\lambda$ 인 변수는 component-specific mean을 자유롭게 추정하고, $k \notin \hat S_\lambda$ 인 변수는 $\mu_{1k}=\cdots=\mu_{Kk}$ 를 강제한다. **이 단계에서 lasso shrinkage가 제거되며, 이것이 본 논문의 핵심 단계이다.**
-
-### 5.5 Stage 3: Refit-likelihood EBIC Tuning
-
-EBIC는 lasso fit 자체가 아니라 refit estimator 기준으로 계산한다.
-
-$$\mathrm{EBIC}_\alpha(\lambda) = -2\ell_n(\hat\Theta_\lambda^{\mathrm{refit}}) + \log n \cdot \mathrm{df}(\hat S_\lambda) + 2\alpha|\hat S_\lambda|\log p$$
-
-공통 대각 공분산 가정 하에서 자유도는
-
-$$\mathrm{df}(\hat S_\lambda) = (K-1) + p + p + (K-1)|\hat S_\lambda|$$
-
-이며, 각 항은 (mixing proportions, common means, diagonal variances, selected variables의 component-specific mean contrasts)에 해당한다. $\Sigma=I_p$로 고정한 경우 variance 자유도 $p$는 빠진다.
-
-최종 선택은
-
-$$\hat\lambda = \arg\min_\lambda \mathrm{EBIC}_\alpha(\lambda),\quad \hat S = \hat S_{\hat\lambda},\quad \hat\Theta = \hat\Theta_{\hat\lambda}^{\mathrm{refit}}$$
-
-이다. $\alpha \in [0, 1]$ 이며, 고차원에서는 $\alpha=0.5$ 또는 $\alpha=1$ 을 기본값으로 두고 sensitivity analysis를 수행한다(Chen and Chen, 2008).
-
-### 5.6 구현상 튜닝과 해석 주의점
-
-- 본 연구에서 제안하는 방법론의 명칭은 다음과 같이 정리한다.
-    
-    - **SZL-Refit (메인 제안):** Plain Sum-to-Zero Lasso screening + Unpenalized Refit + Refit-EBIC
-    - **ASZL-Refit (Secondary extension):** Adaptive version, component-wise weight $a_{jk}$ 사용
-- HP-AL은 더 이상 메인 제안 모형이 아니다. 다만 직전 보고서의 단일 단계(near-oracle) 결과를 비교 reference로 활용하기 위해 group penalty 계열 결과 표는 참고용으로 보존하되, 본 보고서의 메인 비교군에는 포함하지 않는다.
-    
-- Sparse K-means의 "사용 차원"은 실제 clustering 단계에서 사용한 변수 수가 아니라, 가중치 threshold를 기준으로 후처리한 유효 선택 변수 수로 해석한다.
-    
-- 선택 변수 집합은 다음 수식으로 정의한다.
-    
-
-$$\hat S_\lambda = \left{ k : \max_{j<\ell} \frac{|\hat\mu_{jk,\lambda} - \hat\mu_{\ell k,\lambda}|}{\hat\sigma_{k,\lambda}} > \tau_{\mathrm{num}} \right},\quad \tau_{\mathrm{num}} = 10^{-4}$$
-
-여기서 $\tau_{\mathrm{num}}$ 은 수치적 파편화를 제거하기 위한 고정 tolerance이며, $\lambda$ 의 함수가 아닌 상수이다. TPR과 FPR은 모두 $\hat S_\lambda$ 를 기준으로 계산된다.
+**다섯째,** lasso shrinkage로 인한 mean contrast attenuation이 refit으로 복원되는지 $R_k$, $\mathrm{MSE}_{\Delta, S}$, entropy, ARI를 통해 검증한다.
 
 ---
 
-## 6. 이론 구조
+## 3. 핵심 연구 질문
 
-본 연구의 이론은 세 정리로 구성된다. 점근 정규성과 post-selection inference는 selection consistency 조건 하의 corollary 또는 future work로 미룬다.
+### Q1. Sum-to-zero constrained lasso는 mean-heterogeneity variables의 screening rule로 충분한가?
 
-### 6.1 Assumption (요약)
+목표는 exact support recovery보다 먼저 sure screening이다.
 
-- **(A1) Identifiability and separation.** $\min_{j\neq\ell}|\mu_j^0 - \mu_\ell^0|_{\Sigma^{-1}} \geq c_n$ 이고, posterior responsibility가 충분히 안정적으로 추정되도록 $c_n$이 충분히 크다.
-- **(A2) Sparsity and dimension.** $s_0 = |S_0| \ll n$, $\log p = o(n)$. 보다 구체적으로 $s_0 \log p = o(n)$.
-- **(A3) Beta-min condition.** $B_{\min} = \min_{k \in S_0} \sum_j \pi_j (\mu_{jk}^0 - \bar\mu_k^0)^2 / \sigma_k^2$ 이 sure screening rate를 충분히 만족하는 수준.
-- **(A4) Local EM identifiability.** 좋은 initialization 근방에서 EM이 local contraction을 만족하거나, population objective의 true parameter 근방에서 local identifiability가 성립한다.
+$$P(S_0 \subseteq \hat S_\lambda) \to 1.$$
 
-### 6.2 Theorem 1. Sure screening
+기존 시뮬레이션에서 Naive Lasso는 주 분석 구간에서 TPR이 높고 FPR이 낮게 나타났으므로, 현재 가장 자연스러운 가설은 "screening은 이미 충분하고, 병목은 shrinkage"라는 것이다.
 
-조건 (A1)–(A4) 하에서 적절한 $\lambda_n$ sequence에 대해
+### Q2. Naive Lasso의 낮은 ARI는 shrinkage bias 때문인가?
 
-$$P\left( S_0 \subseteq \hat S_\lambda \right) \to 1.$$
+이를 확인하기 위해 recovery ratio를 핵심 지표로 둔다.
 
-즉, sum-to-zero constrained lasso screening은 참 mean-heterogeneity-driving variables를 빠뜨리지 않는다. Refit이 빠진 변수를 복구할 수 없으므로, Stage 1 목표를 exact selection이 아니라 sure screening으로 두는 것이 본 설계의 안전성을 뒷받침한다.
+$$R_k = \frac{|\hat\delta_{\cdot k}|_2}{|\delta_{\cdot k}^0|_2}, \qquad k \in S_0.$$
 
-### 6.3 Theorem 2. Selection size control
+기대되는 패턴은 다음이다.
 
-같은 조건 하에서 EBIC-tuned $\hat\lambda$ 에 대해
+$$R_k^{\text{Naive}} < 1, \qquad R_k^{\text{SZL-Refit}} \approx 1.$$
 
-$$|\hat S_{\hat\lambda}| = O_p(s_0).$$
+즉, Naive Lasso가 변수는 찾지만 mean contrast를 줄이고, refit이 이를 복원하는지 확인한다.
 
-이 결과는 refit 단계의 variance inflation을 제어하기 위해 필요하다.
-
-### 6.4 Theorem 3. Oracle refit equivalence
+### Q3. Refit estimator는 oracle-feature GMM과의 gap을 줄이는가?
 
 Oracle estimator를
 
-$$\hat\Theta^{\mathrm{oracle}} = \arg\max_{\Theta:,\delta_{\cdot k}=0,\ k\notin S_0} \ell_n(\Theta)$$
+$$\hat\Theta^{\text{oracle}} = \arg\max_{\Theta:\ \delta_{\cdot k} = 0,\ k \notin S_0} \ell_n(\Theta)$$
+
+로 두고, 제안 estimator를
+
+$$\hat\Theta^{\text{refit}} = \arg\max_{\Theta:\ \delta_{\cdot k} = 0,\ k \notin \hat S} \ell_n(\Theta)$$
+
+로 둔다.
+
+여기서 $\ell_n(\Theta) = \frac{1}{n}\sum_{i=1}^n \log\big[\sum_{j=1}^K \pi_j \phi_p(X_i; \mu_0+\delta_j, \Sigma)\big]$는 average observed log-likelihood이다(이하 본 문서 전체에서 동일 표기를 사용).
+
+실증적으로는 다음 패턴을 확인한다.
+
+$$\text{ARI}(\hat\Theta^{\text{refit}}) > \text{ARI}(\hat\Theta^{\text{Naive}}),$$ $$\text{ARI}(\hat\Theta^{\text{refit}}) \approx \text{ARI}(\hat\Theta^{\text{oracle}}).$$
+
+---
+
+## 4. 제안 모형
+
+### 4.1 Gaussian mixture mean-shift model
+
+관측치 $X_i = (X_{i1}, \dots, X_{ip})^\top \in \mathbb{R}^p$ 와 잠재군집 $Z_i \in {1, \dots, K}$ 에 대해
+
+$$P(Z_i = j) = \pi_j, \quad j = 1, \dots, K,$$
+
+$$X_i \mid Z_i = j \sim N_p(\mu_j, \Sigma),$$
+
+$$\mu_j = \mu_0 + \delta_j.$$
+
+식별성을 위해
+
+$$\sum_{j=1}^K \delta_{jk} = 0, \quad k = 1, \dots, p$$
+
+를 둔다. 이 제약하에서
+
+$$\mu_0 = \frac{1}{K} \sum_{j=1}^K \mu_j$$
+
+이다. 따라서 $\mu_0$는 marginal population mean이 아니라 component means의 unweighted grand mean이다. 실제로
+
+$$E(X_i) = \sum_{j=1}^K \pi_j \mu_j = \mu_0 + \sum_{j=1}^K \pi_j \delta_j.$$
+
+따라서 $\pi_j$가 모두 같거나 $\sum_j \pi_j \delta_j = 0$인 특수한 경우를 제외하면 $\mu_0 \neq E(X_i)$이다.
+
+### 4.2 Mean-heterogeneity variable
+
+변수 $k$가 군집 평균 차이를 유발한다는 것은 다음과 같다.
+
+$$\exists j \neq \ell \text{ such that } \mu_{jk}^0 \neq \mu_{\ell k}^0.$$
+
+따라서
+
+$$S_0 = {k : \exists j \neq \ell,\ \mu_{jk}^0 \neq \mu_{\ell k}^0}.$$
+
+sum-to-zero parameterization에서는
+
+$$S_0 = {k : |\delta_{\cdot k}^0|_2 > 0}.$$
+
+중요한 점은 다음이다.
+
+$$\delta_{\cdot k} = 0 \iff \delta_{1k} = \cdots = \delta_{Kk} = 0.$$
+
+따라서 element-wise lasso 결과를 변수 단위로 aggregate하면 $S_0$를 추정할 수 있다. 다만 element-wise lasso와 group lasso는 penalty geometry가 다르므로, "element-wise lasso가 group lasso와 동일하다"고 표현하지 않는다. 정확한 표현은 다음이다.
+
+> Element-wise lasso는 component-level sparsity를 유도하지만, 본 연구에서는 그 결과를 variable-level mean contrast로 aggregate하여 $S_0$를 추정한다.
+
+---
+
+## 5. 제안 추정 절차
+
+제안 방법의 이름은 다음으로 둔다.
+
+> **Debiased Sum-to-Zero Lasso Mixture Clustering**
+
+약칭은 **SZL-Refit**으로 둔다. 전체 절차는 다음 네 단계이다.
+
+- **Stage 1:** SZ-Lasso screening
+- **Stage 1.5:** Variable-level aggregation
+- **Stage 2:** Unpenalized GMM refit
+- **Stage 3:** Refit-likelihood EBIC tuning
+
+### 5.1 Stage 1: Sum-to-zero lasso screening
+
+각 $\lambda$에 대해 다음 penalized objective를 최대화한다.
+
+$$\hat\Theta_\lambda^{\text{SZL}} = \arg\max_\Theta \left{ \ell_n(\Theta) - \lambda \sum_{k=1}^p \sum_{j=1}^K \frac{|\delta_{jk}|}{\hat\sigma_k} \right}$$
+
+subject to
+
+$$\sum_{j=1}^K \delta_{jk} = 0, \quad k = 1, \dots, p.$$
+
+여기서 $\hat\sigma_k$로 나누는 항은 변수별 scale normalization이다. $\Sigma = I_p$로 고정하는 초기 실험에서는 생략 가능하다.
+
+이 단계에서 얻은 estimator는 final estimator가 아니다.
+
+> $\hat\Theta_\lambda^{\text{SZL}}$ is a screening estimator, not the final estimator.
+
+기존 Naive Lasso와 수식 형태는 동일하지만 해석이 다르다. 기존 Naive Lasso는 no-refit baseline이고, SZL-Refit은 이 결과를 screening으로만 사용한다.
+
+### 5.2 계산상 sum-to-zero 제약 처리
+
+$\mu_j = \mu_0 + \delta_j$만으로는 분해가 식별되지 않으므로 sum-to-zero 제약은 필수적이다. 본 연구에서는 element-wise $\ell_1$ penalty와 sum-to-zero 제약을 결합하기 위해 **direct constrained update** 방식을 메인 알고리즘으로 사용한다.
+
+**Direct constrained update.** EM의 M-step에서 변수 $k$별로 다음 constrained weighted lasso subproblem을 푼다.
+
+$$\min_{\delta_{1k}, \dots, \delta_{Kk}} \sum_{j=1}^K w_{jk} (\delta_{jk} - z_{jk})^2 + \lambda_k \sum_{j=1}^K |\delta_{jk}|$$
+
+subject to $\sum_j \delta_{jk} = 0$.
+
+여기서 $w_{jk}$, $z_{jk}$는 E-step에서 계산되는 weighted target과 weight이고, $\lambda_k = \lambda / \hat\sigma_k$이다. 이 problem은 $K$차원의 작은 convex problem이므로 표준 convex solver(또는 Lagrangian-augmented coordinate descent)로 안정적으로 풀린다.
+
+**Q-basis 재파라미터화에 대한 주석.** 직전 보고서의 group penalty 설계에서는 $Q \in \mathbb{R}^{K \times (K-1)}$ ($Q^\top \mathbf{1}_K = 0$, $Q^\top Q = I_{K-1}$)를 통한 재파라미터화 $\delta_{\cdot k} = Q\alpha_k$가 자연스러웠다. 그 이유는 group penalty $|\delta_{\cdot k}|_2 = |\alpha_k|_2$가 재파라미터화 후에도 그대로 보존되기 때문이다. 그러나 element-wise $\ell_1$ penalty의 경우
+
+$$\sum_{j=1}^K |\delta_{jk}| = \sum_{j=1}^K \left| \sum_{m=1}^{K-1} Q_{jm} \alpha_{km} \right|$$
+
+이 되어, 일반적으로 $\alpha_k$ 좌표별 separable lasso가 아니다. 따라서 본 연구에서는 element-wise penalty와 정합되는 direct constrained update를 메인 알고리즘으로 채택한다. Q-basis는 (필요 시) numerical 안정화 목적의 보조 도구로만 사용한다.
+
+### 5.3 Stage 1.5: Variable-level aggregation
+
+Lasso는 개별 $\delta_{jk}$에 작용하지만, 연구 대상은 변수 $k$이다. 따라서 lasso 결과를 변수 단위로 aggregate한다. 권장 기준은 standardized max-pairwise contrast이다.
+
+$$\hat S_\lambda = \left{ k : \max_{j < \ell} \frac{|\hat\mu_{jk, \lambda}^{\text{SZL}} - \hat\mu_{\ell k, \lambda}^{\text{SZL}}|}{\hat\sigma_{k, \lambda}} > \tau_{\text{num}} \right}.$$
+
+여기서 $\tau_{\text{num}} = 10^{-4}$는 statistical tuning parameter가 아니라 **numerical tolerance**이다. 기존 보고서에서도 $\tau = 10^{-4}$는 수치적 파편화 제거용 threshold로 사용되었다.
+
+대안적으로
+
+$$\hat S_\lambda = \left{ k : |\hat\delta_{\cdot k, \lambda}^{\text{SZL}}|_2 > \tau_{\text{num}} \right}$$
+
+도 가능하지만, 본문에서는 max-pairwise contrast 기준을 기본으로 둔다. 이 기준이 "변수 $k$에서 군집 평균이 갈라지는가"라는 연구 질문과 더 직접적으로 연결되기 때문이다.
+
+### 5.4 Stage 2: Unpenalized post-selection refit
+
+각 $\lambda$가 만든 $\hat S_\lambda$를 고정하고, penalty 없이 GMM likelihood를 다시 최대화한다.
+
+$$\hat\Theta_\lambda^{\text{refit}} = \arg\max_{\Theta:\ \delta_{\cdot k} = 0,\ k \notin \hat S_\lambda} \ell_n(\Theta).$$
+
+즉, $k \in \hat S_\lambda$인 변수는 $\mu_{1k}, \dots, \mu_{Kk}$를 자유롭게 추정하고, $k \notin \hat S_\lambda$인 변수는 $\mu_{1k} = \cdots = \mu_{Kk}$를 강제한다. **이 단계에서 lasso shrinkage가 제거된다.**
+
+> Lasso는 변수 후보를 찾고, refit은 선택 변수의 군집 중심을 shrinkage 없이 재추정한다.
+
+### 5.5 Stage 3: Refit-likelihood EBIC tuning
+
+EBIC는 penalized lasso estimator가 아니라 refit estimator 기준으로 계산한다.
+
+$$\text{EBIC}_\alpha(\lambda) = -2 n \cdot \ell_n(\hat\Theta_\lambda^{\text{refit}}) + \log n \cdot \text{df}(\hat S_\lambda) + 2\alpha |\hat S_\lambda| \log p,$$
+
+여기서 $\alpha \in [0, 1]$이다. 첫 항의 $n$ scaling은 $\ell_n$이 average log-likelihood로 정의되었기 때문이다(만약 total log-likelihood로 정의한다면 $-2L_n$이 된다). EBIC는 큰 model space에서 BIC의 과선택 경향을 보완하기 위해 제안된 기준으로, high-dimensional model selection에서 자주 사용된다(Chen and Chen, 2008).
+
+**자유도의 effective form.** $\lambda$별 모델 비교에서 mixing proportions $(K-1)$, common means $p$, diagonal variances $p$ 항은 모든 후보 모델에 공통으로 들어가는 nuisance dimension이다. 따라서 모델 비교에서 실제로 작용하는 effective complexity는
+
+$$\text{df}_{\text{eff}}(\hat S_\lambda) = (K-1) |\hat S_\lambda|$$
+
+이고, EBIC의 model-comparison-relevant 부분은
+
+$$\text{EBIC}_\alpha(\lambda) \propto -2 n \cdot \ell_n(\hat\Theta_\lambda^{\text{refit}}) + \log n \cdot (K-1) |\hat S_\lambda| + 2\alpha |\hat S_\lambda| \log p$$
+
+로 환원된다. 본 연구에서는 이 effective form을 tuning에 사용한다.
+
+최종 선택은
+
+$$\hat\lambda = \arg\min_\lambda \text{EBIC}_\alpha(\lambda), \qquad \hat S = \hat S_{\hat\lambda}, \qquad \hat\Theta = \hat\Theta_{\hat\lambda}^{\text{refit}}.$$
+
+$\alpha$는 기본값을 $0.5$로 두고, sensitivity analysis로 $\alpha \in {0, 0.5, 1}$을 비교한다.
+
+---
+
+## 6. Secondary extension: Adaptive SZL-Refit
+
+Adaptive lasso는 메인 방법이 아니라 secondary extension으로 둔다.
+
+### 6.1 Adaptive Stage 1
+
+Adaptive version의 Stage 1은 다음이다.
+
+$$\hat\Theta_\lambda^{\text{ASZL}} = \arg\max_\Theta \left{ \ell_n(\Theta) - \lambda \sum_{k=1}^p \sum_{j=1}^K a_{jk} \frac{|\delta_{jk}|}{\hat\sigma_k} \right}$$
+
+subject to $\sum_{j=1}^K \delta_{jk} = 0$, where
+
+$$a_{jk} = (|\tilde\delta_{jk}| + \varepsilon_n)^{-\gamma}.$$
+
+### 6.2 Pilot estimator 선택과 결과적 stage 수
+
+Pilot $\tilde\delta_{jk}$는 plain SZL screening 결과 또는 SZL-Refit 결과를 사용한다.
+
+이 선택은 ASZL-Refit pipeline의 실제 단계 수에 영향을 준다.
+
+|Pilot 종류|전체 pipeline|비고|
+|---|---|---|
+|Plain SZL screening|3-stage: SZL screening → ASZL screening → unpenalized refit|Pilot이 가장 가벼움|
+|Plain SZL-Refit|4-stage: SZL screening → unpenalized refit (pilot용) → ASZL screening → unpenalized refit (final)|Pilot이 더 안정적이나 계산비용 증가|
+
+본 연구의 secondary extension에서는 **3-stage version**(plain SZL screening pilot)을 기본으로 두고, 4-stage version은 robustness 검증용으로만 보고한다.
+
+### 6.3 Variable-level adaptive weight 제외 이유
+
+다음 형태의 variable-level adaptive weight
+
+$$v_k \sum_{j=1}^K |\delta_{jk}|$$
+
+는 메인 방법으로 사용하지 않는다. 이 구조는 엄밀히 group lasso는 아니지만, 변수 $k$ 전체에 동일한 weight를 부여하므로 group-like behavior로 해석될 여지가 있다. 이번 연구미팅의 방향이 group penalty를 메인에서 제외하는 것이므로, adaptive extension을 쓰더라도 component-wise weight $a_{jk}$에 한정한다.
+
+### 6.4 Adaptive variant의 역할
+
+Adaptive version의 역할은 다음으로 제한한다.
+
+> Plain SZL-Refit이 oracle gap을 충분히 메우지 못하는 저신호 setting에서의 robustness variant.
+
+따라서 critical sanity check 결과가 중요하다.
+
+---
+
+## 7. 이론 계획
+
+본 연구의 이론은 세 정리로 구성한다. 점근 정규성과 finite-sample valid post-selection inference는 본 논문의 핵심 정리로 두지 않고, selection consistency 조건하의 corollary 또는 future work로 둔다.
+
+### 7.1 Assumptions
+
+**A1. Identifiability and separation.**
+
+$$\min_{j \neq \ell} |\mu_j^0 - \mu_\ell^0|_{\Sigma^{-1}} \geq c_n.$$
+
+혼합모형의 label switching을 고려하여 모수 거리는 label permutation에 대해 정의한다.
+
+**A2. Sparsity and dimensionality.**
+
+$$s_0 = |S_0| \ll n, \qquad s_0 \log p = o(n).$$
+
+**A3. Beta-min condition.**
+
+Sum-to-zero parameterization과 정합되도록, 변수 $k$의 standardized mean heterogeneity strength를 다음으로 정의한다.
+
+$$B_k^0 = \frac{1}{\sigma_k^2} \cdot \frac{1}{K} \sum_{j=1}^K (\mu_{jk}^0 - \mu_{0k})^2 = \frac{1}{\sigma_k^2} \cdot \frac{1}{K} \sum_{j=1}^K \delta_{jk}^{0,2} = \frac{|\delta_{\cdot k}^0|_2^2}{K \sigma_k^2}.$$
+
+여기서 $\mu_{0k} = K^{-1}\sum_j \mu_{jk}^0$는 sum-to-zero 제약 하의 grand mean이다 ($\pi_j$-weighted marginal mean이 아님). 이 정의는 sum-to-zero parameterization과 자연스럽게 정합되며, $\delta_{\cdot k}^0$의 효과 크기를 직접 반영한다.
+
+Beta-min 조건은
+
+$$B_{\min} = \min_{k \in S_0} B_k^0$$
+
+가 sure screening rate를 만족할 만큼 충분히 크다는 것이다. 구체적으로는
+
+$$n B_{\min} \gg \log p$$
+
+수준의 lower bound가 필요하다.
+
+**A4. Local EM condition.**
+
+혼합모형의 non-convexity 때문에 global optimum 이론을 바로 주장하지 않는다. 대신 좋은 initialization 근방에서 EM이 local contraction을 만족하거나, population likelihood가 true parameter 근방에서 locally identifiable하다고 가정한다.
+
+### 7.2 Theorem 1. Sure screening
+
+적절한 $\lambda_n$ sequence와 위 조건하에서
+
+$$P(S_0 \subseteq \hat S_\lambda) \to 1.$$
+
+즉, Stage 1 screening은 참 mean-heterogeneity variables를 빠뜨리지 않는다. Refit은 빠진 변수를 복구할 수 없으므로, 이는 refit 설계에서 가장 중요한 조건이다.
+
+### 7.3 Theorem 2. Selection size control
+
+EBIC-tuned $\hat\lambda$에 대해
+
+$$|\hat S_{\hat\lambda}| = O_p(s_0).$$
+
+즉, 선택집합이 true support를 포함하되 지나치게 커지지 않는다. 이 결과는 Stage 2 refit의 variance inflation을 제어하기 위해 필요하다.
+
+### 7.4 Theorem 3. Oracle refit equivalence
+
+Oracle estimator를
+
+$$\hat\Theta^{\text{oracle}} = \arg\max_{\Theta:\ \delta_{\cdot k} = 0,\ k \notin S_0} \ell_n(\Theta)$$
 
 로 두고, 제안 refit estimator를
 
-$$\hat\Theta^{\mathrm{refit}} = \arg\max_{\Theta:,\delta_{\cdot k}=0,\ k\notin \hat S} \ell_n(\Theta)$$
+$$\hat\Theta^{\text{refit}} = \arg\max_{\Theta:\ \delta_{\cdot k} = 0,\ k \notin \hat S} \ell_n(\Theta)$$
 
-로 두자. Theorems 1–2 하에서
+로 둔다.
 
-$$d(\hat\Theta^{\mathrm{refit}}, \Theta^0) = O_p\left( \sqrt{\frac{(K-1)|\hat S| + \text{nuisance df}}{n}} \right)$$
+**(a) Rate result.** Theorems 1–2 하에서, 적절한 metric $d(\cdot, \cdot)$ (label permutation에 대해 정의된 모수 거리)에 대해
 
-이며, 더 강하게 $P(\hat S = S_0) \to 1$ 이 성립하면 label permutation을 고려해
+$$d(\hat\Theta^{\text{refit}}, \Theta^0) = O_p\left(\sqrt{\frac{(K-1) s_0}{n}}\right).$$
 
-$$d(\hat\Theta^{\mathrm{refit}}, \hat\Theta^{\mathrm{oracle}}) = o_p(n^{-1/2}).$$
+여기서 $(K-1) s_0$는 selected mean contrast의 effective dimension이며, common means와 variances 같은 nuisance parameter는 표준 $\sqrt{p/n}$ rate로 수렴한다(별도 항).
 
-이 결과를 Theorems 1–3을 결합한 **two-stage oracle property**로 본 정리에 제시한다.
+**(b) Oracle equivalence.** 더 강하게 $P(\hat S = S_0) \to 1$이 성립하면, 동일한 local optimum basin에서
 
-### 6.5 Corollary (post-selection inference, 제한된 형태)
+$$d(\hat\Theta^{\text{refit}}, \hat\Theta^{\text{oracle}}) = o_p(n^{-1/2})$$
 
-$P(\hat S = S_0) \to 1$ 이 성립하는 강한 조건 하에서 selected mean contrast parameter에 대해 oracle MLE의 점근 정규성을 계승한다. 다만 finite-sample valid post-selection inference는 본 논문의 메인 contribution이 아니며, Berk et al.(2013), Lee et al.(2016) 등 별도 framework로의 확장은 future work로 둔다.
+이며, 이는 oracle MLE와 점근적으로 동등하다.
 
----
+이를 본 연구의 **two-stage oracle property**로 제시한다.
 
-# Part II. 시뮬레이션 결과
+### 7.5 Inference에 관한 주의
 
-## 1. 비교 방법론 및 벤치마크 (재구성)
-
-이번 보고서의 비교군은 메인 메시지("screening은 충분하나 shrinkage가 문제이며, refit이 이를 푼다")를 직접 입증하도록 재구성된다. 직전 보고서의 group lasso 계열(HP-L, HP-AL)은 제외한다.
-
-**1) 전통적 비지도 학습**
-
-- K-means
-- PCA + K-means
-- GMM (Unpenalized)
-
-**2) 기존 sparse / model-based clustering**
-
-- Sparse K-means (Witten and Tibshirani, 2010)
-- Naive Lasso (Pan-Shen type, EW-$\ell_1$ + sum-to-zero, **no refit**)
-- SelvarMix (Celeux et al., 2018) [신규 추가, 가능 시]
-- SC-FS (Liu et al., 2023) [신규 추가, 가능 시]
-
-**3) Critical sanity check 비교군**
-
-- Naive Lasso → Plain SZL screening 후 **refit 추가** (Stage 1+2의 직접 효과 측정)
-
-**4) 제안 모형**
-
-- **SZL-Refit (메인):** Plain Sum-to-Zero Lasso screening + Unpenalized Refit + Refit-EBIC
-- **ASZL-Refit (Secondary):** Adaptive Sum-to-Zero Lasso screening + Unpenalized Refit + Refit-EBIC
-
-**5) 오라클 벤치마크**
-
-- Oracle-feature baseline (True Vars)
-- True-parameter oracle
-
-> **표 컬럼 해석 주의사항.** $p_{\mathrm{fit}}$는 실제 fitting에 들어간 차원이고, $\hat S_\tau$ 또는 $\hat S$ 는 standardized max-contrast 기준 후 선택된 변수 수이다. Penalty 기반 모형의 single-stage fitting은 전체 $p$ 차원에서 수행되므로 $p_{\mathrm{fit}}=p$ 이며, 실질적 변수 선택 결과는 별도 열 $\hat S$ 를 기준으로 해석한다. TPR과 FPR도 동일 기준이다.
-
-> **Oracle-feature baseline의 해석.** 직전 보고서에서 일부 setting에서 HP-AL이 Oracle-feature baseline을 소폭 상회한 결과가 관찰되었다. 이는 Oracle-feature GMM도 finite-sample/local-optimum 영향을 받는 불안정한 기준값임을 의미한다. 따라서 본 보고서에서는 성능의 주된 기준을 true-parameter oracle 대비 gap으로 두고, Oracle-feature baseline은 보조 reference로만 해석한다.
+Finite-sample post-selection confidence interval과 selective inference는 본 연구의 메인 목표가 아니다. 선택 이후 추론은 별도의 framework(Berk et al., 2013; Lee et al., 2016)가 필요하므로 discussion 또는 future work로 둔다. 메인 정리에서는 selection consistency 조건 하 oracle MLE의 점근 정규성을 corollary 형태로만 인용한다.
 
 ---
 
-## 2. Critical Sanity Check (메인 결정 실험)
+## 8. 시뮬레이션 설계
 
-본 연구의 메인 설계 확정을 위해 가장 먼저 수행되어야 할 실험은 다음이다.
+이번 미팅 자료에서는 group-lasso benchmark를 메인 비교군에서 제외한다. 다만 직전 보고서의 HP-L, HP-AL 결과는 연구 방향 전환의 배경 자료로만 보존한다. 기존 HP-AL은 adaptive group lasso 기반 single-stage 방법으로 정리되어 있었고, 이번 설계에서는 이를 메인 contribution에서 제외한다.
 
-### 2.1 실험 설계
+### 8.1 Critical sanity check (메인 결정 실험)
 
-- **세팅:** $n=300$, $p \in {100, 300}$, $a \in {1.6, 1.4, 1.2}$, 반복수 $R \geq 50$
-- **비교 방법:** (1) Naive Lasso (refit 없음, 기존 보고서 baseline), (2) **Plain SZL-Refit** (메인 제안), (3) **ASZL-Refit** (Secondary), (4) Oracle-feature baseline, (5) True-parameter oracle
-
-### 2.2 가설과 결정 기준
-
-본 연구의 메인 설계는 다음 패턴이 관찰될 때 확정된다.
-
-|패턴|결과 해석|메인 설계 결정|
-|---|---|---|
-|**A**|Naive Lasso → SZL-Refit ARI gap의 대부분이 회복됨; SZL-Refit ≈ ASZL-Refit|**Plain SZL-Refit이 메인.** Adaptive는 secondary로만 둠.|
-|**B**|SZL-Refit이 부분 회복; ASZL-Refit이 명확히 우수|ASZL-Refit이 메인 또는 co-main으로 승격.|
-|**C**|두 refit 모두 oracle gap을 메우지 못함|Refit만의 문제가 아님. 설계 전면 재고.|
-
-직전 보고서의 Naive Lasso 결과 — 주 분석 구간에서 TPR ≈ 1.000, FPR ≈ 0.001~0.019, $\hat S \approx q$ (정답 변수 수에 거의 일치) — 를 고려하면 패턴 A가 가장 가능성이 높다. 즉, screening은 이미 거의 완벽하므로, 진짜 병목은 shrinkage일 가능성이 크다. 다만 이는 가설이며, 본 sanity check 결과가 메인 설계를 최종 확정한다.
-
-### 2.3 핵심 보고 지표
-
-ARI, TPR, FPR, $\hat S$ 외에 다음 지표를 반드시 보고한다.
-
-1. **Mean center MSE** $$\mathrm{MSE}_\mu = \min_{\pi \in \mathcal{P}_K} \frac{1}{Kp} \sum_{j=1}^K |\hat\mu_{\pi(j)} - \mu_j^0|_2^2$$
-    
-2. **Mean heterogeneity effect MSE** $$\mathrm{MSE}_{\Delta, S} = \frac{1}{K|S_0|} \sum_{k \in S_0} |\hat\delta_{\cdot k} - \delta_{\cdot k}^0|_2^2$$
-    
-3. **Recovery ratio (논문 핵심 지표)** $$R_k = \frac{|\hat\delta_{\cdot k}|_2}{|\delta_{\cdot k}^0|_2},\quad k \in S_0$$
-    
-4. **Classification entropy** $$\mathrm{Entropy} = -\frac{1}{n}\sum_{i=1}^n \sum_{j=1}^K \hat r_{ij} \log \hat r_{ij}$$
-    
-
-### 2.4 Hero Figure
-
-본 논문의 핵심 figure는 ARI bar plot이 아니라 $R_k$ 의 분포 비교이다.
-
-- **Panel A (Naive Lasso, no refit):** $R_k$ 분포가 약 0.5~0.8에 분포 (shrinkage 시각화)
-- **Panel B (SZL-Refit):** $R_k$ 분포가 1.0 근처에 집중 (debiasing 시각화)
-
-이 한 장이 본 논문의 메인 메시지("lasso는 변수는 잘 찾지만 효과 크기를 줄이고, refit이 이를 복원한다")를 가장 직접적으로 시각화한다.
-
----
-
-## 3. 직전 보고서 결과의 재해석
-
-직전 보고서의 시뮬레이션 결과는 본 재설계의 강력한 근거가 된다. 주 분석 구간에서 Naive Lasso의 행동을 다시 정리하면 다음과 같다.
-
-### 3.1 Naive Lasso의 selection 거동 — 거의 완벽
-
-|환경|TPR|FPR|$\hat S_\tau$ (정답 수)|
-|---|---|---|---|
-|$p=100, a=1.6$ ($q=5$)|1.000|0.001|5.100 (5)|
-|$p=100, a=1.4$ ($q=5$)|1.000|0.015|6.450 (5)|
-|$p=100, a=1.2$ ($q=5$)|1.000|0.006|5.580 (5)|
-|$p=300, a=1.6$ ($q=5$)|1.000|0.000|5.000 (5)|
-|$p=300, a=1.2$ ($q=5$)|1.000|0.001|5.400 (5)|
-
-주 분석 구간에서 Naive Lasso의 TPR은 1.000, FPR은 0.001~0.015 수준이다. 즉 screening 자체는 사실상 oracle 수준이다.
-
-### 3.2 그러나 ARI는 oracle 대비 큰 gap을 보임
-
-|환경|Naive Lasso ARI|Oracle-feature ARI|Gap|
-|---|---|---|---|
-|$p=100, a=1.6$|0.807|0.856|0.049|
-|$p=100, a=1.4$|0.630|0.775|0.145|
-|$p=100, a=1.2$|0.466|0.666|0.200|
-|$p=300, a=1.4$|0.620|0.773|0.153|
-|$p=300, a=1.2$|0.452|0.625|0.173|
-
-특히 $p=100, a=1.2$ 와 $p=300, a=1.2$ 에서는 변수를 거의 완벽하게 찾았음에도 ARI gap이 0.17~0.20에 달한다. 변수 선택 자체가 거의 완벽하다는 사실과 ARI gap이 크다는 사실이 양립할 수 있는 가장 자연스러운 설명은 **선택된 변수의 mean contrast 효과 크기가 lasso shrinkage로 과소추정되어 cluster assignment가 약화되었다**는 것이다.
-
-이 해석은 본 보고서의 메인 메시지를 직접 뒷받침한다.
-
-> "Naive Lasso는 screening은 충분히 잘 한다. 진짜 병목은 shrinkage이고, refit이 이를 풀어준다."
-
-### 3.3 실패 구간(한계 신호 $a \leq 0.8$)의 거동은 본 재설계 범위 밖
-
-직전 보고서의 한계 신호 구간($a \in {0.8, 0.6}$)에서 Naive Lasso는 TPR이 0.000~0.600으로 내려간다. 이 구간은 beta-min 조건의 경계 근방이며, refit으로 해결 가능한 문제가 아니다(refit은 빠진 변수를 복구하지 않는다). 따라서 본 재설계의 주 분석 구간은 직전 보고서와 동일하게 $a \in {1.6, 1.4, 1.2}$ 로 둔다.
-
----
-
-## 4. 시뮬레이션 시나리오 (재구성)
-
-### 4.1 주 분석 시나리오 (메인)
-
-기존 보고서의 시나리오를 그대로 유지한다.
+메인 방법을 확정하기 위해 가장 먼저 수행해야 할 실험은 다음이다.
 
 - $n = 300$
-- $p \in {20, 100, 300}$
-- $q \in {3, 5, 5}$ (각 $p$에 대응)
+- $p \in {100, 300}$
 - $a \in {1.6, 1.4, 1.2}$
-- 반복수 $R \geq 100$ (직전 보고서의 $R=10$ pilot에서 확장)
+- 반복수 $R \geq 50$ (안정 확인 후 $R = 100$ 이상으로 확장)
 
-### 4.2 보조 시나리오 (Supplement)
+비교 방법은 다음으로 제한한다.
 
-- 한계 신호: $a \in {1.0, 0.8}$ (refit의 한계 검증용; refit이 못 푸는 영역의 명시)
-- Unequal mixing: $\pi_1, \dots, \pi_K$ 비대칭
-- Correlated predictors: $\mathrm{corr}(X_k, X_\ell) \neq 0$
-- Variance heterogeneity ($\Sigma_j \neq \Sigma$): 본 모형 범위 밖이나 robustness 검증용으로만 보고
+|구분|방법|목적|
+|---|---|---|
+|Baseline|K-means|전통적 비지도 기준|
+|Baseline|PCA + K-means|차원축소 후 clustering|
+|Baseline|Unpenalized GMM|고차원 비벌점 GMM 기준|
+|Existing sparse|Sparse K-means|sparse clustering 기준|
+|Existing penalized|Naive Lasso (no refit)|기존 single-stage lasso의 shrinkage 확인|
+|**Main**|**SZL-Refit**|**refit 효과 검증**|
+|**Secondary**|**ASZL-Refit**|adaptive weight의 추가효과 확인|
+|Oracle|Oracle-feature GMM|true variables를 아는 경우|
+|Oracle|True-parameter oracle|이상적 기준|
 
-### 4.3 보고할 표와 그림
+SelvarMix와 SC-FS는 가능하면 후속 full simulation에 추가한다. 두 방법 모두 고차원 clustering variable selection과 직접 관련된 benchmark이므로, reviewer 대응을 위해 최종 논문에는 포함하는 것이 좋다.
 
-각 환경별로 다음 표를 보고한다.
+### 8.2 핵심 비교
 
-|비교군 그룹|방법|
-|---|---|
-|전통 baseline|K-means, PCA + K-means, Unpenalized GMM|
-|기존 sparse|Sparse K-means, Naive Lasso (no refit)|
-|기존 sparse 추가|SelvarMix, SC-FS (가능 시)|
-|**메인 제안**|**SZL-Refit**|
-|**Secondary**|**ASZL-Refit**|
-|Oracle|Oracle-feature GMM, True-parameter oracle|
+가장 중요한 비교는 다음이다.
 
-각 셀에는 ARI, TPR, FPR, $\hat S$, $\mathrm{MSE}_\mu$, $\mathrm{MSE}_{\Delta, S}$ 의 평균과 표준오차를 보고한다.
+$$\text{Naive Lasso} \quad \text{vs} \quad \text{SZL-Refit} \quad \text{vs} \quad \text{ASZL-Refit}.$$
 
-핵심 figure는 다음 두 종류이다.
+의사결정 기준은 다음과 같다.
 
-- **Hero Figure 1:** $R_k$ histogram (Naive Lasso vs SZL-Refit), 가장 도전적인 환경($p=300, a=1.2$)에서.
-- **Hero Figure 2:** ARI vs $\lambda$ (또는 EBIC vs $\lambda$) 곡선, Naive Lasso path와 SZL-Refit path를 동일 axis에서 비교하여 refit이 shrinkage bias를 제거하는 모습을 visualize.
+|결과 패턴|해석|메인 방법 결정|
+|---|---|---|
+|SZL-Refit이 oracle gap을 대부분 회복하고 ASZL-Refit과 유사|병목은 screening이 아니라 shrinkage|Plain SZL-Refit 메인|
+|SZL-Refit은 일부 회복, ASZL-Refit이 명확히 우수|adaptive screening이 필요|ASZL-Refit을 co-main 또는 main으로 승격|
+|Refit해도 ARI가 거의 회복되지 않음|shrinkage만의 문제가 아님|설계 재검토|
+
+현재 기존 결과상 가장 가능성이 높은 것은 첫 번째 패턴이다. 그러나 이는 아직 가설이므로 critical sanity check 결과로 확정한다.
+
+### 8.3 성능 지표
+
+ARI, TPR, FPR, $|\hat S|$ 외에 다음 지표를 반드시 보고한다.
+
+**1) Mean center MSE**
+
+$$\text{MSE}_\mu = \min_{\rho \in \mathcal{P}_K} \frac{1}{Kp} \sum_{j=1}^K |\hat\mu_{\rho(j)} - \mu_j^0|_2^2.$$
+
+**2) Mean heterogeneity effect MSE**
+
+$$\text{MSE}_{\Delta, S} = \frac{1}{K |S_0|} \sum_{k \in S_0} |\hat\delta_{\cdot k} - \delta_{\cdot k}^0|_2^2.$$
+
+**3) Recovery ratio**
+
+$$R_k = \frac{|\hat\delta_{\cdot k}|_2}{|\delta_{\cdot k}^0|_2}, \qquad k \in S_0.$$
+
+**4) Classification entropy**
+
+$$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat r_{ij} \log \hat r_{ij}.$$
+
+기존 보고서에서도 $\text{MSE}_\mu$, $\text{MSE}_{\Delta, S}$, $R_k$, entropy가 ARI 차이 원인을 규명하기 위한 추가 지표로 제안되어 있었다.
+
+### 8.4 Hero figure
+
+본 논문의 핵심 figure는 단순 ARI bar plot보다 $R_k$ 분포 비교가 되어야 한다.
+
+- **Panel A. Naive Lasso (no refit):** $R_k < 1$ 방향으로 분포가 치우치는지 확인한다.
+- **Panel B. SZL-Refit:** $R_k \approx 1$ 방향으로 회복되는지 확인한다.
+
+이 figure가 본 연구의 핵심 메시지를 가장 직접적으로 보여준다.
+
+> Lasso는 변수를 찾지만 effect size를 줄이고, refit은 이를 복원한다.
 
 ---
 
-## 부록 A. 직전 보고서 대비 변경 사항 요약
+## 9. 실데이터 분석 계획
 
-|항목|직전 보고서|본 재설계|
-|---|---|---|
-|메인 방법|HP-AL (Adaptive Group Lasso)|**SZL-Refit (Plain Sum-to-Zero Lasso + Refit + EBIC)**|
-|Penalty 형태|Group penalty $\sum_k w_k \|\delta_{\cdot k}\|_2$|Element-wise $\sum_{k,j} \|\delta_{jk}\|$|
-|Adaptive 위치|메인 contribution의 핵심 기제|Secondary extension|
-|추정 단계|Single-stage (no refit)|Two-stage (screening + unpenalized refit)|
-|Tuning|Heuristic BIC|Refit-likelihood EBIC|
-|핵심 메시지|"Adaptive group structure가 oracle gap을 줄인다"|"Lasso는 screening 도구일 뿐, refit이 shrinkage debiasing으로 oracle gap을 줄인다"|
-|Hero metric|ARI 비교|$R_k$ 분포 (recovery ratio)|
-|이론 야심|Group penalty 하 single-stage near-oracle|Two-stage oracle property (sure screening + oracle refit)|
-|Inference|미정|Selection consistency 조건 하 corollary; PSI는 future work|
-|실데이터|없음|1~2개 (gene expression / single-cell RNA-seq)|
-|Group 계열의 운명|메인 제안|본 보고서 메인 비교군에서 제외; 직전 보고서 결과는 reference로 보존|
+실데이터 분석은 critical sanity check 이후 수행한다. 추천 데이터 유형은 gene expression 또는 single-cell RNA-seq이다. 이유는 다음이다.
 
-본 재설계는 지도교수 의견(group penalty 회피), 직전 시뮬레이션 데이터(Naive Lasso의 screening 충분성), 선행연구 차별화(SelvarMix, SC-FS와의 명시적 차별화), 이론 방어 가능성(post-lasso framework로의 정합성)의 네 측면을 모두 만족시키는 방향으로 정리되었다.
+- 고차원 setting이 자연스럽다 ($p \gg n$ 또는 $p$가 큰 경우).
+- 선택 변수 $k$를 gene 또는 feature로 해석할 수 있다.
+- $\delta_{\cdot k}$는 cluster-specific gene effect로 해석 가능하다.
+
+실데이터에서는 단순 ARI만 보고하지 않고 다음을 함께 본다.
+
+- 선택 feature 수
+- Cluster stability (subsampling 또는 bootstrap stability)
+- Classification entropy
+- Refit 전후 mean contrast 변화 (실데이터 버전 $R_k$ 분석)
+- 선택 feature의 해석 가능성 (known marker gene 등)
+
+---
+
+## 10. 교수님께 확인할 질문
+
+이번 미팅에서는 다음 네 가지를 확인받는 것이 좋다.
+
+**질문 1. 메인 방법.** Plain SZL-Refit을 메인으로 두고, ASZL-Refit을 secondary extension으로 두는 방향이 적절한가?
+
+**질문 2. Critical sanity check.** Naive Lasso + Refit이 oracle gap을 얼마나 줄이는지 먼저 확인한 뒤 메인 방법을 최종 확정하는 전략이 적절한가?
+
+**질문 3. 이론 범위.** 이론을 sure screening, size control, oracle refit equivalence 세 정리로 제한하는 것이 적절한가? 점근 정규성과 post-selection inference는 corollary/future work로 미루는 결정이 적절한가?
+
+**질문 4. Benchmark 범위.** 이번 단계에서는 group-lasso benchmark를 제외하고, 추후 full simulation 또는 supplement에서만 참고로 두는 것이 적절한가?
+
+---
+
+## 11. 최종 요약
+
+본 연구의 최종 방향은 다음이다.
+
+> **Debiased Sum-to-Zero Lasso Mixture Clustering**
+> 
+> SZ-Lasso screening → variable-level aggregation → unpenalized GMM refit → refit-likelihood EBIC tuning
+
+핵심 메시지는 다음이다.
+
+- 고차원 Gaussian mixture clustering에서 lasso는 최종 추정기가 아니라 screening 도구로 사용한다.
+- 선택 변수 위에서 unpenalized refit을 수행하여 lasso shrinkage로 약해진 mean contrast를 복원한다.
+- 따라서 ARI gap의 원인을 selection failure와 shrinkage bias로 분리해 분석할 수 있다.
+
+현재까지의 기존 결과는 Naive Lasso가 변수선택은 잘하지만 ARI에서 oracle-feature baseline과 gap을 보이는 패턴을 보여준다. 따라서 가장 먼저 검증해야 할 것은 adaptive weighting이 아니라 plain SZ-Lasso + Refit이 이 gap을 회복하는지이다. 이 critical sanity check 결과에 따라 Plain SZL-Refit을 메인으로 확정할지, ASZL-Refit을 co-main으로 올릴지 결정한다.
