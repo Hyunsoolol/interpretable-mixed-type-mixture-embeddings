@@ -558,15 +558,161 @@ Figure 4. 전체 benchmark의 ARI 비교. SZL-Refit은 oracle reference에 가�
 |**SelvarMix official**|strict $S$와 non-$W$ 결과가 다름|role-based benchmark로 분리 보고|
 |**실험 규모**|$R=10$ sanity check|**$p=300, a=1.2, R=50$ 및 full grid로 확장**|
 
-### 8.5.9 다음 시뮬레이션 계획
+---
+## 8.6 추가 예비 시뮬레이션 결과: $p=100, a=1.4, R=10$
 
-- **Step 1. 초고차원 약신호 setting 우선 확인:** $p=300, a=1.2, R=50$. Naive Lasso의 ARI gap이 크게 나타난 핵심 구간에서 패턴 유지 여부 확인.
+본 섹션은 기존 $p=100, a=1.2, R=10$ sanity check에 이어, signal strength를 $a=1.4$로 증가시킨 중간신호 setting에서 동일한 패턴이 유지되는지를 확인한다. 목적은 Naive Lasso의 shrinkage bias와 SZL-Refit의 debiasing 효과가 약신호 setting뿐 아니라 중간신호 setting에서도 일관적으로 나타나는지를 검증하는 것이다.
+
+### 8.6.1 시뮬레이션 세팅
+
+- **Data structure:** $n=300, p=100, K=3, q=5$
     
-- **Step 2. 현재 setting 반복 수 추가 확장:** $p=100, a=1.2, R=50 \sim 100$. Monte Carlo 안정성 확인.
+- **Signal strength:** $a=1.4$
     
-- **Step 3. 전체 grid 확장:** $p \in \{100, 300\}, a \in \{1.6, 1.4, 1.2\}, R=100$. 모든 비교 모형 포함.
+- **반복 수:** $R=10$
     
-- **Step 4. Robustness setting:** Unequal mixing, correlated predictors, common diagonal $\Sigma$ 추정, 한계 신호 $a \in \{1.0, 0.8\}$ setting 검토.
+- **Active set:** $S_0=\{1, 2, 3, 4, 5\}$
+    
+- **Mean pattern:** 각 active variable에 대해 세 군집 평균을 $(-a, 0, a)$로 설정하였다.
+    
+- **Covariance:** $\Sigma=I_p$.
+    
+- **Tuning:** EBIC를 사용하였고, SZL-Refit 및 ASZL-Refit에서는 refit likelihood 기준 EBIC를 사용하였다.
+    
+
+---
+
+### 8.6.2 핵심 검증 결과
+
+**Table 3. 핵심 방법론 비교 결과, $p=100, a=1.4, R=10$**
+
+|**Method**|**ARI**|**TPR**|**FPR**|**S^**|**MSEμ​**|**MSEΔ,S​**|**Rmean​**|**Entropy**|
+|---|---|---|---|---|---|---|---|---|
+|Naive Lasso at refit $\lambda$|0.514|1.000|0.000|5.000|0.0162|0.2545|0.584|0.243|
+|Naive Lasso self-tuned|0.662|1.000|0.003|5.300|0.0075|0.0813|0.758|0.272|
+|**SZL-Refit**|**0.795**|**1.000**|**0.000**|**5.000**|**0.0038**|**0.0093**|**0.981**|**0.201**|
+|ASZL-Refit|0.791|1.000|0.000|5.000|0.0038|0.0090|0.983|0.201|
+|Oracle-feature GMM|0.786|1.000|0.000|5.000|0.0039|0.0089|0.993|0.198|
+|True-parameter oracle|0.795|1.000|0.000|5.000|0.0000|0.0000|1.000|0.200|
+
+$a=1.4$에서도 Naive Lasso at refit $\lambda$는 true support를 정확히 찾았다($\text{TPR}=1, \text{FPR}=0, \hat{S}=5$). 그러나 선택된 active variables의 mean contrast는 여전히 크게 shrinkage된다 ($R_{\text{mean}}=0.584, \text{MSE}_{\Delta,S}=0.2545$). 그 결과 ARI는 0.514에 머물렀다.
+
+반면 동일한 support 위에서 unpenalized refit을 수행한 **SZL-Refit**은 $R_{\text{mean}}=0.981, \text{MSE}_{\Delta,S}=0.0093, \text{ARI}=0.795$를 기록하였다. 이는 True-parameter oracle의 ARI 0.795와 거의 같은 수준이며, Oracle-feature GMM의 ARI 0.786보다도 약간 높은 값이다. 따라서 $a=1.4$ setting에서도 Naive Lasso의 병목은 support recovery 실패가 아니라 shrinkage bias이며, SZL-Refit이 이를 효과적으로 제거한다는 해석이 유지된다.
+
+- **Naive Lasso self-tuned**는 $R_{\text{mean}}$을 0.758까지 일부 회복하고 ARI도 0.662까지 증가시켰다. 그러나 SZL-Refit의 ARI 0.795 및 $R_{\text{mean}}=0.981$에는 미치지 못한다. 따라서 lasso 자체의 tuning 개선은 shrinkage를 일부 완화하지만, unpenalized refit의 debiasing 효과를 대체하지 못한다.
+    
+- **ASZL-Refit**은 SZL-Refit과 거의 동일한 성능을 보인다. 따라서 $a=1.4$에서도 adaptive weighting의 추가 이득은 크지 않으며, Plain SZL-Refit을 main method로 유지하는 방향이 지지된다.
+    
+
+#### Figure 5. Mean-heterogeneity effect recovery, $a=1.4$
+
+<img width="1004" height="606" alt="image" src="https://github.com/user-attachments/assets/ab07315f-4625-42ce-ab02-e890877f6682" />
+
+- **Caption:** Figure 5. $a=1.4$ setting에서의 mean-heterogeneity effect 회복 정도. Naive Lasso는 true support를 정확히 찾았음에도 $R_{\text{mean}}<1$로 mean contrast를 과소추정한다. 반면 SZL-Refit과 ASZL-Refit은 $R_{\text{mean}}\approx 1$ 수준으로 effect size를 복원하며 oracle reference와 유사한 수준에 도달한다.
+    
+
+#### Figure 6. ARI 기준 군집 성능 비교, $a=1.4$
+
+<img width="1004" height="606" alt="image" src="https://github.com/user-attachments/assets/7c63bdb5-0ad0-49d2-a288-88589ff9078a" />
+Figure 6. $a=1.4$ setting에서의 ARI 기준 군집 성능 비교. Post-selection refit을 수행한 SZL-Refit은 Naive Lasso 대비 ARI를 크게 개선하며, True-parameter oracle 및 Oracle-feature GMM과 거의 같은 수준에 도달한다.
+    
+
+#### Figure 7. Mean-shift effect 추정오차 비교, $a=1.4$
+
+<img width="1004" height="606" alt="image" src="https://github.com/user-attachments/assets/dd67774e-c0fc-47a9-a637-e249ec76e641" />
+Figure 7. $a=1.4$ setting에서의 mean-shift effect 추정오차 비교. Naive Lasso는 true support를 찾았음에도 $\text{MSE}_{\Delta,S}$가 크게 남아 있지만, SZL-Refit은 unpenalized refit을 통해 $\text{MSE}_{\Delta,S}$를 oracle 수준까지 감소시킨다.
+    
+---
+
+### 8.6.3 전체 Benchmark 결과
+
+**Table 4. 전체 Benchmark 성능 비교, $p=100, a=1.4, R=10$**
+
+|**Group**|**Method**|**ARI**|**TPR**|**FPR**|**S^**|**Rmean​**|**MSEΔ,S​**|
+|---|---|---|---|---|---|---|---|
+|Traditional|K-means|0.647|NA|NA|NA|0.984|0.0152|
+|Traditional|PCA + K-means|0.665|NA|NA|NA|0.978|0.0115|
+|Model-based|Unpenalized GMM|0.647|NA|NA|NA|0.977|0.0155|
+|Sparse Clustering|Sparse K-means pkg EBIC|0.771|1.000|0.000|5.000|1.005|0.0115|
+|Spectral/Screen|SCFS pkg Lloyd|0.693|1.000|0.006|5.600|0.974|0.0328|
+|MB Variable Sel|SelvarMix strict $S$|0.557|0.620|0.000|3.100|0.633|0.5413|
+|MB Variable Sel|SelvarMix non-$W$|0.557|1.000|0.039|8.700|0.922|0.0980|
+|MB Variable Sel|SelvarMix non-$W$ + Refit|0.557|1.000|0.039|8.700|0.986|0.0091|
+|MB Variable Sel|SelvarMix proxy EBIC|0.790|1.000|0.000|5.000|0.989|0.0090|
+|Sparse Clustering|Sparse K-means proxy EBIC|0.793|1.000|0.000|5.000|1.011|0.0097|
+|Proposed|**SZL-Refit**|**0.795**|**1.000**|**0.000**|**5.000**|**0.981**|**0.0093**|
+|Auxiliary|ASZL-Refit|0.791|1.000|0.000|5.000|0.983|0.0090|
+|Oracle|Oracle-feature GMM|0.786|1.000|0.000|5.000|0.993|0.0089|
+|Oracle|True-parameter oracle|0.795|1.000|0.000|5.000|1.000|0.0000|
+
+전체 benchmark 결과에서도 SZL-Refit은 가장 높은 수준의 ARI를 보인다. 전통적 baseline인 K-means, PCA + K-means, Unpenalized GMM은 $a=1.2$에 비해 성능이 상승하여 ARI가 약 0.65 수준에 도달하였다. 이는 signal이 강해질수록 full-feature clustering도 군집 구조를 어느 정도 회복할 수 있음을 보여준다. 그러나 SZL-Refit은 ARI 0.795로 이들보다 여전히 높으며, 선택 변수의 mean contrast recovery 역시 oracle 수준에 가깝다.
+
+#### Figure 8. 전체 benchmark ARI 비교, $a=1.4$
+
+<img width="1651" height="606" alt="image" src="https://github.com/user-attachments/assets/309c5927-d2e9-4540-a9db-31586b5c7fbe" />
+
+Figure 8. $a=1.4$ setting에서 전체 benchmark의 ARI 비교. SZL-Refit은 oracle reference에 가까운 ARI를 보이며, Sparse K-means 및 SelvarMix proxy와 같은 강한 external benchmark와도 경쟁적인 성능을 보인다.
+    
+
+#### Figure 9. 변수선택 성능 비교, $a=1.4$
+
+<img width="1651" height="606" alt="image" src="https://github.com/user-attachments/assets/6872b600-d0f5-48d2-9b00-986ee249677e" />
+
+Figure 9. $a=1.4$ setting에서 feature-selection methods의 TPR 및 FPR 비교. Naive Lasso와 SZL-Refit은 $\text{TPR}=1, \text{FPR}=0, \hat{S}=5$를 달성하므로, 이 setting에서 성능 차이는 support recovery보다 post-selection estimation의 shrinkage 여부에서 기인한다.
+    
+
+---
+
+### 8.6.4 $a=1.2$와 $a=1.4$ 결과의 종합 해석
+
+두 setting을 종합하면, 본 연구의 핵심 가설은 일관되게 지지된다.
+
+|**Setting**|**Method**|**ARI**|**S^**|**Rmean​**|**MSEΔ,S​**|
+|---|---|---|---|---|---|
+|$a=1.2$|Naive Lasso at refit $\lambda$|0.454|5.0|0.596|0.1639|
+|$a=1.2$|**SZL-Refit**|**0.659**|**5.0**|**0.976**|**0.0126**|
+|$a=1.2$|True-parameter oracle|0.686|5.0|1.000|0.0000|
+|$a=1.4$|Naive Lasso at refit $\lambda$|0.514|5.0|0.584|0.2545|
+|$a=1.4$|**SZL-Refit**|**0.795**|**5.0**|**0.981**|**0.0093**|
+|$a=1.4$|True-parameter oracle|0.795|5.0|1.000|0.0000|
+
+1. **Lasso의 한계:** 두 setting 모두에서 Naive Lasso는 true support를 정확히 찾지만($\text{TPR}=1, \text{FPR}=0$), mean contrast를 참값의 약 60% 수준으로 과소추정한다. signal strength가 증가해도 lasso shrinkage는 여전히 존재한다.
+    
+2. **SZL-Refit의 유효성:** SZL-Refit은 두 setting 모두에서 $R_{\text{mean}} \approx 1$을 달성하며, ARI 역시 oracle reference에 근접한다.
+    
+3. **결론:** Naive Lasso의 주요 한계는 variable screening이 아니라 **shrinkage-biased estimation**이다. SZL-Refit은 이를 제거하여 mean-effect recovery와 clustering accuracy를 동시에 개선한다.
+    
+
+---
+
+### 8.6.5 시뮬레이션 결과 요약
+
+$p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었습니다. Naive Lasso는 true support를 정확히 찾았지만, $R_{\text{mean}}=0.584$, ARI 0.514에 머물렀습니다. 반면 동일 support 위에서 unpenalized refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.981$, ARI 0.795로 true-parameter oracle과 동등한 수준**에 도달하였습니다. 이는 shrinkage-bias가 신호 강도와 관계없이 발생하는 고질적인 문제이며, refit-debiasing이 이를 해결하는 핵심 기제임을 보여줍니다.
+
+---
+
+### 8.6.6 현재 $a=1.4$ 결과에 따른 의사결정 업데이트
+
+|**쟁점**|**a=1.4 결과**|**결정**|
+|---|---|---|
+|**Naive Lasso의 문제**|Support는 정확히 찾지만 $R_{\text{mean}}=0.584, \text{ARI}=0.514$|Shrinkage bias 해석 유지|
+|**Refit 효과**|SZL-Refit에서 $R_{\text{mean}}=0.981, \text{ARI}=0.795$|Refit 단계 유지 및 강조|
+|**Plain vs Adaptive**|SZL-Refit 0.795, ASZL-Refit 0.791|Plain SZL-Refit main 유지|
+|**외부 benchmark**|Sparse K-means, SelvarMix proxy가 매우 강함|경쟁적 benchmark로 유지|
+|**다음 실험**|$p=100$ series 완료|**$p=300, a=1.2$ 우선 실행**|
+
+---
+
+### 8.6.7 다음 시뮬레이션 계획 수정
+
+1. **초고차원 약신호 setting:** $p=300, a=1.2, R=50$. 고차원 noise가 증가했을 때도 SZL-Refit이 oracle gap을 줄이는지 확인.
+    
+2. **초고차원 중간신호 setting:** $p=300, a=1.4, R=50$. $p=100$에서 관찰된 near-oracle recovery가 유지되는지 확인.
+    
+3. **전체 grid 확장:** $p \in \{100, 300\}, a \in \{1.6, 1.4, 1.2\}, R=100$.
+    
+4. **Robustness setting:** Unequal mixing, correlated predictors, $a \in \{1.0, 0.8\}$ 한계 신호 setting 검토.
+
 ---
 
 ## 참고문헌 (주요 인용)
