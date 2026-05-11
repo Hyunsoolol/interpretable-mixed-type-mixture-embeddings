@@ -262,25 +262,13 @@ $$|\hat S_{\hat\lambda}| = O_p(s_0).$$
 
 ### 7.4 Theorem 3. Oracle refit equivalence
 
-Oracle estimator를
+Theorems 1–2 하에서, label permutation에 대해 정의된 모수 거리 $d(\cdot, \cdot)$ 에 대해 제안된 refit estimator는 다음의 수렴 속도를 갖는다.
 
-$$\hat\Theta^{\text{oracle}} = \arg\max_{\Theta:\ \delta_{\cdot k} = 0,\ k \notin S_0} \ell_n(\Theta),$$
+$$d(\hat\Theta^{\text{refit}}, \Theta^0) = O_p\left(\sqrt{\frac{(K-1) |\hat S| + \mathrm{df}_{\text{nuis}}}{n}}\right)$$
 
-제안 refit estimator를
+여기서 $\mathrm{df}_{\text{nuis}}$는 공통 평균($\mu_0$) 및 공분산($\Sigma$) 등 모든 후보 모델에서 공통으로 추정되는 nuisance parameter의 자유도이다.
 
-$$\hat\Theta^{\text{refit}} = \arg\max_{\Theta:\ \delta_{\cdot k} = 0,\ k \notin \hat S} \ell_n(\Theta)$$
-
-로 두자. Theorems 1–2 하에서, label permutation에 대해 정의된 모수 거리 $d(\cdot, \cdot)$ 에 대해
-
-$$d(\hat\Theta^{\text{refit}}, \Theta^0) = O_p\left(\sqrt{\frac{(K-1) s_0}{n}}\right)$$
-
-이며, common means와 variances 등 nuisance parameter는 표준 $\sqrt{p/n}$ rate로 별도로 수렴한다. 더 강하게 $P(\hat S = S_0) \to 1$ 이 성립하면
-
-$$d(\hat\Theta^{\text{refit}}, \hat\Theta^{\text{oracle}}) = o_p(n^{-1/2})$$
-
-이며, 이는 oracle MLE와 점근적으로 동등함을 의미한다.
-
-본 정리들의 결합을 본 연구에서는 **two-stage oracle property**로 제시한다.
+또한, $P(\hat S = S_0) \to 1$ 이고 refit EM이 oracle EM과 동일한 local basin에 수렴한다면, label permutation을 고려하여 $\hat\Theta^{\text{refit}}$은 oracle estimator와 점근적으로 동등하다. 본 표현은 nuisance parameter의 영향, local optima 가능성, 그리고 label switching 문제를 모두 포괄하여 이론적 방어력을 높인다.
 
 ### 7.5 추론 측면의 범위
 
@@ -307,7 +295,7 @@ $$d(\hat\Theta^{\text{refit}}, \hat\Theta^{\text{oracle}}) = o_p(n^{-1/2})$$
 | Reference (no refit) | Naive Lasso | (H2) shrinkage bias 확인 |
 | Main | SZL-Refit | (H1)+(H3) sure screening + refit recovery 확인 |
 | Auxiliary | ASZL-Refit | adaptive weighting의 추가효과 확인 |
-| Oracle benchmark | Oracle-feature GMM | oracle gap의 상한 reference |
+| Oracle benchmark | Oracle-feature GMM | true $S_0$를 알고 fitting한 estimation-based oracle reference |
 | Oracle benchmark | True-parameter oracle | 이상적 reference |
 
 **가설별 결정 기준.**
@@ -439,14 +427,15 @@ $$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat r_{ij} \log \hat 
 
 **Table 1. 핵심 방법론 비교 결과, $p=100, a=1.2, R=10$**
 
-|**Method**|**ARI**|**TPR**|**FPR**|**S^**|**MSEμ​**|**MSEΔ,S​**|**Rmean​**|**Entropy**|
-|---|---|---|---|---|---|---|---|---|
-|Naive Lasso at refit $\lambda$|0.454|1.000|0.000|5.000|0.0114|0.1639|0.596|0.245|
-|Naive Lasso self-tuned|0.464|1.000|0.007|5.700|0.0076|0.0876|0.703|0.311|
-|**SZL-Refit**|**0.659**|**1.000**|**0.000**|**5.000**|**0.0039**|**0.0126**|**0.976**|**0.293**|
-|ASZL-Refit|0.658|1.000|0.000|5.000|0.0039|0.0122|0.977|0.293|
-|Oracle-feature GMM|0.676|1.000|0.000|5.000|0.0039|0.0125|1.011|0.285|
-|True-parameter oracle|0.686|1.000|0.000|5.000|0.0000|0.0000|1.000|0.297|
+| **Method**                     | **ARI**   | **TPR**   | **FPR**   | **S^**    | **MSEμ​**  | **MSEΔ,S​** | **Rmean​** | **Entropy** |
+| ------------------------------ | --------- | --------- | --------- | --------- | ---------- | ----------- | ---------- | ----------- |
+| Naive Lasso at refit $\lambda$ | 0.454     | 1.000     | 0.000     | 5.000     | 0.0114     | 0.1639      | 0.596      | 0.245       |
+| Naive Lasso self-tuned         | 0.464     | 1.000     | 0.007     | 5.700     | 0.0076     | 0.0876      | 0.703      | 0.311       |
+| **SZL-Refit**                  | **0.659** | **1.000** | **0.000** | **5.000** | **0.0039** | **0.0126**  | **0.976**  | **0.293**   |
+| ASZL-Refit                     | 0.658     | 1.000     | 0.000     | 5.000     | 0.0039     | 0.0122      | 0.977      | 0.293       |
+| Oracle-feature GMM             | 0.676     | 1.000     | 0.000     | 5.000     | 0.0039     | 0.0125      | 1.011      | 0.285       |
+| True-parameter oracle          | 0.686     | 1.000     | 0.000     | 5.000     | 0.0000     | 0.0000      | 1.000      | 0.297       |
+
 
 $R=10$ 결과에서도 핵심 패턴은 유지된다. Naive Lasso at refit $\lambda$는 true support를 정확히 회복한다 ($\text{TPR}=1, \text{FPR}=0, \hat{S}=5$). 그러나 선택된 변수의 mean contrast는 여전히 강하게 shrinkage된다 ($R_{\text{mean}}=0.596, \text{MSE}_{\Delta,S}=0.1639$). 이에 따라 ARI는 0.454에 머문다.
 
@@ -482,22 +471,23 @@ Figure 3. Mean-shift effect 추정오차 비교. Unpenalized refit 이후 $\text
 
 **Table 2. 전체 Benchmark 성능 비교, $p=100, a=1.2, R=10$**
 
-|**Group**|**Method**|**ARI**|**TPR**|**FPR**|**S^**|**Rmean​**|**MSEΔ,S​**|
-|---|---|---|---|---|---|---|---|
-|Traditional|K-means|0.506|NA|NA|NA|0.966|0.0349|
-|Traditional|PCA + K-means|0.504|NA|NA|NA|0.958|0.0357|
-|Model-based|Unpenalized GMM|0.482|NA|NA|NA|0.946|0.0451|
-|Sparse Clustering|Sparse K-means|0.634|1.000|0.000|5.000|1.042|0.0198|
-|Spectral/Screen|SCFS|0.503|1.000|0.013|6.200|0.966|0.0549|
-|MB Variable Sel|SelvarMix strict $S$|0.369|0.520|0.000|2.600|0.586|0.5263|
-|MB Variable Sel|SelvarMix non-$W$|0.369|1.000|0.037|8.500|0.949|0.1116|
-|MB Variable Sel|SelvarMix non-$W$ + Refit|0.369|1.000|0.037|8.500|1.001|0.0353|
-|MB Variable Sel|SelvarMix proxy EBIC|0.662|1.000|0.000|5.000|0.996|0.0159|
-|Penalized GMM|Naive Lasso self-tuned|0.464|1.000|0.007|5.700|0.703|0.0876|
-|Proposed|**SZL-Refit**|**0.659**|**1.000**|**0.000**|**5.000**|**0.976**|**0.0126**|
-|Auxiliary|ASZL-Refit|0.658|1.000|0.000|5.000|0.977|0.0122|
-|Oracle|Oracle-feature GMM|0.676|1.000|0.000|5.000|1.011|0.0125|
-|Oracle|True-parameter oracle|0.686|1.000|0.000|5.000|1.000|0.0000|
+| **Group**         | **Method**                | **ARI**   | **TPR**   | **FPR**   | **S^**    | **Rmean​** | **MSEΔ,S​** |
+| ----------------- | ------------------------- | --------- | --------- | --------- | --------- | ---------- | ----------- |
+| Traditional       | K-means                   | 0.506     | NA        | NA        | NA        | 0.966      | 0.0349      |
+| Traditional       | PCA + K-means             | 0.504     | NA        | NA        | NA        | 0.958      | 0.0357      |
+| Model-based       | Unpenalized GMM           | 0.482     | NA        | NA        | NA        | 0.946      | 0.0451      |
+| Sparse Clustering | Sparse K-means            | 0.634     | 1.000     | 0.000     | 5.000     | 1.042      | 0.0198      |
+| Spectral/Screen   | SCFS                      | 0.503     | 1.000     | 0.013     | 6.200     | 0.966      | 0.0549      |
+| MB Variable Sel   | SelvarMix strict $S$      | 0.369     | 0.520     | 0.000     | 2.600     | 0.586      | 0.5263      |
+| MB Variable Sel   | SelvarMix non-$W$         | 0.369     | 1.000     | 0.037     | 8.500     | 0.949      | 0.1116      |
+| MB Variable Sel   | SelvarMix non-$W$ + Refit | 0.369     | 1.000     | 0.037     | 8.500     | 1.001      | 0.0353      |
+| MB Variable Sel   | SelvarMix proxy EBIC      | 0.662     | 1.000     | 0.000     | 5.000     | 0.996      | 0.0159      |
+| Penalized GMM     | Naive Lasso self-tuned    | 0.464     | 1.000     | 0.007     | 5.700     | 0.703      | 0.0876      |
+| Proposed          | **SZL-Refit**             | **0.659** | **1.000** | **0.000** | **5.000** | **0.976**  | **0.0126**  |
+| Auxiliary         | ASZL-Refit                | 0.658     | 1.000     | 0.000     | 5.000     | 0.977      | 0.0122      |
+| Oracle            | Oracle-feature GMM        | 0.676     | 1.000     | 0.000     | 5.000     | 1.011      | 0.0125      |
+| Oracle            | True-parameter oracle     | 0.686     | 1.000     | 0.000     | 5.000     | 1.000      | 0.0000      |
+
 
 전체 benchmark에서도 SZL-Refit은 강한 성능을 보인다. **Sparse K-means**는 ARI 0.634, $\text{TPR}=1, \text{FPR}=0, \hat{S}=5$로 매우 강한 benchmark이다. 그러나 SZL-Refit은 ARI 0.659로 Sparse K-means보다 약간 높고, $\text{MSE}_{\Delta,S}=0.0126$으로 mean-shift effect 추정에서도 더 안정적이다.
 
@@ -584,16 +574,17 @@ Figure 4. 전체 benchmark의 ARI 비교. SZL-Refit은 oracle reference에 가�
 
 ### 8.6.2 핵심 검증 결과
 
+
 **Table 3. 핵심 방법론 비교 결과, $p=100, a=1.4, R=10$**
 
-|**Method**|**ARI**|**TPR**|**FPR**|**S^**|**MSEμ​**|**MSEΔ,S​**|**Rmean​**|**Entropy**|
-|---|---|---|---|---|---|---|---|---|
-|Naive Lasso at refit $\lambda$|0.514|1.000|0.000|5.000|0.0162|0.2545|0.584|0.243|
-|Naive Lasso self-tuned|0.662|1.000|0.003|5.300|0.0075|0.0813|0.758|0.272|
-|**SZL-Refit**|**0.795**|**1.000**|**0.000**|**5.000**|**0.0038**|**0.0093**|**0.981**|**0.201**|
-|ASZL-Refit|0.791|1.000|0.000|5.000|0.0038|0.0090|0.983|0.201|
-|Oracle-feature GMM|0.786|1.000|0.000|5.000|0.0039|0.0089|0.993|0.198|
-|True-parameter oracle|0.795|1.000|0.000|5.000|0.0000|0.0000|1.000|0.200|
+| **Method**                     | **ARI**   | **TPR**   | **FPR**   | **S^**    | **MSEμ​**  | **MSEΔ,S​** | **Rmean​** | **Entropy** |
+| ------------------------------ | --------- | --------- | --------- | --------- | ---------- | ----------- | ---------- | ----------- |
+| Naive Lasso at refit $\lambda$ | 0.514     | 1.000     | 0.000     | 5.000     | 0.0162     | 0.2545      | 0.584      | 0.243       |
+| Naive Lasso self-tuned         | 0.662     | 1.000     | 0.003     | 5.300     | 0.0075     | 0.0813      | 0.758      | 0.272       |
+| **SZL-Refit**                  | **0.795** | **1.000** | **0.000** | **5.000** | **0.0038** | **0.0093**  | **0.981**  | **0.201**   |
+| ASZL-Refit                     | 0.791     | 1.000     | 0.000     | 5.000     | 0.0038     | 0.0090      | 0.983      | 0.201       |
+| Oracle-feature GMM             | 0.786     | 1.000     | 0.000     | 5.000     | 0.0039     | 0.0089      | 0.993      | 0.198       |
+| True-parameter oracle          | 0.795     | 1.000     | 0.000     | 5.000     | 0.0000     | 0.0000      | 1.000      | 0.200       |
 
 $a=1.4$에서도 Naive Lasso at refit $\lambda$는 true support를 정확히 찾았다($\text{TPR}=1, \text{FPR}=0, \hat{S}=5$). 그러나 선택된 active variables의 mean contrast는 여전히 크게 shrinkage된다 ($R_{\text{mean}}=0.584, \text{MSE}_{\Delta,S}=0.2545$). 그 결과 ARI는 0.514에 머물렀다.
 
@@ -667,14 +658,15 @@ Figure 9. $a=1.4$ setting에서 feature-selection methods의 TPR 및 FPR 비교.
 
 두 setting을 종합하면, 본 연구의 핵심 가설은 일관되게 지지된다.
 
-|**Setting**|**Method**|**ARI**|**S^**|**Rmean​**|**MSEΔ,S​**|
-|---|---|---|---|---|---|
-|$a=1.2$|Naive Lasso at refit $\lambda$|0.454|5.0|0.596|0.1639|
-|$a=1.2$|**SZL-Refit**|**0.659**|**5.0**|**0.976**|**0.0126**|
-|$a=1.2$|True-parameter oracle|0.686|5.0|1.000|0.0000|
-|$a=1.4$|Naive Lasso at refit $\lambda$|0.514|5.0|0.584|0.2545|
-|$a=1.4$|**SZL-Refit**|**0.795**|**5.0**|**0.981**|**0.0093**|
-|$a=1.4$|True-parameter oracle|0.795|5.0|1.000|0.0000|
+| **Setting** | **Method**                     | **ARI**   | **S^**  | **Rmean​** | **MSEΔ,S​** |
+| ----------- | ------------------------------ | --------- | ------- | ---------- | ----------- |
+| $a=1.2$     | Naive Lasso at refit $\lambda$ | 0.454     | 5.0     | 0.596      | 0.1639      |
+| $a=1.2$     | **SZL-Refit**                  | **0.659** | **5.0** | **0.976**  | **0.0126**  |
+| $a=1.2$     | True-parameter oracle          | 0.686     | 5.0     | 1.000      | 0.0000      |
+| $a=1.4$     | Naive Lasso at refit $\lambda$ | 0.514     | 5.0     | 0.584      | 0.2545      |
+| $a=1.4$     | **SZL-Refit**                  | **0.795** | **5.0** | **0.981**  | **0.0093**  |
+| $a=1.4$     | True-parameter oracle          | 0.795     | 5.0     | 1.000      | 0.0000      |
+
 
 1. **Lasso의 한계:** 두 setting 모두에서 Naive Lasso는 true support를 정확히 찾지만($\text{TPR}=1, \text{FPR}=0$), mean contrast를 참값의 약 60% 수준으로 과소추정한다. signal strength가 증가해도 lasso shrinkage는 여전히 존재한다.
     
@@ -687,7 +679,7 @@ Figure 9. $a=1.4$ setting에서 feature-selection methods의 TPR 및 FPR 비교.
 
 ### 8.6.5 시뮬레이션 결과 요약
 
-$p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었습니다. Naive Lasso는 true support를 정확히 찾았지만, $R_{\text{mean}}=0.584$, ARI 0.514에 머물렀습니다. 반면 동일 support 위에서 unpenalized refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.981$, ARI 0.795로 true-parameter oracle과 동등한 수준**에 도달하였습니다. 이는 shrinkage-bias가 신호 강도와 관계없이 발생하는 고질적인 문제이며, refit-debiasing이 이를 해결하는 핵심 기제임을 보여줍니다.
+$p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었습니다. Naive Lasso는 true support를 정확히 찾았지만, $R_{\text{mean}}=0.584$, ARI 0.514에 머물렀습니다. 반면 동일 support 위에서 unpenalized refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.981$, ARI 0.795로 true-parameter oracle에 애무 근접하였다.** 이는 shrinkage-bias가 신호 강도와 관계없이 발생하는 고질적인 문제이며, refit-debiasing이 이를 해결하는 핵심 기제임을 보여줍니다.
 
 ---
 
