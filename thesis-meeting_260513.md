@@ -459,23 +459,21 @@ $R=10$ 결과에서도 핵심 패턴은 유지된다. Naive Lasso at refit $\lam
 
 #### Figure 1. Mean-heterogeneity effect recovery
 
-기존 Figure 1은 $R=10$ 결과 기반으로 다시 생성하여 삽입한다.
-
-- **수정된 caption:** Figure 1. Mean-heterogeneity effect의 회복 정도. 각 점은 반복 실험별 $R_{\text{mean}}$을 나타낸다. Naive Lasso는 true support를 찾았음에도 $R_{\text{mean}}<1$로 mean contrast를 과소추정하는 반면, SZL-Refit은 $R_{\text{mean}}\approx 1$ 수준으로 effect size를 복원한다. 이는 Naive Lasso의 ARI 손실이 support recovery 실패가 아니라 shrinkage bias에서 기인한다는 해석을 뒷받침한다.
+<img width="1076" height="616" alt="image" src="https://github.com/user-attachments/assets/08a3ecee-965a-48eb-afb6-cffadac2eb13" />
+Figure 1. Mean-heterogeneity effect의 회복 정도. 각 점은 반복 실험별 $R_{\text{mean}}$을 나타낸다. Naive Lasso는 true support를 찾았음에도 $R_{\text{mean}}<1$로 mean contrast를 과소추정하는 반면, SZL-Refit은 $R_{\text{mean}}\approx 1$ 수준으로 effect size를 복원한다. 이는 Naive Lasso의 ARI 손실이 support recovery 실패가 아니라 shrinkage bias에서 기인한다는 해석을 뒷받침한다.
     
 
 #### Figure 2. ARI 기준 군집 성능 비교
 
-기존 Figure 2도 $R=10$ 결과 기반으로 다시 생성하여 삽입한다.
-
+<img width="1076" height="616" alt="image" src="https://github.com/user-attachments/assets/eab8d884-3e81-4d1b-9ba7-04d6f519e2f3" />
 - **수정된 caption:** Figure 2. ARI 기준 군집 성능 비교. Post-selection refit을 수행하면 lasso screening estimator의 ARI가 크게 개선되며 oracle reference와의 gap이 대부분 줄어든다. SZL-Refit과 ASZL-Refit은 거의 동일한 성능을 보이므로, 현재 $p=100, a=1.2$ setting에서는 adaptive weighting보다 refit에 의한 debiasing 효과가 주요 개선 요인으로 해석된다.
     
 
 #### Figure 3. Mean-shift effect 추정오차 비교
 
-기존 Figure 3도 $R=10$ 결과 기반으로 다시 생성하여 삽입한다.
+<img width="1076" height="616" alt="image" src="https://github.com/user-attachments/assets/622f161a-c1b7-408b-9ead-49a94fe4af20" />
 
-- **수정된 caption:** Figure 3. Mean-shift effect 추정오차 비교. Unpenalized refit 이후 $\text{MSE}_{\Delta,S}$가 크게 감소한다. 이는 refit 단계가 단순히 군집 할당 성능만 개선하는 것이 아니라, 선택된 변수의 cluster-specific mean contrast 자체를 oracle 수준에 가깝게 복원함을 보여준다.
+Figure 3. Mean-shift effect 추정오차 비교. Unpenalized refit 이후 $\text{MSE}_{\Delta,S}$가 크게 감소한다. 이는 refit 단계가 단순히 군집 할당 성능만 개선하는 것이 아니라, 선택된 변수의 cluster-specific mean contrast 자체를 oracle 수준에 가깝게 복원함을 보여준다.
     
 
 ---
@@ -512,11 +510,10 @@ $R=10$ 결과에서도 핵심 패턴은 유지된다. Naive Lasso at refit $\lam
 
 #### Figure 4. 전체 benchmark ARI 비교
 
-기존 Figure 4는 $R=10$ 결과로 다시 생성한다.
+<img width="1626" height="616" alt="image" src="https://github.com/user-attachments/assets/8cf4a4b6-28e1-4e0b-b4c8-29d6b6af3494" />
 
-- **수정된 title:** Figure 4. ARI Comparison across Benchmarks in the $R=10$ Pilot Study
-    
-- **수정된 caption:** Figure 4. 전체 benchmark의 ARI 비교. SZL-Refit은 oracle reference에 가까운 ARI를 보이며, Sparse K-means 및 SelvarMix proxy와 같은 강한 benchmark와도 경쟁적인 성능을 보인다. 단, 현재 결과는 $p=100, a=1.2, R=10$의 중간 규모 sanity check이므로 방법 간 순위 자체보다는 성능 경향을 확인하는 예비 결과로 해석한다.
+Figure 4. ARI Comparison across Benchmarks in the $R=10$ Pilot Study
+Figure 4. 전체 benchmark의 ARI 비교. SZL-Refit은 oracle reference에 가까운 ARI를 보이며, Sparse K-means 및 SelvarMix proxy와 같은 강한 benchmark와도 경쟁적인 성능을 보인다. 단, 현재 결과는 $p=100, a=1.2, R=10$의 중간 규모 sanity check이므로 방법 간 순위 자체보다는 성능 경향을 확인하는 예비 결과로 해석한다.
     
 
 ---
