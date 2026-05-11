@@ -455,7 +455,7 @@ Figure 1. Mean-heterogeneity effect의 회복 정도. 각 점은 반복 실험�
 #### Figure 2. ARI 기준 군집 성능 비교
 
 <img width="1076" height="616" alt="image" src="https://github.com/user-attachments/assets/eab8d884-3e81-4d1b-9ba7-04d6f519e2f3" />
-- **수정된 caption:** Figure 2. ARI 기준 군집 성능 비교. Post-selection refit을 수행하면 lasso screening estimator의 ARI가 크게 개선되며 oracle reference와의 gap이 대부분 줄어든다. SZL-Refit과 ASZL-Refit은 거의 동일한 성능을 보이므로, 현재 $p=100, a=1.2$ setting에서는 adaptive weighting보다 refit에 의한 debiasing 효과가 주요 개선 요인으로 해석된다.
+Figure 2. ARI 기준 군집 성능 비교. Post-selection refit을 수행하면 lasso screening estimator의 ARI가 크게 개선되며 oracle reference와의 gap이 대부분 줄어든다. SZL-Refit과 ASZL-Refit은 거의 동일한 성능을 보이므로, 현재 $p=100, a=1.2$ setting에서는 adaptive weighting보다 refit에 의한 debiasing 효과가 주요 개선 요인으로 해석된다.
     
 
 #### Figure 3. Mean-shift effect 추정오차 비교
@@ -599,7 +599,7 @@ $a=1.4$에서도 Naive Lasso at refit $\lambda$는 true support를 정확히 찾
 
 <img width="1004" height="606" alt="image" src="https://github.com/user-attachments/assets/ab07315f-4625-42ce-ab02-e890877f6682" />
 
-- **Caption:** Figure 5. $a=1.4$ setting에서의 mean-heterogeneity effect 회복 정도. Naive Lasso는 true support를 정확히 찾았음에도 $R_{\text{mean}}<1$로 mean contrast를 과소추정한다. 반면 SZL-Refit과 ASZL-Refit은 $R_{\text{mean}}\approx 1$ 수준으로 effect size를 복원하며 oracle reference와 유사한 수준에 도달한다.
+Figure 5. $a=1.4$ setting에서의 mean-heterogeneity effect 회복 정도. Naive Lasso는 true support를 정확히 찾았음에도 $R_{\text{mean}}<1$로 mean contrast를 과소추정한다. 반면 SZL-Refit과 ASZL-Refit은 $R_{\text{mean}}\approx 1$ 수준으로 effect size를 복원하며 oracle reference와 유사한 수준에 도달한다.
     
 
 #### Figure 6. ARI 기준 군집 성능 비교, $a=1.4$
@@ -679,7 +679,7 @@ Figure 9. $a=1.4$ setting에서 feature-selection methods의 TPR 및 FPR 비교.
 
 ### 8.6.5 시뮬레이션 결과 요약
 
-$p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었습니다. Naive Lasso는 true support를 정확히 찾았지만, $R_{\text{mean}}=0.584$, ARI 0.514에 머물렀습니다. 반면 동일 support 위에서 unpenalized refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.981$, ARI 0.795로 true-parameter oracle에 매무 근접하였다.** 이는 shrinkage-bias가 신호 강도와 관계없이 발생하는 고질적인 문제이며, refit-debiasing이 이를 해결하는 핵심 기제임을 보여줍니다.
+$p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었습니다. Naive Lasso는 true support를 정확히 찾았지만, $R_{\text{mean}}=0.584$, ARI 0.514에 머물렀습니다. 반면 동일 support 위에서 unpenalized refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.981$, ARI 0.795로 true-parameter oracle에 매 근접하였다.** 이는 shrinkage-bias가 신호 강도와 관계없이 발생하는 고질적인 문제이며, refit-debiasing이 이를 해결하는 핵심 기제임을 보여줍니다.
 
 ---
 
