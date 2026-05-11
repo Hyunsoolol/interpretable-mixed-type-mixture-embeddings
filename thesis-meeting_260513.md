@@ -2,7 +2,7 @@
 
 **Debiased Sum-to-Zero Lasso Mixture Clustering for High-Dimensional Mean-Heterogeneity Selection**
 
-**미팅 일자:** 2026년 5월 8일
+**미팅 일자:** 2026년 5월 13일
 
 ---
 
