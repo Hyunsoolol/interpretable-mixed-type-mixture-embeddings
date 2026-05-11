@@ -1384,7 +1384,8 @@ sim <- run_simulation(
   sparse_gap_nperms = 3
 )
 
-print(sim$summary)
+print(sim$raw)
+print(sim$summary) %>% view()
 
 write.csv(sim$raw, "szl_actual_vs_proxy_raw_results.csv", row.names = FALSE)
 write.csv(sim$summary, "szl_actual_vs_proxy_summary_results.csv", row.names = FALSE)
