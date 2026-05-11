@@ -338,17 +338,21 @@ $$d(\hat\Theta^{\text{refit}}, \Theta^0) = O_p\left(\sqrt{\frac{(K-1) |\hat S| +
 
 ARI, TPR, FPR, $|\hat S|$ 외에 다음 네 지표를 함께 보고한다.
 
-**(M1) Mean center MSE.**
-$$\text{MSE}_\mu = \min_{\rho \in \mathcal{P}_K} \frac{1}{Kp} \sum_{j=1}^K \|\hat\mu_{\rho(j)} - \mu_j^0\|_2^2.$$
+(M1) Mean center MSE.
 
-**(M2) Mean heterogeneity effect MSE.**
-$$\text{MSE}_{\Delta, S} = \frac{1}{K |S_0|} \sum_{k \in S_0} \|\hat\delta_{\cdot k} - \delta_{\cdot k}^0\|_2^2.$$
+$$\text{MSE}_{\mu} = \min_{\rho \in \mathcal{P}_K} \frac{1}{Kp} \sum_{j=1}^K \|\hat{\mu}_{\rho(j)} - \mu_j^0\|_2^2$$
 
-**(M3) Recovery ratio (본 연구의 핵심 지표).**
-$$R_k = \frac{\|\hat\delta_{\cdot k}\|_2}{\|\delta_{\cdot k}^0\|_2}, \qquad k \in S_0.$$
+(M2) Mean heterogeneity effect MSE.
 
-**(M4) Classification entropy.**
-$$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat r_{ij} \log \hat r_{ij}.$$
+$$\text{MSE}_{\Delta, S} = \frac{1}{K|S_0|} \sum_{k \in S_0} \|\hat{\delta}_{\cdot k} - \delta_{\cdot k}^0\|_2^2$$
+
+(M3) Recovery ratio (본 연구의 핵심 지표).
+
+$$R_k = \frac{\|\hat{\delta}_{\cdot k}\|_2}{\|\delta_{\cdot k}^0\|_2}, \quad k \in S_0$$
+
+(M4) Classification entropy.
+
+$$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat{r}_{ij} \log \hat{r}_{ij}$$
 
 본 지표들은 직전 보고서의 추가 분석 계획에서 이미 제안된 것을 그대로 사용한다.
 
