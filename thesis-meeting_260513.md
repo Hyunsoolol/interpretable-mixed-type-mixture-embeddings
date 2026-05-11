@@ -10,11 +10,11 @@
 
 본 보고서는 직전 미팅에서 검토된 group lasso 기반 설계(HP-L, HP-AL)를 발전시키는 과정에서 발견된 다음 사항들을 정리하고, 새 메인 설계를 제시한다.
 
-첫째, 직전 시뮬레이션에서 직전 시뮬레이션에서 Naive Lasso는 주 분석 구간 전반에서 TPR이 높고 FPR이 낮았으며, 특히 중간·약신호 구간 $a=1.4,1.2$에서 oracle-feature baseline 대비 의미 있는 ARI gap을 보였다. 이 패턴은 변수선택의 실패라기보다, lasso shrinkage로 인한 선택 변수의 mean contrast 과소추정 가능성을 시사한다.
+첫째, 직전 시뮬레이션에서 Naive Lasso는 주 분석 구간 전반에서 TPR이 높고 FPR이 낮았으며, 특히 중간·약신호 구간 $a=1.4,1.2$에서 oracle-feature baseline 대비 의미 있는 ARI gap을 보였다. 이 패턴은 변수선택의 실패라기보다, lasso shrinkage로 인한 선택 변수의 mean contrast 과소추정 가능성을 시사한다.
 
 둘째, 이 해석을 따르면 본 연구의 핵심 병목은 screening이 아니라 **post-screening estimation의 shrinkage bias**이다. 따라서 lasso를 final estimator가 아닌 screening estimator로 사용하고, 선택 변수 위에서 unpenalized GMM refit을 수행하는 **두 단계 debiased pipeline**이 자연스러운 해법이 된다.
 
-셋째, 이 설계는 group penalty 구조를 사용하지 않으므로 직전 미팅의 연구 방향(group lasso 미사용)과 정합한다. Sum-to-zero 제약 하에서 $\delta_{\cdot k}=0$와$\delta_{1k}=\cdots=\delta_{Kk}=0$는 동치이므로, element-wise lasso 결과를 변수 단위 mean contrast로 aggregate하여 $S_0$를 추정할 수 있다. 다만 element-wise lasso의 penalty geometry는 component-level sparsity를 유도하므로, group-lasso와 동일한 penalty 구조로 해석하지 않는다.
+셋째, 이 설계는 group penalty 구조를 사용하지 않으므로 직전 미팅의 연구 방향(group lasso 미사용)과 정합한다. Sum-to-zero 제약 하에서 $\delta_{\cdot k}=0$와 $\delta_{1k}=\cdots=\delta_{Kk}=0$는 동치이므로, element-wise lasso 결과를 변수 단위 mean contrast로 aggregate하여 $S_0$를 추정할 수 있다. 다만 element-wise lasso의 penalty geometry는 component-level sparsity를 유도하므로, group-lasso와 동일한 penalty 구조로 해석하지 않는다.
 
 본 보고서는 이러한 관찰을 바탕으로 새 메인 방법론 **Debiased Sum-to-Zero Lasso Mixture Clustering (SZL-Refit)** 을 제안하고, 그 모형, 추정 절차, 이론 구조, 시뮬레이션 설계, 실데이터 분석 계획을 정리한다.
 
@@ -431,7 +431,7 @@ $$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat r_{ij} \log \hat 
 | True-parameter oracle | 0.668 | 1.000 | 0.000 | 5.000 | 0.0000 | 0.0000 | 1.000 | 0.288 |
 
 *   **Shrinkage 관찰:** Naive Lasso는 $\text{TPR}=1, \hat S=5$로 변수를 정확히 찾았으나, $R_{\text{mean}}=0.478$로 효과 크기를 절반 이하로 줄여 ARI가 0.467에 머물렀다.
-*   **Refit 효과:** 동일 support에서 refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.967$, ARI=0.663**으로 Oracle 수준(0.668)까지 성능을 회복했다. 이는 가설 **(H2)**와 **(H3)**을 강력하게 지지한다.
+*   **Refit 효과:** 동일 support에서 refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.967$, ARI=0.663**으로 Oracle 수준(0.668)까지 성능을 회복했다. 이는 \(R=3\) pilot 수준에서 가설 (H2)와 (H3)을 지지하는 예비 근거로 해석된다. 반복수를 늘린 \(R=50\sim100\) 실험에서 동일 패턴이 유지되는지 확인할 예정이다.
 
 <img width="988" height="690" alt="image" src="https://github.com/user-attachments/assets/cfb64f24-a313-4c2f-a7df-cbeb04d6a121" />
 Figure 1. Mean-heterogeneity effect의 회복 정도. 
@@ -460,12 +460,13 @@ Unpenalized refit 이후 \(\mathrm{MSE}_{\Delta,S}\)가 크게 감소한다. 이
 | Spectral/Screen | SCFS | 0.561 | 1.000 | 0.007 | 5.667 | 0.994 | 0.0186 |
 | MB Variable Sel | SelvarMix (SS) | 0.396 | 0.800 | 0.000 | 4.000 | 0.828 | 0.2981 |
 | MB Variable Sel | SelvarMix (nonW) | 0.396 | 1.000 | 0.042 | 9.000 | 0.988 | 0.1234 |
+| MB Variable Sel | SelvarMix (nonW + Refit) | 0.396 | 1.000 | 0.042 | 9.000 | 0.981 | 0.0095 |
 | Proposed | **SZL-Refit** | **0.663** | **1.000** | **0.000** | **5.000** | **0.967** | **0.0082** |
 | Oracle | True-parameter oracle | 0.668 | 1.000 | 0.000 | 5.000 | 1.000 | 0.0000 |
 
 <img width="1478" height="610" alt="image" src="https://github.com/user-attachments/assets/1f8cd0fc-a18e-4edb-b1ee-768d8243ff0c" />
-Figure 4. 전체 benchmark의 ARI 순위. 
-SZL-Refit은 oracle reference에 가까운 ARI를 보이며, Sparse K-means 및 SCFS와 같은 강한 외부 benchmark와도 경쟁적인 성능을 보인다. 단, 현재 결과는 \(R=3\) pilot이므로 순위 자체는 예비적 결과로 해석한다.
+Figure 4. Pilot study에서의 전체 benchmark ARI 비교
+SZL-Refit은 oracle reference에 가까운 ARI를 보이며, Sparse K-means 및 SCFS와 같은 외부 benchmark와도 경쟁적인 성능을 보인다. 단, 현재 결과는 \(R=3\) pilot이므로 방법 간 순위 자체보다는 성능 경향을 확인하기 위한 예비 결과로 해석한다.
 
 ### 8.5.6 결과 해석
 
