@@ -679,7 +679,7 @@ Figure 9. $a=1.4$ setting에서 feature-selection methods의 TPR 및 FPR 비교.
 
 ### 8.6.5 시뮬레이션 결과 요약
 
-$p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었습니다. Naive Lasso는 true support를 정확히 찾았지만, $R_{\text{mean}}=0.584$, ARI 0.514에 머물렀습니다. 반면 동일 support 위에서 unpenalized refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.981$, ARI 0.795로 true-parameter oracle에 애무 근접하였다.** 이는 shrinkage-bias가 신호 강도와 관계없이 발생하는 고질적인 문제이며, refit-debiasing이 이를 해결하는 핵심 기제임을 보여줍니다.
+$p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었습니다. Naive Lasso는 true support를 정확히 찾았지만, $R_{\text{mean}}=0.584$, ARI 0.514에 머물렀습니다. 반면 동일 support 위에서 unpenalized refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.981$, ARI 0.795로 true-parameter oracle에 매무 근접하였다.** 이는 shrinkage-bias가 신호 강도와 관계없이 발생하는 고질적인 문제이며, refit-debiasing이 이를 해결하는 핵심 기제임을 보여줍니다.
 
 ---
 
