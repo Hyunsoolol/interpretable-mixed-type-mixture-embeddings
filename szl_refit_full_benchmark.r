@@ -1366,10 +1366,10 @@ run_simulation <- function(R_rep = 10,
 # Sparse_Kmeans_pkg_Gap and SelvarMix can be slow.
 
 sim <- run_simulation(
-  R_rep = 3,
+  R_rep = 10,
   n = 300,
   p_list = c(100),
-  a_list = c(1.2),
+  a_list = c(1.4),
   K = 3,
   nlambda = 8,
   alpha = 0.5,
@@ -1398,3 +1398,227 @@ boxplot(R_mean ~ method, data = sim$raw,
         main = "Recovery ratio R_k across methods",
         ylab = "Mean recovery ratio over active variables")
 abline(h = 1, lty = 2)
+############################################################
+# Visualization code for SZL-Refit simulation results
+# Project: Debiased Sum-to-Zero Lasso Mixture Clustering
+############################################################
+
+# 1. 필요 패키지 로드 및 설치
+packages <- c("ggplot2", "dplyr", "tidyr", "stringr", "forcats", "scales", "gridExtra")
+for (pkg in packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(forcats)
+library(scales)
+
+# 2. 데이터 준비 (sim 객체 확인)
+if (!exists("sim")) stop("객체 'sim'이 존재하지 않습니다. 시뮬레이션을 먼저 실행해주세요.")
+raw <- sim$raw
+summ <- sim$summary
+
+# 출력 디렉토리 생성
+plot_dir <- "figures_szl_refit"
+if (!dir.exists(plot_dir)) dir.create(plot_dir)
+
+############################################################
+# 1. Method labels and ordering: corrected version
+############################################################
+
+method_labels <- c(
+  "Kmeans" = "K-means",
+  "PCA_Kmeans" = "PCA + K-means",
+  "Unpenalized_GMM" = "Unpenalized GMM",
+  
+  "Sparse_Kmeans_proxy_EBIC" = "Sparse K-means\n(Proxy)",
+  "Sparse_Kmeans_pkg_EBIC" = "Sparse K-means\n(Package, EBIC)",
+  "Sparse_Kmeans_pkg_Gap" = "Sparse K-means\n(Package, Gap)",
+  
+  "SCFS_proxy_EBIC" = "SCFS\n(Proxy)",
+  "SCFS_pkg_Lloyd" = "SCFS\n(Package)",
+  
+  "SelvarMix_proxy_EBIC" = "SelvarMix\n(Proxy)",
+  "SelvarMix_pkg_S" = "SelvarMix\n(Strict S)",
+  "SelvarMix_pkg_nonW" = "SelvarMix\n(non-W)",
+  "SelvarMix_nonW_Refit" = "SelvarMix\n(non-W + Refit)",
+  "SelvarMix_pkg_SRU" = "SelvarMix\n(SRU)",
+  
+  "Naive_Lasso_at_refit_lambda" = "Naive Lasso\n(Ablation)",
+  "Naive_Lasso_self_tuned" = "Naive Lasso\n(Self-tuned)",
+  
+  "SZL_Refit" = "SZL-Refit\n(Proposed)",
+  "ASZL_Refit" = "ASZL-Refit\n(Auxiliary)",
+  
+  "Oracle_feature_GMM" = "Oracle\n(Feature)",
+  "True_parameter_oracle" = "Oracle\n(Parameter)"
+)
+
+method_order <- c(
+  "Kmeans",
+  "PCA_Kmeans",
+  "Unpenalized_GMM",
+  
+  "Sparse_Kmeans_proxy_EBIC",
+  "Sparse_Kmeans_pkg_EBIC",
+  "Sparse_Kmeans_pkg_Gap",
+  
+  "SCFS_proxy_EBIC",
+  "SCFS_pkg_Lloyd",
+  
+  "SelvarMix_proxy_EBIC",
+  "SelvarMix_pkg_S",
+  "SelvarMix_pkg_nonW",
+  "SelvarMix_nonW_Refit",
+  "SelvarMix_pkg_SRU",
+  
+  "Naive_Lasso_at_refit_lambda",
+  "Naive_Lasso_self_tuned",
+  
+  "SZL_Refit",
+  "ASZL_Refit",
+  
+  "Oracle_feature_GMM",
+  "True_parameter_oracle"
+)
+
+prep_plot_data <- function(df) {
+  df %>%
+    mutate(
+      method_label = ifelse(
+        method %in% names(method_labels),
+        unname(method_labels[method]),
+        method
+      ),
+      method_label = factor(
+        method_label,
+        levels = unname(method_labels[method_order[method_order %in% names(method_labels)]])
+      ),
+      scenario = paste0("p=", p, ", a=", a)
+    )
+}
+
+method_order <- names(method_labels)
+
+# 데이터 가공 함수
+prep_plot_data <- function(df) {
+  df %>%
+    mutate(
+      method_label = ifelse(method %in% names(method_labels),
+                            method_labels[method],
+                            method),
+      method_label = factor(method_label, levels = method_labels[method_order]),
+      scenario = paste0("p=", p, ", a=", a)
+    )
+}
+
+raw_p <- prep_plot_data(raw)
+summ_p <- prep_plot_data(summ)
+
+# 4. 핵심 분석용 데이터 필터링 (Proposed vs Baselines)
+core_methods <- c("Naive_Lasso_at_refit_lambda", "Naive_Lasso_self_tuned", 
+                  "SZL_Refit", "ASZL_Refit", "Oracle_feature_GMM", "True_parameter_oracle")
+
+raw_core <- raw_p %>% filter(method %in% core_methods)
+summ_core <- summ_p %>% filter(method %in% core_methods)
+
+# ----------------------------------------------------------
+# [그림 1] Hero Figure: Recovery Ratio (R_mean) 분포
+# ----------------------------------------------------------
+p1 <- ggplot(raw_core, aes(x = method_label, y = R_mean, fill = method_label)) +
+  geom_boxplot(outlier.shape = 21, width = 0.6, alpha = 0.7) +
+  geom_jitter(width = 0.1, alpha = 0.5) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  facet_wrap(~ scenario) +
+  labs(title = "Figure 1. Recovery of Mean-Heterogeneity Effect",
+       subtitle = "Lasso shrinks effects (R < 1), SZL-Refit restores them (R ≈ 1)",
+       x = NULL, y = expression(R[mean])) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 30, hjust = 1), legend.position = "none")
+
+p1
+ggsave(file.path(plot_dir, "01_Rmean_recovery.png"), p1, width = 10, height = 6)
+
+# ----------------------------------------------------------
+# [그림 2] ARI 비교 (핵심 모델)
+# ----------------------------------------------------------
+p2 <- ggplot(summ_core, aes(x = method_label, y = ARI, fill = method_label)) +
+  geom_col(width = 0.6, alpha = 0.8) +
+  geom_errorbar(aes(ymin = ARI - ARI_SE, ymax = ARI + ARI_SE), width = 0.2) +
+  facet_wrap(~ scenario) +
+  labs(title = "Figure 2. Clustering Performance (ARI)",
+       subtitle = "Post-selection Refit closes the oracle gap",
+       x = NULL, y = "Adjusted Rand Index") +
+  theme_bw() + theme(axis.text.x = element_text(angle = 30, hjust = 1), legend.position = "none")
+p2
+ggsave(file.path(plot_dir, "02_ARI_comparison.png"), p2, width = 10, height = 6)
+
+# ----------------------------------------------------------
+# [그림 3] MSE_delta_S 비교 (효과 추정 정확도)
+# ----------------------------------------------------------
+p3 <- ggplot(summ_core, aes(x = method_label, y = MSE_delta_S, fill = method_label)) +
+  geom_col(width = 0.6, alpha = 0.8) +
+  geom_errorbar(aes(ymin = 0, ymax = MSE_delta_S + MSE_delta_S_SE), width = 0.2) +
+  facet_wrap(~ scenario) +
+  labs(title = "Figure 3. Estimation Error of Mean-Shift Effects",
+       subtitle = "Refit significantly reduces estimation MSE",
+       x = NULL, y = expression(MSE[Delta*S])) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 30, hjust = 1), legend.position = "none")
+p3
+ggsave(file.path(plot_dir, "03_MSE_delta_S.png"), p3, width = 10, height = 6)
+
+# ----------------------------------------------------------
+# [그림 4] 전체 Benchmark ARI 비교 (Ranking)
+# ----------------------------------------------------------
+summ_bench_clean <- summ_p %>%
+  filter(!is.na(ARI)) %>%
+  filter(!is.na(method_label)) %>%
+  mutate(method_label = fct_drop(method_label))
+
+p4 <- ggplot(summ_p, aes(x = fct_reorder(method_label, ARI), y = ARI)) +
+  geom_col(fill = "steelblue", alpha = 0.8) +
+  geom_errorbar(aes(ymin = ARI - ARI_SE, ymax = ARI + ARI_SE), width = 0.2) +
+  coord_cartesian(ylim = c(0, 0.8))+
+  labs(title = "Figure 4. ARI Ranking across All Benchmarks",
+       x = "Methods", y = "Adjusted Rand Index") +
+  theme_minimal()
+p4
+ggsave(file.path(plot_dir, "04_full_benchmark_ARI.png"), p4, width = 8, height = 8)
+
+# ----------------------------------------------------------
+# [그림 5] Support Recovery (TPR/FPR)
+# ----------------------------------------------------------
+support_long <- summ_p %>%
+  filter(!is.na(TPR_SE)) %>% 
+  select(method_label, scenario, TPR, FPR) %>%
+  pivot_longer(cols = c(TPR, FPR), names_to = "metric", values_to = "value")
+
+p5 <- ggplot(support_long, aes(x = method_label, y = value, fill = metric)) +
+  geom_col(position = "dodge", alpha = 0.8) +
+  facet_wrap(~ scenario) +
+  labs(title = "Figure 5. Variable Selection Performance",
+       subtitle = "TPR and FPR comparisons",
+       x = NULL, y = "Rate") +
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+p5
+ggsave(file.path(plot_dir, "05_support_recovery.png"), p5, width = 12, height = 6)
+
+# ----------------------------------------------------------
+# [표 1] 미팅용 요약 테이블 생성
+# ----------------------------------------------------------
+meeting_table <- summ_p %>%
+  select(method, ARI, TPR, FPR, R_mean, MSE_delta_S) %>%
+  mutate(across(where(is.numeric), ~ round(., 3)))
+
+# gridExtra를 이용한 표 이미지 저장
+if (requireNamespace("gridExtra", quietly = TRUE)) {
+  png(file.path(plot_dir, "meeting_summary_table.png"), width = 800, height = 400)
+  gridExtra::grid.table(meeting_table)
+  dev.off()
+}
+
+print(meeting_table)
+cat("\n시각화가 완료되었습니다. 결과물은 'figures_szl_refit' 폴더에서 확인하세요.\n")
