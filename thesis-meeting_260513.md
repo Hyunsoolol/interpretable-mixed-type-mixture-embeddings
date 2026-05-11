@@ -433,10 +433,17 @@ $$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat r_{ij} \log \hat 
 *   **Shrinkage 관찰:** Naive Lasso는 $\text{TPR}=1, \hat S=5$로 변수를 정확히 찾았으나, $R_{\text{mean}}=0.478$로 효과 크기를 절반 이하로 줄여 ARI가 0.467에 머물렀다.
 *   **Refit 효과:** 동일 support에서 refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.967$, ARI=0.663**으로 Oracle 수준(0.668)까지 성능을 회복했다. 이는 가설 **(H2)**와 **(H3)**을 강력하게 지지한다.
 
+<img width="988" height="690" alt="image" src="https://github.com/user-attachments/assets/cfb64f24-a313-4c2f-a7df-cbeb04d6a121" />
 Figure 1. Mean-heterogeneity effect의 회복 정도. 
 Naive Lasso는 true support를 찾았음에도 \(R_{\text{mean}}<1\)로 mean contrast를 과소추정하는 반면, SZL-Refit은 \(R_{\text{mean}}\approx 1\) 수준으로 effect size를 복원한다. 이는 Naive Lasso의 ARI 손실이 support recovery 실패가 아니라 shrinkage bias에서 기인한다는 해석을 뒷받침한다.
 
-<img width="988" height="690" alt="image" src="https://github.com/user-attachments/assets/cfb64f24-a313-4c2f-a7df-cbeb04d6a121" />
+<img width="988" height="690" alt="image" src="https://github.com/user-attachments/assets/59512033-6b5d-4b13-9c7b-4f93d2e75b17" />
+Figure 2. ARI 기준 군집 성능 비교. 
+Post-selection refit을 수행하면 lasso screening estimator의 ARI가 크게 개선되며 oracle reference와의 gap이 대부분 줄어든다. 또한 SZL-Refit과 ASZL-Refit의 성능이 거의 유사하므로, 현재 pilot setting에서는 adaptive weighting보다 refit에 의한 debiasing 효과가 주요 개선 요인으로 해석된다.
+
+<img width="988" height="690" alt="image" src="https://github.com/user-attachments/assets/3b5d979f-af74-4412-8de0-e87e3f83541e" />
+Figure 3. Mean-shift effect 추정오차 비교. 
+Unpenalized refit 이후 \(\mathrm{MSE}_{\Delta,S}\)가 크게 감소한다. 이는 refit 단계가 단순히 군집 할당 성능만 개선하는 것이 아니라, 선택된 변수의 cluster-specific mean contrast 자체를 oracle 수준에 가깝게 복원함을 보여준다.
 
 ---
 
@@ -455,6 +462,10 @@ Naive Lasso는 true support를 찾았음에도 \(R_{\text{mean}}<1\)로 mean con
 | MB Variable Sel | SelvarMix (nonW) | 0.396 | 1.000 | 0.042 | 9.000 | 0.988 | 0.1234 |
 | Proposed | **SZL-Refit** | **0.663** | **1.000** | **0.000** | **5.000** | **0.967** | **0.0082** |
 | Oracle | True-parameter oracle | 0.668 | 1.000 | 0.000 | 5.000 | 1.000 | 0.0000 |
+
+<img width="1478" height="610" alt="image" src="https://github.com/user-attachments/assets/1f8cd0fc-a18e-4edb-b1ee-768d8243ff0c" />
+Figure 4. 전체 benchmark의 ARI 순위. 
+SZL-Refit은 oracle reference에 가까운 ARI를 보이며, Sparse K-means 및 SCFS와 같은 강한 외부 benchmark와도 경쟁적인 성능을 보인다. 단, 현재 결과는 \(R=3\) pilot이므로 순위 자체는 예비적 결과로 해석한다.
 
 ### 8.5.6 결과 해석
 
