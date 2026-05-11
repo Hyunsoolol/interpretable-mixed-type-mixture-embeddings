@@ -619,22 +619,25 @@ Figure 7. $a=1.4$ setting에서의 mean-shift effect 추정오차 비교. Naive 
 
 **Table 4. 전체 Benchmark 성능 비교, $p=100, a=1.4, R=10$**
 
-|**Group**|**Method**|**ARI**|**TPR**|**FPR**|**S^**|**Rmean​**|**MSEΔ,S​**|
-|---|---|---|---|---|---|---|---|
-|Traditional|K-means|0.647|NA|NA|NA|0.984|0.0152|
-|Traditional|PCA + K-means|0.665|NA|NA|NA|0.978|0.0115|
-|Model-based|Unpenalized GMM|0.647|NA|NA|NA|0.977|0.0155|
-|Sparse Clustering|Sparse K-means pkg EBIC|0.771|1.000|0.000|5.000|1.005|0.0115|
-|Spectral/Screen|SCFS pkg Lloyd|0.693|1.000|0.006|5.600|0.974|0.0328|
-|MB Variable Sel|SelvarMix strict $S$|0.557|0.620|0.000|3.100|0.633|0.5413|
-|MB Variable Sel|SelvarMix non-$W$|0.557|1.000|0.039|8.700|0.922|0.0980|
-|MB Variable Sel|SelvarMix non-$W$ + Refit|0.557|1.000|0.039|8.700|0.986|0.0091|
-|MB Variable Sel|SelvarMix proxy EBIC|0.790|1.000|0.000|5.000|0.989|0.0090|
-|Sparse Clustering|Sparse K-means proxy EBIC|0.793|1.000|0.000|5.000|1.011|0.0097|
-|Proposed|**SZL-Refit**|**0.795**|**1.000**|**0.000**|**5.000**|**0.981**|**0.0093**|
-|Auxiliary|ASZL-Refit|0.791|1.000|0.000|5.000|0.983|0.0090|
-|Oracle|Oracle-feature GMM|0.786|1.000|0.000|5.000|0.993|0.0089|
-|Oracle|True-parameter oracle|0.795|1.000|0.000|5.000|1.000|0.0000|
+| **Group**         | **Method**                      | **ARI**   | **TPR**   | **FPR**   | **S^**    | **Rmean​** | **MSEΔ,S​** |
+| ----------------- | ------------------------------- | --------- | --------- | --------- | --------- | ---------- | ----------- |
+| Traditional       | K-means                         | 0.647     | NA        | NA        | NA        | 0.984      | 0.0152      |
+| Traditional       | PCA + K-means                   | 0.665     | NA        | NA        | NA        | 0.978      | 0.0115      |
+| Model-based       | Unpenalized GMM                 | 0.647     | NA        | NA        | NA        | 0.977      | 0.0155      |
+| Sparse Clustering | Sparse K-means pkg EBIC         | 0.771     | 1.000     | 0.000     | 5.000     | 1.005      | 0.0115      |
+| Sparse Clustering | Sparse K-means proxy EBIC       | 0.793     | 1.000     | 0.000     | 5.000     | 1.011      | 0.0097      |
+| Spectral/Screen   | SCFS pkg Lloyd                  | 0.693     | 1.000     | 0.006     | 5.600     | 0.974      | 0.0328      |
+| Spectral/Screen   | SCFS proxy EBIC                 | 0.575     | 1.000     | 0.000     | 5.000     | 0.997      | 0.0675      |
+| MB Variable Sel   | SelvarMix strict $S$            | 0.557     | 0.620     | 0.000     | 3.100     | 0.633      | 0.5413      |
+| MB Variable Sel   | SelvarMix non-$W$               | 0.557     | 1.000     | 0.039     | 8.700     | 0.922      | 0.0980      |
+| MB Variable Sel   | SelvarMix non-$W$ + Refit       | 0.557     | 1.000     | 0.039     | 8.700     | 0.986      | 0.0091      |
+| MB Variable Sel   | SelvarMix proxy EBIC            | 0.790     | 1.000     | 0.000     | 5.000     | 0.989      | 0.0090      |
+| Ablation          | Naive Lasso at refit λ\lambda λ | 0.514     | 1.000     | 0.000     | 5.000     | 0.584      | 0.2545      |
+| Penalized GMM     | Naive Lasso self-tuned          | 0.662     | 1.000     | 0.003     | 5.300     | 0.758      | 0.0813      |
+| **Proposed**      | **SZL-Refit**                   | **0.795** | **1.000** | **0.000** | **5.000** | **0.981**  | **0.0093**  |
+| Auxiliary         | ASZL-Refit                      | 0.791     | 1.000     | 0.000     | 5.000     | 0.983      | 0.0090      |
+| Oracle            | Oracle-feature GMM              | 0.786     | 1.000     | 0.000     | 5.000     | 0.993      | 0.0089      |
+| Oracle            | True-parameter oracle           | 0.795     | 1.000     | 0.000     | 5.000     | 1.000      | 0.0000      |
 
 전체 benchmark 결과에서도 SZL-Refit은 가장 높은 수준의 ARI를 보인다. 전통적 baseline인 K-means, PCA + K-means, Unpenalized GMM은 $a=1.2$에 비해 성능이 상승하여 ARI가 약 0.65 수준에 도달하였다. 이는 signal이 강해질수록 full-feature clustering도 군집 구조를 어느 정도 회복할 수 있음을 보여준다. 그러나 SZL-Refit은 ARI 0.795로 이들보다 여전히 높으며, 선택 변수의 mean contrast recovery 역시 oracle 수준에 가깝다.
 
