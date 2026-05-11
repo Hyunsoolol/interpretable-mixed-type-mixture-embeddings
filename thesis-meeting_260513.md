@@ -10,11 +10,11 @@
 
 본 보고서는 직전 미팅에서 검토된 group lasso 기반 설계(HP-L, HP-AL)를 발전시키는 과정에서 발견된 다음 사항들을 정리하고, 새 메인 설계를 제시한다.
 
-첫째, 직전 시뮬레이션에서 Naive Lasso는 주 분석 구간 ($a \in \lbrace 1.6, 1.4, 1.2 \rbrace$)에서 TPR이 거의 1, FPR이 매우 낮음에도 ARI는 oracle-feature baseline 대비 0.15–0.20의 gap을 보였다. 이 패턴은 변수 선택의 실패가 아니라 lasso shrinkage로 인한 mean contrast 과소추정에 의한 것으로 해석된다.
+첫째, 직전 시뮬레이션에서 직전 시뮬레이션에서 Naive Lasso는 주 분석 구간 전반에서 TPR이 높고 FPR이 낮았으며, 특히 중간·약신호 구간 $a=1.4,1.2$에서 oracle-feature baseline 대비 의미 있는 ARI gap을 보였다. 이 패턴은 변수선택의 실패라기보다, lasso shrinkage로 인한 선택 변수의 mean contrast 과소추정 가능성을 시사한다.
 
 둘째, 이 해석을 따르면 본 연구의 핵심 병목은 screening이 아니라 **post-screening estimation의 shrinkage bias**이다. 따라서 lasso를 final estimator가 아닌 screening estimator로 사용하고, 선택 변수 위에서 unpenalized GMM refit을 수행하는 **두 단계 debiased pipeline**이 자연스러운 해법이 된다.
 
-셋째, 이 설계는 group penalty 구조를 사용하지 않으므로 직전 미팅의 연구 방향(group lasso 미사용)과 정합한다. Sum-to-zero 제약 하에서 element-wise lasso의 좌표별 sparsity는 변수 단위로 자연스럽게 aggregate되어 mean-heterogeneity-driving variable selection이라는 연구 타깃을 직접 달성한다.
+셋째, 이 설계는 group penalty 구조를 사용하지 않으므로 직전 미팅의 연구 방향(group lasso 미사용)과 정합한다. Sum-to-zero 제약 하에서 $\delta_{\cdot k}=0$와$\delta_{1k}=\cdots=\delta_{Kk}=0$는 동치이므로, element-wise lasso 결과를 변수 단위 mean contrast로 aggregate하여 $S_0$를 추정할 수 있다. 다만 element-wise lasso의 penalty geometry는 component-level sparsity를 유도하므로, group-lasso와 동일한 penalty 구조로 해석하지 않는다.
 
 본 보고서는 이러한 관찰을 바탕으로 새 메인 방법론 **Debiased Sum-to-Zero Lasso Mixture Clustering (SZL-Refit)** 을 제안하고, 그 모형, 추정 절차, 이론 구조, 시뮬레이션 설계, 실데이터 분석 계획을 정리한다.
 
@@ -374,49 +374,113 @@ $$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat r_{ij} \log \hat 
 본 figure는 본 연구의 핵심 메시지 ("lasso는 변수를 찾으나 effect size를 줄이고, refit이 이를 복원한다")를 직접 전달하는 역할을 한다.
 
 ---
+## 8.5 예비 시뮬레이션 결과: $p=100, a=1.2$ (Pilot)
 
-## 9. 실데이터 분석 계획
+본 섹션은 전체 시뮬레이션에 앞서, 연구의 핵심 가설을 검증하기 위해 수행된 $p=100, a=1.2$ 환경에서의 pilot sanity check 결과를 정리한다.
 
-핵심 검증 실험과 전체 벤치마크 실험 이후, 다음 두 종류의 실데이터에 SZL-Refit을 적용한다.
+### 8.5.1 실험 목적
+본 예비 실험의 목적은 본 연구의 핵심 가설인 다음 질문에 답하는 것이다.
 
-**후보 1. Gene expression data.** 고차원 ($p \gg n$ 또는 큰 $p$) 환경, cluster-specific gene effect $\delta_{\cdot k}$ 의 생물학적 해석 가능성, 선행연구(Pan and Shen 2007 등)와의 비교 가능성을 고려한 자연스러운 응용이다.
+> **"Screening failure가 아니라 shrinkage bias가 ARI gap의 주 원인인가?"**
 
-**후보 2. Single-cell RNA-seq data (preprocessing 후).** 큰 $p$ 환경, cell-type-defining gene을 mean-heterogeneity-driving variable로 해석할 수 있는 명료한 응용이다.
+구체적으로 다음 세 가지 가설을 확인한다.
+*   **(H1) Sure screening:** Sum-to-zero lasso는 true active variables를 빠뜨리지 않고 찾아낼 수 있는가?
+*   **(H2) Shrinkage bias:** Naive Lasso는 변수를 찾더라도 lasso shrinkage로 인해 mean contrast를 과소추정하는가? ($R_k < 1$)
+*   **(H3) Refit recovery:** 선택 변수 위에서 unpenalized refit을 수행하면 $R_k$와 ARI가 oracle 수준으로 회복되는가?
 
-각 데이터에 대해 ARI 외에 다음을 함께 보고한다.
+### 8.5.2 시뮬레이션 세팅
+*   **Data Structure:** $n=300, p=100, K=3, q=5$
+*   **Signal Strength:** $a=1.2$ (중저신호 구간), 반복수 $R=3$
+*   **Active Set:** $S_0 = \{1, 2, 3, 4, 5\}$
+*   **Pattern:** 각 active variable에 대해 군집 평균 패턴을 $(-a, 0, a)$로 설정.
+*   **Covariance:** $\Sigma = I_p$ (공분산 추정 영향을 제거하고 mean contrast 효과에 집중)
+*   **Tuning:** EBIC (Refit 방법의 경우 refit estimator의 likelihood를 기준으로 계산)
 
-- 선택 feature 수와 그 안정성 (subsampling 또는 bootstrap stability)
-- Refit 전후 mean contrast 변화 (실데이터 버전 $R_k$ 분석)
-- Classification entropy 변화
-- 알려진 subtype label과의 ARI 비교
-- 선택 feature의 해석 가능성 (known marker 비율 등)
+### 8.5.3 비교 모형
+이번 pilot에서는 방법론의 효과를 다각도로 분석하기 위해 아래 모델들을 비교하였다.
+
+| 구분 | 방법 | 설명 |
+| :--- | :--- | :--- |
+| **Traditional** | K-means | 전체 변수 기반 기본 clustering |
+| **Traditional** | PCA + K-means | PCA 차원축소 후 K-means |
+| **Model-based** | Unpenalized GMM | 전체 변수에서 비벌점 GMM |
+| **Sparse Clustering** | Sparse K-means | `sparcl` 패키지 기반, EBIC-tuned |
+| **Spectral/Screening** | SCFS | `SC-FS` 패키지 기반 |
+| **Model-based VS** | SelvarMix (SS) | `SelvarMix`의 strict selected clustering set |
+| **Model-based VS** | SelvarMix (nonW) | SelvarMix에서 noise ($W$)로 분류되지 않은 변수 전체 |
+| **Ablation** | Naive Lasso (at refit $\lambda$) | SZL-Refit과 동일 support에서 refit을 제거한 결과 |
+| **Penalized GMM** | Naive Lasso (self-tuned) | Lasso likelihood 기반 EBIC로 선택한 standalone lasso |
+| **Proposed** | **SZL-Refit** | **Plain sum-to-zero lasso screening + unpenalized refit** |
+| **Auxiliary** | ASZL-Refit | Adaptive SZL screening + unpenalized refit |
+| **Oracle** | Oracle-feature GMM | 정답 변수 집합 $S_0$를 알고 수행한 GMM refit |
+| **Oracle** | True-parameter oracle | True parameter를 이용한 이상적 classification 결과 |
 
 ---
 
-## 10. 본 연구의 기여와 향후 작업
+### 8.5.4 핵심 검증 결과 (Main Hypothesis Testing)
 
-### 10.1 기여 요약
+**Table 1. 핵심 방법론 비교 결과**
 
-본 연구의 기여는 다음 세 가지이다.
+| Method | ARI | TPR | FPR | $\hat S$ | $\text{MSE}_{\mu}$ | $\text{MSE}_{\Delta,S}$ | $R_{\text{mean}}$ | Entropy |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Naive Lasso at refit $\lambda$ | 0.467 | 1.000 | 0.000 | 5.000 | 0.0170 | 0.2672 | 0.478 | 0.200 |
+| Naive Lasso self-tuned | 0.506 | 1.000 | 0.014 | 6.333 | 0.0081 | 0.0888 | 0.700 | 0.289 |
+| **SZL-Refit** | **0.663** | **1.000** | **0.000** | **5.000** | **0.0040** | **0.0082** | **0.967** | **0.287** |
+| ASZL-Refit | 0.665 | 1.000 | 0.000 | 5.000 | 0.0039 | 0.0076 | 0.968 | 0.288 |
+| Oracle-feature GMM | 0.633 | 1.000 | 0.000 | 5.000 | 0.0041 | 0.0076 | 1.007 | 0.276 |
+| True-parameter oracle | 0.668 | 1.000 | 0.000 | 5.000 | 0.0000 | 0.0000 | 1.000 | 0.288 |
 
-**(C1) Effects-style mean parameterization for unsupervised Gaussian mixture clustering.** $\mu_j = \mu_0 + \delta_j$ with $\sum_j \delta_{jk} = 0$ 를 비지도 mixture clustering에 명시적으로 도입하고, 이를 통해 mean-heterogeneity-driving variable의 정의와 effect size 추적을 자연스럽게 만든다.
+*   **Shrinkage 관찰:** Naive Lasso는 $\text{TPR}=1, \hat S=5$로 변수를 정확히 찾았으나, $R_{\text{mean}}=0.478$로 효과 크기를 절반 이하로 줄여 ARI가 0.467에 머물렀다.
+*   **Refit 효과:** 동일 support에서 refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.967$, ARI=0.663**으로 Oracle 수준(0.668)까지 성능을 회복했다. 이는 가설 **(H2)**와 **(H3)**을 강력하게 지지한다.
 
-**(C2) Debiased two-stage pipeline for mean-heterogeneity selection.** Lasso를 screening 도구로만 사용하고 unpenalized refit으로 shrinkage bias를 제거하는 SZL-Refit pipeline을 제시하며, 이를 통해 ARI gap의 원인을 selection failure와 shrinkage bias로 분리하여 분석할 수 있다.
+---
 
-**(C3) Two-stage oracle property.** Sure screening, selection size control, oracle refit equivalence 의 세 결과를 결합한 통합 정리를 본 연구의 메인 이론으로 제시한다.
+### 8.5.5 전체 Benchmark Pilot 결과
 
-### 10.2 차기 작업
+**Table 2. 전체 Benchmark 성능 비교**
 
-본 미팅 이후 진행할 작업은 다음 순서를 따른다.
+| Group | Method | ARI | TPR | FPR | $\hat S$ | $R_{\text{mean}}$ | $\text{MSE}_{\Delta,S}$ |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Traditional | K-means | 0.502 | NA | NA | NA | 0.954 | 0.0362 |
+| Traditional | PCA + K-means | 0.489 | NA | NA | NA | 0.962 | 0.0383 |
+| Model-based | Unpenalized GMM | 0.501 | NA | NA | NA | 0.945 | 0.0319 |
+| Sparse Clustering | Sparse K-means | 0.622 | 1.000 | 0.000 | 5.000 | 1.028 | 0.0112 |
+| Spectral/Screen | SCFS | 0.561 | 1.000 | 0.007 | 5.667 | 0.994 | 0.0186 |
+| MB Variable Sel | SelvarMix (SS) | 0.396 | 0.800 | 0.000 | 4.000 | 0.828 | 0.2981 |
+| MB Variable Sel | SelvarMix (nonW) | 0.396 | 1.000 | 0.042 | 9.000 | 0.988 | 0.1234 |
+| Proposed | **SZL-Refit** | **0.663** | **1.000** | **0.000** | **5.000** | **0.967** | **0.0082** |
+| Oracle | True-parameter oracle | 0.668 | 1.000 | 0.000 | 5.000 | 1.000 | 0.0000 |
 
-1. 8.1 절 핵심 검증 실험 수행 ($p \in \lbrace 100, 300 \rbrace$, $a \in \lbrace 1.6, 1.4, 1.2 \rbrace$, $R \geq 100$).
-2. 핵심 검증 결과를 바탕으로 SZL-Refit과 ASZL-Refit 의 본문 위치 (메인/보조) 최종 확정.
-3. 전체 벤치마크 실험 수행 (SelvarMix, SC-FS 포함).
-4. 이론 챕터의 가정 정밀화와 Theorems 1–3 의 증명 작성.
-5. 실데이터 분석 (gene expression 또는 single-cell RNA-seq).
-6. Manuscript 초고 작성.
+### 8.5.6 결과 해석
 
-본 보고서에서 제안한 SZL-Refit 의 설계, 이론 구조, 시뮬레이션 계획에 대한 검토와 의견을 부탁드린다.
+1.  **Lasso의 병목은 변수선택이 아닌 Shrinkage Bias:** Naive Lasso는 변수($S_0$)는 정확히 찾아냈으나, 효과 크기(mean contrast)를 과도하게 축소하여 ARI 손실을 발생시켰다. (H2 지지)
+2.  **SZL-Refit의 Oracle 도달:** Unpenalized refit을 통해 mean contrast를 복원($R_{\text{mean}} \approx 1$)함으로써 Oracle ARI와 통계적으로 동등한 수준에 도달했다. (H3 지지)
+3.  **ASZL-Refit의 효율성:** 현재 $p=100, a=1.2$ 환경에서는 Adaptive Lasso의 이득이 미미했다. 따라서 **Plain SZL-Refit을 메인 방법론으로 유지**하고 ASZL-Refit은 확장형으로 둔다.
+4.  **SelvarMix의 역할 재정의:** SelvarMix는 변수를 역할(S, R, U, W)별로 나누기 때문에, 단순 선택 변수 집합($SS$)과 비교하기보다 `nonW` 집합과 `Refit`을 결합하여 별도의 role-based benchmark로 보고하는 것이 공정하다.
+
+---
+
+### 8.5.7 Pilot 결과의 한계 및 향후 작업
+*   **Monte Carlo 변동성:** $R=3$의 결과이므로 통계적 유의성 확보를 위해 $R \geq 100$ 확장이 필요하다.
+*   **고차원 약신호 환경:** $p=300, a=1.2$ 등 더 어려운 조건에서의 강건성을 추가 검증해야 한다.
+*   **공분산 구조:** $\Sigma = I_p$ 가정을 해제하고 대각 공분산 추정 시의 성능을 확인해야 한다.
+
+### 8.5.8 현재 pilot 결과에 따른 의사결정
+
+| 쟁점 | 현재 결과 | 결정 |
+| :--- | :--- | :--- |
+| **Naive Lasso의 문제** | Support는 정확히 찾지만 $R_{\text{mean}}=0.478$ | **Shrinkage bias가 핵심 병목**임을 명시 |
+| **Refit 효과** | ARI가 Oracle 수준으로 회복됨 | **Refit 단계 유지 및 강조** |
+| **Plain vs Adaptive** | 성능 차이가 매우 작음 | **SZL-Refit(Main), ASZL(Secondary)** |
+| **외부 Benchmark** | Sparse K-means 등이 의미 있는 성능 보임 | 최종 시뮬레이션에 포함 유지 |
+| **실험 규모** | $R=3$ Pilot | **$R=100$으로 확장 수행** |
+
+---
+
+### 8.5.9 다음 시뮬레이션 계획
+1.  **Step 1:** 현재 세팅 반복수 확장 ($p=100, a=1.2, R=50 \sim 100$)
+2.  **Step 2:** 초고차원 약신호 세팅 ($p=300, a=1.2$) - 본 연구의 핵심 타겟 구간
+3.  **Step 3:** 전체 Grid 확장 및 Robustness 테스트 (Unequal mixing, Correlated predictors)
 
 ---
 
