@@ -433,6 +433,11 @@ $$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat r_{ij} \log \hat 
 *   **Shrinkage 관찰:** Naive Lasso는 $\text{TPR}=1, \hat S=5$로 변수를 정확히 찾았으나, $R_{\text{mean}}=0.478$로 효과 크기를 절반 이하로 줄여 ARI가 0.467에 머물렀다.
 *   **Refit 효과:** 동일 support에서 refit을 수행한 **SZL-Refit은 $R_{\text{mean}}=0.967$, ARI=0.663**으로 Oracle 수준(0.668)까지 성능을 회복했다. 이는 가설 **(H2)**와 **(H3)**을 강력하게 지지한다.
 
+Figure 1. Mean-heterogeneity effect의 회복 정도. 
+Naive Lasso는 true support를 찾았음에도 \(R_{\text{mean}}<1\)로 mean contrast를 과소추정하는 반면, SZL-Refit은 \(R_{\text{mean}}\approx 1\) 수준으로 effect size를 복원한다. 이는 Naive Lasso의 ARI 손실이 support recovery 실패가 아니라 shrinkage bias에서 기인한다는 해석을 뒷받침한다.
+
+<img width="988" height="690" alt="image" src="https://github.com/user-attachments/assets/cfb64f24-a313-4c2f-a7df-cbeb04d6a121" />
+
 ---
 
 ### 8.5.5 전체 Benchmark Pilot 결과
