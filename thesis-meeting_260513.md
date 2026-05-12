@@ -864,6 +864,7 @@ $$R_k = \frac{|\hat\delta_{\cdot k}|_2}{|\delta_{\cdot k}^0|_2}, \qquad k \in S_
 
 작은 예시와 본문 시뮬레이션이 같은 패턴을 일관되게 보여주며, 이는 SZL-Refit이 shrinkage debiasing 효과를 통해 mean-heterogeneity selection과 cluster recovery를 동시에 수행한다는 본 연구의 주장을 뒷받침한다.
 
+---
 
 ## 부록 B. SZL-Refit의 직관적 예시
 
