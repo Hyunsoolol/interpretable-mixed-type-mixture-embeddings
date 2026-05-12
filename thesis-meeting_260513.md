@@ -744,8 +744,9 @@ $p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었
 - Xie, B., Pan, W. and Shen, X. (2008). Penalized model-based clustering with cluster-specific diagonal covariance matrices and grouped variables. *Electronic Journal of Statistics*, 2, 168–212.
 - Zou, H. (2006). The adaptive lasso and its oracle properties. *Journal of the American Statistical Association*, 101(476), 1418–1429.
 
+---
 
-### 부록. SZL-Refit의 직관적 예시
+## 부록. SZL-Refit의 직관적 예시
 
 본 연구의 핵심 아이디어는 다음과 같다.
 
