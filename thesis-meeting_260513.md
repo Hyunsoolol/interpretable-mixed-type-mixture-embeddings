@@ -431,14 +431,14 @@ $$\text{Entropy} = -\frac{1}{n} \sum_{i=1}^n \sum_{j=1}^K \hat{r}_{ij} \log \hat
 
 **Table 1. 핵심 방법론 비교 결과, $p=100, a=1.2, R=10$**
 
-| **Method**                     | **ARI**   | **TPR**   | **FPR**   | **S^**    | **MSEμ​**  | **MSEΔ,S​** | **Rmean​** | **Entropy** |
-| ------------------------------ | --------- | --------- | --------- | --------- | ---------- | ----------- | ---------- | ----------- |
-| Naive Lasso at refit $\lambda$ | 0.454     | 1.000     | 0.000     | 5.000     | 0.0114     | 0.1639      | 0.596      | 0.245       |
-| Naive Lasso self-tuned         | 0.464     | 1.000     | 0.007     | 5.700     | 0.0076     | 0.0876      | 0.703      | 0.311       |
-| **SZL-Refit**                  | **0.659** | **1.000** | **0.000** | **5.000** | **0.0039** | **0.0126**  | **0.976**  | **0.293**   |
-| ASZL-Refit                     | 0.658     | 1.000     | 0.000     | 5.000     | 0.0039     | 0.0122      | 0.977      | 0.293       |
-| Oracle-feature GMM             | 0.676     | 1.000     | 0.000     | 5.000     | 0.0039     | 0.0125      | 1.011      | 0.285       |
-| True-parameter oracle          | 0.686     | 1.000     | 0.000     | 5.000     | 0.0000     | 0.0000      | 1.000      | 0.297       |
+| **Method**                     | **ARI**   | **TPR**   | **FPR**   | **S^**    | **$MSE_{\mu}$​** | **$MSE_{\Delta,S}$​** | **$R_{mean}​$** | **Entropy** |
+| ------------------------------ | --------- | --------- | --------- | --------- | ---------------- | --------------------- | --------------- | ----------- |
+| Naive Lasso at refit $\lambda$ | 0.454     | 1.000     | 0.000     | 5.000     | 0.0114           | 0.1639                | 0.596           | 0.245       |
+| Naive Lasso self-tuned         | 0.464     | 1.000     | 0.007     | 5.700     | 0.0076           | 0.0876                | 0.703           | 0.311       |
+| **SZL-Refit**                  | **0.659** | **1.000** | **0.000** | **5.000** | **0.0039**       | **0.0126**            | **0.976**       | **0.293**   |
+| ASZL-Refit                     | 0.658     | 1.000     | 0.000     | 5.000     | 0.0039           | 0.0122                | 0.977           | 0.293       |
+| Oracle-feature GMM             | 0.676     | 1.000     | 0.000     | 5.000     | 0.0039           | 0.0125                | 1.011           | 0.285       |
+| True-parameter oracle          | 0.686     | 1.000     | 0.000     | 5.000     | 0.0000           | 0.0000                | 1.000           | 0.297       |
 
 
 $R=10$ 결과에서도 핵심 패턴은 유지된다. Naive Lasso at refit $\lambda$는 true support를 정확히 회복한다 ($\text{TPR}=1, \text{FPR}=0, \hat{S}=5$). 그러나 선택된 변수의 mean contrast는 여전히 강하게 shrinkage된다 ($R_{\text{mean}}=0.596, \text{MSE}_{\Delta,S}=0.1639$). 이에 따라 ARI는 0.454에 머문다.
@@ -477,23 +477,23 @@ Figure 3. Mean-shift effect 추정오차 비교. Unpenalized refit 이후 $\text
 
 **Table 2. 전체 Benchmark 성능 비교, $p=100, a=1.2, R=10$**
 
-| **Group**         | **Method**                     | **ARI**   | **TPR**   | **FPR**   | **S^**    | **Rmean​** | **MSEΔ,S​** |
-| ----------------- | ------------------------------ | --------- | --------- | --------- | --------- | ---------- | ----------- |
-| Traditional       | K-means                        | 0.506     | NA        | NA        | NA        | 0.966      | 0.0349      |
-| Traditional       | PCA + K-means                  | 0.504     | NA        | NA        | NA        | 0.958      | 0.0357      |
-| Model-based       | Unpenalized GMM                | 0.482     | NA        | NA        | NA        | 0.946      | 0.0451      |
-| Sparse Clustering | Sparse K-means                 | 0.634     | 1.000     | 0.000     | 5.000     | 1.042      | 0.0198      |
-| Spectral/Screen   | SCFS                           | 0.503     | 1.000     | 0.013     | 6.200     | 0.966      | 0.0549      |
-| MB Variable Sel   | SelvarMix strict $S$           | 0.369     | 0.520     | 0.000     | 2.600     | 0.586      | 0.5263      |
-| MB Variable Sel   | SelvarMix non-$W$              | 0.369     | 1.000     | 0.037     | 8.500     | 0.949      | 0.1116      |
-| MB Variable Sel   | SelvarMix non-$W$ + Refit      | 0.369     | 1.000     | 0.037     | 8.500     | 1.001      | 0.0353      |
-| MB Variable Sel   | SelvarMix proxy EBIC           | 0.662     | 1.000     | 0.000     | 5.000     | 0.996      | 0.0159      |
-| Ablation          | Naive Lasso at refit $\lambda$ | 0.454     | 1.000     | 0.000     | 5.000     | 0.596      | 0.1639      |
-| Penalized GMM     | Naive Lasso self-tuned         | 0.464     | 1.000     | 0.007     | 5.700     | 0.703      | 0.0876      |
-| **Proposed**      | **SZL-Refit**                  | **0.659** | **1.000** | **0.000** | **5.000** | **0.976**  | **0.0126**  |
-| Auxiliary         | ASZL-Refit                     | 0.658     | 1.000     | 0.000     | 5.000     | 0.977      | 0.0122      |
-| Oracle            | Oracle-feature GMM             | 0.676     | 1.000     | 0.000     | 5.000     | 1.011      | 0.0125      |
-| Oracle            | True-parameter oracle          | 0.686     | 1.000     | 0.000     | 5.000     | 1.000      | 0.0000      |
+| **Group**         | **Method**                     | **ARI**   | **TPR**   | **FPR**   | **$\hat{S}_{mean}$** | **$R_{mean}​$** | **$MSE_{\Delta,S}$​** |
+| ----------------- | ------------------------------ | --------- | --------- | --------- | -------------------- | --------------- | --------------------- |
+| Traditional       | K-means                        | 0.506     | NA        | NA        | NA                   | 0.966           | 0.0349                |
+| Traditional       | PCA + K-means                  | 0.504     | NA        | NA        | NA                   | 0.958           | 0.0357                |
+| Model-based       | Unpenalized GMM                | 0.482     | NA        | NA        | NA                   | 0.946           | 0.0451                |
+| Sparse Clustering | Sparse K-means                 | 0.634     | 1.000     | 0.000     | 5.000                | 1.042           | 0.0198                |
+| Spectral/Screen   | SCFS                           | 0.503     | 1.000     | 0.013     | 6.200                | 0.966           | 0.0549                |
+| MB Variable Sel   | SelvarMix strict $S$           | 0.369     | 0.520     | 0.000     | 2.600                | 0.586           | 0.5263                |
+| MB Variable Sel   | SelvarMix non-$W$              | 0.369     | 1.000     | 0.037     | 8.500                | 0.949           | 0.1116                |
+| MB Variable Sel   | SelvarMix non-$W$ + Refit      | 0.369     | 1.000     | 0.037     | 8.500                | 1.001           | 0.0353                |
+| MB Variable Sel   | SelvarMix proxy EBIC           | 0.662     | 1.000     | 0.000     | 5.000                | 0.996           | 0.0159                |
+| Ablation          | Naive Lasso at refit $\lambda$ | 0.454     | 1.000     | 0.000     | 5.000                | 0.596           | 0.1639                |
+| Penalized GMM     | Naive Lasso self-tuned         | 0.464     | 1.000     | 0.007     | 5.700                | 0.703           | 0.0876                |
+| **Proposed**      | **SZL-Refit**                  | **0.659** | **1.000** | **0.000** | **5.000**            | **0.976**       | **0.0126**            |
+| Auxiliary         | ASZL-Refit                     | 0.658     | 1.000     | 0.000     | 5.000                | 0.977           | 0.0122                |
+| Oracle            | Oracle-feature GMM             | 0.676     | 1.000     | 0.000     | 5.000                | 1.011           | 0.0125                |
+| Oracle            | True-parameter oracle          | 0.686     | 1.000     | 0.000     | 5.000                | 1.000           | 0.0000                |
 
 
 전체 benchmark에서도 SZL-Refit은 강한 성능을 보인다. **Sparse K-means**는 ARI 0.634, $\text{TPR}=1, \text{FPR}=0, \hat{S}=5$로 매우 강한 benchmark이다. 그러나 SZL-Refit은 ARI 0.659로 Sparse K-means보다 약간 높고, $\text{MSE}_{\Delta,S}=0.0126$으로 mean-shift effect 추정에서도 더 안정적이다.
@@ -583,14 +583,14 @@ Figure 4. ARI Comparison across Benchmarks in the $R=10$ Pilot Study. 전체 ben
 
 **Table 3. 핵심 방법론 비교 결과, $p=100, a=1.4, R=10$**
 
-| **Method**                     | **ARI**   | **TPR**   | **FPR**   | **S^**    | **MSEμ​**  | **MSEΔ,S​** | **Rmean​** | **Entropy** |
-| ------------------------------ | --------- | --------- | --------- | --------- | ---------- | ----------- | ---------- | ----------- |
-| Naive Lasso at refit $\lambda$ | 0.514     | 1.000     | 0.000     | 5.000     | 0.0162     | 0.2545      | 0.584      | 0.243       |
-| Naive Lasso self-tuned         | 0.662     | 1.000     | 0.003     | 5.300     | 0.0075     | 0.0813      | 0.758      | 0.272       |
-| **SZL-Refit**                  | **0.795** | **1.000** | **0.000** | **5.000** | **0.0038** | **0.0093**  | **0.981**  | **0.201**   |
-| ASZL-Refit                     | 0.791     | 1.000     | 0.000     | 5.000     | 0.0038     | 0.0090      | 0.983      | 0.201       |
-| Oracle-feature GMM             | 0.786     | 1.000     | 0.000     | 5.000     | 0.0039     | 0.0089      | 0.993      | 0.198       |
-| True-parameter oracle          | 0.795     | 1.000     | 0.000     | 5.000     | 0.0000     | 0.0000      | 1.000      | 0.200       |
+| **Method**                     | **ARI**   | **TPR**   | **FPR**   | **$\hat{S}_{mean}$** | **$MSE_{\mu}$​** | **$MSE_{\Delta,S}$​** | **$R_{mean}​$** | **Entropy** |
+| ------------------------------ | --------- | --------- | --------- | -------------------- | ---------------- | --------------------- | --------------- | ----------- |
+| Naive Lasso at refit $\lambda$ | 0.514     | 1.000     | 0.000     | 5.000                | 0.0162           | 0.2545                | 0.584           | 0.243       |
+| Naive Lasso self-tuned         | 0.662     | 1.000     | 0.003     | 5.300                | 0.0075           | 0.0813                | 0.758           | 0.272       |
+| **SZL-Refit**                  | **0.795** | **1.000** | **0.000** | **5.000**            | **0.0038**       | **0.0093**            | **0.981**       | **0.201**   |
+| ASZL-Refit                     | 0.791     | 1.000     | 0.000     | 5.000                | 0.0038           | 0.0090                | 0.983           | 0.201       |
+| Oracle-feature GMM             | 0.786     | 1.000     | 0.000     | 5.000                | 0.0039           | 0.0089                | 0.993           | 0.198       |
+| True-parameter oracle          | 0.795     | 1.000     | 0.000     | 5.000                | 0.0000           | 0.0000                | 1.000           | 0.200       |
 
 $a=1.4$에서도 Naive Lasso at refit $\lambda$는 true support를 정확히 찾았다($\text{TPR}=1, \text{FPR}=0, \hat{S}=5$). 그러나 선택된 active variables의 mean contrast는 여전히 크게 shrinkage된다 ($R_{\text{mean}}=0.584, \text{MSE}_{\Delta,S}=0.2545$). 그 결과 ARI는 0.514에 머물렀다.
 
@@ -627,25 +627,25 @@ Figure 7. $a=1.4$ setting에서의 mean-shift effect 추정오차 비교. Naive 
 
 **Table 4. 전체 Benchmark 성능 비교, $p=100, a=1.4, R=10$**
 
-| **Group**         | **Method**                     | **ARI**   | **TPR**   | **FPR**   | **S^**    | **Rmean​** | **MSEΔ,S​** |
-| ----------------- | ------------------------------ | --------- | --------- | --------- | --------- | ---------- | ----------- |
-| Traditional       | K-means                        | 0.647     | NA        | NA        | NA        | 0.984      | 0.0152      |
-| Traditional       | PCA + K-means                  | 0.665     | NA        | NA        | NA        | 0.978      | 0.0115      |
-| Model-based       | Unpenalized GMM                | 0.647     | NA        | NA        | NA        | 0.977      | 0.0155      |
-| Sparse Clustering | Sparse K-means pkg EBIC        | 0.771     | 1.000     | 0.000     | 5.000     | 1.005      | 0.0115      |
-| Sparse Clustering | Sparse K-means proxy EBIC      | 0.793     | 1.000     | 0.000     | 5.000     | 1.011      | 0.0097      |
-| Spectral/Screen   | SCFS pkg Lloyd                 | 0.693     | 1.000     | 0.006     | 5.600     | 0.974      | 0.0328      |
-| Spectral/Screen   | SCFS proxy EBIC                | 0.575     | 1.000     | 0.000     | 5.000     | 0.997      | 0.0675      |
-| MB Variable Sel   | SelvarMix strict $S$           | 0.557     | 0.620     | 0.000     | 3.100     | 0.633      | 0.5413      |
-| MB Variable Sel   | SelvarMix non-$W$              | 0.557     | 1.000     | 0.039     | 8.700     | 0.922      | 0.0980      |
-| MB Variable Sel   | SelvarMix non-$W$ + Refit      | 0.557     | 1.000     | 0.039     | 8.700     | 0.986      | 0.0091      |
-| MB Variable Sel   | SelvarMix proxy EBIC           | 0.790     | 1.000     | 0.000     | 5.000     | 0.989      | 0.0090      |
-| Ablation          | Naive Lasso at refit $\lambda$ | 0.514     | 1.000     | 0.000     | 5.000     | 0.584      | 0.2545      |
-| Penalized GMM     | Naive Lasso self-tuned         | 0.662     | 1.000     | 0.003     | 5.300     | 0.758      | 0.0813      |
-| **Proposed**      | **SZL-Refit**                  | **0.795** | **1.000** | **0.000** | **5.000** | **0.981**  | **0.0093**  |
-| Auxiliary         | ASZL-Refit                     | 0.791     | 1.000     | 0.000     | 5.000     | 0.983      | 0.0090      |
-| Oracle            | Oracle-feature GMM             | 0.786     | 1.000     | 0.000     | 5.000     | 0.993      | 0.0089      |
-| Oracle            | True-parameter oracle          | 0.795     | 1.000     | 0.000     | 5.000     | 1.000      | 0.0000      |
+| **Group**         | **Method**                     | **ARI**   | **TPR**   | **FPR**   | **$\hat{S}_{mean}$** | **$R_{mean}​$** | **$MSE_{\Delta,S}$​** |
+| ----------------- | ------------------------------ | --------- | --------- | --------- | -------------------- | --------------- | --------------------- |
+| Traditional       | K-means                        | 0.647     | NA        | NA        | NA                   | 0.984           | 0.0152                |
+| Traditional       | PCA + K-means                  | 0.665     | NA        | NA        | NA                   | 0.978           | 0.0115                |
+| Model-based       | Unpenalized GMM                | 0.647     | NA        | NA        | NA                   | 0.977           | 0.0155                |
+| Sparse Clustering | Sparse K-means pkg EBIC        | 0.771     | 1.000     | 0.000     | 5.000                | 1.005           | 0.0115                |
+| Sparse Clustering | Sparse K-means proxy EBIC      | 0.793     | 1.000     | 0.000     | 5.000                | 1.011           | 0.0097                |
+| Spectral/Screen   | SCFS pkg Lloyd                 | 0.693     | 1.000     | 0.006     | 5.600                | 0.974           | 0.0328                |
+| Spectral/Screen   | SCFS proxy EBIC                | 0.575     | 1.000     | 0.000     | 5.000                | 0.997           | 0.0675                |
+| MB Variable Sel   | SelvarMix strict $S$           | 0.557     | 0.620     | 0.000     | 3.100                | 0.633           | 0.5413                |
+| MB Variable Sel   | SelvarMix non-$W$              | 0.557     | 1.000     | 0.039     | 8.700                | 0.922           | 0.0980                |
+| MB Variable Sel   | SelvarMix non-$W$ + Refit      | 0.557     | 1.000     | 0.039     | 8.700                | 0.986           | 0.0091                |
+| MB Variable Sel   | SelvarMix proxy EBIC           | 0.790     | 1.000     | 0.000     | 5.000                | 0.989           | 0.0090                |
+| Ablation          | Naive Lasso at refit $\lambda$ | 0.514     | 1.000     | 0.000     | 5.000                | 0.584           | 0.2545                |
+| Penalized GMM     | Naive Lasso self-tuned         | 0.662     | 1.000     | 0.003     | 5.300                | 0.758           | 0.0813                |
+| **Proposed**      | **SZL-Refit**                  | **0.795** | **1.000** | **0.000** | **5.000**            | **0.981**       | **0.0093**            |
+| Auxiliary         | ASZL-Refit                     | 0.791     | 1.000     | 0.000     | 5.000                | 0.983           | 0.0090                |
+| Oracle            | Oracle-feature GMM             | 0.786     | 1.000     | 0.000     | 5.000                | 0.993           | 0.0089                |
+| Oracle            | True-parameter oracle          | 0.795     | 1.000     | 0.000     | 5.000                | 1.000           | 0.0000                |
 
 전체 benchmark 결과에서도 SZL-Refit은 가장 높은 수준의 ARI를 보인다. 전통적 baseline인 K-means, PCA + K-means, Unpenalized GMM은 $a=1.2$에 비해 성능이 상승하여 ARI가 약 0.65 수준에 도달하였다. 이는 signal이 강해질수록 full-feature clustering도 군집 구조를 어느 정도 회복할 수 있음을 보여준다. 그러나 SZL-Refit은 ARI 0.795로 이들보다 여전히 높으며, 선택 변수의 mean contrast recovery 역시 oracle 수준에 가깝다.
 
@@ -677,14 +677,14 @@ Figure 9. $a=1.4$ setting에서 feature-selection methods의 TPR 및 FPR 비교.
 
 두 setting을 종합하면, 본 연구의 핵심 가설은 일관되게 지지된다.
 
-| **Setting** | **Method**                     | **ARI**   | **S^**  | **Rmean​** | **MSEΔ,S​** |
-| ----------- | ------------------------------ | --------- | ------- | ---------- | ----------- |
-| $a=1.2$     | Naive Lasso at refit $\lambda$ | 0.454     | 5.0     | 0.596      | 0.1639      |
-| $a=1.2$     | **SZL-Refit**                  | **0.659** | **5.0** | **0.976**  | **0.0126**  |
-| $a=1.2$     | True-parameter oracle          | 0.686     | 5.0     | 1.000      | 0.0000      |
-| $a=1.4$     | Naive Lasso at refit $\lambda$ | 0.514     | 5.0     | 0.584      | 0.2545      |
-| $a=1.4$     | **SZL-Refit**                  | **0.795** | **5.0** | **0.981**  | **0.0093**  |
-| $a=1.4$     | True-parameter oracle          | 0.795     | 5.0     | 1.000      | 0.0000      |
+| **Setting** | **Method**                     | **ARI**   | **$\hat{S}_{mean}$** | **$R_{mean}​$** | **$MSE_{\Delta,S}$​** |
+| ----------- | ------------------------------ | --------- | -------------------- | --------------- | --------------------- |
+| $a=1.2$     | Naive Lasso at refit $\lambda$ | 0.454     | 5.0                  | 0.596           | 0.1639                |
+| $a=1.2$     | **SZL-Refit**                  | **0.659** | **5.0**              | **0.976**       | **0.0126**            |
+| $a=1.2$     | True-parameter oracle          | 0.686     | 5.0                  | 1.000           | 0.0000                |
+| $a=1.4$     | Naive Lasso at refit $\lambda$ | 0.514     | 5.0                  | 0.584           | 0.2545                |
+| $a=1.4$     | **SZL-Refit**                  | **0.795** | **5.0**              | **0.981**       | **0.0093**            |
+| $a=1.4$     | True-parameter oracle          | 0.795     | 5.0                  | 1.000           | 0.0000                |
 
 
 1. **Lasso의 한계:** 두 setting 모두에서 Naive Lasso는 true support를 정확히 찾지만($\text{TPR}=1, \text{FPR}=0$), mean contrast를 참값의 약 60% 수준으로 과소추정한다. signal strength가 증가해도 lasso shrinkage는 여전히 존재한다.
