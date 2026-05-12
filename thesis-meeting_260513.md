@@ -1,3 +1,4 @@
+
 # 연구 미팅 보고서
 
 **Debiased Sum-to-Zero Lasso Mixture Clustering for High-Dimensional Mean-Heterogeneity Selection**
@@ -742,3 +743,114 @@ $p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었
 - Witten, D. M. and Tibshirani, R. (2010). A framework for feature selection in clustering. *Journal of the American Statistical Association*, 105(490), 713–726.
 - Xie, B., Pan, W. and Shen, X. (2008). Penalized model-based clustering with cluster-specific diagonal covariance matrices and grouped variables. *Electronic Journal of Statistics*, 2, 168–212.
 - Zou, H. (2006). The adaptive lasso and its oracle properties. *Journal of the American Statistical Association*, 101(476), 1418–1429.
+
+
+### 부록. SZL-Refit의 직관적 예시
+
+본 연구의 핵심 아이디어는 다음과 같다.
+
+> **Naive Lasso는 중요한 변수를 찾을 수 있지만, 선택된 변수의 mean contrast를 shrinkage한다.**
+> 
+> **SZL-Refit은 lasso를 screening 도구로만 사용하고, 선택 변수 위에서 unpenalized GMM을 다시 적합하여 mean contrast를 복원한다.**
+
+이를 단순한 예시로 설명하면 다음과 같다.
+
+#### 1. 실제 데이터 생성 구조
+
+관측치가 세 개의 잠재 군집에서 생성된다고 하자 ($K=3$).
+
+전체 변수는 100개이고 ($p=100$), 실제로 군집을 구분하는 변수는 5개뿐이라고 하자.
+
+$$S_0 = \{1, 2, 3, 4, 5\}$$
+
+나머지 95개 변수는 군집 간 평균 차이가 없는 noise variable이다. 예를 들어 변수 1의 실제 군집별 평균이 다음과 같다고 하자.
+
+$$(\mu_{11}^0, \mu_{21}^0, \mu_{31}^0) = (-1.4, 0, 1.4)$$
+즉, 변수 1은 세 군집을 구분하는 active variable이다. 따라서 변수 1은 $1 \in S_0$ 이다.
+
+#### 2. Naive Lasso의 역할과 한계
+
+Naive Lasso는 다음과 같은 $\ell_1$ penalty를 사용한다.
+
+$$\lambda \sum_{k=1}^p \sum_{j=1}^K |\delta_{jk}|$$
+
+이 penalty는 noise variable의 mean deviation을 0으로 만들기 때문에 변수선택에는 유용하다. 예를 들어 실제 active set이 $S_0 = \{1, 2, 3, 4, 5\}$ 일 때, Naive Lasso가 $\hat{S} = \{1, 2, 3, 4, 5\}$ 를 정확히 찾을 수 있다.
+
+그러나 문제는 lasso penalty가 active variable의 효과 크기도 함께 줄인다는 점이다. 예를 들어 변수 1의 실제 평균 차이가 $(-1.4, 0, 1.4)$ 인데, Naive Lasso는 이를 다음처럼 추정할 수 있다.
+
+$$(-0.8, 0, 0.8)$$
+
+|**군집**|**실제 평균**|**Naive Lasso 추정**|
+|---|---|---|
+|**Cluster 1**|-1.4|-0.8|
+|**Cluster 2**|0|0|
+|**Cluster 3**|1.4|0.8|
+
+즉, Naive Lasso는 변수를 찾았지만, 군집 간 평균 차이를 실제보다 작게 추정한다. 이를 shrinkage bias라고 볼 수 있다.
+
+이때 recovery ratio는 다음과 같이 정의되며,
+
+$$R_k = \frac{\|\hat{\delta}_{\cdot k}\|_2}{\|\delta_{\cdot k}^0\|_2}$$
+
+Naive Lasso에서는 일반적으로 $R_k < 1$ 이 된다.
+
+현재 시뮬레이션에서도 Naive Lasso는 TPR이 1에 가깝고 $\hat{S}$ 가 정답 변수 수와 일치하지만, $R_{\text{mean}}$ 이 약 0.6 수준으로 나타났다. 이는 변수선택 실패가 아니라, 선택 변수의 mean contrast shrinkage가 ARI 손실의 원인일 수 있음을 의미한다.
+
+#### 3. 왜 ARI가 낮아지는가
+
+Gaussian mixture clustering에서 군집 할당은 posterior responsibility에 의해 결정된다.
+
+$$\hat{r}_{ij} = P(Z_i=j \mid X_i; \hat{\Theta})$$
+
+군집 평균 차이가 충분히 크면 각 observation이 어느 군집에 속하는지 비교적 명확해진다. 그러나 Naive Lasso가 mean contrast를 줄이면 군집 간 separation이 작아진다.
+
+- **실제 평균 차이:** $(-1.4, 0, 1.4)$
+    
+- **Naive Lasso 추정 평균 차이:** $(-0.8, 0, 0.8)$
+    
+
+후자의 경우 군집들이 실제보다 덜 분리되어 보이므로 posterior responsibility가 덜 명확해지고, 결과적으로 ARI가 낮아질 수 있다. 따라서 Naive Lasso의 문제는 $\hat{S} \neq S_0$ 가 아니라, $\|\hat{\delta}_{\cdot k}\|_2 < \|\delta_{\cdot k}^0\|_2$ 라는 추정 편향일 수 있다.
+
+#### 4. SZL-Refit의 해결 방식
+
+SZL-Refit은 이 문제를 selection과 estimation을 분리하여 해결한다.
+
+**Step 1. Lasso로 변수만 찾는다**
+
+먼저 sum-to-zero constrained lasso를 사용하여 active variable set을 screening한다.
+
+$$\hat{S} = \{1, 2, 3, 4, 5\}$$
+
+이 단계에서는 lasso 추정값 자체를 final estimator로 사용하지 않는다. 즉, shrinkage된 평균 추정값 $(-0.8, 0, 0.8)$ 을 최종 군집 평균으로 보고하지 않는다.
+
+**Step 2. 선택 변수 위에서 penalty 없이 다시 추정한다**
+
+선택된 변수 집합 $\hat{S}$ 를 고정하고, penalty 없이 GMM likelihood를 다시 최대화한다.
+
+$$\hat{\Theta}^{\text{refit}} = \arg\max_{\Theta: \delta_{\cdot k}=0, k \notin \hat{S}} \ell_n(\Theta)$$
+
+그러면 변수 1의 평균이 다음처럼 복원될 수 있다.
+
+$$(-1.35, 0.05, 1.38)$$
+
+|**군집**|**실제 평균**|**Naive Lasso**|**SZL-Refit**|
+|---|---|---|---|
+|**Cluster 1**|-1.4|-0.8|-1.35|
+|**Cluster 2**|0|0|0.05|
+|**Cluster 3**|1.4|0.8|1.38|
+
+따라서 Naive Lasso에서 $R_k < 1$ 이던 것이 SZL-Refit 이후에는 $R_k \approx 1$ 로 회복된다.
+
+#### 5. 핵심 비교 요약
+
+|**방법**|**변수선택**|**mean contrast 추정**|**예상 결과**|
+|---|---|---|---|
+|**Naive Lasso**|잘함|shrinkage됨|ARI gap 발생|
+|**SZL-Refit**|lasso로 잘함|refit으로 복원|ARI 회복|
+|**Oracle-feature GMM**|true $S_0$ 를 알고 fitting|penalty 없음|reference|
+
+즉, 본 연구의 핵심 메시지는 다음과 같다.
+
+> **Naive Lasso는 어떤 변수가 중요한지는 찾지만, 그 변수가 군집을 얼마나 강하게 구분하는지는 과소추정한다.**
+> 
+> **SZL-Refit은 lasso로 중요한 변수만 찾고, 선택된 변수에서 군집 평균 차이를 penalty 없이 다시 추정한다.**
