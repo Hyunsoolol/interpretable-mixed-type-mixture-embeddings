@@ -31,6 +31,8 @@
 
 본 연구는 두 가지 보완을 통해 위 흐름과 차별화된다. 첫째, mixture 평균에 대한 effects-style parameterization $\mu_j = \mu_0 + \delta_j$ with $\sum_j \delta_{jk} = 0$ 을 도입하여 mean-heterogeneity-driving variable의 정의와 효과 크기 추적을 명시화한다. 둘째, 회귀 문헌의 post-lasso/relaxed lasso 원리(Belloni and Chernozhukov, 2013; Meinshausen, 2007)를 EM 기반 비지도 mixture로 확장하여, lasso를 screening 도구로만 사용하고 unpenalized refit으로 shrinkage bias를 제거하는 debiased two-stage pipeline을 구축한다.
 
+<img width="1627" height="688" alt="image" src="https://github.com/user-attachments/assets/32283fe7-832f-472d-a6a8-801d805edeef" />
+
 ---
 
 ## 3. 연구 목표와 가설
@@ -745,8 +747,125 @@ $p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었
 - Zou, H. (2006). The adaptive lasso and its oracle properties. *Journal of the American Statistical Association*, 101(476), 1418–1429.
 
 ---
+## 부록 A. 방법론의 직관적 이해: 작은 예시
 
-## 부록. SZL-Refit의 직관적 예시
+본 부록은 본 연구의 핵심 아이디어를 **사람이 손으로 따라갈 수 있는 작은 예시**로 설명한다. 시뮬레이션 본문의 $p=100, 300$ 환경 대신 $K=3, p=6, n=90$ 의 단순한 setting에서 (1) 데이터의 구조, (2) Naive Lasso의 한계, (3) SZL-Refit의 작동 원리, (4) recovery ratio의 의미를 네 그림으로 차례로 시각화한다.
+
+---
+
+### A.1 예시 데이터 구조
+
+다음과 같이 단순한 데이터를 생성한다.
+
+- 군집 수 $K = 3$, 군집당 표본 30개, 전체 표본 $n = 90$.
+- 변수 수 $p = 6$. 그중 active variable은 $S_0 = \lbrace X_1, X_2 \rbrace$ 두 개뿐이며, 나머지 $X_3, X_4, X_5, X_6$는 noise variable이다.
+- Active variable에서는 세 군집의 참 평균이
+
+$$(\mu_{1,k}^0, \mu_{2,k}^0, \mu_{3,k}^0) = (-1.4,\ 0,\ 1.4), \quad k \in S_0 = \lbrace 1, 2 \rbrace$$
+
+이고, noise variable에서는 모든 군집의 평균이 0이다. 공분산은 $\Sigma = I_p$ 로 둔다.
+
+이 setting의 핵심은 다음 한 줄로 요약된다.
+
+> **여섯 개 변수 중 두 개($X_1, X_2$)만이 군집을 갈라놓고, 나머지 네 개는 군집 정보가 전혀 없는 noise이다.**
+
+<img width="1627" height="688" alt="image" src="https://github.com/user-attachments/assets/fc0cc778-e0e0-445c-a802-0005329e6ab3" />
+
+
+**Figure A.** 같은 데이터를 두 좌표 평면에 그렸다. (a) Active variable 평면 $X_1$–$X_2$에서는 세 군집이 세 모서리에 명확히 분리되어 있다. 검은색 + 표시는 참 군집 평균이다. (b) Noise variable 평면 $X_3$–$X_4$에서는 세 군집이 원점 근처에 섞여 있어 구분이 불가능하다. 즉 noise variable은 군집 정보를 담고 있지 않으며, 본 연구가 식별하고자 하는 mean-heterogeneity-driving variable은 (a) 에 해당하는 변수들이다.
+
+---
+
+### A.2 세 가지 추정 방법의 cluster mean 비교
+
+본 예시에서 세 가지 방법으로 cluster mean을 추정하였다.
+
+- **True (참값):** 데이터 생성 시 사용한 참 $\mu_{j,k}^0$.
+- **Naive Lasso:** Sum-to-zero constrained $\ell_1$-penalized GMM. 변수 선택은 정확히 active set $\lbrace X_1, X_2 \rbrace$ 를 찾아냈으나, 선택된 변수의 mean contrast가 lasso penalty에 의해 shrinkage된다.
+- **SZL-Refit:** Naive Lasso와 동일한 선택 변수 집합을 사용하되, 선택 변수 위에서 penalty 없이 GMM을 다시 적합한다.
+
+세 방법의 추정 결과는 다음과 같다 (소수점 둘째 자리에서 반올림).
+
+|변수|True|Naive Lasso|SZL-Refit|
+|---|---|---|---|
+|$X_1$ (cluster 1, 2, 3)|$(-1.40,\ 0.00,\ 1.40)$|$(-0.79,\ -0.03,\ 0.55)$|$(-1.34,\ 0.15,\ 1.10)$|
+|$X_2$ (cluster 1, 2, 3)|$(-1.40,\ 0.00,\ 1.40)$|$(-1.00,\ -0.11,\ 0.63)$|$(-1.55,\ 0.04,\ 1.18)$|
+|$X_3, \dots, X_6$|모두 $0$|모두 $0$|모두 $0$|
+
+세 방법 모두 **noise variable ($X_3$–$X_6$) 은 정확히 0으로 추정한다.** 즉 변수 선택 자체는 어느 방법이나 성공한다. 차이는 **active variable의 mean contrast 크기**에서 나타난다.
+
+<img width="1926" height="739" alt="image" src="https://github.com/user-attachments/assets/998f145a-41d8-4f47-88cd-49cf34cc4dd1" />
+
+**Figure B.** 같은 데이터에서 세 방법의 cluster mean을 막대그래프로 비교한 결과. 노란색 음영은 active variable이고, 점선은 참값이다. 가운데 panel(Naive Lasso)에서는 active variable의 막대 높이가 참값의 점선보다 명백히 작다. 즉 lasso penalty가 mean contrast를 깎아냈다. 오른쪽 panel(SZL-Refit)에서는 막대 높이가 점선에 거의 닿아 있다. 즉 unpenalized refit이 깎인 mean contrast를 복원하였다.
+
+---
+
+### A.3 Cluster separation의 시각화
+
+위의 mean contrast 차이가 실제 cluster 할당에 어떤 영향을 주는지 보기 위해, 추정된 cluster 중심을 데이터 위에 겹쳐 그렸다.
+
+<img width="1927" height="737" alt="image" src="https://github.com/user-attachments/assets/229f5fd1-0488-46de-b7cb-8677842c4439" />
+
+**Figure C.** 추정된 cluster 중심(큰 검은색 +)을 $X_1$–$X_2$ 평면 위에 그렸다. 각 panel 좌상단의 박스는 cluster 1과 cluster 3의 추정 중심 사이의 거리 $|\hat\mu_1 - \hat\mu_3|$ 이다.
+
+- **True:** $3.96$ — 참 군집 평균 간 거리.
+- **Naive Lasso:** $2.11$ — 참값의 약 53% 수준으로 수축되어, 세 cluster 중심이 원점 쪽으로 끌려 있다.
+- **SZL-Refit:** $3.66$ — 참값의 약 92% 수준으로 회복되어, 세 cluster 중심이 거의 참값 위치에 가까이 자리잡는다.
+
+Gaussian mixture clustering에서 cluster 할당은 posterior responsibility로 결정되므로, **cluster 중심 사이의 거리가 작아지면 각 관측치가 어느 군집에 속하는지 판단하기 어려워진다.** Naive Lasso의 ARI 손실은 바로 이 "중심 거리 수축"에서 기인하는 것으로 해석할 수 있다. SZL-Refit은 이 수축을 풀어주어 cluster 할당 성능을 회복한다.
+
+---
+
+### A.4 Recovery ratio의 해석
+
+본 연구는 mean contrast의 회복 정도를 정량화하기 위해 다음 지표를 사용한다.
+
+$$R_k = \frac{|\hat\delta_{\cdot k}|_2}{|\delta_{\cdot k}^0|_2}, \qquad k \in S_0.$$
+
+- $R_k = 1$ 은 추정된 mean contrast가 참값과 동일한 크기임을 의미한다.
+- $R_k < 1$ 은 shrinkage로 인해 mean contrast가 과소추정되었음을 의미한다.
+- $R_k > 1$ 은 estimation noise로 인한 과대추정 (이 setting에서는 거의 발생하지 않는다).
+
+본 예시에서 두 active variable에 대한 $R_k$ 의 평균은 다음과 같다.
+
+|방법|$R_k$ 평균|
+|---|---|
+|Naive Lasso|$0.53$|
+|SZL-Refit|$0.93$|
+|Oracle (참값)|$1.00$|
+
+<img width="1025" height="653" alt="image" src="https://github.com/user-attachments/assets/f006d03e-9727-4115-b2df-7c2520a66765" />
+
+**Figure D.** Recovery ratio $R_k$ 비교. Naive Lasso에서 0.53으로 크게 줄어든 mean contrast가 SZL-Refit에서 0.93으로 회복되어 oracle 수준에 가까워진다. 본 figure는 본 연구의 핵심 메시지를 단일 지표로 압축한 것으로, 본문 시뮬레이션의 hero figure ($R_k$ 분포)와 직접 대응한다.
+
+---
+
+### A.5 본 예시가 전달하는 메시지
+
+본 작은 예시에서 다음 네 가지 사실을 확인할 수 있다.
+
+1. **Naive Lasso의 변수 선택은 충분하다.** $\hat S = \lbrace X_1, X_2 \rbrace = S_0$.
+2. **그러나 Naive Lasso의 추정된 cluster mean은 참값보다 절반 가까이 작다.** $R_k \approx 0.53$.
+3. **이 수축은 cluster 중심 간 거리도 함께 줄여서, cluster 할당 성능을 약화시킨다.**
+4. **선택 변수를 고정하고 penalty 없이 다시 적합하면 mean contrast가 oracle 수준에 가까이 복원된다.** $R_k \approx 0.93$.
+
+본 연구의 메인 시뮬레이션 ($p \in \lbrace 100, 300 \rbrace$, $a \in \lbrace 1.2, 1.4, 1.6 \rbrace$) 에서 관찰된 패턴 — Naive Lasso의 TPR이 1이고 FPR이 0에 가까움에도 ARI는 oracle-feature baseline보다 0.15–0.20 낮은 현상 — 은 본 작은 예시가 보여주는 **shrinkage bias의 직접적인 결과**로 해석된다. SZL-Refit은 이 shrinkage를 제거하여 ARI를 oracle 수준에 근접하게 회복시킨다.
+
+---
+
+### A.6 본 예시와 본문 시뮬레이션의 대응
+
+|본 예시 (작은 예시)|본문 시뮬레이션|
+|---|---|
+|$K=3, n=90, p=6, q=2, a=1.4$|$K=3, n=300, p \in \lbrace 100, 300 \rbrace, q=5, a \in \lbrace 1.2, 1.4, 1.6 \rbrace$|
+|Active = $\lbrace X_1, X_2 \rbrace$, 손으로 확인 가능|Active = $\lbrace X_1, \dots, X_5 \rbrace$, 시뮬레이션으로 확인|
+|$R_k$ Naive 0.53 → SZL-Refit 0.93|$R_{\text{mean}}$ Naive 0.58 → SZL-Refit 0.98 ($p=100, a=1.4$)|
+|Cluster 중심 거리 2.11 → 3.66 (참값 3.96)|ARI 0.51 → 0.80 (oracle 0.79)|
+
+작은 예시와 본문 시뮬레이션이 같은 패턴을 일관되게 보여주며, 이는 SZL-Refit이 shrinkage debiasing 효과를 통해 mean-heterogeneity selection과 cluster recovery를 동시에 수행한다는 본 연구의 주장을 뒷받침한다.
+
+
+## 부록 B. SZL-Refit의 직관적 예시
 
 본 연구의 핵심 아이디어는 다음과 같다.
 
@@ -756,7 +875,7 @@ $p=100, a=1.4, R=10$ 결과에서도 $a=1.2$와 동일한 패턴이 유지되었
 
 이를 단순한 예시로 설명하면 다음과 같다.
 
-#### 1. 실제 데이터 생성 구조
+### B.1. 실제 데이터 생성 구조
 
 관측치가 세 개의 잠재 군집에서 생성된다고 하자 ($K=3$).
 
@@ -769,7 +888,7 @@ $$S_0 = \{1, 2, 3, 4, 5\}$$
 $$(\mu_{11}^0, \mu_{21}^0, \mu_{31}^0) = (-1.4, 0, 1.4)$$
 즉, 변수 1은 세 군집을 구분하는 active variable이다. 따라서 변수 1은 $1 \in S_0$ 이다.
 
-#### 2. Naive Lasso의 역할과 한계
+### B.2. Naive Lasso의 역할과 한계
 
 Naive Lasso는 다음과 같은 $\ell_1$ penalty를 사용한다.
 
@@ -797,7 +916,7 @@ Naive Lasso에서는 일반적으로 $R_k < 1$ 이 된다.
 
 현재 시뮬레이션에서도 Naive Lasso는 TPR이 1에 가깝고 $\hat{S}$ 가 정답 변수 수와 일치하지만, $R_{\text{mean}}$ 이 약 0.6 수준으로 나타났다. 이는 변수선택 실패가 아니라, 선택 변수의 mean contrast shrinkage가 ARI 손실의 원인일 수 있음을 의미한다.
 
-#### 3. 왜 ARI가 낮아지는가
+### B.3. 왜 ARI가 낮아지는가
 
 Gaussian mixture clustering에서 군집 할당은 posterior responsibility에 의해 결정된다.
 
@@ -812,7 +931,7 @@ $$\hat{r}_{ij} = P(Z_i=j \mid X_i; \hat{\Theta})$$
 
 후자의 경우 군집들이 실제보다 덜 분리되어 보이므로 posterior responsibility가 덜 명확해지고, 결과적으로 ARI가 낮아질 수 있다. 따라서 Naive Lasso의 문제는 $\hat{S} \neq S_0$ 가 아니라, $\|\hat{\delta}_{\cdot k}\|_2 < \|\delta_{\cdot k}^0\|_2$ 라는 추정 편향일 수 있다.
 
-#### 4. SZL-Refit의 해결 방식
+### B.4. SZL-Refit의 해결 방식
 
 SZL-Refit은 이 문제를 selection과 estimation을 분리하여 해결한다.
 
@@ -842,7 +961,7 @@ $$(-1.35, 0.05, 1.38)$$
 
 따라서 Naive Lasso에서 $R_k < 1$ 이던 것이 SZL-Refit 이후에는 $R_k \approx 1$ 로 회복된다.
 
-#### 5. 핵심 비교 요약
+### B.5. 핵심 비교 요약
 
 |**방법**|**변수선택**|**mean contrast 추정**|**예상 결과**|
 |---|---|---|---|
