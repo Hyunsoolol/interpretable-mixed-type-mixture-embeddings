@@ -101,24 +101,12 @@
 ---
 
 ### 4. 정리
-
-#### 4.1 피해야 할 주장 vs. 강조할 주장
-
-- **피해야 할 주장 (위험):** "본 연구가 처음으로 Lasso 후 MLE refit을 제안한다", "Lasso screening + unpenalized GMM refit이 본 연구의 유일한 novelty이다."
-    
-- **강조할 주장 (안전):** 본 연구는 Meynet-Maugis와 같은 broad screening-refit 계열에 속하나, 이를 Sum-to-zero Gaussian mean-effect mixture model에 맞게 재구성했습니다. 타깃을 $S_0={k:\delta_{\cdot k}^0\neq 0}$로 명시하고, Lasso shrinkage가 유발하는 ARI 저하를 $R_k$로 진단하여, 이를 Debiased mean-effect recovery로 완벽히 복원하는 통합 프레임워크를 제안합니다.
-    
-
-#### 4.2 논문 본문 삽입용 선행연구 정리 문단 (Introduction / Related Work)
-
-> 본 연구와 가장 가까운 선행연구는 Meynet and Maugis-Rabusseau의 Lasso-MLE procedure이다. 이 절차는 Pan and Shen의 $\ell_1$-regularization을 이용해 data-driven model collection을 만들고, 각 선택 모델에서 Lasso estimator가 아니라 MLE로 mixture parameters를 추정한다. 따라서 “Lasso로 후보 support 또는 model collection을 만든 뒤 MLE로 refit한다”는 큰 아이디어 자체는 본 연구의 새로운 기여로 주장할 수 없다. 본 연구의 차별점은 $\mu_j=\mu_0+\delta_j, \sum_j\delta_{jk}=0$라는 sum-to-zero mean-effect parameterization을 통해 $S_0={k:\delta_{\cdot k}^0\neq 0}$를 직접 target으로 두고, Lasso shrinkage가 mean contrast 및 ARI에 미치는 영향을 $R_k$, $\text{MSE}_{\Delta,S}$, entropy로 분해하며, selected support 위에서 debiased mean-effect recovery를 수행한다는 점이다.
-
-#### 4.3 Simulation 업데이트 전략
-
-논문의 방어력을 높이기 위해 시뮬레이션에 **Lasso-MLE-like baseline**을 추가해야 합니다.
-
-1. Pan-Shen 스타일의 Centered lasso path를 생성합니다.
-    
-2. 각 Support에서 Unpenalized diagonal GMM MLE를 적합합니다.
-    
-3. EBIC를 통해 모델을 선택하고, 이를 `Meynet_Lasso_MLE_like (with EBIC)` 명칭으로 벤치마크에 포함시킵니다.
+|**측면**|**SZL-Refit**|**Meynet (2012) Lasso-MLE**|**중복 여부**|
+|---|---|---|---|
+|**Stage 1: Lasso screening**|sum-to-zero $\ell_1$|Pan-Shen $\ell_1$|본질적 동일|
+|**Stage 2: unpenalized refit on selected support**|O|O (Theorem 6.2.2)|동일|
+|**Model selection criterion**|refit-EBIC|slope heuristics|도구 다름, 목적 동일|
+|**식별성 처리**|sum-to-zero parameterization (명시)|empirical centering (전처리)|등가|
+|**이론 보장**|sure screening + size control + oracle equivalence (목표)|Hellinger oracle inequality (증명 완료)|우리가 후행|
+|**응용**|gene expression / single-cell (계획)|functional data (wavelets)|다름|
+|**Variable role classification**|$S_0$ vs $S_0^c$ 단일|$(K, J_r, J_a)$ triple|Meynet이 더 정교|
