@@ -22,15 +22,16 @@ $$S_\mu = \varnothing, \qquad S_\sigma = \varnothing, \qquad E_\rho = \{(2,3)\}$
 
 ## 2. Gaussian Mixture with Cluster-specific Covariance
 
-$$Z_i \in \{1, \dots, K\}, \qquad P(Z_i=k) = \pi_k$$
+$$Z_i \in \{1, \dots, K\}, \quad P(Z_i = k) = \pi_k$$
 
-$$X_i \mid Z_i=k \sim N_p(\mu_k, \Sigma_k)$$
+$$X_i \mid Z_i = k \sim N_p(\mu_k, \Sigma_k)$$
 
 **Covariance decomposition:**
 
 $$\Sigma_k = D_k R_k D_k$$
 
-$$D_k = \operatorname{diag}(\sigma_{k1}, \dots, \sigma_{kp}), \qquad R_k = (\rho_{k,j\ell})_{j,\ell=1}^{p}$$
+$$D_k = \text{diag}(\sigma_{k1}, \dots, \sigma_{kp}), \quad R_k = (\rho_{k,j\ell})_{j, \ell=1}^{p}$$
+
 
 ---
 
@@ -62,11 +63,11 @@ $$S_\sigma^0 = \{j : \eta_{\cdot,j}^0 \neq 0\}$$
 
 ## 5. Correlation Effect
 
-$$\rho_{k,j\ell} = \operatorname{Corr}(X_j, X_\ell \mid Z=k)$$
+$$\rho_{k,j\ell} = \text{Corr}(X_j, X_\ell \mid Z = k)$$
 
 **Fisher transform:**
 
-$$z_{k,j\ell} = \operatorname{atanh}(\rho_{k,j\ell}) = \frac{1}{2} \log \left( \frac{1+\rho_{k,j\ell}}{1-\rho_{k,j\ell}} \right)$$
+$$z_{k,j\ell} = \text{atanh}(\rho_{k,j\ell}) = \frac{1}{2} \log \left( \frac{1 + \rho_{k,j\ell}}{1 - \rho_{k,j\ell}} \right)$$
 
 $$z_{k,j\ell} = z_{0,j\ell} + \gamma_{k,j\ell}$$
 
@@ -115,15 +116,15 @@ $$\hat N_k = \sum_{i=1}^{n} \hat r_{ik}$$
 
 ## 8. Weighted Moment Estimates
 
-- **Mean:** $\bar x_{k,j} = \frac{\sum_{i=1}^{n} \hat r_{ik}X_{ij}}{\hat N_k}$
+- **Mean:** $\bar x_{k,j} = \frac{\sum_{i=1}^{n} \hat r_{ik} X_{ij}}{\hat N_k}$
     
-- **Variance:** $\hat\sigma_{k,j}^2 = \frac{\sum_{i=1}^{n} \hat r_{ik}(X_{ij}-\bar x_{k,j})^2}{\hat N_k}$
+- **Variance:** $\hat \sigma_{k,j}^2 = \frac{\sum_{i=1}^{n} \hat r_{ik} (X_{ij} - \bar x_{k,j})^2}{\hat N_k}$
     
-- **Covariance:** $\hat\Sigma_{k,j\ell} = \frac{\sum_{i=1}^{n} \hat r_{ik}(X_{ij}-\bar x_{k,j})(X_{i\ell}-\bar x_{k,\ell})}{\hat N_k}$
+- **Covariance:** $\hat \Sigma_{k,j\ell} = \frac{\sum_{i=1}^{n} \hat r_{ik} (X_{ij} - \bar x_{k,j})(X_{i\ell} - \bar x_{k,\ell})}{\hat N_k}$
     
-- **Correlation:** $\hat\rho_{k,j\ell} = \frac{\hat\Sigma_{k,j\ell}}{\sqrt{\hat\sigma_{k,j}^2 \hat\sigma_{k,\ell}^2}}$
+- **Correlation:** $\hat \rho_{k,j\ell} = \frac{\hat \Sigma_{k,j\ell}}{\sqrt{\hat \sigma_{k,j}^2 \hat \sigma_{k,\ell}^2}}$
     
-- **Fisher-z correlation:** $\hat z_{k,j\ell} = \operatorname{atanh}(\hat\rho_{k,j\ell})$
+- **Fisher-z correlation:** $\hat z_{k,j\ell} = \text{atanh}(\hat \rho_{k,j\ell})$
     
 
 ---
