@@ -75,7 +75,7 @@ $$\bar{\eta}_j = \sum_h w_h \eta_{hj}, \qquad P_B(\eta) = \sum_{j=1}^{d} \left[ 
 
 $$\mathcal{L}^{B}_{\lambda_n}(\pi, \eta) = \ell_n(\pi, \eta) - n\lambda_n P_B(\eta)$$
 
-$$\widehat{S}_\lambda = \left\{ j : \left[ \sum_{h=1}^{K} w_h (\widehat{\eta}_{hj} - \widehat{\bar{\eta}}_j)^2 \right]^{1/2} > \epsilon \right\}$$
+$$\widehat{S}_\lambda = \left\lbrace j : \left[ \sum_{h=1}^{K} w_h (\widehat{\eta}_{hj} - \widehat{\bar{\eta}}_j)^2 \right]^{1/2} > \epsilon \right\rbrace$$
 
 모든 cluster에 공통으로 큰 좌표는 active set에서 제외된다. 따라서 support는 분포 설명이 아니라 cluster 판별을 기준으로 정의된다.
 
