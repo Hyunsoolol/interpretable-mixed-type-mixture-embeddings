@@ -44,7 +44,7 @@ $$\mu_h \text{ 비슷}, \ \Sigma_h \text{ 다름} \quad \longleftrightarrow \qua
 
 <img width="634" height="498" alt="image" src="https://github.com/user-attachments/assets/1dbe9aa3-0291-4f65-b7ac-4de9c95105ba" />
 
-"$\mu$가 같아도 $\kappa$가 다르면 $\eta = \kappa\mu$는 다르다. 그래서 두 군집을 구분할 수 있고, 그래서 페널티도 $\eta$에 걸어야 한다."
+" $\mu$가 같아도 $\kappa$가 다르면 $\eta = \kappa\mu$는 다르다. 그래서 두 군집을 구분할 수 있고, 그래서 페널티도 $\eta$에 걸어야 한다. "
 
 ### 1.3 vMF mixture
 
