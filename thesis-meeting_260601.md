@@ -4,45 +4,51 @@
 
 ### 1.1 문제 설정과 선행 연구
 
-비지도 상황에서 텍스트 임베딩 $x_i = \phi(d_i) \in \mathbb{R}^d$ 의 군집화를 다룬다. 고차원 텍스트 데이터의 클러스터링에서 두 가지 도전 과제가 있다.
+비지도 상황에서 텍스트 임베딩 $x_i = \phi(d_i) \in \mathbb{R}^d$ 의 군집화. 고차원 과제
+(i) 군집별 분산 추정
+(ii) 변수 선택
 
-첫째, 고차원에서 군집별 분산 구조를 추정하기 어렵다. 둘째, 모든 좌표가 군집 구조에 기여하지는 않으므로 변수 선택이 필요하다.
+본 연구는 다음 네 흐름에 기반한다.
 
-본 연구는 이 두 문제를 동시에 다루기 위해 다음 세 흐름의 선행 연구에 기반한다.
+- **Directional clustering** (Banerjee et al., 2005)
+  $$f(z \mid \mu, \kappa) = c_d(\kappa)\exp(\kappa \mu^\top z), \quad z, \mu \in \mathbb{S}^{d-1}$$
+  $\mathbb{S}^{d-1}$ 위 directional data에 대한 vMF mixture와 EM 추정.
 
-**고차원 directional clustering.** Banerjee et al. (2005) 는 unit hypersphere $\mathbb{S}^{d-1}$ 위의 directional data에 대해 vMF mixture model과 EM 기반 추정을 제안하였고, spherical k-means와의 연결을 보였다. 이는 L2 정규화된 텍스트 임베딩의 자연스러운 확률 모형이다.
+- **Sparse vMF mixture** (Rossi & Barbaro, 2022)
+  $$\mathcal{L}_p(\Theta) = \mathcal{L}(\Theta) - \beta \sum_h \|\mu_h\|_1$$
+  본 연구의 직접 출발점. 한계: penalized estimator를 최종 모형으로 사용 ($L_1$ bias 잔존), penalty 대상이 $\mu_h$ 이므로 판별항 $\kappa_h \mu_h$ 구조 미반영.
 
-**Sparse vMF mixture (Rossi & Barbaro, 2022).** "Mixture of von Mises-Fisher distribution with sparse prototypes" 는 vMF mixture에 $L_1$ penalized likelihood를 도입하여 sparse directional means를 추정한다.
+- **Cluster-contrast 변수 선택** (Pan & Shen, 2007; Wang & Zhu, 2008; Xie et al., 2008)
+  $$\mu_{hj} = \mu_{\ell j} \ \forall h, \ell \iff j \text{ 는 noise variable}$$
+  GMM에서 발전한 통찰. 본 연구는 이를 directional 자연모수 $\eta_h = \kappa_h \mu_h$ 에 적용한다.
 
-$$\mathcal{L}_p(\Theta) = \mathcal{L}(\Theta) - \beta \sum_{h=1}^{K} \|\mu_h\|_1$$
-
-EM 알고리즘과 path-following 전략으로 sparsity-likelihood trade-off를 탐색하고, BIC로 penalty parameter $\beta$ 를 자동 선택한다. financial reports 데이터를 포함한 실험에서 sparse prototype의 해석가능성을 보였다. 본 연구는 이 논문의 sparse vMF 구조를 출발점으로 삼되, 다음 두 한계를 개선한다.
-
-- penalized estimator를 그대로 최종 모형으로 사용하므로 $L_1$ shrinkage bias가 잔존한다.
-- penalty가 $\mu_h$ 에 걸려, 실제 cluster 판별항인 $\kappa_h \mu_h$ 의 구조를 반영하지 못한다.
-
-**Penalized model-based clustering with cluster-contrast logic.** Pan & Shen (2007), Wang & Zhu (2008), Xie et al. (2008) 등은 GMM 변수 선택에서 "noise variable은 cluster 간 공통 평균을 가져야 한다" 는 통찰을 발전시켰다. 이 cluster-contrast 사고를 directional setting의 자연모수에 적용하는 것이 본 연구의 핵심 아이디어다.
-
-**Two-stage Lasso-MLE principle (Meynet).** Meynet 계열 연구는 penalized estimator를 변수 선택의 screening 단계로만 사용하고, 선택된 support에서 unpenalized MLE로 refit하는 원칙을 발전시켰다. 본 연구는 이 원칙을 sparse directional mixture에 적용한다.
+- **Two-stage Lasso-MLE** (Meynet 계열)
+  $$\widehat{S}_\lambda \xrightarrow{\text{screening}} \widehat{\Theta}^{\text{refit}}_{\widehat{S}} \xrightarrow{\text{unpenalized MLE}} \text{final}$$
+  Penalized estimator는 screening 단계로만, 선택된 support에서 unpenalized refit.
 
 ### 1.2 GMM의 한계와 vMF로의 전환
 
-미팅 피드백은 평균이 비슷해도 퍼짐이 다르면 별개의 군집으로 분리하고 싶다는 것이었다. GMM에서 이를 다루려면 cluster별 공분산 $\Sigma_h$ 가 필요한데, 고차원에서 모수가 폭발한다.
+L2 정규화된 임베딩 $z_i \in \mathbb{S}^{d-1}$ 의 군집화에서 GMM 적용을 검토한다.
 
-| **모형** | **cluster당 퍼짐 모수** | **d=768 예시** |
-|---|---|---|
-| GMM full cov. | $d(d+1)/2$ | $\approx 3 \times 10^5$ |
-| GMM diag. cov. | $d$ | 768 |
-| vMF | 1 (scalar $\kappa_h$) | 1 |
-| vMF (common $\kappa$) | 0 (전역 1) | 0 |
+- **GMM full / diagonal:** 모수 수가 각각 $O(d^2)$, $O(d)$ 로 고차원에서 추정 불안정.
+- **GMM spherical** ($\Sigma_h = \sigma_h^2 I$): 모수는 cluster당 1개로 줄지만, sample space가 여전히 $\mathbb{R}^d$ 이므로 단위 norm 제약 $\|z_i\| = 1$ 과 불일치.
 
-vMF로 옮기면 두 setting이 다음과 같이 대응된다.
+vMF mixture 는 sample space 자체가 $\mathbb{S}^{d-1}$ 이고 $\kappa_h$ 가 angular spread 를 직접 표현한다. 본 연구는 **코사인 기하학과의 정합성**과 **고차원 모수 절약**을 동시에 만족한다는 점에서 vMF를 채택한다.
 
-$$\mu_h \text{ 비슷}, \ \Sigma_h \text{ 다름} \quad \longleftrightarrow \quad \mu_h \text{ 비슷}, \ \kappa_h \text{ 다름}$$
+| **모형**         | Sample space       | **cluster당 퍼짐 모수**    | **d=768 예시**            |
+| -------------- | ------------------ | --------------------- | ----------------------- |
+| GMM full cov.  | $\mathbb{R}^{d}$   | $d(d+1)/2$            | $\approx 3 \times 10^5$ |
+| GMM diag. cov. | $\mathbb{R}^{d}$   | $d$                   | 768                     |
+| GMM spherical  | $\mathbb{R}^{d}$   | 1                     | 1                       |
+| vMF            | $\mathbb{S}^{d-1}$ | 1 (scalar $\kappa_h$) | 1                       |
 
-단, vMF는 평균 방향 주변의 angular spread를 isotropic으로 가정하므로 좌표별 또는 방향별로 비등방인 분산 구조는 모델링하지 못한다. L2 정규화된 임베딩에서는 이 손실보다 모수 폭발을 해소하는 이득이 크다고 판단한다. 또한 component-specific $\kappa_h$ 가 너무 자유로우면 소수 관측치에 과적합할 수 있으므로, $n \ll d$ 인 경우에는 common $\kappa$ 또는 $\kappa_h$ 에 cap을 두는 방안을 함께 검토한다.
+vMF setting에서 평균이 비슷하지만 퍼짐이 다른 군집은 다음과 같이 표현된다.
+
+$$\mu_h \text{ 비슷}, \ \Sigma_h \text{ 다름} \ (\text{GMM}) \quad \longleftrightarrow \quad \mu_h \text{ 비슷}, \ \kappa_h \text{ 다름} \ (\text{vMF})$$
 
 <img width="634" height="498" alt="image" src="https://github.com/user-attachments/assets/1dbe9aa3-0291-4f65-b7ac-4de9c95105ba" />
+
+단, vMF는 평균 방향 주변의 angular spread를 isotropic으로 가정하므로 좌표별 또는 방향별로 비등방인 분산 구조는 모델링하지 못한다. L2 정규화된 임베딩에서는 이 한계보다 구면 기하학과의 정합성에서 얻는 이득이 크다고 판단한다. 또한 component-specific $\kappa_h$ 가 너무 자유로우면 소수 관측치에 과적합할 수 있으므로, $n \ll d$ 인 경우에는 common $\kappa$ 또는 $\kappa_h$ 에 cap을 두는 방안을 함께 검토한다.
 
 " $\mu$가 같아도 $\kappa$가 다르면 $\eta = \kappa\mu$는 다르다. 그래서 두 군집을 구분할 수 있고, 그래서 페널티도 $\eta$에 걸어야 한다. "
 
@@ -109,6 +115,7 @@ $$p(z_i \mid \pi, \eta) = \sum_{h=1}^{K} \pi_h c_d(\|\eta_h\|_2) \exp(\eta_h^\to
 
 ### 4.2 Stage 1: Cluster-contrast penalty
 
+$\mu_h$ 가 같아도 $\kappa_h$ 가 다르면 자연모수 $\eta_h = \kappa_h \mu_h$ 는 다르다. 두 군집의 판별 정보는 $\mu_h$ 차이가 아니라 $\eta_h$ 차이에 담겨 있으므로, 페널티 대상도 $\eta_h$ 가 되어야 한다.
 $$\bar{\eta}_j = \sum_h w_h \eta_{hj}, \qquad P_B(\eta) = \sum_{j=1}^{d} \left[ \sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2 \right]^{1/2}$$
 
 $$\mathcal{L}^{B}_{\lambda_n}(\pi, \eta) = \ell_n(\pi, \eta) - n\lambda_n P_B(\eta)$$
@@ -165,8 +172,6 @@ $$\text{BIC}(K,\lambda) = -2\ell_n(\widehat{\widetilde{\Theta}}^{\text{refit}}_{
 - Cosine similarity 기반 임베딩의 기하학적 구조와 부합한다.
 - 비지도 군집화 상황을 가정한다.
 
-> **검토 요청 1:** 텍스트 임베딩 군집화를 unit hypersphere 위 directional clustering으로 정식화하는 접근의 적절성에 대해 의견을 구한다.
-
 #### (2) 기본 확률 모형 — vMF mixture
 
 - GMM full covariance의 $O(Kd^2)$ 모수 폭발을 회피한다.
@@ -174,17 +179,11 @@ $$\text{BIC}(K,\lambda) = -2\ell_n(\widehat{\widetilde{\Theta}}^{\text{refit}}_{
 - 평균이 비슷해도 $\kappa_h$ 가 다르면 분리 가능한 구조를 제공한다.
 - 단, vMF는 평균 방향 주변의 angular spread를 isotropic으로 가정한다는 한계를 인지한다.
 
-> **검토 요청 2:** vMF mixture를 기본 확률 모형으로 채택하는 방향에 대한 의견과, Component-specific $\kappa_h$ 와 common $\kappa$ 중 default 설정에 대한 조언을 구한다.
-
 #### (3) 핵심 방법론 — Two-stage sparse vMF mixture
 
 - **Stage 1 (screening):** 자연모수 $\eta_h = \kappa_h \mu_h$ 에 cluster-contrast group penalty $P_B(\eta)$ 를 부여한 penalized vMF mixture로 active set $\widehat{S}_\lambda$ 를 추출.
 - **Stage 2 (refit):** 선택된 support에서 원래 $\mathbb{S}^{d-1}$ 위의 unpenalized sparse-vMF submodel로 refit.
 - Meynet식 Lasso-MLE 원칙을 directional mixture에 적용한 정식화.
-
-> **검토 요청 3:** Penalty 대상을 $\mu_h$ 가 아닌 $\eta_h = \kappa_h \mu_h$ 로 두는 선택, 그리고 cluster-contrast group penalty $P_B(\eta)$ 의 구조에 대한 의견을 구한다.
-
-> **검토 요청 4:** Penalized estimator를 최종 모형이 아닌 screening 단계로 사용하고, 원래 $\mathbb{S}^{d-1}$ 위에서 unpenalized refit을 수행하는 two-stage 구조의 적절성에 대한 의견을 구한다.
 
 #### (4) Novelty 위치 설정
 
@@ -195,8 +194,6 @@ $$\text{BIC}(K,\lambda) = -2\ell_n(\widehat{\widetilde{\Theta}}^{\text{refit}}_{
 | Sparse vMF mixture | Rossi & Barbaro (2022): $L_1$ on $\mu_h$ | $\eta_h$ 의 cluster-contrast group penalty |
 | Cluster-contrast 변수선택 | Pan & Shen (2007) 등: Euclidean GMM | Directional setting (vMF) 으로 확장 |
 | Two-stage Lasso-MLE | Meynet 계열: regression / GMM | Sparse directional mixture에 적용 |
-
-> **검토 요청 5:** "Sparse vMF 자체의 최초 제안" 이 아니라 "Cluster-contrast group penalty + Meynet식 two-stage refit을 directional mixture에 정식화" 로 novelty를 설정하는 방향에 대한 의견을 구한다.
 
 ### 7.2 후속 검토 항목
 
