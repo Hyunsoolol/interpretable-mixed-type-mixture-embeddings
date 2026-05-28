@@ -149,33 +149,6 @@ $\mu_{hj} = \mu_{\ell j}$ 라도 $\kappa_h \neq \kappa_\ell$ 이면 $\eta_{hj} \
    - **(B) 이중 페널티 (Sub):** $\mu_h, \kappa_h$ 각각 분리 페널티 (해석 보조용).
 3. Screening 후 $\mathbb{S}^{d-1}$ 위에서 unpenalized refit.
 
----
-
-## 6. 미팅 논의 사항
-
-### 6.1 검토 요청
-**(1) 문제 설정:** $z_i \in \mathbb{S}^{d-1}$ 위 directional clustering.
-**(2) 기본 모형:** vMF mixture. $\mu_h$ 같고 $\kappa_h$ 다른 시나리오 $\eta_h$ 차이로 식별. 한계: angular isotropic.
-**(3) 핵심 방법론: (C) 단일 페널티를 Main Method로 채택**
-- (C) 단일: $\eta_h$ 에 group penalty (사후확률 Log-odds 기반)
-- (B) 이중: $\mu_h$ group penalty + $\kappa_h$ 별도 페널티 (해석 보조용)
-- Stage 2 refit 공통
-
-**(4) Novelty**
-
-| 구분 | 기존 | 본 연구 |
-|---|---|---|
-| Sparse vMF | Rossi & Barbaro (2022) | (C) Main / (B) Sub cluster-contrast |
-| Cluster-contrast | Pan-Shen, Xie (GMM) | vMF 확장 |
-| Two-stage Lasso-MLE | Meynet | Directional |
-| 같은 평균 시나리오 | Xie (GMM) | (B), (C) 정식화 |
-
-### 6.2 검토 요청 사항
-- vMF angular isotropic 가정의 적합도 진단
-- $\kappa_h$ component-specific vs common
-- (B), (C) 식별성 및 weight $w_h$ 선택
-- **(C) 단일 페널티를 Main Method로 확정 (최적화 난이도 및 이론적 정합성 고려)** 및 (B)의 활용 방안 (보조 지표)
-- 비교 baseline: Rossi & Barbaro (2022), Witten & Tibshirani (2010), dense vMF + threshold
 
 ---
 
