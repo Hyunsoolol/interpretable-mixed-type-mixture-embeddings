@@ -36,6 +36,10 @@ $$\mathcal{L}_p = \mathcal{L} - \lambda_1 \sum_{h,j} |\mu_{hj}| - \lambda_2 \sum
 
 $$\mathcal{L}_p^{\text{(2)}} = \mathcal{L} - \lambda_1 \sum_j \left[\sum_h w_h(\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2} - \lambda_2 \sum_h |\kappa_h - \bar{\kappa}|$$
 
+- 평균 정보와 분산 정보를 **분리된 객체로 명시** → 분해 해석 가능
+- Hyperparameter $\lambda_1, \lambda_2$ 동시 튜닝
+- $\mu_h$ (단위 벡터) 와 $\kappa_h$ (양의 실수) 의 스케일 분리
+
 #### (C) vMF 단일 페널티 (제안)
 
 $$\mathcal{L}_p^{\text{(1)}} = \mathcal{L} - \lambda \sum_j \left[\sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2\right]^{1/2}, \qquad \eta_h = \kappa_h \mu_h$$
@@ -43,6 +47,11 @@ $$\mathcal{L}_p^{\text{(1)}} = \mathcal{L} - \lambda \sum_j \left[\sum_h w_h(\et
 $\mu_A = \mu_B = \mu$, $\kappa_A \neq \kappa_B$ 일 때:
 
 $$\eta_A - \eta_B = (\kappa_A - \kappa_B)\, \mu \neq 0$$
+
+- 평균과 분산이 자연모수 $\eta_h$ 로 **결합**
+- Hyperparameter 단일 $\lambda$
+- Posterior log-odds $(\eta_h - \eta_\ell)^\top z_i$ 와 직접 정합
+
 
 #### (D) 본 연구의 입장 — (B), (C) 모두 정식화
 
