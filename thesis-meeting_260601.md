@@ -129,7 +129,9 @@ $$\widehat{S}_{\lambda_1, \lambda_2}^{\text{(2)}} = \left\lbrace j : \left[\sum_
 
 ### 4.3 Stage 2: Sparse-vMF refit on $\mathbb{S}^{d-1}$
 
-제약: $\mu_{h,\widehat{S}^c} = 0,\ \|\mu_{h,\widehat{S}}\|_2 = 1$. 정규화 상수는 $c_d$ (not $c_{d_\lambda}$).
+$$\mu_{h,\widehat{S}^c} = 0, \quad \left\|\mu_{h,\widehat{S}}\right\|_2 = 1$$
+
+정규화 상수는 $c_d$ ($c_{d_\lambda}$ 아님).
 
 $$p(z_i \mid \widetilde{\Theta}_{\widehat{S}}) = \sum_h \widetilde{\pi}_h c_d(\widetilde{\kappa}_h) \exp\left( \widetilde{\kappa}_h \widetilde{\mu}_{h,\widehat{S}}^\top z_{i,\widehat{S}} \right)$$
 
