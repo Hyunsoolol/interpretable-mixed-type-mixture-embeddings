@@ -68,7 +68,7 @@ vMF mixture를 **parsimonious directional working model** 로 채택한다.
 
 모형의 경험적 적합도는 실험 단계에서 검증한다.
 
-<img width="23" height="78" alt="image" src="https://github.com/user-attachments/assets/2ed6761b-00f3-4fb8-852a-7004607e3584" />
+<img width="626" height="380" alt="image" src="https://github.com/user-attachments/assets/d2713c3a-7dc7-4392-8074-b6bf49a96eaa" />
 
 
 ## 2. 연구 아이디어: Two-stage refit
