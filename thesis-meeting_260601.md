@@ -50,6 +50,24 @@ $$p(z_i \mid \Theta) = \sum_{h=1}^{K} \pi_h c_d(\kappa_h) \exp(\kappa_h \mu_h^\t
 
 Banerjee et al. (2005) 은 vMF mixture가 spherical k-means의 확률모형적 일반화임을 보였다.
 
+### 1.4 vMF mixture 채택의 입장
+
+본 연구는 L2 정규화된 임베딩 $z_i \in \mathbb{S}^{d-1}$ 이 vMF mixture 
+분포를 정확히 따른다고 가정하지 않는다. 대신, 다음 세 가지 근거에 기반하여 
+vMF mixture를 **parsimonious directional working model** 로 채택한다.
+
+(i) **기하학적 부합:** Cosine similarity 기반 임베딩에서 의미 정보는 
+    방향에 담기므로, $\mathbb{S}^{d-1}$ 위 directional model이 자연스럽다.
+
+(ii) **모수 절약:** GMM full covariance의 $O(Kd^2)$ 모수를 cluster당 
+     scalar $\kappa_h$ 로 우회한다.
+
+(iii) **선행 연구의 표준성:** Banerjee et al. (2005) 이후 vMF mixture는 
+      고차원 텍스트 directional data 군집화의 표준 도구로 자리잡아왔다 
+      (Reisinger et al., 2010; Davidson et al., 2018; Rossi & Barbaro, 2022).
+
+모형의 경험적 적합도는 실험 단계에서 검증한다.
+
 ## 2. 연구 아이디어: Two-stage refit
 
 $$d_i \xrightarrow{\phi} x_i \in \mathbb{R}^d \xrightarrow{/\|\cdot\|_2} z_i \in \mathbb{S}^{d-1}$$
