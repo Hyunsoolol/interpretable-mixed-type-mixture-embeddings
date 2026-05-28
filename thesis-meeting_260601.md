@@ -14,6 +14,7 @@
 - **Cluster-contrast 변수 선택** (Pan & Shen, 2007; Wang & Zhu, 2008; Xie et al., 2008)
   $$\mu_{hj} = \mu_{\ell j} \ \forall h, \ell \iff j \text{ 는 noise variable}$$
 - **Two-stage Lasso-MLE** (Meynet 계열)
+
 $$\widehat{S}_\lambda \xrightarrow{\text{screening}} \widehat{\Theta}^{\text{refit}}_{\widehat{S}} \xrightarrow{\text{unpenalized MLE}} \text{final}$$
 
 ### 1.2 GMM 한계와 vMF 전환
