@@ -42,6 +42,8 @@ $$\mu_h \text{ 비슷}, \ \Sigma_h \text{ 다름} \quad \longleftrightarrow \qua
 
 단, vMF는 평균 방향 주변의 angular spread를 isotropic으로 가정하므로 좌표별 또는 방향별로 비등방인 분산 구조는 모델링하지 못한다. L2 정규화된 임베딩에서는 이 손실보다 모수 폭발을 해소하는 이득이 크다고 판단한다. 또한 component-specific $\kappa_h$ 가 너무 자유로우면 소수 관측치에 과적합할 수 있으므로, $n \ll d$ 인 경우에는 common $\kappa$ 또는 $\kappa_h$ 에 cap을 두는 방안을 함께 검토한다.
 
+<img width="634" height="498" alt="image" src="https://github.com/user-attachments/assets/1dbe9aa3-0291-4f65-b7ac-4de9c95105ba" />
+
 ### 1.3 vMF mixture
 
 $$f(z \mid \mu, \kappa) = c_d(\kappa)\exp(\kappa\mu^\top z), \qquad z, \mu \in \mathbb{S}^{d-1},\ \kappa \geq 0$$
