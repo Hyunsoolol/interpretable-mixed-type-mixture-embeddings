@@ -53,9 +53,11 @@ $$\eta_A - \eta_B = (\kappa_A - \kappa_B)\, \mu \neq 0$$
 - Posterior log-odds $(\eta_h - \eta_\ell)^\top z_i$ 와 직접 정합
 
 
-#### (D) 본 연구의 입장 — (B), (C) 모두 정식화
+#### (D) 본 연구의 입장 — (C) 단일 페널티를 Main Method로 채택
 
-| 측면 | (B) 이중 | (C) 단일 |
+본 연구는 이론적 정합성과 최적화 효율성을 고려하여 **(C) 단일 페널티를 Main Method**로 전개하며, (B)는 active set 분해를 위한 해석용(post-hoc) 보조 모형으로 활용합니다.
+
+| 측면 | (B) 이중 (Sub) | (C) 단일 (Main) |
 |---|---|---|
 | 페널티 | $\text{group}(\mu) + L_1(\kappa)$ | $\text{group}(\eta)$ |
 | Hyperparameter | $\lambda_1, \lambda_2$ | $\lambda$ |
@@ -67,12 +69,12 @@ $$\eta_A - \eta_B = (\kappa_A - \kappa_B)\, \mu \neq 0$$
 
 ### 1.3 GMM 한계와 vMF 전환
 
-| **모형**         | Sample space       | **cluster당 퍼짐 모수**    | **d=768**            |
+| **모형** | Sample space       | **cluster당 퍼짐 모수** | **d=768** |
 | -------------- | ------------------ | --------------------- | ----------------------- |
 | GMM full cov.  | $\mathbb{R}^{d}$   | $d(d+1)/2$            | $\approx 3 \times 10^5$ |
 | GMM diag. cov. | $\mathbb{R}^{d}$   | $d$                   | 768                     |
 | GMM spherical  | $\mathbb{R}^{d}$   | 1                     | 1                       |
-| **vMF**        | $\mathbb{S}^{d-1}$ | 1 ($\kappa_h$)        | 1                       |
+| **vMF** | $\mathbb{S}^{d-1}$ | 1 ($\kappa_h$)        | 1                       |
 
 $$\mu_h \text{ 비슷}, \ \Sigma_h \text{ 다름} \ (\text{GMM}) \quad \longleftrightarrow \quad \mu_h \text{ 비슷}, \ \kappa_h \text{ 다름} \ (\text{vMF})$$
 
@@ -96,7 +98,7 @@ vMF mixture를 **parsimonious directional working model** 로 채택. 정확한 
 $$d_i \xrightarrow{\phi} x_i \in \mathbb{R}^d \xrightarrow{/\|\cdot\|_2} z_i \in \mathbb{S}^{d-1}$$
 
 - **Stage 1 (screening):** 두 페널티 형태
-  - (C) 단일: $\widehat{S}_\lambda^{\text{(1)}} \leftarrow$ penalty on $\eta_h$
+  - (C) 단일: $\widehat{S}_\lambda^{\text{(1)}} \leftarrow$ penalty on $\eta_h$ (Main)
   - (B) 이중: $\widehat{S}_{\lambda_1, \lambda_2}^{\text{(2)}} \leftarrow$ penalty on $\mu_h, \kappa_h$
 - **Stage 2 (refit):** $\widehat{\Theta}^{\text{refit}}_{\widehat{S}} \leftarrow$ unpenalized sparse-vMF on $\mathbb{S}^{d-1}$
 
@@ -104,24 +106,29 @@ $$d_i \xrightarrow{\phi} x_i \in \mathbb{R}^d \xrightarrow{/\|\cdot\|_2} z_i \in
 
 | | Rossi & Barbaro (2022) | 본 연구 |
 |---|---|---|
-| Penalty 대상 | $\mu_h$ | (B) $\mu_h, \kappa_h$ / (C) $\eta_h$ |
+| Penalty 대상 | $\mu_h$ | (C) $\eta_h$ (Main) / (B) $\mu_h, \kappa_h$ |
 | 최종 추정량 | penalized | unpenalized refit |
 | Bias | $L_1$ 잔존 | refit 완화 |
 | Refit | 없음 | $\mathbb{S}^{d-1}$ 위 |
-
-$$\log \frac{P(h \mid z_i)}{P(\ell \mid z_i)} = \log \frac{\pi_h}{\pi_\ell} + \log \frac{c_d(\kappa_h)}{c_d(\kappa_\ell)} + (\eta_h - \eta_\ell)^\top z_i$$
 
 $\mu_{hj} = \mu_{\ell j}$ 라도 $\kappa_h \neq \kappa_\ell$ 이면 $\eta_{hj} \neq \eta_{\ell j}$.
 
 ## 4. 모형과 수식
 
-### 4.1 Reparametrization
+### 4.1 Reparametrization과 사후 확률의 Log-odds
 
 $$p(z_i \mid \pi, \eta) = \sum_{h=1}^{K} \pi_h c_d(\|\eta_h\|_2) \exp(\eta_h^\top z_i), \qquad \eta_h = \kappa_h \mu_h$$
 
+**사후 확률의 Log-odds 기반 페널티 유도:**
+군집 할당을 결정하는 사후 확률의 Log-odds는 자연모수 $\eta$의 차이로 전개됩니다.
+
+$$\log \frac{P(h \mid z_i)}{P(\ell \mid z_i)} = \log \frac{\pi_h}{\pi_\ell} + \log \frac{c_d(\kappa_h)}{c_d(\kappa_\ell)} + (\eta_h - \eta_\ell)^\top z_i$$
+
+위 수식에서 확인되듯, 두 군집을 구분하는 실질적인 판별항(decision boundary)은 $\mu_h$가 아닌 자연모수 벡터의 차이 $(\eta_h - \eta_\ell)$입니다. 따라서 군집 판별에 기여하지 않는 노이즈 변수를 올바르게 식별하고 제거하기 위해서는, $\eta_h$에 직접 페널티를 부여하여 그룹 간 분산을 축소(shrinkage)하는 것이 통계적으로 가장 타당한 접근입니다.
+
 ### 4.2 Stage 1: 두 형태의 cluster-contrast penalty
 
-#### (C) 단일 페널티
+#### (C) 단일 페널티 (Main Method)
 
 $$P_B^{\text{(1)}}(\eta) = \sum_{j=1}^{d} \left[ \sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2 \right]^{1/2}, \qquad \bar{\eta}_j = \sum_h w_h \eta_{hj}$$
 
@@ -129,7 +136,7 @@ $$\mathcal{L}^{\text{(1)}}_{\lambda} = \ell_n(\pi, \eta) - n\lambda P_B^{\text{(
 
 $$\widehat{S}_\lambda^{\text{(1)}} = \left\lbrace j : \left[ \sum_h w_h (\widehat{\eta}_{hj} - \widehat{\bar{\eta}}_j)^2 \right]^{1/2} > \epsilon \right\rbrace$$
 
-#### (B) 이중 페널티
+#### (B) 이중 페널티 (Sub Method)
 
 $$P^\mu(\mu) = \sum_{j=1}^d \left[\sum_h w_h (\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2}, \qquad P^\kappa(\kappa) = \sum_h |\kappa_h - \bar{\kappa}|$$
 
@@ -159,8 +166,8 @@ Refit 은 (B), (C) 공통.
 
 1. GMM $O(Kd^2)$ → vMF scalar $\kappa_h$.
 2. 같은 평균 다른 분산 시나리오의 두 vMF 형태:
-   - (B) 이중 페널티: $\mu_h, \kappa_h$ 각각
-   - (C) 단일 페널티: $\eta_h = \kappa_h \mu_h$
+   - **(C) 단일 페널티 (Main):** $\eta_h = \kappa_h \mu_h$ 결합 페널티. 사후 확률의 Log-odds 판별항과 직접적으로 정합.
+   - **(B) 이중 페널티 (Sub):** $\mu_h, \kappa_h$ 각각 분리 페널티 (해석 보조용).
 3. Screening 후 $\mathbb{S}^{d-1}$ 위에서 unpenalized refit.
 
 ## 6. 미팅 논의 사항
@@ -171,16 +178,16 @@ Refit 은 (B), (C) 공통.
 
 **(2) 기본 모형:** vMF mixture. $\mu_h$ 같고 $\kappa_h$ 다른 시나리오 $\eta_h$ 차이로 식별. 한계: angular isotropic.
 
-**(3) 핵심 방법론:** 두 페널티 형태
-- (B) 이중: $\mu_h$ group penalty + $\kappa_h$ 별도 페널티
-- (C) 단일: $\eta_h$ 에 group penalty
+**(3) 핵심 방법론: (C) 단일 페널티를 Main Method로 채택**
+- (C) 단일: $\eta_h$ 에 group penalty (사후확률 Log-odds 기반)
+- (B) 이중: $\mu_h$ group penalty + $\kappa_h$ 별도 페널티 (해석 보조용)
 - Stage 2 refit 공통
 
 **(4) Novelty**
 
 | 구분 | 기존 | 본 연구 |
 |---|---|---|
-| Sparse vMF | Rossi & Barbaro (2022) | (B) / (C) cluster-contrast |
+| Sparse vMF | Rossi & Barbaro (2022) | (C) Main / (B) Sub cluster-contrast |
 | Cluster-contrast | Pan-Shen, Xie (GMM) | vMF 확장 |
 | Two-stage Lasso-MLE | Meynet | Directional |
 | 같은 평균 시나리오 | Xie (GMM) | (B), (C) 정식화 |
@@ -190,7 +197,7 @@ Refit 은 (B), (C) 공통.
 - vMF angular isotropic 가정의 적합도 진단
 - $\kappa_h$ component-specific vs common
 - (B), (C) 식별성 및 weight $w_h$ 선택
-- (B), (C) 중 main 설정 방향
+- **(C) 단일 페널티를 Main Method로 확정 (최적화 난이도 및 이론적 정합성 고려)** 및 (B)의 활용 방안 (보조 지표)
 - 비교 baseline: Rossi & Barbaro (2022), Witten & Tibshirani (2010), dense vMF + threshold
 
 ## 참고문헌
