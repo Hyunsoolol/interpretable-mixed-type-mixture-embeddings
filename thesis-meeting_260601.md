@@ -29,7 +29,8 @@ $$\widehat{S}_\lambda \xrightarrow{\text{screening}} \widehat{\Theta}^{\text{ref
 
 $$\mathcal{L}_p = \mathcal{L} - \lambda_1 \sum_{h,j} |\mu_{hj}| - \lambda_2 \sum_j \left[\sum_h (\sigma_{h,j}^2 - \bar{\sigma}_j^2)^2\right]^{1/2}$$
 
-Sample space $\mathbb{R}^d$ — L2 정규화 임베딩과 불일치.
+- $\mu_A = \mu_B$ 일 때 분산 페널티 ($\lambda_2$) 가 두 군집 구분.
+- Sample space $\mathbb{R}^d$ — L2 정규화 임베딩과 불일치.
 
 #### (B) vMF 이중 페널티 (제안)
 
