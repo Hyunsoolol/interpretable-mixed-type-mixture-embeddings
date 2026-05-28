@@ -108,13 +108,19 @@ $$\widehat{S}_{\lambda_1, \lambda_2}^{\text{(2)}} = \left\lbrace j : \left[\sum_
 
 ### 3.3 Stage 2: Sparse-vMF refit on $\mathbb{S}^{d-1}$
 $$\mu_{h,\widehat{S}^c} = 0, \quad \left\|\mu_{h,\widehat{S}}\right\|_2 = 1$$
+
 정규화 상수는 $c_d$ ($c_{d_\lambda}$ 아님).
+
 $$p(z_i \mid \widetilde{\Theta}_{\widehat{S}}) = \sum_h \widetilde{\pi}_h c_d(\widetilde{\kappa}_h) \exp\left( \widetilde{\kappa}_h \widetilde{\mu}_{h,\widehat{S}}^\top z_{i,\widehat{S}} \right)$$
 
 EM update:
+
 $$\widetilde{\tau}_{ih} = \frac{\widetilde{\pi}_h c_d(\widetilde{\kappa}_h) \exp(\widetilde{\kappa}_h \widetilde{\mu}_{h,\widehat{S}}^\top z_{i,\widehat{S}})}{\sum_\ell \widetilde{\pi}_\ell c_d(\widetilde{\kappa}_\ell) \exp(\widetilde{\kappa}_\ell \widetilde{\mu}_{\ell,\widehat{S}}^\top z_{i,\widehat{S}})}$$
+
 $$r_{h,\widehat{S}} = \sum_i \widetilde{\tau}_{ih} z_{i,\widehat{S}}, \qquad N_h = \sum_i \widetilde{\tau}_{ih}$$
+
 $$\widehat{\widetilde{\mu}}_{h,\widehat{S}} = \frac{r_{h,\widehat{S}}}{\|r_{h,\widehat{S}}\|_2}, \quad \widehat{\widetilde{\mu}}_{h,\widehat{S}^c} = 0, \quad \widehat{\widetilde{\kappa}}_h \approx \frac{\bar{R}d - \bar{R}^3}{1 - \bar{R}^2}, \quad \bar{R} = \frac{\|r_{h,\widehat{S}}\|_2}{N_h}$$
+
 Refit 은 (B), (C) 공통.
 
 ---
