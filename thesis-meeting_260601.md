@@ -130,12 +130,63 @@ $$\text{BIC}(K,\lambda) = -2\ell_n(\widehat{\widetilde{\Theta}}^{\text{refit}}_{
 
 ## 7. 미팅 논의 사항
 
-- vMF의 angular isotropic 가정이 본 자료에 적합한지
-- $\kappa_h$ 를 component-specific으로 둘지 common으로 둘지, $n \ll d$ 인 경우의 판단 기준
-- $P_B(\eta)$ 의 식별성과 weight $w_h$ 선택
-- BIC/ICL의 정당화 범위
-- Threshold $\epsilon$ 의 자료기반 결정 방법
-- 실험 setup, synthetic 자료와 SBERT/OpenAI embedding 등 실제 임베딩에서의 비교군 구성
+### 7.1 현 단계 프레임워크 및 기본 모형에 대한 검토 요청
+
+본 미팅에서는 다음 프레임워크와 기본 모형의 타당성에 대해 교수님의 검토와 의견을 구하고자 한다.
+
+#### (1) 문제 설정 — L2 정규화된 텍스트 임베딩의 directional clustering
+
+- LLM 임베딩 $x_i = \phi(d_i) \in \mathbb{R}^d$ 를 L2 정규화하여 $z_i \in \mathbb{S}^{d-1}$ 위의 directional data로 다룬다.
+- Cosine similarity 기반 임베딩의 기하학적 구조와 부합한다.
+- 비지도 군집화 상황을 가정한다.
+
+> **검토 요청 1:** 텍스트 임베딩 군집화를 unit hypersphere 위 directional clustering으로 정식화하는 접근의 적절성에 대해 의견을 구한다.
+
+#### (2) 기본 확률 모형 — vMF mixture
+
+- GMM full covariance의 $O(Kd^2)$ 모수 폭발을 회피한다.
+- Cluster별 angular concentration을 scalar $\kappa_h$ 로 표현한다.
+- 평균이 비슷해도 $\kappa_h$ 가 다르면 분리 가능한 구조를 제공한다.
+- 단, vMF는 평균 방향 주변의 angular spread를 isotropic으로 가정한다는 한계를 인지한다.
+
+> **검토 요청 2:** vMF mixture를 기본 확률 모형으로 채택하는 방향에 대한 의견과, Component-specific $\kappa_h$ 와 common $\kappa$ 중 default 설정에 대한 조언을 구한다.
+
+#### (3) 핵심 방법론 — Two-stage sparse vMF mixture
+
+- **Stage 1 (screening):** 자연모수 $\eta_h = \kappa_h \mu_h$ 에 cluster-contrast group penalty $P_B(\eta)$ 를 부여한 penalized vMF mixture로 active set $\widehat{S}_\lambda$ 를 추출.
+- **Stage 2 (refit):** 선택된 support에서 원래 $\mathbb{S}^{d-1}$ 위의 unpenalized sparse-vMF submodel로 refit.
+- Meynet식 Lasso-MLE 원칙을 directional mixture에 적용한 정식화.
+
+> **검토 요청 3:** Penalty 대상을 $\mu_h$ 가 아닌 $\eta_h = \kappa_h \mu_h$ 로 두는 선택, 그리고 cluster-contrast group penalty $P_B(\eta)$ 의 구조에 대한 의견을 구한다.
+
+> **검토 요청 4:** Penalized estimator를 최종 모형이 아닌 screening 단계로 사용하고, 원래 $\mathbb{S}^{d-1}$ 위에서 unpenalized refit을 수행하는 two-stage 구조의 적절성에 대한 의견을 구한다.
+
+#### (4) Novelty 위치 설정
+
+선행 연구 대비 본 연구의 기여 위치를 다음과 같이 설정하고자 한다.
+
+| 구분 | 기존 연구 | 본 연구 |
+|---|---|---|
+| Sparse vMF mixture | Rossi & Barbaro (2022): $L_1$ on $\mu_h$ | $\eta_h$ 의 cluster-contrast group penalty |
+| Cluster-contrast 변수선택 | Pan & Shen (2007) 등: Euclidean GMM | Directional setting (vMF) 으로 확장 |
+| Two-stage Lasso-MLE | Meynet 계열: regression / GMM | Sparse directional mixture에 적용 |
+
+> **검토 요청 5:** "Sparse vMF 자체의 최초 제안" 이 아니라 "Cluster-contrast group penalty + Meynet식 two-stage refit을 directional mixture에 정식화" 로 novelty를 설정하는 방향에 대한 의견을 구한다.
+
+### 7.2 후속 검토 항목
+
+위 프레임워크가 확정되면 다음 단계에서 구체화할 항목들이다.
+
+- vMF의 angular isotropic 가정이 LLM 임베딩 자료에 어느 정도 적합한지에 대한 진단 방법
+- $\kappa_h$ 를 component-specific으로 둘지 common으로 둘지의 결정 기준 ($n \ll d$ 인 경우 포함)
+- $P_B(\eta)$ 의 식별성 및 weight $w_h$ 선택 ($\pi_h$ vs $1/K$ vs adaptive)
+- BIC/ICL의 정당화 범위와 이론적 보장 가능 영역
+- Threshold $\epsilon$ 의 자료기반 결정 방법 (예: stability selection, bootstrap)
+- 실험 setup: synthetic 자료 설계, SBERT/OpenAI/SimCSE 등 실제 임베딩 비교군 구성
+- 비교 baseline: Rossi & Barbaro (2022) 직접 비교, Witten & Tibshirani (2010) sparse k-means, dense vMF + threshold 후 refit- BIC/ICL의 정당화 범위와 이론적 보장 가능 영역
+- Threshold $\epsilon$ 의 자료기반 결정 방법 (예: stability selection, bootstrap)
+- 실험 setup: synthetic 자료 설계, SBERT/OpenAI/SimCSE 등 실제 임베딩 비교군 구성
+- 비교 baseline: Rossi & Barbaro (2022) 직접 비교, Witten & Tibshirani (2010) sparse k-means, dense vMF + threshold 후 refit
 
 ## 참고문헌
 
