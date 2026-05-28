@@ -34,6 +34,8 @@ $$p(z_i \mid \Theta) = \sum_{h=1}^{K} \pi_h c_d(\kappa_h) \exp(\kappa_h \mu_h^\t
 ### 1.4 채택 입장
 vMF mixture를 **parsimonious directional working model** 로 채택. 정확한 분포 가정이 아님.
 
+<img width="440" height="319" alt="image" src="https://github.com/user-attachments/assets/b7aea979-1e98-4169-afaf-28f9f4645d15" />
+
 ### 1.5 같은 평균 다른 분산 시나리오 — 세 접근
 
 #### (A) Xie, Pan & Shen (2008) — GMM 이중 페널티
