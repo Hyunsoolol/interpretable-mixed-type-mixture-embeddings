@@ -52,6 +52,8 @@ $$\mathcal{L}_p^{\text{(2)}} = \mathcal{L} - \lambda_1 \sum_j \left[\sum_h w_h(\
 - 평균 정보와 분산 정보를 **분리된 객체로 명시** → 분해 해석 가능
 - Hyperparameter $\lambda_1, \lambda_2$ 동시 튜닝
 - $\mu_h$ (단위 벡터) 와 $\kappa_h$ (양의 실수) 의 스케일 분리
+- **역할 분담:** $\kappa_h$ 는 군집 단위 모수 → 변수 선택은 $\mu$ 페널티, 군집 spread 분리는 $\kappa$ 페널티가 담당
+- $\mu_A = \mu_B$ 일 때 active set 은 비어도 ($\widehat{S}^{\text{(2)}} = \emptyset$), $\kappa$ 페널티가 두 군집을 분리
 
 #### (C) vMF 단일 페널티 (제안)
 $$\mathcal{L}_p^{\text{(1)}} = \mathcal{L} - \lambda \sum_j \left[\sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2\right]^{1/2}, \qquad \eta_h = \kappa_h \mu_h$$
@@ -60,9 +62,11 @@ $$\eta_A - \eta_B = (\kappa_A - \kappa_B)\, \mu \neq 0$$
 - 평균과 분산이 자연모수 $\eta_h$ 로 **결합**
 - Hyperparameter 단일 $\lambda$
 - Posterior log-odds $(\eta_h - \eta_\ell)^\top z_i$ 와 직접 정합
+- **식별 범위:** 좌표별 차이가 $(\kappa_A - \kappa_B)\mu_j$ → 구분 가능한 active 좌표는 $\mu_j \neq 0$ 에 한정
+- $\mu$ 가 sparse 하면 $\mu_j = 0$ 좌표는 구분 불가. 단, 해당 좌표는 본래 판별에 기여 안 하므로 제외가 타당 (완전 해결 아닌 적용 범위로 명시)
 
 #### (D) 본 연구의 입장 — (C) 단일 페널티를 Main Method로 채택
-본 연구는 이론적 정합성과 최적화 효율성을 고려하여 **(C) 단일 페널티를 Main Method**로 전개하며, (B)는 active set 분해를 위한 해석용(post-hoc) 보조 모형으로 활용합니다.
+본 연구는 이론적 정합성과 최적화 효율성을 근거로 **(C) 단일 페널티를 Main Method**로 설정하고, (B)와의 비교를 통해 이를 실증한다. (B)는 평균/분산 정보의 분해 해석을 위한 보조 모형으로 함께 전개한다.
 
 | 측면 | (B) 이중 (Sub) | (C) 단일 (Main) |
 |---|---|---|
@@ -70,6 +74,7 @@ $$\eta_A - \eta_B = (\kappa_A - \kappa_B)\, \mu \neq 0$$
 | Hyperparameter | $\lambda_1, \lambda_2$ | $\lambda$ |
 | 평균·분산 | 분리 | $\eta_h$ 결합 |
 | log-odds 정합 | 간접 | 직접 |
+| 변수 선택 단위 | $\mu$(변수) + $\kappa$(군집) 분담 | $\eta$ 단일 |
 | 해석 | active set 분해 | post-hoc |
 
 ---
@@ -80,7 +85,7 @@ $$d_i \xrightarrow{\phi} x_i \in \mathbb{R}^d \xrightarrow{/\|\cdot\|_2} z_i \in
 
 - **Stage 1 (screening):** 두 페널티 형태
   - (C) 단일: $\widehat{S}_\lambda^{\text{(1)}} \leftarrow$ penalty on $\eta_h$ (Main)
-  - (B) 이중: $\widehat{S}_{\lambda_1, \lambda_2}^{\text{(2)}} \leftarrow$ penalty on $\mu_h, \kappa_h$
+  - (B) 이중: $\widehat{S}_{\lambda_1, \lambda_2}^{\text{(2)}} \leftarrow$ $\mu_h$ 로 변수 선택 + $\kappa_h$ 로 군집 분리
 - **Stage 2 (refit):** $\widehat{\Theta}^{\text{refit}}_{\widehat{S}} \leftarrow$ unpenalized sparse-vMF on $\mathbb{S}^{d-1}$
 
 ---
@@ -93,9 +98,9 @@ $$p(z_i \mid \pi, \eta) = \sum_{h=1}^{K} \pi_h c_d(\|\eta_h\|_2) \exp(\eta_h^\to
 **사후 확률의 Log-odds:**
 $$\log \frac{P(h \mid z_i)}{P(\ell \mid z_i)} = \log \frac{\pi_h}{\pi_\ell} + \log \frac{c_d(\kappa_h)}{c_d(\kappa_\ell)} + (\eta_h - \eta_\ell)^\top z_i$$
 
-- **$\eta_h$ 페널티 유도:** 두 군집을 구분하는 실질적 판별항(decision boundary)은 $\mu_h$가 아닌 자연모수의 차이 $(\eta_h - \eta_\ell)$. 따라서 $\eta_h$에 직접 페널티를 부여하여 분산을 축소(shrinkage)하는 것이 타당함.
-- **가중치 $w_h$ 의 타당성 ($w_h = \pi_h$):** $$\bar{\eta}_j = \sum_{h=1}^K w_h \eta_{hj}$$
-  군집 크기 불균형을 반영해 전역 평균 $\bar{\eta}_j$를 설정함으로써, (1) 소수 군집의 미세한 노이즈로 인한 변수 선택 오탐지(False Positive)를 방지하고, (2) 로그우도(Log-likelihood) 함수와의 스케일 정합성을 유지함.
+- **$\eta_h$ 페널티 유도:** 두 군집을 구분하는 log-odds 의 선형 판별항(discriminant term)은 $\mu_h$ 가 아닌 자연모수의 차이 $(\eta_h - \eta_\ell)^\top z_i$. 따라서 $\eta_h$ 에 직접 페널티를 부여하는 것이 타당함.
+- **가중치 $w_h$ 의 선택 ($w_h = \pi_h$):** $$\bar{\eta}_j = \sum_{h=1}^K w_h \eta_{hj}$$
+  군집 크기 불균형을 반영하여 (1) 소수 군집 노이즈로 인한 변수 선택 오탐지(False Positive) 완화, (2) 로그우도 함수와의 스케일 정합성 유지. 단, $w_h = \pi_h$ vs $1/K$ vs adaptive 의 비교는 후속 검토 항목.
 
 ### 3.2 Stage 1: 두 형태의 cluster-contrast penalty
 
@@ -107,7 +112,10 @@ $$\widehat{S}_\lambda^{\text{(1)}} = \left\lbrace j : \left[ \sum_h w_h (\wideha
 #### (B) 이중 페널티 (Sub Method)
 $$P^\mu(\mu) = \sum_{j=1}^d \left[\sum_h w_h (\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2}, \qquad P^\kappa(\kappa) = \sum_h |\kappa_h - \bar{\kappa}|$$
 $$\mathcal{L}^{\text{(2)}}_{\lambda_1, \lambda_2} = \ell_n(\pi, \mu, \kappa) - n\lambda_1 P^\mu(\mu) - n\lambda_2 P^\kappa(\kappa)$$
-$$\widehat{S}_{\lambda_1, \lambda_2}^{\text{(2)}} = \left\lbrace j : \left[\sum_h w_h (\widehat{\mu}_{hj} - \widehat{\bar{\mu}}_j)^2\right]^{1/2} > \epsilon \right\rbrace$$
+
+- **변수 선택 ($\mu$ 페널티):**
+$$\widehat{S}_{\lambda_1}^{\text{(2)}} = \left\lbrace j : \left[\sum_h w_h (\widehat{\mu}_{hj} - \widehat{\bar{\mu}}_j)^2\right]^{1/2} > \epsilon \right\rbrace$$
+- **군집 분리 ($\kappa$ 페널티):** $\widehat{\kappa}_h$ 의 $\widehat{\bar{\kappa}}$ shrink 정도로 spread 차이 식별. $\mu_A = \mu_B$ 면 $\widehat{S}_{\lambda_1}^{\text{(2)}} = \emptyset$ 이라도 $\kappa$ 가 군집 분리
 
 ### 3.3 Stage 2: Sparse-vMF refit on $\mathbb{S}^{d-1}$
 $$\mu_{h,\widehat{S}^c} = 0, \quad \left\|\mu_{h,\widehat{S}}\right\|_2 = 1$$
@@ -137,7 +145,7 @@ Refit 은 (B), (C) 공통.
 | Bias | $L_1$ 잔존 | refit 완화 |
 | Refit | 없음 | $\mathbb{S}^{d-1}$ 위 |
 
-$\mu_{hj} = \mu_{\ell j}$ 라도 $\kappa_h \neq \kappa_\ell$ 이면 $\eta_{hj} \neq \eta_{\ell j}$.
+$\mu_{hj} = \mu_{\ell j}$ 라도 $\kappa_h \neq \kappa_\ell$ 이면 $\eta_{hj} \neq \eta_{\ell j}$ ($\mu_j \neq 0$ 인 좌표에 한함).
 
 ---
 
@@ -145,10 +153,9 @@ $\mu_{hj} = \mu_{\ell j}$ 라도 $\kappa_h \neq \kappa_\ell$ 이면 $\eta_{hj} \
 
 1. GMM $O(Kd^2)$ → vMF scalar $\kappa_h$.
 2. 같은 평균 다른 분산 시나리오의 두 vMF 형태:
-   - **(C) 단일 페널티 (Main):** $\eta_h = \kappa_h \mu_h$ 결합 페널티. 사후 확률의 Log-odds 판별항과 직접적으로 정합.
-   - **(B) 이중 페널티 (Sub):** $\mu_h, \kappa_h$ 각각 분리 페널티 (해석 보조용).
+   - **(C) 단일 페널티 (Main):** $\eta_h = \kappa_h \mu_h$ 결합 페널티. Log-odds 판별항과 직접 정합. 식별은 $\mu$-support 내로 한정.
+   - **(B) 이중 페널티 (Sub):** $\mu_h$ 로 변수 선택, $\kappa_h$ 로 군집 분리 (역할 분담).
 3. Screening 후 $\mathbb{S}^{d-1}$ 위에서 unpenalized refit.
-
 
 ---
 
