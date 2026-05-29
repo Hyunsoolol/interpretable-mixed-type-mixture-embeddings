@@ -148,11 +148,11 @@ $$P^\kappa(\kappa) = \sum_h \left|\kappa_h - \bar{\kappa}\right|$$
 
 $$\mathcal{L}^{\text{(2)}}_{\lambda_1, \lambda_2} = \ell_n - n\lambda_1 P^\mu(\mu) - n\lambda_2 P^\kappa(\kappa)$$
 
-변수 선택 ($\mu$ 페널티):
+- 변수 선택 ($\mu$ 페널티):
 
 $$\widehat{S}_{\lambda_1}^{\text{(2)}} = \left\lbrace j : \left[\sum_h w_h (\widehat{\mu}_{hj} - \widehat{\bar{\mu}}_j)^2\right]^{1/2} > \epsilon \right\rbrace$$
 
-군집 분리 ($\kappa$ 페널티): $\widehat{\kappa}_h$ 의 $\widehat{\bar{\kappa}}$ shrink 정도로 spread 차이 식별. $\mu_A = \mu_B$ 면 $\widehat{S}_{\lambda_1}^{\text{(2)}} = \emptyset$ 이라도 $\kappa$ 가 군집 분리.
+- 군집 분리 ($\kappa$ 페널티): $\widehat{\kappa}_h$ 가 $\widehat{\bar{\kappa}}$ 로 shrink 되는 정도로 spread 차이를 식별한다. 평균이 같은 경우($\mu_A = \mu_B$) active set 이 비더라도 $\kappa$ 페널티가 두 군집을 분리한다.
 
 ### 5.4 Stage 2: Sparse-vMF refit on $\mathbb{S}^{d-1}$
 
