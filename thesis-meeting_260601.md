@@ -74,7 +74,7 @@ $$\mathcal{L}_p = \mathcal{L} - \lambda_1 \sum_{h,j} |\mu_{hj}| - \lambda_2 \sum
 - $\mu_A = \mu_B$ 일 때 분산 정보가 두 군집 구분
 - Sample space $\mathbb{R}^d$ — L2 정규화 임베딩과 불일치
 
-### (B) vMF 이중 페널티 (제안)
+### (B) vMF 이중 페널티 (보조)
 
 $$\mathcal{L}_p^{\text{(2)}} = \mathcal{L} - \lambda_1 \sum_j \left[\sum_h w_h(\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2} - \lambda_2 \sum_h \left|\kappa_h - \bar{\kappa}\right|$$
 
@@ -166,9 +166,9 @@ $$p(z_i \mid \widetilde{\Theta}_{\widehat{S}}) = \sum_h \widetilde{\pi}_h c_d(\w
 
 $$\widetilde{\tau}_{ih} = \frac{\widetilde{\pi}_h c_d(\widetilde{\kappa}_h) \exp(\widetilde{\kappa}_h \widetilde{\mu}_{h,\widehat{S}}^\top z_{i,\widehat{S}})}{\sum_\ell \widetilde{\pi}_\ell c_d(\widetilde{\kappa}_\ell) \exp(\widetilde{\kappa}_\ell \widetilde{\mu}_{\ell,\widehat{S}}^\top z_{i,\widehat{S}})}$$
 
-$$r_{h,\widehat{S}} = \sum_i \widetilde{\tau}_{ih} z_{i,\widehat{S}}, \qquad N_h = \sum_i \widetilde{\tau}_{ih}, \qquad \bar{R}_{h,\widehat{S}} = \frac{\|r_{h,\widehat{S}}\|_2}{N_h}$$
+$$r_{h,\widehat{S}} = \sum_i \widetilde{\tau}_{ih} z_{i,\widehat{S}}, \qquad \widetilde{N}_h = \sum_i \widetilde{\tau}_{ih}, \qquad \bar{R}_{h,\widehat{S}} = \frac{\|r_{h,\widehat{S}}\|_2}{\widetilde{N}_h}$$
 
-$$\widehat{\widetilde{\mu}}_{h,\widehat{S}} = \frac{r_{h,\widehat{S}}}{\|r_{h,\widehat{S}}\|_2}, \quad \widehat{\widetilde{\mu}}_{h,\widehat{S}^c} = 0, \quad \widehat{\widetilde{\kappa}}_h \approx \frac{\bar{R}_{h,\widehat{S}}\, d - \bar{R}_{h,\widehat{S}}^3}{1 - \bar{R}_{h,\widehat{S}}^2}$$
+$$\widehat{\widetilde{\mu}}_{h,\widehat{S}} = \frac{r_{h,\widehat{S}}}{\|r_{h,\widehat{S}}\|_2}, \quad \widehat{\widetilde{\mu}}_{h,\widehat{S}^c} = 0, \quad \widehat{\widetilde{\kappa}}_h \approx \frac{d\bar{R}_{h,\widehat{S}}\  - \bar{R}_{h,\widehat{S}}^3}{1 - \bar{R}_{h,\widehat{S}}^2}$$
 
 Refit 은 (B), (C) 공통.
 
