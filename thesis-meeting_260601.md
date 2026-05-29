@@ -40,103 +40,96 @@ $$p(z_i \mid \Theta) = \sum_{h=1}^{K} \pi_h c_d(\kappa_h) \exp(\kappa_h \mu_h^\t
 ### 1.4 채택 입장
 vMF mixture를 **parsimonious directional working model** 로 채택. 정확한 분포 가정이 아님.
 
-### 1.5 같은 평균 다른 분산 시나리오 — 세 접근
+---
+
+## 2. 연구 질문
+
+- **RQ1.** $\eta_h = \kappa_h \mu_h$ 에 대한 cluster-contrast penalty 가 기존 $\mu$ 기반 penalty (Rossi & Barbaro, 2022) 보다 변수 선택과 군집화 성능에서 우월한가?
+- **RQ2.** Two-stage refit 이 penalized estimator 를 그대로 쓰는 것보다 추정 편향·군집 정확도를 개선하는가?
+- **RQ3.** 단일 페널티 (C) 와 이중 페널티 (B) 중 directional sparse clustering 에 더 적합한 형태는?
+
+## 3. 기여
+
+1. **방법론:** vMF 자연모수 $\eta_h = \kappa_h \mu_h$ 에 cluster-contrast group penalty 를 부여하는 첫 정식화
+2. **Two-stage:** Meynet 식 Lasso-MLE 원칙을 directional mixture 로 확장, 원래 $\mathbb{S}^{d-1}$ 위 refit
+3. **응용:** L2 정규화된 LLM 임베딩의 비지도 군집화에 대한 통계적 파이프라인
+
+---
+
+## 4. 같은 평균 다른 분산 시나리오 — 세 접근
 
 #### (A) Xie, Pan & Shen (2008) — GMM 이중 페널티
 $$\mathcal{L}_p = \mathcal{L} - \lambda_1 \sum_{h,j} |\mu_{hj}| - \lambda_2 \sum_j \left[\sum_h (\sigma_{h,j}^2 - \bar{\sigma}_j^2)^2\right]^{1/2}$$
-- $\mu_A = \mu_B$ 일 때 분산 페널티 ($\lambda_2$) 가 두 군집 구분.
-- Sample space $\mathbb{R}^d$ — L2 정규화 임베딩과 불일치.
+- $\mu_A = \mu_B$ 일 때 분산 페널티가 두 군집 구분
+- Sample space $\mathbb{R}^d$ — L2 정규화 임베딩과 불일치
 
 #### (B) vMF 이중 페널티 (제안)
 $$\mathcal{L}_p^{\text{(2)}} = \mathcal{L} - \lambda_1 \sum_j \left[\sum_h w_h(\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2} - \lambda_2 \sum_h |\kappa_h - \bar{\kappa}|$$
-- 평균 정보와 분산 정보를 **분리된 객체로 명시** → 분해 해석 가능
-- Hyperparameter $\lambda_1, \lambda_2$ 동시 튜닝
-- $\mu_h$ (단위 벡터) 와 $\kappa_h$ (양의 실수) 의 스케일 분리
-- **역할 분담:** $\kappa_h$ 는 군집 단위 모수 → 변수 선택은 $\mu$ 페널티, 군집 spread 분리는 $\kappa$ 페널티가 담당
-- $\mu_A = \mu_B$ 일 때 active set 은 비어도 ($\widehat{S}^{\text{(2)}} = \emptyset$), $\kappa$ 페널티가 두 군집을 분리
+- 평균·분산 정보를 분리된 객체로 명시 → 분해 해석 가능
+- **역할 분담:** $\kappa_h$ 는 군집 단위 → 변수 선택은 $\mu$, 군집 spread 분리는 $\kappa$
+- $\mu_A = \mu_B$ 일 때 active set 비어도 ($\widehat{S}^{\text{(2)}} = \emptyset$) $\kappa$ 페널티가 군집 분리
 
 #### (C) vMF 단일 페널티 (제안)
 $$\mathcal{L}_p^{\text{(1)}} = \mathcal{L} - \lambda \sum_j \left[\sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2\right]^{1/2}, \qquad \eta_h = \kappa_h \mu_h$$
 $\mu_A = \mu_B = \mu$, $\kappa_A \neq \kappa_B$ 일 때:
 $$\eta_A - \eta_B = (\kappa_A - \kappa_B)\, \mu \neq 0$$
-- 평균과 분산이 자연모수 $\eta_h$ 로 **결합**
-- Hyperparameter 단일 $\lambda$
+- 평균·분산이 자연모수 $\eta_h$ 로 결합, hyperparameter 단일 $\lambda$
 - Posterior log-odds $(\eta_h - \eta_\ell)^\top z_i$ 와 직접 정합
-- **식별 범위:** 좌표별 차이가 $(\kappa_A - \kappa_B)\mu_j$ → 구분 가능한 active 좌표는 $\mu_j \neq 0$ 에 한정
-- $\mu$ 가 sparse 하면 $\mu_j = 0$ 좌표는 구분 불가. 단, 해당 좌표는 본래 판별에 기여 안 하므로 제외가 타당 (완전 해결 아닌 적용 범위로 명시)
+- **식별 범위:** 구분 가능한 active 좌표는 $\mu_j \neq 0$ 에 한정 ($\mu$ sparse 시 $\mu_j=0$ 좌표는 구분 불가하나 본래 판별 미기여 → 제외 타당)
 
-#### (D) 본 연구의 입장 — (C) 단일 페널티를 Main Method로 채택
-본 연구는 이론적 정합성과 최적화 효율성을 근거로 **(C) 단일 페널티를 Main Method**로 설정하고, (B)와의 비교를 통해 이를 실증한다. (B)는 평균/분산 정보의 분해 해석을 위한 보조 모형으로 함께 전개한다.
+#### (D) 본 연구의 입장
+이론적 정합성과 최적화 효율성을 근거로 **(C) 단일 페널티를 Main Method**로 설정하고, (B)와의 비교로 실증. (B)는 평균/분산 분해 해석용 보조 모형.
 
 | 측면 | (B) 이중 (Sub) | (C) 단일 (Main) |
 |---|---|---|
 | 페널티 | $\text{group}(\mu) + L_1(\kappa)$ | $\text{group}(\eta)$ |
 | Hyperparameter | $\lambda_1, \lambda_2$ | $\lambda$ |
-| 평균·분산 | 분리 | $\eta_h$ 결합 |
 | log-odds 정합 | 간접 | 직접 |
-| 변수 선택 단위 | $\mu$(변수) + $\kappa$(군집) 분담 | $\eta$ 단일 |
-| 해석 | active set 분해 | post-hoc |
+| 변수 선택 단위 | $\mu$(변수)+$\kappa$(군집) 분담 | $\eta$ 단일 |
 
 ---
 
-## 2. 연구 아이디어: Two-stage refit
+## 5. 모형
 
+### 5.1 Two-stage refit
 $$d_i \xrightarrow{\phi} x_i \in \mathbb{R}^d \xrightarrow{/\|\cdot\|_2} z_i \in \mathbb{S}^{d-1}$$
 
-- **Stage 1 (screening):** 두 페널티 형태
-  - (C) 단일: $\widehat{S}_\lambda^{\text{(1)}} \leftarrow$ penalty on $\eta_h$ (Main)
-  - (B) 이중: $\widehat{S}_{\lambda_1, \lambda_2}^{\text{(2)}} \leftarrow$ $\mu_h$ 로 변수 선택 + $\kappa_h$ 로 군집 분리
+- **Stage 1 (screening):** (C) $\widehat{S}_\lambda^{\text{(1)}} \leftarrow \eta_h$ penalty (Main) / (B) $\widehat{S}_{\lambda_1}^{\text{(2)}} \leftarrow \mu$ 변수선택 + $\kappa$ 군집분리
 - **Stage 2 (refit):** $\widehat{\Theta}^{\text{refit}}_{\widehat{S}} \leftarrow$ unpenalized sparse-vMF on $\mathbb{S}^{d-1}$
 
----
-
-## 3. 모형과 수식
-
-### 3.1 Reparametrization 및 사후 확률의 Log-odds
+### 5.2 Reparametrization 및 Log-odds
 $$p(z_i \mid \pi, \eta) = \sum_{h=1}^{K} \pi_h c_d(\|\eta_h\|_2) \exp(\eta_h^\top z_i), \qquad \eta_h = \kappa_h \mu_h$$
-
-**사후 확률의 Log-odds:**
 $$\log \frac{P(h \mid z_i)}{P(\ell \mid z_i)} = \log \frac{\pi_h}{\pi_\ell} + \log \frac{c_d(\kappa_h)}{c_d(\kappa_\ell)} + (\eta_h - \eta_\ell)^\top z_i$$
 
-- **$\eta_h$ 페널티 유도:** 두 군집을 구분하는 log-odds 의 선형 판별항(discriminant term)은 $\mu_h$ 가 아닌 자연모수의 차이 $(\eta_h - \eta_\ell)^\top z_i$. 따라서 $\eta_h$ 에 직접 페널티를 부여하는 것이 타당함.
-- **가중치 $w_h$ 의 선택 ($w_h = \pi_h$):** $$\bar{\eta}_j = \sum_{h=1}^K w_h \eta_{hj}$$
-  군집 크기 불균형을 반영하여 (1) 소수 군집 노이즈로 인한 변수 선택 오탐지(False Positive) 완화, (2) 로그우도 함수와의 스케일 정합성 유지. 단, $w_h = \pi_h$ vs $1/K$ vs adaptive 의 비교는 후속 검토 항목.
+- **$\eta_h$ 페널티 유도:** log-odds 의 선형 판별항은 $\mu_h$ 가 아닌 $(\eta_h - \eta_\ell)^\top z_i$ → $\eta_h$ 에 직접 페널티
+- **가중치 $w_h = \pi_h$:** 군집 크기 불균형 반영 → 소수 군집 노이즈 false positive 완화, 로그우도 스케일 정합 (대안 $1/K$, adaptive 는 후속 검토)
 
-### 3.2 Stage 1: 두 형태의 cluster-contrast penalty
+### 5.3 Stage 1 penalty
 
-#### (C) 단일 페널티 (Main Method)
-$$P_B^{\text{(1)}}(\eta) = \sum_{j=1}^{d} \left[ \sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2 \right]^{1/2}, \qquad \bar{\eta}_j = \sum_h w_h \eta_{hj}$$
-$$\mathcal{L}^{\text{(1)}}_{\lambda} = \ell_n(\pi, \eta) - n\lambda P_B^{\text{(1)}}(\eta)$$
+**(C) 단일 (Main)**
+$$P_B^{\text{(1)}}(\eta) = \sum_{j=1}^{d} \left[ \sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2 \right]^{1/2}, \qquad \mathcal{L}^{\text{(1)}}_{\lambda} = \ell_n - n\lambda P_B^{\text{(1)}}(\eta)$$
 $$\widehat{S}_\lambda^{\text{(1)}} = \left\lbrace j : \left[ \sum_h w_h (\widehat{\eta}_{hj} - \widehat{\bar{\eta}}_j)^2 \right]^{1/2} > \epsilon \right\rbrace$$
 
-#### (B) 이중 페널티 (Sub Method)
+**(B) 이중 (Sub)**
 $$P^\mu(\mu) = \sum_{j=1}^d \left[\sum_h w_h (\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2}, \qquad P^\kappa(\kappa) = \sum_h |\kappa_h - \bar{\kappa}|$$
-$$\mathcal{L}^{\text{(2)}}_{\lambda_1, \lambda_2} = \ell_n(\pi, \mu, \kappa) - n\lambda_1 P^\mu(\mu) - n\lambda_2 P^\kappa(\kappa)$$
+$$\mathcal{L}^{\text{(2)}}_{\lambda_1, \lambda_2} = \ell_n - n\lambda_1 P^\mu(\mu) - n\lambda_2 P^\kappa(\kappa)$$
+- 변수 선택: $\widehat{S}_{\lambda_1}^{\text{(2)}} = \lbrace j : [\sum_h w_h (\widehat{\mu}_{hj} - \widehat{\bar{\mu}}_j)^2]^{1/2} > \epsilon \rbrace$
+- 군집 분리: $\widehat{\kappa}_h$ 의 $\widehat{\bar{\kappa}}$ shrink 정도. $\mu_A = \mu_B$ 면 $\widehat{S}^{\text{(2)}} = \emptyset$ 이라도 $\kappa$ 가 분리
 
-- **변수 선택 ($\mu$ 페널티):**
-$$\widehat{S}_{\lambda_1}^{\text{(2)}} = \left\lbrace j : \left[\sum_h w_h (\widehat{\mu}_{hj} - \widehat{\bar{\mu}}_j)^2\right]^{1/2} > \epsilon \right\rbrace$$
-- **군집 분리 ($\kappa$ 페널티):** $\widehat{\kappa}_h$ 의 $\widehat{\bar{\kappa}}$ shrink 정도로 spread 차이 식별. $\mu_A = \mu_B$ 면 $\widehat{S}_{\lambda_1}^{\text{(2)}} = \emptyset$ 이라도 $\kappa$ 가 군집 분리
-
-### 3.3 Stage 2: Sparse-vMF refit on $\mathbb{S}^{d-1}$
+### 5.4 Stage 2: Sparse-vMF refit on $\mathbb{S}^{d-1}$
 $$\mu_{h,\widehat{S}^c} = 0, \quad \left\|\mu_{h,\widehat{S}}\right\|_2 = 1$$
 
-정규화 상수는 $c_d$ ($c_{d_\lambda}$ 아님).
+정규화 상수는 $c_d$ ($c_{d_\lambda}$ 아님) — 모든 모델이 공통 $\mathbb{S}^{d-1}$ 위에서 정의되어 likelihood 비교 가능.
 
-$$p(z_i \mid \widetilde{\Theta}_{\widehat{S}}) = \sum_h \widetilde{\pi}_h c_d(\widetilde{\kappa}_h) \exp\left( \widetilde{\kappa}_h \widetilde{\mu}_{h,\widehat{S}}^\top z_{i,\widehat{S}} \right)$$
-
-EM update:
-
+$$p(z_i \mid \widetilde{\Theta}_{\widehat{S}}) = \sum_h \widetilde{\pi}_h c_d(\widetilde{\kappa}_h) \exp( \widetilde{\kappa}_h \widetilde{\mu}_{h,\widehat{S}}^\top z_{i,\widehat{S}} )$$
 $$\widetilde{\tau}_{ih} = \frac{\widetilde{\pi}_h c_d(\widetilde{\kappa}_h) \exp(\widetilde{\kappa}_h \widetilde{\mu}_{h,\widehat{S}}^\top z_{i,\widehat{S}})}{\sum_\ell \widetilde{\pi}_\ell c_d(\widetilde{\kappa}_\ell) \exp(\widetilde{\kappa}_\ell \widetilde{\mu}_{\ell,\widehat{S}}^\top z_{i,\widehat{S}})}$$
-
-$$r_{h,\widehat{S}} = \sum_i \widetilde{\tau}_{ih} z_{i,\widehat{S}}, \qquad N_h = \sum_i \widetilde{\tau}_{ih}$$
-
 $$\widehat{\widetilde{\mu}}_{h,\widehat{S}} = \frac{r_{h,\widehat{S}}}{\|r_{h,\widehat{S}}\|_2}, \quad \widehat{\widetilde{\mu}}_{h,\widehat{S}^c} = 0, \quad \widehat{\widetilde{\kappa}}_h \approx \frac{\bar{R}d - \bar{R}^3}{1 - \bar{R}^2}, \quad \bar{R} = \frac{\|r_{h,\widehat{S}}\|_2}{N_h}$$
 
 Refit 은 (B), (C) 공통.
 
 ---
 
-## 4. 선행연구와의 차이
+## 6. 선행연구와의 차이
 
 | | Rossi & Barbaro (2022) | 본 연구 |
 |---|---|---|
@@ -145,17 +138,36 @@ Refit 은 (B), (C) 공통.
 | Bias | $L_1$ 잔존 | refit 완화 |
 | Refit | 없음 | $\mathbb{S}^{d-1}$ 위 |
 
-$\mu_{hj} = \mu_{\ell j}$ 라도 $\kappa_h \neq \kappa_\ell$ 이면 $\eta_{hj} \neq \eta_{\ell j}$ ($\mu_j \neq 0$ 인 좌표에 한함).
+$\mu_{hj} = \mu_{\ell j}$ 라도 $\kappa_h \neq \kappa_\ell$ 이면 $\eta_{hj} \neq \eta_{\ell j}$ ($\mu_j \neq 0$ 에 한함).
 
 ---
 
-## 5. 요약
+## 7. 작동 가정
 
-1. GMM $O(Kd^2)$ → vMF scalar $\kappa_h$.
-2. 같은 평균 다른 분산 시나리오의 두 vMF 형태:
-   - **(C) 단일 페널티 (Main):** $\eta_h = \kappa_h \mu_h$ 결합 페널티. Log-odds 판별항과 직접 정합. 식별은 $\mu$-support 내로 한정.
-   - **(B) 이중 페널티 (Sub):** $\mu_h$ 로 변수 선택, $\kappa_h$ 로 군집 분리 (역할 분담).
-3. Screening 후 $\mathbb{S}^{d-1}$ 위에서 unpenalized refit.
+- True model: $K^*$ 개 vMF component, Sparsity $|S^*| = s \ll d$
+- Separation: 군집 간 $\eta$ 차이 충분, Regularity: $\kappa_h$ 유계
+- $n \ll d$ 시: common $\kappa$ 또는 $\kappa_h$ cap
+
+## 8. 검증 계획
+
+- **Synthetic:** (i) $\mu$ 다름, (ii) $\mu$ 같고 $\kappa$ 다름, (iii) 노이즈 변수 다수 → RQ1–3 검증
+- **실제 데이터:** 표준 텍스트 벤치마크 + LLM 임베딩 (SimCSE/E5)
+- **Baseline:** Rossi & Barbaro (2022), Witten & Tibshirani (2010), dense vMF + threshold, (B) vs (C)
+- **지표:** ARI, NMI, F1(active set), refit 전후 비교
+
+## 9. 범위와 한계
+
+- vMF angular isotropic 가정 (방향별 비등방 분산 미모델링)
+- 식별은 $\mu$-support 내로 한정 (4(C) 참조)
+- 이론적 보장 (selection consistency 등) 및 BIC/ICL 정당화는 후속 과제
+
+---
+
+## 10. 요약
+
+1. GMM $O(Kd^2)$ → vMF scalar $\kappa_h$
+2. 같은 평균 다른 분산: **(C) 단일 페널티 $\eta_h$ (Main, log-odds 직접 정합)** / (B) 이중 페널티 (Sub, 분해 해석)
+3. Screening 후 $\mathbb{S}^{d-1}$ 위 unpenalized refit
 
 ---
 
