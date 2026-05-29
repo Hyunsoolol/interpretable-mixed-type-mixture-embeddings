@@ -94,7 +94,8 @@ $$\eta_A - \eta_B = (\kappa_A - \kappa_B)\, \mu \neq 0$$
 ### 5.1 Two-stage refit
 $$d_i \xrightarrow{\phi} x_i \in \mathbb{R}^d \xrightarrow{/\|\cdot\|_2} z_i \in \mathbb{S}^{d-1}$$
 
-- **Stage 1 (screening):** (C) $\widehat{S}_\lambda^{\text{(1)}} \leftarrow \eta_h$ penalty (Main) / (B) $\widehat{S}_{\lambda_1}^{\text{(2)}} \leftarrow \mu$ 변수선택 + $\kappa$ 군집분리
+- **Stage 1 (screening):**
+  (C) $\widehat{S}_\lambda^{\text{(1)}} \leftarrow \eta_h$ penalty (Main) / (B) $\widehat{S}_{\lambda_1}^{\text{(2)}} \leftarrow \mu$ 변수선택 + $\kappa$ 군집분리
 - **Stage 2 (refit):** $\widehat{\Theta}^{\text{refit}}_{\widehat{S}} \leftarrow$ unpenalized sparse-vMF on $\mathbb{S}^{d-1}$
 
 ### 5.2 Reparametrization 및 Log-odds
