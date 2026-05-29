@@ -107,13 +107,49 @@ $$\log \frac{P(h \mid z_i)}{P(\ell \mid z_i)} = \log \frac{\pi_h}{\pi_\ell} + \l
 ### 5.3 Stage 1 penalty
 
 **(C) 단일 (Main)**
-$$P_B^{\text{(1)}}(\eta) = \sum_{j=1}^{d} \left[ \sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2 \right]^{1/2}, \qquad \mathcal{L}^{\text{(1)}}_{\lambda} = \ell_n - n\lambda P_B^{\text{(1)}}(\eta)$$
+
+$$P_B^{\text{(1)}}(\eta) = \sum_{j=1}^{d} \left[ \sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2 \right]^{1/2}$$
+
+$$\mathcal{L}^{\text{(1)}}_{\lambda} = \ell_n - n\lambda P_B^{\text{(1)}}(\eta)$$
+
 $$\widehat{S}_\lambda^{\text{(1)}} = \left\lbrace j : \left[ \sum_h w_h (\widehat{\eta}_{hj} - \widehat{\bar{\eta}}_j)^2 \right]^{1/2} > \epsilon \right\rbrace$$
 
 **(B) 이중 (Sub)**
-$$P^\mu(\mu) = \sum_{j=1}^d \left[\sum_h w_h (\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2}, \qquad P^\kappa(\kappa) = \sum_h |\kappa_h - \bar{\kappa}|$$
+
+$$P^\mu(\mu) = \sum_{j=1}^d \left[\sum_h w_h (\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2}$$
+
+$$P^\kappa(\kappa) = \sum_h \left|\kappa_h - \bar{\kappa}\right|$$
+
 $$\mathcal{L}^{\text{(2)}}_{\lambda_1, \lambda_2} = \ell_n - n\lambda_1 P^\mu(\mu) - n\lambda_2 P^\kappa(\kappa)$$
-- 변수 선택: $\widehat{S}_{\lambda_1}^{\text{(2)}} = \lbrace j : [\sum_h w_h (\widehat{\mu}_{hj} - \widehat{\bar{\mu}}_j)^2]^{1/2} > \epsilon \rbrace$
+
+- **변수 선택:**
+
+$$\widehat{S}_{\lambda_1}^{\text{(2)}} = \left\lbrace j : \left[\sum_h w_h (\widehat{\mu}_{hj} - \widehat{\bar{\mu}}_j)^2\right]^{1/2} > \epsilon \right\rbrace$$
+
+- **군집 분리:** $\widehat{\kappa}_h$ 의 $\widehat{\bar{\kappa}}$ shrink 정도. $\mu_A = \mu_B$ 면 $\widehat{S}_{\lambda_1}^{\text{(2)}} = \emptyset$ 이라도 $\kappa$ 가 분리
+
+
+
+### 5.3 Stage 1 penalty
+
+**(C) 단일 (Main)**
+
+$$P_B^{\text{(1)}}(\eta) = \sum_{j=1}^{d} \left[ \sum_h w_h(\eta_{hj} - \bar{\eta}_j)^2 \right]^{1/2}$$
+
+$$\mathcal{L}^{\text{(1)}}_{\lambda} = \ell_n - n\lambda P_B^{\text{(1)}}(\eta)$$
+
+$$\widehat{S}_\lambda^{\text{(1)}} = \left\lbrace j : \left[ \sum_h w_h (\widehat{\eta}_{hj} - \widehat{\bar{\eta}}_j)^2 \right]^{1/2} > \epsilon \right\rbrace$$
+
+**(B) 이중 (Sub)**
+
+$$P^\mu(\mu) = \sum_{j=1}^d \left[\sum_h w_h (\mu_{hj} - \bar{\mu}_j)^2\right]^{1/2}$$
+
+$$P^\kappa(\kappa) = \sum_h \left|\kappa_h - \bar{\kappa}\right|$$
+
+$$\mathcal{L}^{\text{(2)}}_{\lambda_1, \lambda_2} = \ell_n - n\lambda_1 P^\mu(\mu) - n\lambda_2 P^\kappa(\kappa)$$
+- 변수 선택:
+$$\widehat{S}_{\lambda_1}^{\text{(2)}} = \left\lbrace j : \left[\sum_h w_h (\widehat{\mu}_{hj} - \widehat{\bar{\mu}}_j)^2\right]^{1/2} > \epsilon \right\rbrace$$
+
 - 군집 분리: $\widehat{\kappa}_h$ 의 $\widehat{\bar{\kappa}}$ shrink 정도. $\mu_A = \mu_B$ 면 $\widehat{S}^{\text{(2)}} = \emptyset$ 이라도 $\kappa$ 가 분리
 
 ### 5.4 Stage 2: Sparse-vMF refit on $\mathbb{S}^{d-1}$
