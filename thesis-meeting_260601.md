@@ -33,6 +33,9 @@ $$\widehat{S}_\lambda \xrightarrow{\text{screening}} \widehat{\Theta}^{\text{ref
 | GMM spherical | $\mathbb{R}^{d}$ | 1 | 1 |
 | **vMF** | $\mathbb{S}^{d-1}$ | 1 ($\kappa_h$) | 1 |
 
+<img width="713" height="443" alt="image" src="https://github.com/user-attachments/assets/acaedb05-4b72-4f20-ac21-3580d20348a0" />
+
+
 $$\mu_h \text{ 비슷}, \ \Sigma_h \text{ 다름} \ (\text{GMM}) \quad \longleftrightarrow \quad \mu_h \text{ 비슷}, \ \kappa_h \text{ 다름} \ (\text{vMF})$$
 
 <img width="634" height="498" alt="image" src="https://github.com/user-attachments/assets/1dbe9aa3-0291-4f65-b7ac-4de9c95105ba" />
