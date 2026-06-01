@@ -56,8 +56,8 @@ vMF mixture를 **parsimonious directional working model** 로 채택. 정확한 
 
 ## 2. 연구 질문
 
-- **RQ1.** $\eta_h = \kappa_h \mu_h$ 에 대한 cluster-contrast penalty 가 기존 $\mu$ 기반 penalty (Rossi & Barbaro, 2022) 보다 변수 선택·군집화 성능에서 우월한가?
-- **RQ2.** Two-stage refit 이 penalized estimator 를 그대로 쓰는 것보다 추정 편향·군집 정확도를 개선하는가?
+- **RQ1.** $\eta_h = \kappa_h \mu_h$ 에 대한 cluster-contrast penalty 가 기존 $\mu$ 기반 penalty (Rossi & Barbaro, 2022) 보다 변수 선택과 군집화 성능에서 우월한가?
+- **RQ2.** Two-stage refit 이 penalized estimator 를 그대로 쓰는 것보다 추정 편향과 군집 정확도를 개선하는가?
 - **RQ3.** 단일 페널티 (C) 와 이중 페널티 (B) 중 directional sparse clustering 에 더 적합한 형태는?
 
 ## 3. 기여
@@ -98,7 +98,7 @@ $$\eta_A - \eta_B = (\kappa_A - \kappa_B)\, \mu \neq 0$$
 - 식별 범위: active 좌표는 $\mu_j \neq 0$ 에 한정 ($\mu_j=0$ 좌표는 log-odds 미기여 → 제외 타당)
 
 ### (D) 본 연구의 입장
-이론적 정합성·최적화 효율성을 근거로 **(C) 단일 페널티를 Main Method**로 설정하고, (B)와의 비교로 실증. (B)는 평균/분산 분해 해석용 보조 모형.
+이론적 정합성과 최적화 효율성을 근거로 **(C) 단일 페널티를 Main Method**로 설정하고, (B)와의 비교로 실증. (B)는 평균/분산 분해 해석용 보조 모형.
 
 | 측면 | (B) 이중 (Sub) | (C) 단일 (Main) |
 |---|---|---|
