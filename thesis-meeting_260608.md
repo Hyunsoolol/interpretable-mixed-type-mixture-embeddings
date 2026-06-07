@@ -374,28 +374,3 @@ replication = 10
 6. 에타 패널티는 TPR을 유지하면서 FPR을 크게 낮췄고,
    refit 후 eta norm과 kappa ratio도 true value에 가까워졌다.
 ```
-
-## 14. 다음 단계
-
-pilot 수준의 robustness simulation을 final simulation으로 확장한다.
-
-```text
-replication = 30 or 50
-kappa ratio = {2, 5, 10}
-mu_cos = {1.00, 0.99, 0.95}
-```
-
-최종 결과는 다음 지표 중심으로 정리한다.
-
-```text
-ARI
-selected q
-TPR
-FPR
-Precision
-F1
-eta contrast norm
-kappa ratio
-```
-
-실제 directional data 예제를 추가하면, eta 기반 support가 실제 clustering 해석에도 도움이 된다는 점을 보일 수 있다.
