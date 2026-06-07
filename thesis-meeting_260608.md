@@ -70,7 +70,7 @@ r_k = \sum_i \tau_{ik}x_i.
 ```math
 \mu_{kj}
 \propto
-\operatorname{sign}(r_{kj})
+\mathrm{sign}(r_{kj})
 \left(\kappa_k |r_{kj}| - \beta\right)_+.
 ```
 
@@ -197,7 +197,7 @@ Q_{\text{pen}}
 ```math
 z_{kj}
 =
-\operatorname{sign}(r_{kj})
+\mathrm{sign}(r_{kj})
 \left(\kappa_k |r_{kj}| - \lambda_\mu\right)_+,
 \qquad
 \mu_k = z_k / \|z_k\|_2.
@@ -245,12 +245,12 @@ True 값은 다음과 같다.
 
 ```text
 selected q = 10
-||mu_2 - mu_1|| = 0
-||eta_2 - eta_1|| = 180
+mu contrast norm = 0
+eta contrast norm = 180
 kappa ratio = 10
 ```
 
-| method | ARI | selected q | TPR | FPR | Precision | F1 | `||eta2-eta1||` | kappa ratio |
+| method | ARI | selected q | TPR | FPR | Precision | F1 | eta contrast norm | kappa ratio |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | Rossi | 1.000 | 21.933 | 1.000 | 0.133 | 0.470 | 0.635 | 181.370 | 10.149 |
 | Rossi + refit | 1.000 | 21.933 | 1.000 | 0.133 | 0.470 | 0.635 | 181.025 | 10.040 |
@@ -297,7 +297,7 @@ Rossi F1: 0.635 -> 0.635
 
 ```text
 에타 패널티:
-||eta_2 - eta_1|| = 174.767
+eta contrast norm = 174.767
 kappa ratio = 8.428
 ```
 
@@ -305,7 +305,7 @@ refit 후에는 support는 유지하면서 추정량이 true value에 가까워�
 
 ```text
 에타 패널티 + refit:
-||eta_2 - eta_1|| = 180.828
+eta contrast norm = 180.828
 kappa ratio = 10.052
 ```
 
@@ -329,7 +329,7 @@ TPR = 1.000
 FPR = 0.000
 Precision = 1.000
 F1 = 1.000
-||eta_2 - eta_1|| = 180.766
+eta contrast norm = 180.766
 kappa ratio = 10.063
 ```
 
@@ -394,7 +394,7 @@ TPR
 FPR
 Precision
 F1
-||eta_2 - eta_1||
+eta contrast norm
 kappa ratio
 ```
 
