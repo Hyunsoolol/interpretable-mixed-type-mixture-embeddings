@@ -241,6 +241,44 @@ K = 2에서 prototype objective는 다음과 같다.
 
 ## 9. 6가지 방법 비교 결과
 
+아래 표는 다음 기본 setting에서 30회 반복한 평균 결과이다.
+
+```text
+replication = 30
+valid replication = 30
+
+K_true = 2
+n = 1000
+d = 100
+true active q = 10
+mixing proportion = (0.5, 0.5)
+
+mu_1 = mu_2
+kappa_1 = 20
+kappa_2 = 200
+kappa ratio = 10
+```
+
+각 반복에서는 같은 생성 구조의 데이터를 새로 만들고, 여섯 가지 방법을 같은 concentration-driven setting에서 비교했다.
+
+```text
+Rossi:
+K grid = {1, 2, 3}
+nstart = 5
+beta path에서 BIC로 선택
+
+분리 패널티:
+K = 2
+lambda_mu = {0, 100, 200, 300, 400, 500, 600}
+lambda_kappa = {0, 10, 25, 50, 75}
+BIC로 tuning 선택
+
+에타 패널티:
+K = 2
+lambda_eta = {0, 1, 2, 5, 10, 15, 20, 30, 40, 50}
+BIC로 tuning 선택
+```
+
 True 값은 다음과 같다.
 
 ```text
