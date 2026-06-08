@@ -325,7 +325,7 @@ kappa ratio = 10
 
 ```text
 Rossi:
-K grid = {1, 2, 3}
+K = 2
 nstart = 5
 beta path에서 BIC로 선택
 
@@ -468,7 +468,7 @@ kappa ratio = 10.063
 
 ## 13. 추가 simulation
 
-Main setting 외에 두 가지 상황을 추가로 확인했다. 모든 setting에서 `n = 1000`, `d = 100`, `true active q = 10`, `replication = 30`으로 두었다. 모든 방법에서 실패한 반복은 없었다.
+Main setting 외에 두 가지 상황을 추가로 확인했다. 모든 setting에서 `K = 2`, `n = 1000`, `d = 100`, `true active q = 10`, `replication = 30`으로 두었다. 모든 방법에서 실패한 반복은 없었다.
 
 ### 13.1 집중도 차이가 더 작은 경우
 
@@ -486,8 +486,8 @@ Clustering과 variable selection 결과는 다음과 같다.
 
 | method | ARI | selected q | TPR | FPR | Precision | F1 |
 |---|---:|---:|---:|---:|---:|---:|
-| Rossi | 0.142 | 14.467 | 1.000 | 0.050 | 0.856 | 0.893 |
-| Rossi + refit | 0.140 | 14.467 | 1.000 | 0.050 | 0.856 | 0.893 |
+| Rossi | 0.363 | 41.133 | 1.000 | 0.346 | 0.383 | 0.502 |
+| Rossi + refit | 0.349 | 41.133 | 1.000 | 0.346 | 0.383 | 0.502 |
 | 분리 패널티 | 0.360 | 35.133 | 1.000 | 0.279 | 0.463 | 0.585 |
 | 분리 패널티 + refit | 0.356 | 35.133 | 1.000 | 0.279 | 0.463 | 0.585 |
 | 에타 패널티 | 0.343 | 11.467 | 1.000 | 0.016 | 0.882 | 0.935 |
@@ -497,14 +497,14 @@ Parameter estimation 결과는 다음과 같다.
 
 | method | MSE_mu | MSE_kappa | MSE_eta_contrast | kappa_1_hat | kappa_2_hat | kappa ratio | eta contrast norm |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Rossi | 1.06e-4 | 0.932 | 0.190 | 19.870 | 40.332 | 2.032 | 21.002 |
-| Rossi + refit | 1.36e-4 | 0.959 | 0.292 | 20.206 | 40.705 | 2.017 | 21.163 |
+| Rossi | 1.43e-4 | 1.826 | 0.252 | 19.804 | 39.967 | 2.023 | 20.852 |
+| Rossi + refit | 2.85e-4 | 1.558 | 0.523 | 20.245 | 40.183 | 1.988 | 21.312 |
 | 분리 패널티 | 2.25e-4 | 1.412 | 0.355 | 19.704 | 39.503 | 2.008 | 20.889 |
 | 분리 패널티 + refit | 2.67e-4 | 1.217 | 0.457 | 20.013 | 39.841 | 1.993 | 21.086 |
 | 에타 패널티 | 1.82e-4 | 10.544 | 0.421 | 23.375 | 37.893 | 1.623 | 15.030 |
 | 에타 패널티 + refit | 8.51e-5 | 1.618 | 0.188 | 20.171 | 40.286 | 2.001 | 20.623 |
 
-이 setting에서는 concentration 차이가 약해 clustering 자체가 어렵다. ARI가 전체적으로 낮아졌고, 특히 Rossi는 BIC가 `K = 1`을 선택하는 반복이 있어 ARI가 낮게 나왔다. 그러나 variable selection 기준에서는 에타 패널티가 가장 안정적이다. `selected q`가 true value 10에 가장 가깝고, FPR과 F1도 가장 좋다.
+이 setting에서는 concentration 차이가 약해 clustering 자체가 어렵다. `K = 2`를 고정하면 Rossi도 ARI가 약 0.35 수준으로 회복되어, clustering 성능은 분리 패널티 및 에타 패널티와 큰 차이가 나지 않는다. 그러나 variable selection 기준에서는 차이가 분명하다. Rossi는 `selected q = 41.133`으로 noise coordinate를 많이 선택했고, FPR이 0.346으로 높았다. 반면 에타 패널티는 `selected q`가 true value 10에 가장 가깝고, FPR과 F1도 가장 좋다.
 
 Refit 전 에타 패널티는 concentration을 shrink해서 `kappa ratio = 1.623`으로 작게 추정하지만, refit 후에는 `kappa ratio = 2.001`로 true value에 가까워진다. `MSE_eta_contrast`도 refit 후 0.188로 가장 낮다.
 
