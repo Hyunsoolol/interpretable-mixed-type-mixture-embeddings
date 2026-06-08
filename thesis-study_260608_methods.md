@@ -4,18 +4,18 @@
 
 방향자료 `x_i`는 단위구면 위의 벡터다.
 
-$$
+```math
 x_i \in S^{d-1}, \qquad \|x_i\|_2 = 1
-$$
+```
 
 vMF density는 다음과 같다.
 
-$$
+```math
 f(x_i \mid \mu_k, \kappa_k)
 =
 C_d(\kappa_k)
 \exp(\kappa_k \mu_k^\top x_i)
-$$
+```
 
 여기서
 
@@ -29,24 +29,24 @@ $$
 
 군집이 `K`개일 때 mixture likelihood는 다음과 같다.
 
-$$
+```math
 f(x_i)
 =
 \sum_{k=1}^{K}
 \alpha_k C_d(\kappa_k)
 \exp(\kappa_k \mu_k^\top x_i)
-$$
+```
 
 추정해야 할 값은 다음이다.
 
-$$
+```math
 \Theta =
 \{\alpha_k, \mu_k, \kappa_k\}_{k=1}^{K}
-$$
+```
 
 EM algorithm에서는 posterior responsibility를 계산한다.
 
-$$
+```math
 \tau_{ik}
 =
 \frac{
@@ -56,15 +56,15 @@ $$
 \alpha_\ell C_d(\kappa_\ell)
 \exp(\kappa_\ell \mu_\ell^\top x_i)
 }
-$$
+```
 
 그리고
 
-$$
+```math
 N_k = \sum_i \tau_{ik},
 \qquad
 r_k = \sum_i \tau_{ik} x_i
-$$
+```
 
 를 이용해 M-step을 수행한다.
 
@@ -72,7 +72,7 @@ $$
 
 Rossi & Barbaro (2022)는 `mu_k`에 L1 penalty를 둔다.
 
-$$
+```math
 \ell_p(\Theta)
 =
 \ell(\Theta)
@@ -80,35 +80,35 @@ $$
 \beta
 \sum_{k=1}^{K}
 \|\mu_k\|_1
-$$
+```
 
 핵심 update는 soft-thresholding 형태다.
 
-$$
+```math
 \mu_{kj}
 \propto
 \mathrm{sign}(r_{kj})
 \left(\kappa_k |r_{kj}| - \beta\right)_+
-$$
+```
 
 그 후 정규화한다.
 
-$$
+```math
 \|\mu_k\|_2 = 1
-$$
+```
 
 집중도는 다음 근사식을 이용한다.
 
-$$
+```math
 \rho_k =
 \frac{\mu_k^\top r_k}{N_k}
-$$
+```
 
-$$
+```math
 \kappa_k
 \approx
 \frac{d\rho_k - \rho_k^3}{1-\rho_k^2}
-$$
+```
 
 해석:
 
@@ -120,25 +120,25 @@ $$
 
 vMF mixture에서 군집 선택은 다음 값을 비교하는 것과 관련된다.
 
-$$
+```math
 \log \alpha_k
 +
 \log C_d(\kappa_k)
 +
 \kappa_k \mu_k^\top x_i
-$$
+```
 
 여기서 핵심 선형항은
 
-$$
+```math
 \eta_k^\top x_i
-$$
+```
 
 이고,
 
-$$
+```math
 \eta_k = \kappa_k \mu_k
-$$
+```
 
 이다.
 
@@ -175,7 +175,7 @@ Refit은 variable selection 후 선택된 support만 고정하고, penalty 없�
 
 교수님 제안에 따라 `mu_k`와 `kappa_k`에 penalty를 분리해서 둔 방법이다.
 
-$$
+```math
 Q_{\mathrm{pen}}
 =
 \ell(\Theta)
@@ -185,32 +185,32 @@ Q_{\mathrm{pen}}
 -
 \lambda_\kappa
 \sum_k \kappa_k
-$$
+```
 
 `mu_k` update는 다음과 같다.
 
-$$
+```math
 z_{kj}
 =
 \mathrm{sign}(r_{kj})
 \left(\kappa_k |r_{kj}| - \lambda_\mu\right)_+
-$$
+```
 
-$$
+```math
 \mu_k =
 \frac{z_k}{\|z_k\|_2}
-$$
+```
 
 `kappa_k` update는 다음 형태다.
 
-$$
+```math
 \rho_k =
 \frac{\mu_k^\top r_k - \lambda_\kappa}{N_k}
-$$
+```
 
-$$
+```math
 \kappa_k = A_d^{-1}(\rho_k)
-$$
+```
 
 해석:
 
@@ -222,27 +222,27 @@ $$
 
 제안 방향은 posterior decision에 직접 들어가는 `eta_k`에 penalty를 두는 것이다.
 
-$$
+```math
 \eta_k = \kappa_k \mu_k
-$$
+```
 
 K=2일 때는 두 군집의 차이를 다음으로 본다.
 
-$$
+```math
 \Delta \eta =
 \eta_2 - \eta_1
-$$
+```
 
 penalty는 다음과 같다.
 
-$$
+```math
 \ell_{\mathrm{pen}}
 =
 \ell(\Theta)
 -
 \lambda_\eta
 \|\eta_2 - \eta_1\|_1
-$$
+```
 
 해석:
 
@@ -255,34 +255,34 @@ Rossi 2022 paper-like setting은 `K=4`다. 이 경우 `eta_2 - eta_1`만으로�
 
 그래서 coordinate별 centered eta contrast를 쓴다.
 
-$$
+```math
 \bar{\eta}_{j}
 =
 \frac{1}{K}
 \sum_{k=1}^{K}
 \eta_{kj}
-$$
+```
 
-$$
+```math
 \eta_{kj}^{c}
 =
 \eta_{kj}
 -
 \bar{\eta}_{j}
-$$
+```
 
 coordinate `j`의 component 간 차이는 다음으로 본다.
 
-$$
+```math
 \left(
 \sum_{k=1}^{K}
 (\eta_{kj}^{c})^2
 \right)^{1/2}
-$$
+```
 
 K=4 eta penalty는 다음 방향이다.
 
-$$
+```math
 \ell_{\mathrm{pen}}
 =
 \ell(\Theta)
@@ -293,7 +293,7 @@ $$
 \sum_{k=1}^{K}
 (\eta_{kj} - \bar{\eta}_{j})^2
 \right)^{1/2}
-$$
+```
 
 해석:
 
@@ -318,9 +318,9 @@ $$
 
 Clustering:
 
-$$
+```math
 ARI
-$$
+```
 
 Variable selection:
 
@@ -334,25 +334,25 @@ F1
 
 Parameter estimation:
 
-$$
+```math
 \mathrm{MSE}_{\mu}
 =
 \frac{1}{Kd}
 \sum_{k,j}
 (\hat{\mu}_{kj} - \mu_{kj})^2
-$$
+```
 
-$$
+```math
 \mathrm{MSE}_{\kappa}
 =
 \frac{1}{K}
 \sum_k
 (\hat{\kappa}_k - \kappa_k)^2
-$$
+```
 
 K=2에서는
 
-$$
+```math
 \mathrm{MSE}_{\Delta \eta}
 =
 \frac{1}{d}
@@ -362,17 +362,17 @@ $$
 -
 (\eta_{2j}-\eta_{1j})
 \right]^2
-$$
+```
 
 K=4에서는 centered eta 기준을 쓴다.
 
-$$
+```math
 \mathrm{MSE}_{\eta^c}
 =
 \frac{1}{Kd}
 \sum_{k,j}
 (\hat{\eta}_{kj}^{c} - \eta_{kj}^{c})^2
-$$
+```
 
 ## 11. 현재까지의 해석
 

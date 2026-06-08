@@ -15,26 +15,26 @@ vMF mixture에서 concentration 차이가 군집 구분을 만들 때,
 
 vMF density는 다음과 같다.
 
-$$
+```math
 f(x \mid \mu, \kappa)
 = C_d(\kappa)\exp(\kappa \mu^\top x),
 \qquad x,\mu \in S^{d-1}.
-$$
+```
 
 vMF mixture는 다음과 같다.
 
-$$
+```math
 p(x_i \mid \Theta)
 = \sum_{k=1}^{K}
 \alpha_k C_d(\kappa_k)
 \exp(\kappa_k \mu_k^\top x_i).
-$$
+```
 
 posterior decision에 직접 들어가는 자연모수는
 
-$$
+```math
 \eta_k = \kappa_k \mu_k
-$$
+```
 
 이다. 따라서 component 간 구분은 `mu_k`만이 아니라 `eta_k`의 차이에 의해 결정된다.
 
@@ -42,15 +42,15 @@ $$
 
 Rossi & Barbaro (2022)는 component direction `mu_k`에 L1 penalty를 둔다.
 
-$$
+```math
 \ell_p(\Theta)
 = \ell(\Theta)
 - \beta \sum_{k=1}^{K}\|\mu_k\|_1.
-$$
+```
 
 EM update의 주요 형태는 다음과 같다.
 
-$$
+```math
 \tau_{ik}
 =
 \frac{
@@ -59,27 +59,27 @@ $$
 \sum_{\ell=1}^{K}
 \alpha_\ell C_d(\kappa_\ell)\exp(\kappa_\ell\mu_\ell^\top x_i)
 }.
-$$
+```
 
-$$
+```math
 N_k = \sum_i \tau_{ik},
 \qquad
 r_k = \sum_i \tau_{ik}x_i.
-$$
+```
 
-$$
+```math
 \mu_{kj}
 \propto
 \mathrm{sign}(r_{kj})
 \left(\kappa_k |r_{kj}| - \beta\right)_+.
-$$
+```
 
-$$
+```math
 \rho_k = \frac{\mu_k^\top r_k}{N_k},
 \qquad
 \kappa_k \approx
 \frac{d\rho_k - \rho_k^3}{1-\rho_k^2}.
-$$
+```
 
 이 방법은 sparse prototype을 제공하지만, penalty와 해석 대상이 `mu_k`에 있다. 그러나 posterior decision에는 `eta_k = kappa_k mu_k`가 직접 들어간다.
 
@@ -133,9 +133,9 @@ kappa_2 = 200
 
 이 경우 평균 방향은 같다.
 
-$$
+```math
 \|\mu_2 - \mu_1\| = 0.
-$$
+```
 
 하지만 concentration은 크게 다르다.
 
@@ -145,9 +145,9 @@ kappa ratio = 10
 
 따라서 true signal은 `mu` 차이가 아니라 `eta` 차이에 있다.
 
-$$
+```math
 \|\eta_2 - \eta_1\| = 180.
-$$
+```
 
 즉, 군집은 concentration 차이로 구분되지만 `mu_1 = mu_2`이므로, `mu` 중심 variable selection은 군집 구분에 기여한 coordinate를 직접 설명하기 어렵다.
 
@@ -175,9 +175,9 @@ Refit은 다음 절차를 의미한다.
 
 즉,
 
-$$
-\mu_{kj} = 0 \quad (j \notin S)
-$$
+```math
+\mu_{kj} = 0 \quad \text{for } j \notin S
+```
 
 라는 제약 아래 unpenalized EM을 다시 수행한다.
 
@@ -211,23 +211,23 @@ kappa ratio
 
 Parameter estimation은 다음 MSE로 평가한다.
 
-$$
+```math
 \mathrm{MSE}_{\mu}
 =
 \frac{1}{Kd}
 \sum_{k=1}^{K}
 \|\hat{\mu}_k-\mu_k\|_2^2.
-$$
+```
 
-$$
+```math
 \mathrm{MSE}_{\kappa}
 =
 \frac{1}{K}
 \sum_{k=1}^{K}
 (\hat{\kappa}_k-\kappa_k)^2.
-$$
+```
 
-$$
+```math
 \mathrm{MSE}_{\Delta\eta}
 =
 \frac{1}{d}
@@ -237,7 +237,7 @@ $$
 -
 (\eta_{2j}-\eta_{1j})
 \right]^2.
-$$
+```
 
 여기서 `eta_k = kappa_k mu_k`이고, `MSE_eta_contrast`는 `eta_2 - eta_1`에 대한 MSE를 의미한다. Posterior decision에서 직접 비교되는 값이 `eta_2 - eta_1`이므로, 이 지표가 concentration-driven setting에서 가장 중요한 parameter estimation 지표다.
 
@@ -247,31 +247,31 @@ MSE 계산 전에는 label switching을 정리해야 한다. 현재 simulation�
 
 교수님 제안에 따라 `mu`와 `kappa`에 penalty를 분리해서 두는 EM을 구현했다.
 
-$$
-Q_{\mathrm{pen}}
+```math
+Q_{\text{pen}}
 = \ell(\Theta)
 - \lambda_\mu \sum_k \|\mu_k\|_1
 - \lambda_\kappa \sum_k \kappa_k.
-$$
+```
 
 주요 update는 다음과 같다.
 
-$$
+```math
 z_{kj}
 =
 \mathrm{sign}(r_{kj})
 \left(\kappa_k |r_{kj}| - \lambda_\mu\right)_+,
 \qquad
 \mu_k = z_k / \|z_k\|_2.
-$$
+```
 
-$$
+```math
 s_k = \mu_k^\top r_k,
 \qquad
 \rho_k = \frac{s_k-\lambda_\kappa}{N_k},
 \qquad
 \kappa_k = A_d^{-1}(\rho_k).
-$$
+```
 
 하지만 `kappa_k`는 coordinate-specific parameter가 아니라 component-level scalar이다. 따라서 `kappa_k`에 별도 penalty를 두어도 어떤 coordinate가 concentration 차이에 기여했는지를 직접 선택하기 어렵다.
 
@@ -279,16 +279,16 @@ $$
 
 제안 방향은 자연모수 `eta_k`를 기준으로 variable selection을 수행하는 것이다.
 
-$$
+```math
 \eta_k = \kappa_k \mu_k.
-$$
+```
 
 K = 2에서 prototype objective는 다음과 같다.
 
-$$
+```math
 \ell(\Theta)
 - \lambda_\eta \sum_j |\eta_{2j} - \eta_{1j}|.
-$$
+```
 
 구현은 practical proximal EM 형태로 수행했다.
 
