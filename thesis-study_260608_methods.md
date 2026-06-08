@@ -1,27 +1,6 @@
-# 연구미팅 내용 공부 정리
+# Sparse vMF Mixture 및 Eta Penalty 정리
 
-## 1. 전체 흐름
-
-이 자료의 핵심 흐름은 다음이다.
-
-```text
-1. vMF mixture model의 기본 likelihood와 EM을 이해한다.
-2. posterior decision에는 mu가 아니라 eta = kappa mu가 직접 들어간다는 점을 확인한다.
-3. Rossi & Barbaro (2022)는 mu에 L1 penalty를 두므로 sparse prototype을 제공한다.
-4. 그러나 concentration 차이가 중요한 상황에서는 mu 기준 sparsity만으로는 해석이 부족할 수 있다.
-5. 교수님 제안인 mu/kappa 분리 패널티를 baseline으로 비교한다.
-6. 제안 방향으로 eta contrast에 직접 penalty를 두는 모형을 정리한다.
-7. lambda 선택, refit, 평가지표를 같은 기준에서 비교한다.
-```
-
-따라서 이 자료에서 가장 중요한 연결고리는 다음 문장이다.
-
-```text
-Rossi 2022의 penalty target은 mu_k지만,
-posterior decision의 coordinate-level 효과는 eta_k = kappa_k mu_k에 의해 결정된다.
-```
-
-## 2. vMF 분포
+## 1. vMF 분포
 
 방향자료 `x_i`는 단위구면 위의 벡터다.
 
@@ -46,7 +25,7 @@ C_d(\kappa_k)
 
 참고: Banerjee et al. (2005), Mardia and Jupp (2000), Rossi & Barbaro (2022)
 
-## 3. vMF Mixture Model과 EM
+## 2. vMF Mixture Model과 EM
 
 군집이 `K`개일 때 mixture likelihood는 다음과 같다.
 
@@ -107,7 +86,7 @@ unpenalized vMF M-step에서는 보통
 
 로부터 `kappa_k`를 추정한다.
 
-## 4. Posterior Decision과 Eta
+## 3. Posterior Decision과 Eta
 
 vMF mixture에서 관측치 `x_i`가 어느 군집에 속하는지는 다음 log posterior score 비교로 결정된다.
 
@@ -160,7 +139,7 @@ K=2에서는 log posterior odds가 다음처럼 정리된다.
 
 이 점이 에타 패널티를 제안하는 핵심 이유다.
 
-## 5. 집중도 kappa 추정과 근사식 출처
+## 4. 집중도 kappa 추정과 근사식 출처
 
 vMF 분포에서 `kappa`의 MLE는 다음 방정식을 푸는 문제다.
 
@@ -194,7 +173,7 @@ A_d(\kappa)
 
 현재 코드에서는 이 근사식이 `rossi_barbaro_2022_reproduction.r`의 `estimate_kappa()`에 구현되어 있다.
 
-## 6. Rossi & Barbaro (2022) Sparse vMF
+## 5. Rossi & Barbaro (2022) Sparse vMF
 
 Rossi & Barbaro (2022)는 component direction `mu_k`에 L1 penalty를 둔다.
 
@@ -240,7 +219,7 @@ z_{kj}
 - 그러나 posterior decision에는 `eta_k = kappa_k mu_k`가 들어간다.
 - 따라서 concentration 차이가 중요한 상황에서는 `mu_k` sparsity만으로는 decision effect를 충분히 설명하지 못할 수 있다.
 
-## 7. Rossi 방법의 한계가 나타나는 상황
+## 6. Rossi 방법의 한계가 나타나는 상황
 
 현재 연구에서 만든 limitation setting은 다음이다.
 
@@ -271,7 +250,7 @@ z_{kj}
 
 즉 군집 차이는 평균 방향 자체가 아니라 concentration이 반영된 natural parameter에서 나타난다. 이 상황에서 Rossi는 clustering은 잘할 수 있지만, variable selection에서는 false positive가 늘거나 실제 decision effect를 덜 직접적으로 설명할 수 있다.
 
-## 8. 분리 패널티 EM
+## 7. 분리 패널티 EM
 
 교수님 제안에 따라 `mu_k`와 `kappa_k`에 penalty를 분리해서 둔 baseline이다.
 
@@ -316,7 +295,7 @@ z_{kj}
 
 분리 패널티의 장점은 `mu_k` sparsity와 `kappa_k` shrinkage를 분리해서 볼 수 있다는 점이다. 그러나 `kappa_k`는 coordinate별 parameter가 아니라 component-level scalar다. 따라서 `lambda_kappa`를 두어도 어떤 coordinate가 concentration 차이에 기여했는지는 직접 선택하지 못한다.
 
-## 9. 제안 모형: Eta Penalty
+## 8. 제안 모형: Eta Penalty
 
 에타 패널티는 2022 논문에 있는 방법이 아니라, 현재 연구에서 비교 중인 제안 방향이다. 핵심은 vMF mixture를 `mu_k`, `kappa_k` 대신 natural parameter
 
@@ -589,7 +568,7 @@ c_{kj,\lambda}
 - component 간 `eta_kj` 차이가 큰 coordinate는 선택된다.
 - K=2의 `eta_2 - eta_1` penalty를 K>2로 확장한 형태다.
 
-## 10. Refit
+## 9. Refit
 
 Refit은 variable selection 후 선택된 support만 고정하고, penalty 없이 다시 vMF mixture를 추정하는 절차다.
 
@@ -607,7 +586,7 @@ Refit은 variable selection 후 선택된 support만 고정하고, penalty 없�
 - 대신 penalty shrinkage를 줄여 `kappa`, `eta` 추정값을 개선할 수 있다.
 - 에타 패널티에서는 refit 후 `eta contrast`, `kappa ratio`, `MSE_kappa`가 true value에 더 가까워지는지 확인하는 것이 중요하다.
 
-## 11. Lambda 선택 방식
+## 10. Lambda 선택 방식
 
 현재 simulation에서 tuning parameter는 정보기준 기반으로 선택했다. 기본 기준은 BIC이다.
 
@@ -703,7 +682,7 @@ K>2에서는 다음 값이 기준이 된다.
 5. BIC 선택 결과와 EBIC 선택 결과가 같은지 sensitivity check를 한다.
 ```
 
-## 12. R 코드 구현 구조
+## 11. R 코드 구현 구조
 
 현재 구현은 Rossi & Barbaro (2022) 재현 코드를 공통 기반으로 두고, 그 위에 분리 패널티와 에타 패널티를 비교하는 구조다.
 
@@ -728,7 +707,7 @@ K>2에서는 다음 값이 기준이 된다.
 6. 선택된 support를 고정하고 필요하면 penalty 없이 refit
 ```
 
-## 13. 비교한 방법
+## 12. 비교한 방법
 
 현재 비교 구조는 다음 6가지다.
 
@@ -741,7 +720,7 @@ K>2에서는 다음 값이 기준이 된다.
 | 에타 패널티 | `eta_k` contrast | `eta_2 - eta_1` 또는 centered eta support | 없음 |
 | 에타 패널티 + refit | `eta_k` contrast | 에타 support | 있음 |
 
-## 14. 평가지표
+## 13. 평가지표
 
 Clustering:
 
@@ -810,22 +789,9 @@ kappa ratio
 eta contrast norm
 ```
 
-## 15. 현재까지의 해석
+## 14. 현재까지의 해석
 
-핵심 결론은 다음이다.
-
-```text
-Rossi 2022는 sparse prototype을 제공하지만,
-penalty와 해석 대상이 mu_k에 있다.
-
-하지만 posterior decision에는
-eta_k = kappa_k mu_k가 직접 들어간다.
-
-따라서 concentration 차이가 중요한 경우에는
-eta 기준 variable selection이 더 자연스럽다.
-```
-
-시뮬레이션 결과상:
+시뮬레이션 결과는 다음 방향을 보였다.
 
 - concentration-driven setting에서는 에타 패널티가 가장 좋은 variable selection을 보였다.
 - Rossi는 clustering은 잘하지만 false positive가 많았다.
@@ -833,41 +799,9 @@ eta 기준 variable selection이 더 자연스럽다.
 - 에타 패널티는 FPR을 크게 줄이고 Precision/F1이 좋았다.
 - refit은 support를 바꾸지는 않지만, shrinkage를 줄여 `kappa`와 `eta` 추정을 개선했다.
 
-연구미팅에서 말할 때는 다음 흐름이 가장 자연스럽다.
+## 15. 참고문헌
 
-```text
-Rossi & Barbaro (2022)는 mu_k에 L1 penalty를 두는 sparse prototype 방식이다.
-EM 안에서 mu_k는 soft-thresholding으로 업데이트하고,
-kappa_k는 Banerjee et al. (2005) 계열의 vMF concentration approximation으로 계산한다.
-
-그런데 posterior decision에는 mu_k가 아니라 eta_k = kappa_k mu_k가 들어간다.
-따라서 평균 방향 차이는 작고 concentration 차이가 큰 상황에서는
-mu 기준 penalty가 decision effect를 직접 선택한다고 보기 어렵다.
-
-그래서 교수님 제안인 mu/kappa 분리 패널티를 baseline으로 구현했고,
-추가로 eta_2 - eta_1에 직접 penalty를 두는 eta penalty EM을 비교했다.
-
-현재 결과에서는 eta penalty가 TPR을 유지하면서 FPR을 줄였고,
-refit 후에는 kappa와 eta contrast 추정도 true value에 더 가까워졌다.
-```
-
-## 16. 공부할 때 핵심 질문
-
-```text
-1. 왜 posterior decision에서 eta_k가 중요한가?
-2. Rossi 2022의 penalty target은 왜 mu_k인가?
-3. concentration 차이가 있을 때 mu 기준 sparsity가 왜 부족한가?
-4. 분리 패널티에서 kappa penalty는 왜 coordinate selection을 직접 못 하는가?
-5. eta penalty는 어떤 의미에서 coordinate-level decision effect를 선택하는가?
-6. eta penalty의 exact M-step이 왜 쉽지 않은가?
-7. 현재 proximal EM prototype을 논문용 방법으로 정교화하려면 무엇이 필요한가?
-8. refit은 왜 support는 그대로 두고 parameter estimation만 개선하는가?
-9. lambda 선택은 BIC, EBIC, adaptive grid 중 무엇을 기준으로 할 것인가?
-```
-
-## 17. 참고문헌 위치
-
-현재 공부 자료에서 직접 연결되는 문헌은 다음과 같다.
+본문에서 직접 연결되는 문헌은 다음과 같다.
 
 | 내용 | 참고문헌 |
 |---|---|
