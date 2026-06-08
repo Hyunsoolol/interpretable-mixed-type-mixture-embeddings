@@ -181,7 +181,69 @@ Refit은 다음 절차를 의미한다.
 
 라는 제약 아래 unpenalized EM을 다시 수행한다.
 
-## 7. 분리 패널티 EM
+## 7. 평가지표
+
+6가지 방법은 다음 세 범주의 지표로 비교한다.
+
+```text
+Clustering:
+ARI
+
+Variable selection:
+selected q
+TPR
+FPR
+Precision
+F1
+
+Parameter estimation:
+MSE_mu
+MSE_kappa
+MSE_eta_contrast
+kappa_1_hat
+kappa_2_hat
+kappa ratio
+```
+
+`ARI`는 clustering label이 true label과 얼마나 일치하는지를 본다.
+
+`selected q`, `TPR`, `FPR`, `Precision`, `F1`은 active coordinate recovery를 평가한다. 이 연구의 핵심은 clustering 자체뿐 아니라 군집 차이를 설명하는 coordinate를 얼마나 정확히 선택하는지에 있다.
+
+Parameter estimation은 다음 MSE로 평가한다.
+
+```math
+\mathrm{MSE}_{\mu}
+=
+\frac{1}{Kd}
+\sum_{k=1}^{K}
+\|\hat{\mu}_k-\mu_k\|_2^2.
+```
+
+```math
+\mathrm{MSE}_{\kappa}
+=
+\frac{1}{K}
+\sum_{k=1}^{K}
+(\hat{\kappa}_k-\kappa_k)^2.
+```
+
+```math
+\mathrm{MSE}_{\Delta\eta}
+=
+\frac{1}{d}
+\sum_{j=1}^{d}
+\left[
+(\hat{\eta}_{2j}-\hat{\eta}_{1j})
+-
+(\eta_{2j}-\eta_{1j})
+\right]^2.
+```
+
+여기서 `eta_k = kappa_k mu_k`이고, `MSE_eta_contrast`는 `eta_2 - eta_1`에 대한 MSE를 의미한다. Posterior decision에서 직접 비교되는 값이 `eta_2 - eta_1`이므로, 이 지표가 concentration-driven setting에서 가장 중요한 parameter estimation 지표다.
+
+MSE 계산 전에는 label switching을 정리해야 한다. 현재 simulation은 `kappa_1 < kappa_2` 구조이므로, 추정 component도 `kappa`가 작은 component와 큰 component 순서로 정렬한 뒤 true parameter와 비교한다.
+
+## 8. 분리 패널티 EM
 
 교수님 제안에 따라 `mu`와 `kappa`에 penalty를 분리해서 두는 EM을 구현했다.
 
@@ -213,7 +275,7 @@ s_k = \mu_k^\top r_k,
 
 하지만 `kappa_k`는 coordinate-specific parameter가 아니라 component-level scalar이다. 따라서 `kappa_k`에 별도 penalty를 두어도 어떤 coordinate가 concentration 차이에 기여했는지를 직접 선택하기 어렵다.
 
-## 8. 에타 패널티 EM
+## 9. 에타 패널티 EM
 
 제안 방향은 자연모수 `eta_k`를 기준으로 variable selection을 수행하는 것이다.
 
@@ -239,7 +301,7 @@ K = 2에서 prototype objective는 다음과 같다.
 
 이 방식은 posterior decision에 직접 들어가는 coordinate effect `eta_2j - eta_1j`를 직접 shrink하고 선택한다.
 
-## 9. 6가지 방법 비교 결과
+## 10. 6가지 방법 비교 결과
 
 아래 표는 다음 기본 setting에서 30회 반복한 평균 결과이다.
 
@@ -285,6 +347,8 @@ True 값은 다음과 같다.
 selected q = 10
 mu contrast norm = 0
 eta contrast norm = 180
+kappa_1 = 20
+kappa_2 = 200
 kappa ratio = 10
 ```
 
@@ -297,7 +361,9 @@ kappa ratio = 10
 | 에타 패널티 | 1.000 | 11.800 | 1.000 | 0.020 | 0.856 | 0.920 | 174.767 | 8.428 |
 | 에타 패널티 + refit | 1.000 | 11.800 | 1.000 | 0.020 | 0.856 | 0.920 | 180.828 | 10.052 |
 
-## 10. 결과 해석
+현재 표는 기존 산출 summary 기준이며, parameter estimation의 보조 지표로 `eta contrast norm`과 `kappa ratio`를 함께 제시했다. 최종 simulation에서는 위 평가지표 정의에 따라 `MSE_mu`, `MSE_kappa`, `MSE_eta_contrast`, `kappa_1_hat`, `kappa_2_hat`을 추가한다.
+
+## 11. 결과 해석
 
 모든 방법의 ARI가 1.000이므로, 이 setting에서는 clustering 성능 차이가 핵심이 아니다.
 
@@ -347,7 +413,7 @@ eta contrast norm = 180.828
 kappa ratio = 10.052
 ```
 
-## 11. Eta screening + refit 확인
+## 12. Eta screening + refit 확인
 
 계산적으로 단순한 eta screening + refit도 추가로 확인했다.
 
@@ -373,7 +439,7 @@ kappa ratio = 10.063
 
 이는 `eta` contrast score 자체가 concentration-driven active coordinate를 잘 포착한다는 근거다. 최종 방법은 penalized likelihood 안에서 eta contrast를 직접 다루는 에타 패널티 EM으로 정리하고, eta screening + refit은 practical comparison으로 둘 수 있다.
 
-## 12. Robustness pilot
+## 13. Robustness pilot
 
 한계 setting 외에도 다음 grid에서 pilot simulation을 수행했다.
 
@@ -391,7 +457,7 @@ replication = 10
 | `kappa ratio = 5` | 모든 방법의 ARI가 약 0.99. eta penalty/refit과 eta screening/refit의 support F1이 가장 높음 |
 | `kappa ratio = 10` | 모든 방법의 ARI가 1.00. Rossi와 분리 패널티는 selected q를 약 22-25로 넓게 선택, eta penalty/refit은 약 11-12로 true q에 가까움 |
 
-## 13. 현재 결론
+## 14. 현재 결론
 
 현재까지의 결과는 다음과 같이 정리된다.
 
