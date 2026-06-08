@@ -352,16 +352,29 @@ kappa_2 = 200
 kappa ratio = 10
 ```
 
-| method | ARI | selected q | TPR | FPR | Precision | F1 | eta contrast norm | kappa ratio |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Rossi | 1.000 | 21.933 | 1.000 | 0.133 | 0.470 | 0.635 | 181.370 | 10.149 |
-| Rossi + refit | 1.000 | 21.933 | 1.000 | 0.133 | 0.470 | 0.635 | 181.025 | 10.040 |
-| 분리 패널티 | 1.000 | 24.300 | 1.000 | 0.159 | 0.422 | 0.590 | 181.342 | 10.143 |
-| 분리 패널티 + refit | 1.000 | 24.300 | 1.000 | 0.159 | 0.422 | 0.590 | 181.052 | 10.034 |
-| 에타 패널티 | 1.000 | 11.800 | 1.000 | 0.020 | 0.856 | 0.920 | 174.767 | 8.428 |
-| 에타 패널티 + refit | 1.000 | 11.800 | 1.000 | 0.020 | 0.856 | 0.920 | 180.828 | 10.052 |
+Clustering과 variable selection 결과는 다음과 같다.
 
-현재 표는 기존 산출 summary 기준이며, parameter estimation의 보조 지표로 `eta contrast norm`과 `kappa ratio`를 함께 제시했다. 최종 simulation에서는 위 평가지표 정의에 따라 `MSE_mu`, `MSE_kappa`, `MSE_eta_contrast`, `kappa_1_hat`, `kappa_2_hat`을 추가한다.
+| method | ARI | selected q | TPR | FPR | Precision | F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| Rossi | 1.000 | 21.933 | 1.000 | 0.133 | 0.470 | 0.635 |
+| Rossi + refit | 1.000 | 21.933 | 1.000 | 0.133 | 0.470 | 0.635 |
+| 분리 패널티 | 1.000 | 24.300 | 1.000 | 0.159 | 0.422 | 0.590 |
+| 분리 패널티 + refit | 1.000 | 24.300 | 1.000 | 0.159 | 0.422 | 0.590 |
+| 에타 패널티 | 1.000 | 11.800 | 1.000 | 0.020 | 0.856 | 0.920 |
+| 에타 패널티 + refit | 1.000 | 11.800 | 1.000 | 0.020 | 0.856 | 0.920 |
+
+Parameter estimation 결과는 다음과 같다.
+
+| method | MSE_mu | MSE_kappa | MSE_eta_contrast | kappa_1_hat | kappa_2_hat | kappa ratio | eta contrast norm |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Rossi | 1.68e-4 | 1.327 | 0.247 | 19.795 | 200.796 | 10.149 | 181.370 |
+| Rossi + refit | 5.57e-5 | 1.406 | 0.362 | 20.021 | 200.920 | 10.040 | 181.025 |
+| 분리 패널티 | 1.60e-4 | 1.330 | 0.241 | 19.808 | 200.800 | 10.143 | 181.342 |
+| 분리 패널티 + refit | 6.25e-5 | 1.422 | 0.391 | 20.035 | 200.946 | 10.034 | 181.052 |
+| 에타 패널티 | 1.64e-4 | 9.254 | 0.360 | 23.489 | 197.912 | 8.428 | 174.767 |
+| 에타 패널티 + refit | 3.36e-5 | 1.249 | 0.179 | 19.978 | 200.722 | 10.052 | 180.828 |
+
+MSE 지표를 포함해 같은 setting에서 30회 재실행했으며, 모든 방법에서 실패한 반복은 없었다.
 
 ## 11. 결과 해석
 
@@ -412,6 +425,20 @@ refit 후에는 support는 유지하면서 추정량이 true value에 가까워�
 eta contrast norm = 180.828
 kappa ratio = 10.052
 ```
+
+MSE 기준으로도 에타 패널티 + refit이 가장 좋은 parameter estimation 결과를 보였다.
+
+```text
+에타 패널티:
+MSE_kappa = 9.254
+MSE_eta_contrast = 0.360
+
+에타 패널티 + refit:
+MSE_kappa = 1.249
+MSE_eta_contrast = 0.179
+```
+
+즉, 에타 패널티는 support selection에서 가장 좋고, refit을 추가하면 penalty shrinkage가 줄어들어 concentration과 eta contrast 추정도 개선된다.
 
 ## 12. Eta screening + refit 확인
 
@@ -475,6 +502,9 @@ replication = 10
 5. eta_k = kappa_k mu_k를 기준으로 penalty를 두면,
    posterior decision에 직접 들어가는 coordinate effect를 선택할 수 있다.
 
-6. 에타 패널티는 TPR을 유지하면서 FPR을 크게 낮췄고,
-   refit 후 eta norm과 kappa ratio도 true value에 가까워졌다.
+6. 에타 패널티는 TPR을 유지하면서 FPR을 크게 낮췄다.
+
+7. 에타 패널티 + refit은 support를 유지하면서
+   MSE_kappa와 MSE_eta_contrast를 줄였고,
+   kappa ratio와 eta norm도 true value에 가까워졌다.
 ```
