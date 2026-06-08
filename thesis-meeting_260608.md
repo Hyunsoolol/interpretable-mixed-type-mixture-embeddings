@@ -466,23 +466,86 @@ kappa ratio = 10.063
 
 이는 `eta` contrast score 자체가 concentration-driven active coordinate를 잘 포착한다는 근거다. 최종 방법은 penalized likelihood 안에서 eta contrast를 직접 다루는 에타 패널티 EM으로 정리하고, eta screening + refit은 practical comparison으로 둘 수 있다.
 
-## 13. Robustness pilot
+## 13. 추가 simulation
 
-한계 setting 외에도 다음 grid에서 pilot simulation을 수행했다.
+Main setting 외에 두 가지 상황을 추가로 확인했다. 모든 setting에서 `n = 1000`, `d = 100`, `true active q = 10`, `replication = 30`으로 두었다. 모든 방법에서 실패한 반복은 없었다.
+
+### 13.1 집중도 차이가 더 작은 경우
+
+평균 방향 차이는 없고, concentration 차이만 약하게 둔 경우다.
 
 ```text
-kappa ratio = {2, 5, 10}
-mu_cos = {1.00, 0.99, 0.95}
-replication = 10
+mu_1 = mu_2
+kappa_1 = 20
+kappa_2 = 40
+true kappa ratio = 2
+true eta contrast norm = 20
 ```
 
-요약은 다음과 같다.
+Clustering과 variable selection 결과는 다음과 같다.
 
-| setting | 결과 |
-|---|---|
-| `kappa ratio = 2` | signal이 약해 모든 방법의 ARI가 낮음. 그래도 eta 기반 방법이 support recovery에서 상대적으로 안정적 |
-| `kappa ratio = 5` | 모든 방법의 ARI가 약 0.99. eta penalty/refit과 eta screening/refit의 support F1이 가장 높음 |
-| `kappa ratio = 10` | 모든 방법의 ARI가 1.00. Rossi와 분리 패널티는 selected q를 약 22-25로 넓게 선택, eta penalty/refit은 약 11-12로 true q에 가까움 |
+| method | ARI | selected q | TPR | FPR | Precision | F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| Rossi | 0.142 | 14.467 | 1.000 | 0.050 | 0.856 | 0.893 |
+| Rossi + refit | 0.140 | 14.467 | 1.000 | 0.050 | 0.856 | 0.893 |
+| 분리 패널티 | 0.360 | 35.133 | 1.000 | 0.279 | 0.463 | 0.585 |
+| 분리 패널티 + refit | 0.356 | 35.133 | 1.000 | 0.279 | 0.463 | 0.585 |
+| 에타 패널티 | 0.343 | 11.467 | 1.000 | 0.016 | 0.882 | 0.935 |
+| 에타 패널티 + refit | 0.367 | 11.467 | 1.000 | 0.016 | 0.882 | 0.935 |
+
+Parameter estimation 결과는 다음과 같다.
+
+| method | MSE_mu | MSE_kappa | MSE_eta_contrast | kappa_1_hat | kappa_2_hat | kappa ratio | eta contrast norm |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Rossi | 1.06e-4 | 0.932 | 0.190 | 19.870 | 40.332 | 2.032 | 21.002 |
+| Rossi + refit | 1.36e-4 | 0.959 | 0.292 | 20.206 | 40.705 | 2.017 | 21.163 |
+| 분리 패널티 | 2.25e-4 | 1.412 | 0.355 | 19.704 | 39.503 | 2.008 | 20.889 |
+| 분리 패널티 + refit | 2.67e-4 | 1.217 | 0.457 | 20.013 | 39.841 | 1.993 | 21.086 |
+| 에타 패널티 | 1.82e-4 | 10.544 | 0.421 | 23.375 | 37.893 | 1.623 | 15.030 |
+| 에타 패널티 + refit | 8.51e-5 | 1.618 | 0.188 | 20.171 | 40.286 | 2.001 | 20.623 |
+
+이 setting에서는 concentration 차이가 약해 clustering 자체가 어렵다. ARI가 전체적으로 낮아졌고, 특히 Rossi는 BIC가 `K = 1`을 선택하는 반복이 있어 ARI가 낮게 나왔다. 그러나 variable selection 기준에서는 에타 패널티가 가장 안정적이다. `selected q`가 true value 10에 가장 가깝고, FPR과 F1도 가장 좋다.
+
+Refit 전 에타 패널티는 concentration을 shrink해서 `kappa ratio = 1.623`으로 작게 추정하지만, refit 후에는 `kappa ratio = 2.001`로 true value에 가까워진다. `MSE_eta_contrast`도 refit 후 0.188로 가장 낮다.
+
+### 13.2 평균과 집중도 차이가 모두 있는 경우
+
+평균 방향 차이와 concentration 차이가 동시에 있는 경우다.
+
+```text
+mu_cos = 0.95
+kappa_1 = 20
+kappa_2 = 100
+true mu contrast norm = 0.316
+true kappa ratio = 5
+true eta contrast norm = 81.240
+```
+
+Clustering과 variable selection 결과는 다음과 같다.
+
+| method | ARI | selected q | TPR | FPR | Precision | F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| Rossi | 0.995 | 12.467 | 1.000 | 0.027 | 0.817 | 0.895 |
+| Rossi + refit | 0.995 | 12.467 | 1.000 | 0.027 | 0.817 | 0.895 |
+| 분리 패널티 | 0.995 | 13.700 | 1.000 | 0.041 | 0.760 | 0.855 |
+| 분리 패널티 + refit | 0.995 | 13.700 | 1.000 | 0.041 | 0.760 | 0.855 |
+| 에타 패널티 | 0.994 | 11.633 | 1.000 | 0.018 | 0.912 | 0.944 |
+| 에타 패널티 + refit | 0.995 | 11.633 | 1.000 | 0.018 | 0.912 | 0.944 |
+
+Parameter estimation 결과는 다음과 같다.
+
+| method | MSE_mu | MSE_kappa | MSE_eta_contrast | kappa_1_hat | kappa_2_hat | kappa ratio | eta contrast norm |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Rossi | 1.16e-4 | 0.336 | 0.157 | 19.867 | 100.422 | 5.057 | 82.178 |
+| Rossi + refit | 3.15e-5 | 0.343 | 0.110 | 19.967 | 100.477 | 5.034 | 81.832 |
+| 분리 패널티 | 1.25e-4 | 0.346 | 0.165 | 19.852 | 100.424 | 5.061 | 82.217 |
+| 분리 패널티 + refit | 3.65e-5 | 0.353 | 0.131 | 19.976 | 100.493 | 5.033 | 81.852 |
+| 에타 패널티 | 1.34e-4 | 8.147 | 0.364 | 23.267 | 97.849 | 4.210 | 76.422 |
+| 에타 패널티 + refit | 3.62e-5 | 0.336 | 0.107 | 19.982 | 100.444 | 5.029 | 81.811 |
+
+평균 차이까지 있으면 모든 방법의 ARI가 거의 1에 가깝다. 하지만 variable selection에서는 여전히 에타 패널티가 가장 좋다. Rossi와 분리 패널티는 true active q보다 넓게 선택하는 경향이 있고, 에타 패널티는 selected q, FPR, Precision, F1에서 가장 안정적이다.
+
+Parameter estimation에서도 에타 패널티 + refit이 가장 좋은 결과를 보였다. `MSE_eta_contrast = 0.107`로 가장 낮고, `kappa ratio = 5.029`로 true value 5에 가깝다.
 
 ## 14. 현재 결론
 
@@ -507,4 +570,11 @@ replication = 10
 7. 에타 패널티 + refit은 support를 유지하면서
    MSE_kappa와 MSE_eta_contrast를 줄였고,
    kappa ratio와 eta norm도 true value에 가까워졌다.
+
+8. concentration 차이가 매우 약한 경우에는 clustering 자체가 어려워지지만,
+   에타 패널티는 support recovery에서 가장 안정적이었다.
+
+9. 평균 차이와 concentration 차이가 모두 있는 경우에도
+   에타 패널티는 variable selection에서 가장 좋고,
+   에타 패널티 + refit은 MSE_eta_contrast가 가장 낮았다.
 ```
