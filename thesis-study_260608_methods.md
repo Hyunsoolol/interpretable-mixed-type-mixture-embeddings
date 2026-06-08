@@ -579,6 +579,14 @@ Refit은 variable selection 후 선택된 support만 고정하고, penalty 없�
 4. S 안에서 penalty 없이 vMF mixture 재추정
 ```
 
+즉 선택되지 않은 coordinate에서는 다음 제약을 둔다.
+
+```math
+\mu_{kj} = 0,
+\qquad
+j \notin S
+```
+
 해석은 다음과 같다.
 
 - refit은 선택된 변수 집합을 바꾸지 않는다.
@@ -738,6 +746,39 @@ Precision
 F1
 ```
 
+true active coordinate set을 `S`, 추정된 active coordinate set을 `S_hat`이라고 두면 다음과 같다.
+
+```math
+\hat{q}
+=
+|\hat{S}|
+```
+
+```math
+\mathrm{TPR}
+=
+\frac{|S \cap \hat{S}|}{|S|}
+```
+
+```math
+\mathrm{FPR}
+=
+\frac{|\hat{S} \setminus S|}{d-|S|}
+```
+
+```math
+\mathrm{Precision}
+=
+\frac{|S \cap \hat{S}|}{|\hat{S}|}
+```
+
+```math
+\mathrm{F1}
+=
+\frac{2\cdot \mathrm{Precision}\cdot \mathrm{TPR}}
+{\mathrm{Precision}+\mathrm{TPR}}
+```
+
 Parameter estimation:
 
 ```math
@@ -788,6 +829,8 @@ kappa_2_hat
 kappa ratio
 eta contrast norm
 ```
+
+MSE 계산 전에는 label switching을 정리한다. K=2 concentration-driven simulation에서는 true parameter가 `kappa_1 < kappa_2` 구조이므로, 추정 component도 `kappa`가 작은 component와 큰 component 순서로 정렬한 뒤 비교한다. K>2 simulation에서는 true `mu_k`와 추정 `mu_k` 사이의 cosine similarity가 가장 커지는 permutation을 사용한다.
 
 ## 14. 현재까지의 해석
 
