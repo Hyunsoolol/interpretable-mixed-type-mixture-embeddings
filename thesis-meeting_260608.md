@@ -238,7 +238,48 @@ Parameter estimation 결과는 다음과 같다.
 5. 에타 패널티는 TPR을 유지하면서 FPR을 크게 낮췄다.
 6. 에타 패널티 + refit은 support를 유지하면서 `MSE_mu`, `MSE_kappa`, `MSE_eta_contrast`, `kappa ratio`, `eta norm`을 true value에 가깝게 개선했다.
 
-## 부록 A. Rossi & Barbaro (2022) 재현
+---
+## 부록 A. $\eta$-Penalty 모형의 수리적 타당성
+
+**1. 베이즈 결정 경계(Decision Boundary)의 직접적 수축**
+
+$$\log \frac{\tau_{i2}}{\tau_{i1}} = \log \frac{\alpha_2 C_d(\kappa_2)}{\alpha_1 C_d(\kappa_1)} + (\eta_2 - \eta_1)^\top x_i$$
+
+- 사후 확률 할당을 주도하는 실질적 선형 판별 계수는 $\mu$가 아닌 $\eta_2 - \eta_1$임
+- 목적 함수에 $-\lambda_\eta \|\eta_2 - \eta_1\|_1$ 패널티 부여 시, 노이즈 차원의 판별 계수 자체를 0으로 강제. 분류 목적에 가장 직접적이고 정확한 변수 선택 수행
+    
+
+**2. 집중도 주도(Concentration-driven) 환경에서의 식별력**
+
+- $\mu_1 = \mu_2$ 이고 $\kappa_1 \ll \kappa_2$
+    
+- 기존 $\mu$-penalty: $\|\mu_2 - \mu_1\| = 0$ (군집 식별 불가, False Positive 증가)
+    
+    - 제안 $\eta$-penalty: $\|\eta_2 - \eta_1\| = \kappa_2 - \kappa_1 \neq 0$ (군집 식별 가능)
+        
+- 평균 방향이 동일하더라도 집중도 차이로 발생하는 좌표별(Coordinate-level) 분리 효과를 완벽하게 포착.
+    
+
+**3. $\kappa$ 발산에 대한 내재적 정규화**
+
+$$\|\eta_k\|_2 = \|\kappa_k \mu_k\|_2 = \kappa_k$$
+
+- 자연 모수의 $L_2$ 노름이 곧 집중도($\kappa$)이므로, $\eta$ 벡터에 대한 $L_1$ 패널티는 필연적으로 $\kappa$ 스케일의 수축을 유도함.
+    
+- 고차원 vMF 모형의 고질적 한계인 $\kappa_k \rightarrow \infty$ (소수 관측치 과적합 발산) 현상을 인위적인 제약(`shared kappa`) 없이 수리적으로 원천 차단.
+    
+
+**4. 수축 편향 완벽 제거**
+
+$$\hat{S}_\eta = \{j : |\hat{\eta}_{2j} - \hat{\eta}_{1j}| > 0 \}$$
+
+$$\text{Refit constraint: } \mu_{kj} = 0 \text{ for } j \notin \hat{S}_\eta$$
+
+- **핵심:** Phase 1에서 도출된 Support($\hat{S}_\eta$)를 고정한 채, 패널티 없이 재학습(Unpenalized EM)하는 Relaxed LASSO 구조 도입.
+    
+- **효과:** $L_1$ 패널티로 인해 축소된 $\kappa$ 추정치와 $\eta$ Contrast를 True Value 스케일로 복원. FPR 통제와 모수 추정 정확도를 동시에 달성.
+
+## 부록 B. Rossi & Barbaro (2022) 재현
 
 논문 artificial simulation 구조를 R로 재현했다. 계산 시간 때문에 medium-budget setting으로 먼저 확인했다.
 
@@ -270,7 +311,7 @@ precision: 0.444 - 0.891
 
 Rossi 방법은 논문 결과와 같은 정성적 패턴을 재현했다. 다만 variable recovery에서는 false positive가 남았다.
 
-## 부록 B. Eta screening + refit 확인
+## 부록 C. Eta screening + refit 확인
 
 계산적으로 단순한 eta screening + refit도 추가로 확인했다.
 
