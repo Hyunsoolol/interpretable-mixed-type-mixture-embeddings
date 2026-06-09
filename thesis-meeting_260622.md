@@ -1,5 +1,3 @@
-# Sparse vMF Mixture via Natural Parameter Shrinkage
-
 ## 1. 시뮬레이션 및 모수 추정 결과
 
 ### 1.1. Main: 집중도 주도 환경 
