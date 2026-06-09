@@ -6,7 +6,7 @@
 * **Setting:** $K=2, n=1000, d=100$. True active $q=10$.
 * **True Params:** $\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=200$. (True $\kappa$ ratio = 10, True $\|\eta_2-\eta_1\| = 180$)
 
-**[군집화 및 변수 선택 성능]**
+**a. 군집화 및 변수 선택 성능**
 
 | Method | ARI | Selected $q$ | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
@@ -17,7 +17,7 @@
 | **에타 패널티** | 1.000 | 11.800 | 1.000 | **0.020** | **0.856** | **0.920** |
 | **에타 패널티 + refit**| 1.000 | **11.800** | 1.000 | **0.020** | **0.856** | **0.920** |
 
-**[모수 추정 성능] (* MSE 지표 $\times 100$)**
+**b. 모수 추정 성능** (MSE 지표 $\times 100$)
 
 | Method | MSE_$\mu$ | MSE_$\kappa$ | MSE_$\Delta\eta$ | $\kappa$ ratio | $\|\eta_2-\eta_1\|$ |
 |:---|---:|---:|---:|---:|---:|
@@ -33,7 +33,7 @@
 ### 1.2. Add 1: 집중도 차이가 약한 환경
 * **True Params:** $\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=40$. (True $\kappa$ ratio = 2, True $\|\eta_2-\eta_1\| = 20$)
 
-**[군집화 및 변수 선택 성능]**
+a. **군집화 및 변수 선택 성능**
 
 | Method | ARI | Selected $q$ | TPR | FPR | F1 |
 |:---|---:|---:|---:|---:|---:|
@@ -44,7 +44,7 @@
 | **에타 패널티** | 0.343 | **11.467** | 1.000 | **0.016** | **0.935** |
 | **에타 패널티 + refit**| 0.367 | **11.467** | 1.000 | **0.016** | **0.935** |
 
-**[모수 추정 성능] (* MSE 지표 $\times 100$)**
+**b. 모수 추정 성능** (MSE 지표 $\times 100$)
 
 | Method | MSE_$\mu$ | MSE_$\kappa$ | MSE_$\Delta\eta$ | $\kappa$ ratio |
 |:---|---:|---:|---:|---:|
@@ -60,7 +60,7 @@
 ### 1.3. Add 2: 평균과 집중도 차이가 모두 존재하는 환경
 * **True Params:** $\mu_{cos} = 0.95$, $\kappa_1=20, \kappa_2=100$. (True $\kappa$ ratio = 5, True $\|\eta_2-\eta_1\| = 81.240$)
 
-**[군집화 및 변수 선택 성능]**
+**a. 군집화 및 변수 선택 성능**
 
 | Method | ARI | Selected $q$ | TPR | FPR | F1 |
 |:---|---:|---:|---:|---:|---:|
@@ -71,7 +71,7 @@
 | **에타 패널티** | 0.994 | **11.633** | 1.000 | **0.018** | **0.944** |
 | **에타 패널티 + refit**| 0.995 | **11.633** | 1.000 | **0.018** | **0.944** |
 
-**[모수 추정 성능] (* MSE 지표 $\times 100$)**
+**b. 모수 추정 성능** (MSE 지표 $\times 100$)
 
 | Method | MSE_$\mu$ | MSE_$\kappa$ | MSE_$\Delta\eta$ | $\kappa$ ratio |
 |:---|---:|---:|---:|---:|
@@ -110,6 +110,7 @@ $$\|\eta_k\|_2 = \|\kappa_k \mu_k\|_2 = \kappa_k$$
 * 고차원 모형의 고질적 한계인 $\kappa_k \rightarrow \infty$ (소수 관측치 과적합 발산) 현상을 인위적인 제약(`shared kappa`) 없이 수리적으로 원천 차단.
 
 **④ 수축 편향 제거 (Select-then-Refit)**
+
 $$\hat{S}_\eta = \{j : |\hat{\eta}_{2j} - \hat{\eta}_{1j}| > 0 \}$$
 $$\text{Refit constraint: } \mu_{kj} = 0 \text{ for } j \notin \hat{S}_\eta$$
 * Phase 1에서 도출된 Support($\hat{S}_\eta$)를 고정한 채, 패널티 없이 재학습(Unpenalized EM)하는 Relaxed LASSO 구조 도입.
