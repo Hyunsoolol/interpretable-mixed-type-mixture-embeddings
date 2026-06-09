@@ -1,63 +1,108 @@
 # Sparse vMF Mixture via Natural Parameter Shrinkage
 
-## 1. Formulation & Penalty Structures
-vMF 혼합 모형의 확률밀도함수와 자연 모수(Natural Parameter)는 다음과 같다.
-$$p(x_i \mid \Theta) = \sum_{k=1}^{K} \alpha_k C_d(\kappa_k) \exp(\kappa_k \mu_k^\top x_i)$$
-$$\eta_k = \kappa_k \mu_k$$
+## 1. $\eta$-Penalty 모형의 수리적 타당성 (Theoretical Justification)
 
-**[비교 모형의 목적 함수]**
-* **Rossi (2022) [$\mu$-penalty]**: 
-  $$\ell_{\mathrm{Rossi}} = \ell(\Theta) - \beta \sum_k \|\mu_k\|_1$$
-* **Baseline [Split-penalty]**: 
-  $$\ell_{\mathrm{sep}} = \ell(\Theta) - \lambda_\mu \sum_k \|\mu_k\|_1 - \lambda_\kappa \sum_k \kappa_k$$
-* **Proposed [$\eta$-penalty]**: 
-  $$\ell_{\eta} = \ell(\Theta) - \lambda_\eta \|\eta_2-\eta_1\|_1$$
+**① 베이즈 결정 경계(Decision Boundary) 직접 수축**
+$$\log \frac{\tau_{i2}}{\tau_{i1}} = \text{Const} + (\eta_2 - \eta_1)^\top x_i$$
+* 사후 확률을 결정하는 실질적 판별 계수는 $\mu$가 아닌 **$\eta$의 대조(Contrast)**.
+* $-\lambda_\eta \|\eta_2 - \eta_1\|_1$ 패널티는 노이즈 차원의 판별 계수를 직접 0으로 강제하여 정확한 변수 선택 수행.
 
----
+**② 집중도 주도(Concentration-driven) 환경 식별**
+* 조건: $\mu_1 = \mu_2$, $\kappa_1 \ll \kappa_2$ 
+* **$\mu$-penalty (기존)**: $\|\mu_2 - \mu_1\| = 0 \rightarrow$ 군집 식별 불가.
+* **$\eta$-penalty (제안)**: $\|\eta_2 - \eta_1\| = \kappa_2 - \kappa_1 \neq 0 \rightarrow$ 좌표별 분리 기여도 포착.
 
-## 2. $\eta$-Penalty 모형의 수리적 타당성 (Theoretical Justification)
-
-### 2.1. 베이즈 결정 경계 (Decision Boundary) 수축
-$$\log \frac{\tau_{i2}}{\tau_{i1}} = \log \frac{\alpha_2 C_d(\kappa_2)}{\alpha_1 C_d(\kappa_1)} + (\eta_2 - \eta_1)^\top x_i$$
-* 사후 확률을 결정하는 선형 판별 계수는 $\mu$가 아닌 **$\eta$의 대조(Contrast)**임.
-* $\eta_2 - \eta_1$에 $L_1$ 패널티 부여 시, 노이즈 차원의 판별 계수를 0으로 강제하여 가장 직접적인 변수 선택 수행.
-
-### 2.2. 집중도 주도 (Concentration-driven) 환경 식별
-조건: $\mu_1 = \mu_2$, $\kappa_1 \ll \kappa_2$ (방향 동일, 집중도 상이)
-* **Rossi**: $\|\mu_2 - \mu_1\| = 0$ $\rightarrow$ 군집 식별 및 변수 선택 불가.
-* **Proposed**: $\|\eta_2 - \eta_1\| = \kappa_2 - \kappa_1 \neq 0$ $\rightarrow$ 좌표별 분리 효과 포착 성공.
-
-### 2.3. 내재적 정규화 (Built-in Regularization)
+**③ 내재적 정규화 (Built-in Regularization)**
 $$\|\eta_k\|_2 = \|\kappa_k \mu_k\|_2 = \kappa_k$$
-* 자연 모수의 $L_2$ 노름이 집중도 $\kappa$.
-* $\eta$에 대한 $L_1$ 패널티는 필연적으로 $\kappa$ 스케일 수축 유도.
-* 고차원 모형의 $\kappa_k \rightarrow \infty$ 발산 현상을 `shared kappa` 제약 없이 원천 차단.
+* $\eta$에 대한 $L_1$ 패널티는 자연 모수의 $L_2$ 노름인 집중도($\kappa$)의 스케일 수축을 필연적으로 유도.
+* 고차원 모형의 고질적 한계인 $\kappa_k \rightarrow \infty$ 발산을 인위적 제약(`shared kappa`) 없이 수리적으로 차단.
 
-### 2.4. Select-then-Refit (수축 편향 제거)
-$$\hat{S}_\eta = \{j : |\hat{\eta}_{2j} - \hat{\eta}_{1j}| > 0 \}$$
-* Phase 1: $\eta$-penalty를 통해 Support $\hat{S}_\eta$ 도출.
-* Phase 2 (Refit): $\mu_{kj} = 0 \text{ for } j \notin \hat{S}_\eta$ 제약 하에 unpenalized EM 재학습.
-* $L_1$ 수축 편향(Shrinkage bias)을 제거하여 $\kappa$ 및 $\eta$ 모수 추정치 복원.
+**④ 수축 편향 제거 (Select-then-Refit)**
+$$\text{Refit: Subject to } \mu_{kj} = 0 \text{ for } j \notin \hat{S}_\eta, \text{ run unpenalized EM}$$
+* Phase 1의 Support($\hat{S}_\eta$) 고정 후 패널티 없이 재학습.
+* $L_1$ 패널티로 축소된 $\kappa$ 및 $\eta$ Contrast를 True value 스케일로 완벽히 복원.
 
 ---
 
-## 3. 핵심 시뮬레이션 결과 요약
+## 2. 시뮬레이션 및 모수 추정 결과 (Simulation Results)
 
-**[Setting: Concentration-driven]**
-$K=2, n=1000, d=100$. True active $q=10$.
-$\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=200$. 
-(True $\kappa$ ratio = 10, True $\|\eta_2-\eta_1\| = 180$)
+### 2.1. Main: 집중도 주도 환경 (Concentration-driven)
+* **Setting:** $K=2, n=1000, d=100$. True active $q=10$.
+* **True Params:** $\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=200$. (True $\kappa$ ratio = 10, True $\|\eta_2-\eta_1\| = 180$)
 
-| Method | Selected $q$ | FPR | F1 | $\kappa$ ratio | $\|\eta_2-\eta_1\|$ |
+**[군집화 및 변수 선택 성능]**
+| Method | ARI | Selected $q$ | TPR | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|---:|
+| Rossi | 1.000 | 21.933 | 1.000 | 0.133 | 0.470 | 0.635 |
+| Rossi + refit | 1.000 | 21.933 | 1.000 | 0.133 | 0.470 | 0.635 |
+| 분리 패널티 | 1.000 | 24.300 | 1.000 | 0.159 | 0.422 | 0.590 |
+| 분리 패널티 + refit | 1.000 | 24.300 | 1.000 | 0.159 | 0.422 | 0.590 |
+| **에타 패널티** | 1.000 | 11.800 | 1.000 | **0.020** | **0.856** | **0.920** |
+| **에타 패널티 + refit**| 1.000 | **11.800** | 1.000 | **0.020** | **0.856** | **0.920** |
+
+**[모수 추정 성능]**
+| Method | MSE_$\mu$ | MSE_$\kappa$ | MSE_$\Delta\eta$ | $\kappa$ ratio | $\|\eta_2-\eta_1\|$ |
 |:---|---:|---:|---:|---:|---:|
-| **Rossi** | 21.93 | 0.133 | 0.635 | 10.15 | 181.37 |
-| **Rossi + Refit** | 21.93 | 0.133 | 0.635 | 10.04 | 181.02 |
-| **Proposed ($\eta$)** | 11.80 | **0.020** | **0.920** | 8.43 *(Shrink)* | 174.77 *(Shrink)* |
-| **Proposed + Refit**| **11.80** | **0.020** | **0.920** | **10.05** | **180.83** |
+| Rossi | 1.68e-4 | 1.327 | 0.247 | 10.149 | 181.370 |
+| Rossi + refit | 5.57e-5 | 1.406 | 0.362 | 10.040 | 181.025 |
+| 분리 패널티 | 1.60e-4 | 1.330 | 0.241 | 10.143 | 181.342 |
+| 분리 패널티 + refit | 6.25e-5 | 1.422 | 0.391 | 10.034 | 181.052 |
+| **에타 패널티** | 1.64e-4 | 9.254 | 0.360 | 8.428 | 174.767 |
+| **에타 패널티 + refit**| **3.36e-5** | **1.249** | **0.179** | **10.052** | **180.828** |
 
-*모든 모형 `TPR = 1.0`, `ARI = 1.0` 달성.*
+---
 
-**[Conclusion]**
-* **Rossi**: False Positive 통제 실패. Refit 수행해도 Support 회복 불가.
-* **Proposed ($\eta$)**: FPR 최소화 및 최적의 변수 선택(F1 0.920) 달성.
-* **Proposed + Refit**: Support 유지하며 축소된 모수값(kappa ratio, $\eta$ contrast)을 True value 스케일로 완벽히 복원.
+### 2.2. Add 1: 집중도 차이가 약한 환경
+* **True Params:** $\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=40$. (True $\kappa$ ratio = 2, True $\|\eta_2-\eta_1\| = 20$)
+
+**[군집화 및 변수 선택 성능]**
+| Method | ARI | Selected $q$ | TPR | FPR | F1 |
+|:---|---:|---:|---:|---:|---:|
+| Rossi | 0.363 | 41.133 | 1.000 | 0.346 | 0.502 |
+| Rossi + refit | 0.349 | 41.133 | 1.000 | 0.346 | 0.502 |
+| 분리 패널티 | 0.360 | 35.133 | 1.000 | 0.279 | 0.585 |
+| 분리 패널티 + refit | 0.356 | 35.133 | 1.000 | 0.279 | 0.585 |
+| **에타 패널티** | 0.343 | **11.467** | 1.000 | **0.016** | **0.935** |
+| **에타 패널티 + refit**| 0.367 | **11.467** | 1.000 | **0.016** | **0.935** |
+
+**[모수 추정 성능]**
+| Method | MSE_$\mu$ | MSE_$\kappa$ | MSE_$\Delta\eta$ | $\kappa$ ratio |
+|:---|---:|---:|---:|---:|
+| Rossi | 1.43e-4 | 1.826 | 0.252 | 2.023 |
+| Rossi + refit | 2.85e-4 | 1.558 | 0.523 | 1.988 |
+| 분리 패널티 | 2.25e-4 | 1.412 | 0.355 | 2.008 |
+| 분리 패널티 + refit | 2.67e-4 | 1.217 | 0.457 | 1.993 |
+| **에타 패널티** | 1.82e-4 | 10.544 | 0.421 | 1.623 |
+| **에타 패널티 + refit**| **8.51e-5** | **1.618** | **0.188** | **2.001** |
+
+---
+
+### 2.3. Add 2: 평균과 집중도 차이가 모두 존재하는 환경
+* **True Params:** $\mu_{cos} = 0.95$, $\kappa_1=20, \kappa_2=100$. (True $\kappa$ ratio = 5, True $\|\eta_2-\eta_1\| = 81.240$)
+
+**[군집화 및 변수 선택 성능]**
+| Method | ARI | Selected $q$ | TPR | FPR | F1 |
+|:---|---:|---:|---:|---:|---:|
+| Rossi | 0.995 | 12.467 | 1.000 | 0.027 | 0.895 |
+| Rossi + refit | 0.995 | 12.467 | 1.000 | 0.027 | 0.895 |
+| 분리 패널티 | 0.995 | 13.700 | 1.000 | 0.041 | 0.855 |
+| 분리 패널티 + refit | 0.995 | 13.700 | 1.000 | 0.041 | 0.855 |
+| **에타 패널티** | 0.994 | **11.633** | 1.000 | **0.018** | **0.944** |
+| **에타 패널티 + refit**| 0.995 | **11.633** | 1.000 | **0.018** | **0.944** |
+
+**[모수 추정 성능]**
+| Method | MSE_$\mu$ | MSE_$\kappa$ | MSE_$\Delta\eta$ | $\kappa$ ratio |
+|:---|---:|---:|---:|---:|
+| Rossi | 1.16e-4 | 0.336 | 0.157 | 5.057 |
+| Rossi + refit | 3.15e-5 | 0.343 | 0.110 | 5.034 |
+| 분리 패널티 | 1.25e-4 | 0.346 | 0.165 | 5.061 |
+| 분리 패널티 + refit | 3.65e-5 | 0.353 | 0.131 | 5.033 |
+| **에타 패널티** | 1.34e-4 | 8.147 | 0.364 | 4.210 |
+| **에타 패널티 + refit**| **3.62e-5** | **0.336** | **0.107** | **5.029** |
+
+---
+
+## 3. 요약 결론 (Summary)
+* **기존 모형의 한계:** $\mu$ 기반 패널티(Rossi) 및 분리 패널티는 높은 False Positive(FPR)를 제어하지 못하며, Refit을 수행해도 Support 구조적 한계로 인해 개선되지 않음.
+* **$\eta$-Penalty의 우월성:** 모든 시나리오에서 TPR 1.0을 유지하며 FPR을 최소화하여 가장 높은 F1 Score를 달성.
+* **Refit의 필수성:** $\eta$-Penalty 단독 수행 시 필연적으로 발생하는 $\kappa$ 수축 편향을 Refit을 통해 완벽히 제거. MSE_$\eta$ contrast를 모든 방법론 중 최저 수준으로 낮추며 True parameter 복원 성공.
