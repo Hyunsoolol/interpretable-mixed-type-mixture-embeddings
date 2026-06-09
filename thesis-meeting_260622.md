@@ -86,7 +86,7 @@ a. **군집화 및 변수 선택 성능**
 
 * **기존 모형의 한계:** $\mu$ 기반 패널티(Rossi) 및 분리 패널티는 높은 False Positive(FPR)를 제어하지 못하며, Refit을 수행해도 Support 구조적 한계로 인해 개선되지 않음.
 * **$\eta$-Penalty의 우월성:** 모든 시나리오에서 TPR 1.0을 유지하며 FPR을 최소화하여 가장 높은 F1 Score를 달성.
-* **Refit의 필수성:** $\eta$-Penalty 단독 수행 시 필연적으로 발생하는 $\kappa$ 수축 편향을 Refit을 통해 완벽히 제거. MSE_$\eta$ contrast를 모든 방법론 중 최저 수준으로 낮추며 True parameter 복원 성공.
+* **Refit의 필수성:** $\eta$-Penalty 단독 수행 시 필연적으로 발생하는 $\kappa$ 수축 편향을 Refit을 통해 완벽히 제거. MSE$_\eta$ contrast를 모든 방법론 중 최저 수준으로 낮추며 True parameter 복원 성공.
 
 ---
 
