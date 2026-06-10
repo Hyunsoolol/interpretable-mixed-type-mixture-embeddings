@@ -310,13 +310,113 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 * 모형 적합 지표 표에서도 에타 패널티 + refit이 가장 좋다. 이는 평균 방향 차이가 약간 존재하더라도 concentration-driven support를 직접 겨냥하는 방식이 유효할 수 있음을 보여준다.
 * 이 controlled setting은 기존 heterogeneous-support setting보다 논문 연결에 더 적합하다. 변수 구조를 고정했기 때문에 3번 stress setting에서 4번 controlled setting으로 자연스럽게 난이도를 완화하는 흐름을 만들 수 있다.
 
-## 5. 요약 결론
+## 5. K=4 공통 변수 + 군집별 특정 변수 setting
+
+앞의 3번과 4번은 모든 component가 같은 active coordinate를 공유하는 setting이다. 여기서는 현실적인 sparse structure를 더 직접적으로 보기 위해, 공통 변수와 군집별 특정 변수를 함께 포함하는 setting을 구성했다. 핵심 질문은 특정 군집에만 영향을 주는 변수를 유지하면서, 순수 노이즈 변수를 제거할 수 있는지이다.
+
+### 5.1. Simulation setting
+
+* **Setting:** $K=4$, $n=1000$, 군집 비율 균일.
+* **Simulation:** 반복 수 20회, random start 5회.
+* **Tuning:** Rossi는 $\beta$ path, 분리 패널티는 $\lambda_\kappa$ grid와 $\lambda_\mu$ path, 에타 패널티는 centered $\eta$ norm의 $\lambda_\eta$ path에서 BIC 기준으로 선택.
+* **Variables:** 전체 변수 개수는 $d=100$개, union 기준 유효 변수 개수는 22개.
+  * 공통 변수는 1-6번 coordinate로 두고, 모든 component에서 nonzero로 설정했다.
+  * 군집별 특정 변수는 component마다 4개씩 부여했다.
+  * Component 1의 특정 변수는 7-10번, component 2는 11-14번, component 3은 15-18번, component 4는 19-22번이다.
+  * 노이즈 변수는 23-100번 coordinate이다.
+  * Entry-level active 개수는 공통 변수 $4\times6=24$개와 특정 변수 $4\times4=16$개를 합쳐 40개이다.
+* **Mean direction:** raw vector에서 공통 변수는 1.0, 자기 component의 특정 변수는 0.5, 나머지는 0으로 둔 뒤 normalize했다.
+* **Concentration:** $\kappa=(30,45,65,90)$.
+
+Raw mean vector는 다음과 같다.
+
+```text
+common variables: v_kj = 1.0 for j = 1,...,6 and all k
+component-specific variables: v_kj = 0.5 only for component k
+noise variables: v_kj = 0
+mu_k = v_k / ||v_k||
+```
+
+따라서 각 component는 공통 변수 6개와 자기 component의 특정 변수 4개를 사용한다. Component별 nonzero coordinate는 10개이고, union active coordinate는 22개이다. 평균 방향의 pairwise cosine은 0.857이다.
+
+### 5.2. 군집화 및 변수 선택 성능
+
+| Method | ARI | True union $q$ | Selected $q$ | TPR | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|---:|---:|
+| Rossi path BIC | 0.685 | 22.000 | 98.800 | 1.000 | 0.985 | 0.223 | 0.364 |
+| Rossi path BIC + refit | 0.653 | 22.000 | 98.800 | 1.000 | 0.985 | 0.223 | 0.364 |
+| Separate 2D path/grid BIC | 0.684 | 22.000 | 89.450 | 1.000 | 0.865 | 0.248 | 0.397 |
+| Separate 2D path/grid BIC + refit | 0.657 | 22.000 | 89.450 | 1.000 | 0.865 | 0.248 | 0.397 |
+| Eta centered path BIC | 0.623 | 22.000 | **24.550** | 0.995 | **0.034** | **0.899** | **0.943** |
+| **Eta centered path BIC + refit** | **0.686** | 22.000 | **24.550** | 0.995 | **0.034** | **0.899** | **0.943** |
+
+### 5.3. 변수 유형별 선택률
+
+| Method | Common selection | Specific selection | Noise selection |
+|:---|---:|---:|---:|
+| Rossi path BIC | 1.000 | 1.000 | 0.985 |
+| Rossi path BIC + refit | 1.000 | 1.000 | 0.985 |
+| Separate 2D path/grid BIC | 1.000 | 1.000 | 0.865 |
+| Separate 2D path/grid BIC + refit | 1.000 | 1.000 | 0.865 |
+| Eta centered path BIC | 1.000 | 0.994 | **0.034** |
+| **Eta centered path BIC + refit** | **1.000** | **0.994** | **0.034** |
+
+### 5.4. 모형 적합 지표
+
+BIC는 공식 tuning 선택 기준이고, EBIC는 보조 적합 지표로 계산했다. 두 값 모두 낮을수록 좋다.
+
+| Method | loglik | df | BIC | EBIC |
+|:---|---:|---:|---:|---:|
+| Rossi path BIC | 97505.999 | 280.850 | -193071.956 | -191778.594 |
+| Rossi path BIC + refit | 97537.376 | 398.200 | -192324.083 | -190490.304 |
+| Separate 2D path/grid BIC | 97436.277 | 183.250 | -193606.709 | -192762.811 |
+| Separate 2D path/grid BIC + refit | 97529.051 | 360.800 | -192565.785 | -190904.239 |
+| Eta centered path BIC | 97325.887 | 176.650 | -193431.519 | -192618.015 |
+| **Eta centered path BIC + refit** | 97387.235 | 101.200 | **-194075.404** | **-193609.361** |
+
+### 5.5. 모수 추정 성능
+
+MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
+
+| Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
+|:---|---:|---:|---:|---:|
+| Rossi path BIC | 0.015 | 227.318 | 30.609 | 58.431 |
+| Rossi path BIC + refit | 0.033 | 266.883 | 58.140 | 58.467 |
+| Separate 2D path/grid BIC | **0.008** | 987.648 | 18.492 | 55.769 |
+| Separate 2D path/grid BIC + refit | 0.031 | 248.971 | 55.333 | 58.365 |
+| Eta centered path BIC | 0.029 | 1401.665 | 41.531 | 58.306 |
+| **Eta centered path BIC + refit** | 0.010 | **177.046** | **17.414** | 57.909 |
+
+### 5.6. 해석
+
+* 공통 변수와 군집별 특정 변수가 함께 있는 setting에서도 Rossi와 분리 패널티는 true active variable을 모두 선택하지만, 노이즈 변수도 대부분 함께 선택한다.
+* Rossi path BIC의 selected $q$는 98.800이고, 분리 패널티의 selected $q$는 89.450이다. True union $q=22$에 비해 지나치게 많은 변수를 선택한다.
+* 에타 패널티 + refit은 selected $q=24.550$으로 true union $q=22$에 가장 가깝고, FPR은 0.034로 가장 낮다.
+* 변수 유형별로 보면 에타 패널티 + refit은 공통 변수 선택률 1.000, 군집별 특정 변수 선택률 0.994를 유지하면서 노이즈 선택률을 0.034로 낮춘다.
+* Refit 기준 ARI는 에타 패널티 + refit이 0.686으로 Rossi path BIC 0.685와 비슷하며, BIC와 모수 추정 MSE_centered_eta는 가장 좋다.
+* 이 setting은 제안 방법이 단순히 공통 support를 찾는 것이 아니라, 군집별 특정 변수까지 유지하면서 노이즈 변수를 제거할 수 있음을 보여준다.
+
+## 6. 1-5번 변수 구조 요약
+
+| 번호 | setting | 공통 active 변수 | 군집별 특정 변수 | 노이즈 변수 | union active $q$ |
+|:---|:---|:---|:---|:---|---:|
+| 1 | K=2 기본 메커니즘 | 두 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
+| 2.1 | Rossi 2022 corrected reproduction | component별 nonzero가 90개로 매우 많아 대부분의 coordinate가 여러 component에서 active | 명시적으로 설계하지 않음 | component별 zero coordinate 10개 | 반복별 상이 |
+| 2.2 | K=4 sparse-active 비교 | component별 support를 랜덤 생성하므로 반복마다 겹침 정도가 달라짐 | 명시적으로 설계하지 않았지만, 랜덤 support 때문에 일부 coordinate는 특정 component에서만 active | 평균 약 65.9개 | 평균 34.1 |
+| 3 | K=4 stress setting | 모든 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
+| 4 | K=4 controlled concentration-dominant setting | 모든 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
+| 5 | K=4 공통 변수 + 군집별 특정 변수 setting | 6개 | component마다 4개씩, 총 16개 | 78개 | 22 |
+
+1, 3, 4번은 같은 active coordinate를 공유하는 공통 support setting이다. 2번은 Rossi 논문식 sparse prototype 구조 또는 랜덤 sparse-active 구조이므로 공통 변수와 군집별 특정 변수를 명시적으로 통제하지 않는다. 5번은 공통 변수와 군집별 특정 변수를 명시적으로 나누어, 제안 방법이 특정 군집 변수와 노이즈 변수를 구분할 수 있는지 확인하는 setting이다.
+
+## 7. 요약 결론
 
 * **기본 메커니즘:** $K=2$ 환경에서는 평균 방향이 같고 집중도 차이가 군집을 만드는 경우, $\eta$-penalty가 Rossi 및 분리 패널티보다 FPR을 크게 낮추고 F1을 개선한다.
 * **Refit 역할:** $\eta$-penalty 단독은 $\kappa$ 수축 편향이 생길 수 있으나, 선택된 support를 고정한 refit을 수행하면 $\kappa$ ratio와 $\eta$ contrast가 true value에 가깝게 복원된다.
 * **논문 재현:** Rossi & Barbaro (2022)의 sparse vMF는 논문 Figure와 유사하게 재현된다. 특히 논문 기준 sparsity는 zero coordinate 비율로 해석해야 한다.
 * **K=4 stress setting:** 평균 방향이 같고 집중도만 다른 어려운 상황에서는 path tuning 후에도 Rossi와 분리 패널티가 불필요한 변수를 많이 선택한다. $\eta$-penalty는 FPR을 낮추고 해석 가능한 변수 선택을 제공한다.
 * **Controlled concentration-dominant setting:** 변수 구조를 K=4 stress setting과 동일하게 고정하고 평균 방향만 약간 다르게 두면, Rossi와 분리 패널티는 거의 전체 변수를 선택하지만 $\eta$-penalty + refit은 FPR을 낮추고 refit 기준 ARI와 BIC도 가장 좋다.
+* **공통 변수 + 군집별 특정 변수 setting:** $\eta$-penalty + refit은 공통 변수와 군집별 특정 변수를 거의 모두 유지하면서 노이즈 선택률을 0.034로 낮춘다. 이는 제안 방법이 특정 군집 변수까지 반영하는 sparse structure에서 유리할 수 있음을 보여준다.
 
 ---
 

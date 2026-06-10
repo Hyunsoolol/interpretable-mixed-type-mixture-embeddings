@@ -364,19 +364,23 @@ K=2에서는 $\eta_2-\eta_1$ 직접 contrast를 사용했다. K=4에서는 cente
 | 1번 K=2 기본 메커니즘 | `eta_path_tuning_compare_run.r` | Rossi beta path, separate path/grid, eta path를 BIC로 선택 |
 | 2, 3번 K=4 비교 | `k4_path_tuning_compare_run.r` | paperlike sparse-active setting, same-mean kappa stress setting |
 | 4번 K=4 controlled setting | `k4_controlled_concdom_run.r` | common active support 유지, 평균 방향만 완화한 concentration-dominant setting |
+| 5번 K=4 specific-effect setting | `k4_specific_effect_run.r` | 공통 변수와 component-specific 변수를 함께 생성한 setting |
 | K=4 공통 함수 | `rb2022_k4_pilot_compare_run.r` | `fit_eta_centered_em()`, `prox_eta_centered()`, `fit_support_refit()` |
 | 초기 grid 실험 기록 | `eta_penalty_vmf_run.r`, `separate_penalty_vmf_run.r` | path tuning으로 정리하기 전 단독 penalty prototype |
 
-### 현재 1-4번 simulation setting 요약
+### 현재 1-5번 simulation setting 요약
 
-| 번호 | setting | 변수 구조 | 모수 구조 | 공식 tuning |
-|:---|:---|:---|:---|:---|
-| 1 | K=2 기본 메커니즘 | $d=100$, true $q=10$ | 집중도 차이 큼, 집중도 차이 작음, 평균+집중도 차이 | path 후보 + BIC |
-| 2 | Rossi 2022 재현 및 K=4 sparse-active 비교 | $d=100$, paperlike sparse prototype 또는 component별 nonzero 10개 | Rossi 2022 artificial simulation 기준 | beta path 또는 6-method path/grid + BIC |
-| 3 | K=4 stress setting | 모든 component가 같은 active coordinate 10개 공유 | $\mu_1=\cdots=\mu_4$, $\kappa=(20,35,60,100)$ | path 후보 + BIC |
-| 4 | K=4 controlled concentration-dominant setting | 3번과 동일하게 모든 component가 같은 active coordinate 10개 공유 | 평균 방향 pairwise cosine 0.95, $\kappa=(25,40,65,100)$ | path 후보 + BIC |
+| 번호 | setting | 공통 active 변수 | 군집별 특정 변수 | 노이즈 변수 | 모수 구조 | 공식 tuning |
+|:---|:---|:---|:---|:---|:---|:---|
+| 1 | K=2 기본 메커니즘 | 두 component가 같은 active coordinate 10개 공유 | 없음 | 90개 | 집중도 차이 큼, 집중도 차이 작음, 평균+집중도 차이 | path 후보 + BIC |
+| 2 | Rossi 2022 재현 및 K=4 sparse-active 비교 | 논문 corrected reproduction에서는 component별 nonzero 90개, sparse-active 비교에서는 랜덤 support가 반복마다 일부 겹침 | 명시적으로 설계하지 않음 | corrected reproduction에서는 component별 zero 10개, sparse-active 비교에서는 평균 약 65.9개 | Rossi 2022 artificial simulation 또는 component별 nonzero 10개 | beta path 또는 6-method path/grid + BIC |
+| 3 | K=4 stress setting | 모든 component가 같은 active coordinate 10개 공유 | 없음 | 90개 | $\mu_1=\cdots=\mu_4$, $\kappa=(20,35,60,100)$ | path 후보 + BIC |
+| 4 | K=4 controlled concentration-dominant setting | 3번과 동일하게 모든 component가 같은 active coordinate 10개 공유 | 없음 | 90개 | 평균 방향 pairwise cosine 0.95, $\kappa=(25,40,65,100)$ | path 후보 + BIC |
+| 5 | K=4 공통 변수 + 군집별 특정 변수 setting | 6개 | component마다 4개씩, 총 16개 | 78개 | 공통 변수 weight 1.0, 특정 변수 weight 0.5, $\kappa=(30,45,65,90)$ | path 후보 + BIC |
 
 4번은 기존 heterogeneous-support setting을 대체한 버전이다. 기존 4번은 common active 7개와 component-specific active 3개씩을 섞어 union active가 19개였지만, 현재 버전은 변수 구조를 3번과 동일하게 고정한다. 따라서 3번의 pure concentration stress setting에서 평균 방향 차이만 약간 추가한 controlled setting으로 해석한다.
+
+5번은 새로 추가한 specific-effect setting이다. 공통 변수는 모든 component에서 nonzero이고, 군집별 특정 변수는 해당 component에서만 nonzero이다. 따라서 5번은 true union active $q=22$이고, entry-level active는 공통 변수 $4\times6=24$개와 특정 변수 $4\times4=16$개를 합쳐 40개이다.
 
 ---
 
