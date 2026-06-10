@@ -153,7 +153,7 @@ Tuning은 1절과 같은 path tuning 기준으로 맞췄다. Rossi는 $\beta$ pa
 
 ### 2.3. 모형 적합 지표
 
-BIC와 EBIC는 낮을수록 좋은 기준이다.
+BIC는 공식 tuning 선택 기준이고, EBIC는 보조 적합 지표로 계산했다. 두 값 모두 낮을수록 좋다.
 
 | Method | loglik | df | BIC | EBIC |
 |:---|---:|---:|---:|---:|
@@ -181,7 +181,7 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 * 실제 논문 Figure와 비교할 때는 sparsity를 zero coordinate 비율로 해석해야 한다. 이 기준에서는 corrected reproduction 결과가 논문 Figure 13, 15, 16의 패턴과 유사하다.
 * 논문 기준 corrected reproduction에서는 BIC가 true sparsity 0.10보다 더 sparse한 표현을 선택한다. 이때 zero recall은 높고 zero precision은 낮아지는 경향이 나타나며, 이는 논문 설명과 일치한다.
-* 2.2-2.4의 6-method 비교는 component별 nonzero coordinate가 10개인 별도 sparse active-variable 세팅이다. 이 세팅에서는 $\mu_k$ sparsity가 true structure이므로 Rossi와 분리 패널티가 BIC/EBIC 기준에서 좋은 결과를 보이는 것이 자연스럽다.
+* 2.2-2.4의 6-method 비교는 component별 nonzero coordinate가 10개인 별도 sparse active-variable 세팅이다. 이 세팅에서는 $\mu_k$ sparsity가 true structure이므로 Rossi와 분리 패널티가 BIC 선택 결과에서 좋은 성능을 보이는 것이 자연스럽다.
 * 에타 패널티는 selected $q$를 더 작게 만들고 FPR을 가장 낮추지만, true structure가 $\mu_k$ sparsity인 상황에서는 TPR이 다소 낮아진다.
 * 따라서 논문 재현은 Rossi 방법의 정상 작동을 확인하는 기준점으로 두고, 제안 방법의 필요성은 이후 concentration-driven 한계 세팅에서 보여주는 것이 적절하다.
 
@@ -214,7 +214,7 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 ### 3.3. 모형 적합 지표
 
-BIC와 EBIC는 낮을수록 좋은 기준이다.
+BIC는 공식 tuning 선택 기준이고, EBIC는 보조 적합 지표로 계산했다. 두 값 모두 낮을수록 좋다.
 
 | Method | loglik | df | BIC | EBIC |
 |:---|---:|---:|---:|---:|
@@ -242,9 +242,9 @@ BIC와 EBIC는 낮을수록 좋은 기준이다.
 
 * 평균 방향이 같고 집중도만 다른 경우에는 Rossi와 분리 패널티가 대부분의 변수를 선택한다. path tuning 후에도 Rossi의 FPR은 0.841, 분리 패널티의 FPR은 0.917로 높다.
 * 에타 패널티는 selected $q=27.950$, FPR 0.199, Precision 0.553, F1 0.661로 변수 선택 성능을 크게 개선한다.
-* BIC/EBIC 기준에서는 에타 패널티 + refit이 가장 좋다.
+* 모형 적합 지표 표에서는 에타 패널티 + refit이 가장 좋다.
 * ARI는 전체적으로 낮다. 이는 $K=4$에서 평균 방향이 완전히 같고 집중도만 다른 상황 자체가 군집화하기 어려운 stress setting임을 의미한다.
-* 모수 MSE는 기존 코드가 $\mu$ cosine 기준으로 label matching을 수행하므로 보조 지표로만 본다. 이 결과에서는 ARI, 변수 선택 지표, BIC/EBIC를 우선적으로 해석한다.
+* 모수 MSE는 기존 코드가 $\mu$ cosine 기준으로 label matching을 수행하므로 보조 지표로만 본다. 이 결과에서는 ARI, 변수 선택 지표, BIC와 보조 EBIC를 우선적으로 해석한다.
 
 ## 4. K=4 realistic concentration-dominant setting
 
@@ -278,7 +278,7 @@ Stress setting은 평균 방향을 완전히 같게 둔 강한 한계 상황이�
 
 ### 4.3. 모형 적합 지표
 
-BIC와 EBIC는 낮을수록 좋은 기준이다.
+BIC는 공식 tuning 선택 기준이고, EBIC는 보조 적합 지표로 계산했다. 두 값 모두 낮을수록 좋다.
 
 | Method | loglik | df | BIC | EBIC |
 |:---|---:|---:|---:|---:|
@@ -304,7 +304,7 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 ### 4.5. 해석
 
-* 실제 유사 환경에서는 Rossi가 BIC/EBIC에서 가장 좋고, ARI는 Rossi와 분리 패널티가 비슷하다. 이는 평균 방향 차이가 일부 존재하므로 $\mu_k$ sparsity가 여전히 유효하기 때문이다.
+* 실제 유사 환경에서는 Rossi가 BIC 기반 모형 적합에서 가장 좋고, ARI는 Rossi와 분리 패널티가 비슷하다. 이는 평균 방향 차이가 일부 존재하므로 $\mu_k$ sparsity가 여전히 유효하기 때문이다.
 * 그러나 Rossi는 selected $q=48.850$으로 true union $q=19$보다 많은 변수를 선택하고, FPR이 0.369로 남아 있다.
 * 에타 패널티 + refit은 ARI가 0.609로 Rossi + refit 0.626보다 낮지만, selected $q=37.200$, FPR 0.232, F1 0.692로 변수 선택 성능이 더 좋다.
 * 따라서 이 세팅의 핵심 메시지는 에타 방법이 clustering 자체를 압도한다는 것이 아니라, 군집 성능을 크게 잃지 않으면서 더 sparse하고 해석 가능한 변수 선택을 제공한다는 점이다.
@@ -316,7 +316,7 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 * **Refit 역할:** $\eta$-penalty 단독은 $\kappa$ 수축 편향이 생길 수 있으나, 선택된 support를 고정한 refit을 수행하면 $\kappa$ ratio와 $\eta$ contrast가 true value에 가깝게 복원된다.
 * **논문 재현:** Rossi & Barbaro (2022)의 sparse vMF는 논문 Figure와 유사하게 재현된다. 특히 논문 기준 sparsity는 zero coordinate 비율로 해석해야 한다.
 * **K=4 stress setting:** 평균 방향이 같고 집중도만 다른 어려운 상황에서는 path tuning 후에도 Rossi와 분리 패널티가 불필요한 변수를 많이 선택한다. $\eta$-penalty는 FPR을 낮추고 해석 가능한 변수 선택을 제공한다.
-* **현실적 중간 setting:** 평균 차이도 일부 존재하는 경우 Rossi가 BIC/EBIC에서 강하지만, $\eta$-penalty + refit은 ARI 손실을 감수하는 대신 더 sparse한 변수 선택을 제공한다.
+* **현실적 중간 setting:** 평균 차이도 일부 존재하는 경우 Rossi가 BIC 기반 모형 적합에서 강하지만, $\eta$-penalty + refit은 ARI 손실을 감수하는 대신 더 sparse한 변수 선택을 제공한다.
 
 ---
 

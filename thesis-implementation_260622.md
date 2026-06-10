@@ -180,34 +180,30 @@ $$\kappa_k \approx \frac{d\rho_k-\rho_k^3}{1-\rho_k^2}$$
 
 코드 위치는 `update_mu_kappa_separate_one()`과 `fit_separate_penalty_em()`이다.
 
-### 분리 패널티 lambda grid
+### 분리 패널티 path/grid tuning
 
-분리 패널티는 아직 Rossi처럼 이론적 path를 유도하지 않았기 때문에 grid search를 사용했다.
+현재 260622 연구미팅 자료의 공식 비교에서는 고정 grid만 사용하지 않고, Rossi의 path tuning에 맞춰 분리 패널티도 path/grid 방식으로 정리했다. 분리 패널티에는 tuning parameter가 두 개 있으므로, $\lambda_\kappa$는 데이터 기반 grid로 두고 각 $\lambda_\kappa$에서 $\lambda_\mu$ path를 생성한다.
 
-K=2 단독 실험의 기본 grid는 다음이었다.
+$\lambda_\kappa$ 후보는 dense fit에서 계산한 feasible scale에 비율을 곱해 만든다.
 
-| tuning | grid |
+| setting | $\lambda_\kappa$ 후보 |
 |:---|:---|
-| $\lambda_\mu$ | 0, 100, 200, 300, 400, 500, 600 |
-| $\lambda_\kappa$ | 0, 10, 25, 50, 75 |
+| K=2 | feasible scale $\times$ {0, 0.05, 0.1, 0.2, 0.35, 0.5} |
+| K=4 | feasible scale $\times$ {0, 0.05, 0.1, 0.2} |
 
-K=4 6-method 비교에서는 계산 시간을 줄이기 위해 조금 더 작은 grid를 사용했다.
-
-| tuning | grid |
-|:---|:---|
-| $\lambda_\mu$ | 0, 100, 200, 300, 400, 600 |
-| $\lambda_\kappa$ | 0, 5, 10, 25 |
+각 $\lambda_\kappa$가 고정되면 $\lambda_\mu$는 현재 M-step score에서 support가 바뀔 수 있는 threshold를 따라 증가시킨다.
 
 구현 흐름은 다음이다.
 
 1. 먼저 $\beta=0$ dense vMF를 적합한다.
-2. 각 $\lambda_\kappa$에 대해 dense fit에서 시작한다.
-3. 같은 $\lambda_\kappa$ 안에서는 $\lambda_\mu$ grid를 순서대로 돌면서 이전 fit을 warm start로 사용한다.
-4. 각 조합에 대해 BIC를 계산한다.
-5. BIC가 가장 작은 조합을 선택한다.
-6. 선택된 support로 refit을 수행한다.
+2. dense fit에서 $\lambda_\kappa$ 후보 grid를 만든다.
+3. 각 $\lambda_\kappa$에 대해 dense fit에서 시작한다.
+4. 같은 $\lambda_\kappa$ 안에서는 현재 M-step의 $\kappa_k |r_{kj}|$ threshold를 이용해 $\lambda_\mu$ path를 만든다.
+5. 각 path 후보에 대해 BIC를 계산한다.
+6. 전체 후보 중 BIC가 가장 작은 fit을 선택한다.
+7. 선택된 support로 refit을 수행한다.
 
-코드 위치는 `fit_separate_pair()`와 `fit_separate_penalty_grid()`다.
+코드 위치는 K=2의 `fit_separate_path_grid()`, `fit_separate_path_for_kappa()`와 K=4의 `fit_separate_path_grid_pair()`다.
 
 ---
 
@@ -259,13 +255,9 @@ $$\kappa_k = \|\eta_k\|_2, \qquad \mu_k = \frac{\eta_k}{\|\eta_k\|_2}.$$
 
 코드 위치는 `eta_penalty_vmf_run.r`의 `fit_eta_penalty_em()`과 `prox_eta_contrast_k2()`다.
 
-K=2 eta grid는 다음이었다.
+K=2 공식 비교에서는 고정 grid가 아니라 $\lambda_\eta$ path를 사용했다. 각 EM 반복에서 unpenalized eta M-step을 계산하고, $|\eta_{2j}-\eta_{1j}|$ 값 중 현재 $\lambda_\eta$보다 큰 가장 작은 threshold를 다음 후보로 둔다. 각 후보는 이전 fit을 warm start로 사용해 적합하고, path 위에서 BIC가 가장 작은 $\lambda_\eta$를 선택한다.
 
-| tuning | grid |
-|:---|:---|
-| $\lambda_\eta$ | 0, 1, 2, 5, 10, 15, 20, 30, 40, 50 |
-
-각 $\lambda_\eta$에 대해 proximal EM을 수행하고, BIC가 가장 작은 $\lambda_\eta$를 선택했다.
+코드 위치는 `fit_eta_lambda_path()`다.
 
 ### K>2 centered eta penalty
 
@@ -293,23 +285,19 @@ $$\eta_{kj,\lambda} = \bar{\eta}_j + c_{kj,\lambda}$$
 
 코드 위치는 `rb2022_k4_pilot_compare_run.r`의 `prox_eta_centered()`와 `fit_eta_centered_em()`이다.
 
-K=4 6-method 비교의 eta grid는 다음이었다.
+K=4 공식 비교에서도 고정 grid가 아니라 centered eta norm의 $\lambda_\eta$ path를 사용했다. 각 후보는 현재 M-step의 $\|c_{\cdot j}\|_2$ threshold에서 생성하고, 이전 fit을 warm start로 사용한다. 최종 fit은 path 위에서 BIC가 가장 작은 지점으로 선택한다.
 
-| tuning | grid |
-|:---|:---|
-| $\lambda_\eta$ | 0, 1, 2, 5, 10, 20, 30 |
-
-각 $\lambda_\eta$에 대해 warm start로 proximal EM을 수행하고, BIC가 가장 작은 fit을 선택했다.
+코드 위치는 `fit_eta_centered_path_pair()`다.
 
 ---
 
 ## 8. BIC, EBIC, 자유도 계산
 
-모형 선택은 주로 BIC를 사용했다.
+공식 simulation에서 tuning parameter 선택은 BIC를 사용했다.
 
 $$BIC = \log(n)df - 2\ell(\hat{\Theta}).$$
 
-EBIC도 같이 계산했다.
+EBIC도 보조 적합 지표로 함께 계산했지만, 현재 연구미팅 자료의 공식 tuning 기준으로 사용하지 않았다.
 
 $$EBIC = \{\log(n)+2\gamma\log(d)\}df - 2\ell(\hat{\Theta}), \qquad \gamma=0.5.$$
 
@@ -337,9 +325,9 @@ $$df = (K-1)+d+(K-1)m$$
 |:---|:---|:---|:---|:---|
 | Rossi | $\mu_k$ L1 | $\mu_k$ nonzero coordinate union | beta path에서 BIC 최소 | 없음 |
 | Rossi + refit | Rossi와 동일 | Rossi support | Rossi가 선택한 beta 사용 | support 고정 후 unpenalized EM |
-| 분리 패널티 | $\mu_k$ L1, $\kappa_k$ L1 | $\mu_k$ nonzero coordinate union | $\lambda_\mu,\lambda_\kappa$ grid에서 BIC 최소 | 없음 |
+| 분리 패널티 | $\mu_k$ L1, $\kappa_k$ L1 | $\mu_k$ nonzero coordinate union | $\lambda_\kappa$ grid와 $\lambda_\mu$ path 후보 중 BIC 최소 | 없음 |
 | 분리 패널티 + refit | 분리 패널티와 동일 | 분리 패널티 support | 선택된 lambda 사용 | support 고정 후 unpenalized EM |
-| 에타 패널티 | $\eta$ contrast 또는 centered eta | eta contrast support | $\lambda_\eta$ grid에서 BIC 최소 | 없음 |
+| 에타 패널티 | $\eta$ contrast 또는 centered eta | eta contrast support | $\lambda_\eta$ path에서 BIC 최소 | 없음 |
 | 에타 패널티 + refit | 에타 패널티와 동일 | 에타 support | 선택된 lambda 사용 | support 고정 후 unpenalized EM |
 
 K=2에서는 $\eta_2-\eta_1$ 직접 contrast를 사용했다. K=4에서는 centered eta의 coordinate별 group norm을 사용했다.
