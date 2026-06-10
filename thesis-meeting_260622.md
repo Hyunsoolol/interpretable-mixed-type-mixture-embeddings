@@ -1,8 +1,9 @@
 ## 1. 2022년 논문 시뮬레이션 세팅 기반 full reproduction
 
 * **목적:** Rossi & Barbaro (2022)의 artificial simulation setting에 맞춰 Rossi 방법이 논문과 유사하게 재현되는지 확인하고, 같은 조건에서 6가지 방법을 비교.
-* **Setting:** $K=4$ 고정, 군집 비율 균일, $n=1000$, $d=100$, overlap $=0.05$.
-* **Sparsity:** 논문 방식처럼 component별로 방향벡터 $\mu_k$의 10% 좌표만 nonzero. 따라서 component별 true nonzero entry는 10개이고, 전체 union active coordinate는 반복 평균 34.5개.
+* **Setting:** $K=4$ 고정, 군집 비율 균일, $n=1000$, overlap $=0.05$.
+* **Variables:** 전체 변수 개수는 $d=100$개. Component별 유효 변수 개수는 10개이고, union 기준 유효 변수 개수는 반복 평균 34.5개.
+* **Sparsity:** 논문 방식처럼 component별로 방향벡터 $\mu_k$의 10% 좌표만 nonzero.
 * **Simulation:** 반복 수 100회, random start 10회, Rossi beta path 최대 700 steps.
 * **Tuning:** 각 반복에서 BIC 기준으로 penalty parameter 선택.
   * Rossi: 평균 $\beta=119.394$
@@ -77,10 +78,11 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 ### 2.1. Simulation setting
 
-* **Setting:** $K=4$, $n=1000$, $d=100$, 군집 비율 균일.
+* **Setting:** $K=4$, $n=1000$, 군집 비율 균일.
+* **Variables:** 전체 변수 개수는 $d=100$개, 유효 변수 개수는 $q=10$개.
 * **Simulation:** 반복 수 100회, random start 10회, Rossi beta path 최대 700 steps.
 * **Mean direction:** $\mu_1=\mu_2=\mu_3=\mu_4$.
-* **Sparsity:** 공통 평균 방향은 100개 좌표 중 10개만 nonzero.
+* **Sparsity:** 공통 평균 방향은 유효 변수 10개에서만 nonzero.
 * **Concentration:** $\kappa=(20,35,60,100)$.
 
 이 세팅에서는 평균 방향이 완전히 같으므로, 군집 차이는 posterior decision에 들어가는 $\eta_k=\kappa_k\mu_k$의 크기 차이에서만 발생한다. 2022 논문에서 사용하는 overlap 조정식은 평균 방향 간 분리를 전제로 하므로 여기서는 사용하지 않고, $\kappa$를 직접 지정했다.
@@ -136,10 +138,10 @@ Stress setting은 평균 방향을 완전히 같게 둔 강한 한계 상황이�
 
 ### 3.1. Simulation setting
 
-* **Setting:** $K=4$, $n=1000$, $d=100$, 군집 비율 균일.
+* **Setting:** $K=4$, $n=1000$, 군집 비율 균일.
 * **Simulation:** 반복 수 100회, random start 10회, Rossi beta path 최대 700 steps.
 * **Mean direction:** 평균 방향은 완전히 같지 않지만 매우 유사하게 설정. Pairwise cosine은 약 0.90 수준.
-* **Active variables:** 총 변수 100개 중 true active coordinate union은 19개.
+* **Variables:** 전체 변수 개수는 $d=100$개, union 기준 유효 변수 개수는 19개.
   * Component별 active coordinate는 10개.
   * 모든 component가 공유하는 공통 active coordinate는 7개.
   * Component별 specific active coordinate는 3개씩.
@@ -198,7 +200,8 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 ## 4. 시뮬레이션 및 모수 추정 결과
 
 ### 4.1. 집중도 주도 환경
-* **Setting:** $K=2, n=1000, d=100$. True active $q=10$.
+* **Setting:** $K=2$, $n=1000$.
+* **Variables:** 전체 변수 개수는 $d=100$개, 유효 변수 개수는 $q=10$개.
 * **True Params:** $\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=200$. (True $\kappa$ ratio = 10, True $\|\eta_2-\eta_1\| = 180$)
 
 **a. 군집화 및 변수 선택 성능**
@@ -226,6 +229,8 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 ---
 
 ### 4.2. 집중도 차이가 약한 환경
+* **Setting:** $K=2$, $n=1000$.
+* **Variables:** 전체 변수 개수는 $d=100$개, 유효 변수 개수는 $q=10$개.
 * **True Params:** $\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=40$. (True $\kappa$ ratio = 2, True $\|\eta_2-\eta_1\| = 20$)
 
 a. **군집화 및 변수 선택 성능**
@@ -253,6 +258,8 @@ a. **군집화 및 변수 선택 성능**
 ---
 
 ### 4.3. 평균과 집중도 차이가 모두 존재하는 환경
+* **Setting:** $K=2$, $n=1000$.
+* **Variables:** 전체 변수 개수는 $d=100$개, 유효 변수 개수는 $q=10$개.
 * **True Params:** $\mu_{cos} = 0.95$, $\kappa_1=20, \kappa_2=100$. (True $\kappa$ ratio = 5, True $\|\eta_2-\eta_1\| = 81.240$)
 
 **a. 군집화 및 변수 선택 성능**
