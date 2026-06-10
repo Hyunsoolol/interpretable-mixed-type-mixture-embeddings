@@ -282,7 +282,7 @@ $$\log \frac{\tau_{i2}}{\tau_{i1}} = \text{Const} + (\eta_2 - \eta_1)^\top x_i$$
 * **$\mu$-penalty (기존)**: $\|\mu_2 - \mu_1\| = 0 \rightarrow$ 군집 식별 불가, False Positive 증가.
 * **$\eta$-penalty (제안)**: $\|\eta_2 - \eta_1\| = \kappa_2 - \kappa_1 \neq 0 \rightarrow$ 평균 방향이 동일하더라도 집중도 차이로 발생하는 좌표별(Coordinate-level) 분리 효과를 완벽히 포착.
 
-**③ 내재적 정규화
+**③ 내재적 정규화**
 $$\|\eta_k\|_2 = \|\kappa_k \mu_k\|_2 = \kappa_k$$
 * 자연 모수의 $L_2$ 노름이 곧 집중도($\kappa$)이므로, $\eta$ 벡터에 대한 $L_1$ 패널티는 필연적으로 $\kappa$ 스케일의 수축을 유도함.
 * 고차원 모형의 고질적 한계인 $\kappa_k \rightarrow \infty$ (소수 관측치 과적합 발산) 현상을 인위적인 제약(`shared kappa`) 없이 수리적으로 원천 차단.
