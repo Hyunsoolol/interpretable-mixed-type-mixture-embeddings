@@ -1,31 +1,32 @@
-## 1. 2022년 논문 시뮬레이션 세팅 기반 full reproduction
+## 1. 2022년 논문 시뮬레이션 세팅 재현
 
-* **목적:** Rossi & Barbaro (2022)의 artificial simulation setting에 맞춰 Rossi 방법이 논문과 유사하게 재현되는지 확인하고, 같은 조건에서 6가지 방법을 비교.
-* **Setting:** $K=4$ 고정, 군집 비율 균일, $n=1000$, overlap $=0.05$.
-* **Variables:** 전체 변수 개수는 $d=100$개. Component별 유효 변수 개수는 10개이고, union 기준 유효 변수 개수는 반복 평균 34.5개.
-* **Sparsity:** 논문 방식처럼 component별로 방향벡터 $\mu_k$의 10% 좌표만 nonzero.
+### 1.1. 논문 기준 corrected reproduction
+
+* **목적:** Rossi & Barbaro (2022)의 artificial simulation setting에서 Rossi sparse vMF가 논문 Figure와 유사하게 재현되는지 확인.
+* **Setting:** $K=4$ 고정, 군집 비율 균일, $n=1000$, $d=100$, overlap $=0.05$.
+* **Concentration:** 논문 기준 $d=100$, overlap $=0.05$에서 base $\kappa=15.09$를 사용하고, component별 $\kappa_k$는 $N(\kappa, 0.025\kappa)$에서 생성한 뒤 평균 방향 간 분리에 맞게 조정했다.
+* **Sparsity 정의:** 논문은 directional mean의 일부 좌표를 0으로 만드는 방식으로 sparsity를 설정한다. 따라서 논문 sparsity $=0.10$은 zero coordinate가 10%라는 뜻이고, 코드에서는 `nonzero_fraction = 0.90`으로 실행해야 한다.
+* **Variables:** component별 zero coordinate는 10개, nonzero coordinate는 90개. Entry-level 기준 true nonzero는 $4 \times 90 = 360$개, true zero는 $4 \times 10 = 40$개.
 * **Simulation:** 반복 수 100회, random start 10회, Rossi beta path 최대 700 steps.
-* **Tuning:** 각 반복에서 BIC 기준으로 penalty parameter 선택.
-  * Rossi: 평균 $\beta=119.394$
-  * 분리 패널티: 평균 $\lambda_\mu=112.000$, $\lambda_\kappa=0.100$
-  * 에타 패널티: 평균 $\lambda_\eta=2.000$
+* **Tuning:** 각 반복에서 BIC 기준으로 penalty parameter 선택. Corrected run의 평균 $\beta=72.673$.
 
-### 1.1. Rossi 2022 결과 재현 확인
+논문 결과는 exact table이 아니라 Figure 13, Figure 15, Figure 16으로 제시되어 있다. 아래 논문 값은 $K=4$, $n=1000$, overlap $=0.05$, sparsity $=0.10$, BIC panel에서 읽은 근사 범위다.
 
-논문은 해당 결과를 주로 Figure 13, Figure 16으로 제시하므로 exact table 값은 없지만, 같은 조건의 full reproduction 결과와 비교하면 Rossi-BIC의 sparse recovery가 거의 동일하게 재현된다.
-
-| Metric | 6-method full run의 Rossi | 논문 세팅 자체 재현 결과 |
+| Metric | 논문 Figure 근사값 | Corrected reproduction |
 |:---|---:|---:|
-| ARI | 0.904 | 0.904 |
-| beta | 119.394 | 118.389 |
-| nonzero fraction | 0.096 | 0.097 |
-| entry precision | 0.908 | 0.904 |
-| entry recall | 0.867 | 0.873 |
-| entry F1 | 0.884 | 0.886 |
+| ARI | 약 0.80-0.90 | 0.871 |
+| achieved sparsity | 약 0.30-0.40 | 0.347 |
+| zero precision | 약 0.25-0.35 | 0.265 |
+| zero recall | 약 0.85-1.00 | 0.905 |
+| nonzero fraction | - | 0.653 |
 
-해석상 중요한 점은 Rossi가 논문 세팅에서는 과도하게 dense하게 남지 않고, BIC 선택 후 nonzero fraction이 true level인 0.10 근처로 회복된다는 것이다. 따라서 Rossi 2022 방법 자체는 논문 세팅에서 잘 재현된다.
+해석상 중요한 점은 corrected reproduction이 논문 Figure의 정성적 패턴과 같은 범위에 있다는 것이다. BIC는 zero recall을 높게 유지하지만 zero precision은 낮은 편이고, achieved sparsity도 true sparsity 0.10보다 크게 선택된다. 이는 논문에서 설명한 “BIC가 recall은 좋지만 precision 손실을 감수하며 더 sparse한 표현을 선택하는 경향”과 일치한다.
 
-### 1.2. 6가지 방법: 군집화 및 변수 선택 성능
+기존에 사용한 `nonzero_fraction = 0.10` 세팅은 component별 nonzero coordinate가 10개인 경우다. 이 세팅은 우리 연구의 sparse active-variable 상황을 보기에는 유용하지만, 논문 Figure와 직접 비교할 때는 논문 sparsity 정의와 반대이므로 corrected reproduction과 구분해서 해석해야 한다.
+
+### 1.2. 추가 비교: nonzero 10% 기준 6가지 방법
+
+아래 1.2-1.4의 6가지 방법 비교는 우리 연구에서 먼저 살펴본 sparse active-variable 세팅이다. 전체 변수는 $d=100$개이고, component별 nonzero coordinate는 10개이며, union 기준 유효 변수 개수는 반복 평균 34.5개다. 반복 수는 100회, random start는 10회, tuning parameter는 각 반복에서 BIC 기준으로 선택했다.
 
 아래 표는 coordinate union 기준이다. 즉 하나의 coordinate가 어느 component에서든 선택되면 selected coordinate로 계산했다.
 
@@ -66,11 +67,11 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 ### 1.5. 핵심 해석
 
-* 2022 논문과 같은 sparse directional mean setting에서는 Rossi 방법이 논문 결과와 잘 맞게 재현된다.
-* 이 세팅은 애초에 $\mu_k$ sparsity가 true structure이므로, Rossi가 BIC/EBIC 기준에서 가장 좋은 결과를 보이는 것이 자연스럽다.
+* 실제 논문 Figure와 비교할 때는 sparsity를 zero coordinate 비율로 해석해야 한다. 이 기준에서는 corrected reproduction 결과가 논문 Figure 13, 15, 16의 패턴과 유사하다.
+* 논문 기준 corrected reproduction에서는 BIC가 true sparsity 0.10보다 더 sparse한 표현을 선택한다. 이때 zero recall은 높고 zero precision은 낮아지는 경향이 나타나며, 이는 논문 설명과 일치한다.
+* 1.2-1.4의 6-method 비교는 component별 nonzero coordinate가 10개인 별도 sparse active-variable 세팅이다. 이 세팅에서는 $\mu_k$ sparsity가 true structure이므로 Rossi가 BIC/EBIC 기준에서 좋은 결과를 보이는 것이 자연스럽다.
 * 에타 패널티는 selected $q$를 더 작게 만들고 FPR을 가장 낮추지만, true structure가 $\mu_k$ sparsity인 상황에서는 TPR이 다소 낮아진다.
-* 에타 패널티 단독은 $\eta=\kappa\mu$ shrinkage 때문에 $\kappa$가 작게 추정되는 bias가 크다. Refit을 하면 이 bias는 상당히 줄어든다.
-* 따라서 2022 논문 재현 세팅은 Rossi 방법의 정상 작동을 확인하는 기준점으로 두고, 제안 방법의 필요성은 이후 concentration-driven 한계 세팅에서 보여주는 것이 적절하다.
+* 따라서 논문 재현은 Rossi 방법의 정상 작동을 확인하는 기준점으로 두고, 제안 방법의 필요성은 이후 concentration-driven 한계 세팅에서 보여주는 것이 적절하다.
 
 ## 2. Stress setting: 평균 방향 동일, 집중도 차이
 
