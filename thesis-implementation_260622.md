@@ -6,6 +6,16 @@
 2. Rossi, 분리 패널티, 에타 패널티에서 penalty와 tuning parameter를 어떻게 처리했는지
 3. 현재 R 코드가 실제로 어떤 순서로 fitting, model selection, refit을 수행하는지
 
+현재 260622 연구미팅 자료의 공식 기준은 다음과 같다.
+
+| 항목 | 공식 기준 |
+|:---|:---|
+| tuning 후보 생성 | path 기반 후보 생성 |
+| tuning 선택 | BIC 최소 지점 선택 |
+| EBIC | 보조 적합 지표로만 계산 |
+| 최종 추정 | 선택된 support를 고정하고 penalty 없이 refit |
+| 4번 시뮬레이션 | K=4 controlled concentration-dominant setting |
+
 ---
 
 ## 1. 기본 vMF Mixture 모형
@@ -344,17 +354,29 @@ K=2에서는 $\eta_2-\eta_1$ 직접 contrast를 사용했다. K=4에서는 cente
 4. refit 방법은 선택된 support를 고정하고 penalty 없이 다시 EM을 수행한다.
 5. cluster label은 posterior responsibility에서 가장 큰 component로 정한다.
 6. ARI, selected $q$, TPR, FPR, Precision, F1, loglik, BIC, EBIC, MSE 지표를 계산한다.
-7. 반복별 결과를 raw csv로 저장하고, 평균과 표준오차를 summary csv로 저장한다.
+7. 반복별 결과를 raw csv로 저장하고, 평균 요약을 summary csv로 저장한다. K=2 driver에서는 표준오차도 함께 계산한다.
 
-주요 파일은 다음과 같다.
+현재 연구미팅 자료에 직접 연결되는 simulation driver는 다음과 같다.
 
-| 역할 | 파일 | 주요 함수 |
+| 역할 | 파일 | 주요 함수 또는 내용 |
 |:---|:---|:---|
 | 공통 vMF, Rossi 재현 | `rossi_barbaro_2022_reproduction.r` | `e_step_vmf()`, `estimate_kappa()`, `fit_svMF_em()`, `fit_svMF_path()` |
-| K=4 6방법 비교 | `rb2022_k4_pilot_compare_run.r` | `fit_rossi_pair()`, `fit_separate_pair()`, `fit_eta_pair()` |
-| K=2 eta penalty | `eta_penalty_vmf_run.r` | `fit_eta_penalty_em()`, `prox_eta_contrast_k2()` |
-| K=2 separate penalty | `separate_penalty_vmf_run.r` | `fit_separate_penalty_em()`, `update_mu_kappa_separate_one()` |
-| score/refit 초기 비교 | `compare_three_methods_kappa_limit_run.r` | `eta_contrast_score()`, `fit_score_refit_bic()` |
+| 1번 K=2 기본 메커니즘 | `eta_path_tuning_compare_run.r` | Rossi beta path, separate path/grid, eta path를 BIC로 선택 |
+| 2, 3번 K=4 비교 | `k4_path_tuning_compare_run.r` | paperlike sparse-active setting, same-mean kappa stress setting |
+| 4번 K=4 controlled setting | `k4_controlled_concdom_run.r` | common active support 유지, 평균 방향만 완화한 concentration-dominant setting |
+| K=4 공통 함수 | `rb2022_k4_pilot_compare_run.r` | `fit_eta_centered_em()`, `prox_eta_centered()`, `fit_support_refit()` |
+| 초기 grid 실험 기록 | `eta_penalty_vmf_run.r`, `separate_penalty_vmf_run.r` | path tuning으로 정리하기 전 단독 penalty prototype |
+
+### 현재 1-4번 simulation setting 요약
+
+| 번호 | setting | 변수 구조 | 모수 구조 | 공식 tuning |
+|:---|:---|:---|:---|:---|
+| 1 | K=2 기본 메커니즘 | $d=100$, true $q=10$ | 집중도 차이 큼, 집중도 차이 작음, 평균+집중도 차이 | path 후보 + BIC |
+| 2 | Rossi 2022 재현 및 K=4 sparse-active 비교 | $d=100$, paperlike sparse prototype 또는 component별 nonzero 10개 | Rossi 2022 artificial simulation 기준 | beta path 또는 6-method path/grid + BIC |
+| 3 | K=4 stress setting | 모든 component가 같은 active coordinate 10개 공유 | $\mu_1=\cdots=\mu_4$, $\kappa=(20,35,60,100)$ | path 후보 + BIC |
+| 4 | K=4 controlled concentration-dominant setting | 3번과 동일하게 모든 component가 같은 active coordinate 10개 공유 | 평균 방향 pairwise cosine 0.95, $\kappa=(25,40,65,100)$ | path 후보 + BIC |
+
+4번은 기존 heterogeneous-support setting을 대체한 버전이다. 기존 4번은 common active 7개와 component-specific active 3개씩을 섞어 union active가 19개였지만, 현재 버전은 변수 구조를 3번과 동일하게 고정한다. 따라서 3번의 pure concentration stress setting에서 평균 방향 차이만 약간 추가한 controlled setting으로 해석한다.
 
 ---
 
