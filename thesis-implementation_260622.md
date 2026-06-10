@@ -12,13 +12,7 @@
 
 관측값 $x_i$는 단위구 $S^{d-1}$ 위의 방향자료다. $K$개 component를 갖는 vMF mixture는 다음과 같다.
 
-$$
-f(x_i)
-=
-\sum_{k=1}^{K}
-\alpha_k C_d(\kappa_k)
-\exp(\kappa_k \mu_k^\top x_i).
-$$
+$$f(x_i) = \sum_{k=1}^{K} \alpha_k C_d(\kappa_k) \exp(\kappa_k \mu_k^\top x_i).$$
 
 여기서
 
@@ -31,16 +25,7 @@ $$
 
 posterior responsibility는
 
-$$
-\tau_{ik}
-=
-\frac{
-\alpha_k C_d(\kappa_k)\exp(\kappa_k\mu_k^\top x_i)
-}{
-\sum_{\ell=1}^{K}
-\alpha_\ell C_d(\kappa_\ell)\exp(\kappa_\ell\mu_\ell^\top x_i)
-}.
-$$
+$$\tau_{ik} = \frac{ \alpha_k C_d(\kappa_k)\exp(\kappa_k\mu_k^\top x_i) }{ \sum_{\ell=1}^{K} \alpha_\ell C_d(\kappa_\ell)\exp(\kappa_\ell\mu_\ell^\top x_i) }.$$
 
 코드에서는 이 계산이 `rossi_barbaro_2022_reproduction.r`의 `e_step_vmf()`에 들어 있다.
 
@@ -50,39 +35,25 @@ $$
 
 E-step 이후 M-step에서 쓰는 sufficient statistics는 다음이다.
 
-$$
-N_k = \sum_i \tau_{ik},
-\qquad
-r_k = \sum_i \tau_{ik}x_i.
-$$
+$$N_k = \sum_i \tau_{ik}, \qquad r_k = \sum_i \tau_{ik}x_i.$$
 
 mixing proportion은
 
-$$
-\alpha_k = \frac{N_k}{n}
-$$
+$$\alpha_k = \frac{N_k}{n}$$
 
 로 업데이트한다.
 
 패널티가 없으면 평균 방향은 $r_k$ 방향으로 간다.
 
-$$
-\mu_k = \frac{r_k}{\|r_k\|_2}.
-$$
+$$\mu_k = \frac{r_k}{\|r_k\|_2}.$$
 
 집중도는
 
-$$
-\rho_k = \frac{\mu_k^\top r_k}{N_k}
-$$
+$$\rho_k = \frac{\mu_k^\top r_k}{N_k}$$
 
 를 만든 뒤 $A_d(\kappa_k)=\rho_k$를 푸는 방식이다. 현재 코드는 정확한 numerical inversion 대신 다음 근사식을 쓴다.
 
-$$
-\kappa_k
-\approx
-\frac{d\rho_k-\rho_k^3}{1-\rho_k^2}.
-$$
+$$\kappa_k \approx \frac{d\rho_k-\rho_k^3}{1-\rho_k^2}.$$
 
 코드 위치는 `estimate_kappa()`다. 이 근사식은 vMF mixture EM에서 널리 쓰이는 Banerjee et al. (2005)의 concentration update approximation에 기반한다. 방향자료의 vMF MLE 기본식은 Mardia and Jupp (2000)에서 표준적으로 다루며, inverse approximation 관련 논의는 Sra (2012)도 참고할 수 있다.
 
@@ -102,11 +73,7 @@ random start는 `fit_svMF_multistart()`에서 처리한다. 여러 초기값으�
 
 수렴 기준은 상대 objective 변화량이다.
 
-$$
-\frac{|Q^{(t)}-Q^{(t-1)}|}
-{\max(1, |Q^{(t-1)}|)}
-< \mathrm{tol}.
-$$
+$$\frac{|Q^{(t)}-Q^{(t-1)}|}{\max(1, |Q^{(t-1)}|)} < tol.$$
 
 기본적으로 `tol = 1e-7`을 사용했다. component가 비거나, M-step에서 모든 좌표가 0이 되어 방향벡터를 만들 수 없으면 해당 fit은 실패로 처리한다.
 
@@ -116,36 +83,21 @@ $$
 
 Rossi & Barbaro (2022)는 component direction $\mu_k$에 L1 penalty를 둔다.
 
-$$
-\ell_{\mathrm{pen}}(\Theta)
-=
-\ell(\Theta)
--
-\beta \sum_{k=1}^{K}\|\mu_k\|_1.
-$$
+$$\ell_{pen}(\Theta) = \ell(\Theta) - \beta \sum_{k=1}^{K}\|\mu_k\|_1.$$
 
 E-step은 기본 vMF mixture와 같다. 차이는 M-step에서 $\mu_k$를 업데이트할 때 coordinate-wise shrinkage가 들어간다는 점이다.
 
 각 component $k$에 대해 현재 $\kappa_k$가 주어졌을 때,
 
-$$
-z_{kj}
-=
-\mathrm{sign}(r_{kj})
-\left(\kappa_k |r_{kj}|-\beta\right)_+
-$$
+$$z_{kj} = sgn(r_{kj}) \left(\kappa_k |r_{kj}|-\beta\right)_+$$
 
 를 만들고,
 
-$$
-\mu_k = \frac{z_k}{\|z_k\|_2}
-$$
+$$\mu_k = \frac{z_k}{\|z_k\|_2}$$
 
-로 정규화한다. 그 다음
+로 정규화한다. 여기서 $sgn(\cdot)$은 부호 함수다. 그 다음
 
-$$
-\rho_k = \frac{\mu_k^\top r_k}{N_k}
-$$
+$$\rho_k = \frac{\mu_k^\top r_k}{N_k}$$
 
 를 계산하고 `estimate_kappa()`로 $\kappa_k$를 업데이트한다. 코드에서는 `update_mu_kappa_one()` 안에서 $\mu_k$와 $\kappa_k$를 inner loop로 반복한다.
 
@@ -158,33 +110,19 @@ Rossi 방법은 $\beta$를 fixed grid로 두지 않고 path-following 방식으�
 1. $\beta=0$에서 dense vMF mixture를 multi-start EM으로 적합한다.
 2. 현재 해에서
 
-$$
-m_{kj}
-=
-\kappa_k |r_{kj}|-\beta
-$$
+$$m_{kj} = \kappa_k |r_{kj}|-\beta$$
 
 를 계산한다.
 
 3. 양수인 $m_{kj}$ 중 가장 작은 값을 찾아 다음 beta로 이동한다.
 
-$$
-\beta_{\mathrm{next}}
-=
-\beta
-+
-\min_{k,j: m_{kj}>0} m_{kj}.
-$$
+$$\beta_{next} = \beta + \min_{k,j: m_{kj}>0} m_{kj}.$$
 
 4. 너무 작은 증가를 피하기 위해, 이미 $\beta>0$이면
 
-$$
-\beta_{\mathrm{next}}
-\ge
-\beta(1+\mathrm{min\_rel\_beta})
-$$
+$$\beta_{next} \ge \beta(1+\epsilon_\beta)$$
 
-가 되도록 한다.
+가 되도록 한다. 여기서 $\epsilon_\beta$는 코드의 `min_rel_beta`에 해당한다.
 
 5. 이전 해를 초기값으로 warm start해서 새 $\beta$에서 EM을 다시 수행한다.
 6. 이 과정을 `max_path_steps`까지 반복한다.
@@ -200,11 +138,7 @@ Refit은 선택된 변수 집합을 고정한 뒤 penalty 없이 vMF mixture를 
 
 예를 들어 Rossi refit에서는 먼저 Rossi가 선택한 coordinate support를 만든다.
 
-$$
-\hat{S}
-=
-\{j:\ \exists k,\ |\hat{\mu}_{kj}|>0\}.
-$$
+$$\hat{S} = \{j:\ \exists k,\ |\hat{\mu}_{kj}|>0\}.$$
 
 그 다음 $\hat{S}$ 밖의 좌표는 계속 0으로 고정하고, $\hat{S}$ 안에서만 unpenalized EM을 수행한다.
 
@@ -228,41 +162,19 @@ Refit을 넣은 이유는 L1 penalty로 생기는 shrinkage bias를 줄이기 �
 
 분리 패널티는 교수님 제안에 따라 $\mu_k$와 $\kappa_k$에 penalty를 따로 둔 baseline이다.
 
-$$
-\ell_{\mathrm{pen}}(\Theta)
-=
-\ell(\Theta)
--
-\lambda_\mu \sum_k \|\mu_k\|_1
--
-\lambda_\kappa \sum_k \kappa_k.
-$$
+$$\ell_{pen}(\Theta) = \ell(\Theta) - \lambda_\mu \sum_k \|\mu_k\|_1 - \lambda_\kappa \sum_k \kappa_k.$$
 
 E-step은 기본 vMF mixture와 같다. M-step에서는 $\mu_k$ update는 Rossi와 거의 같다.
 
-$$
-z_{kj}
-=
-\mathrm{sign}(r_{kj})
-\left(\kappa_k |r_{kj}|-\lambda_\mu\right)_+,
-\qquad
-\mu_k = \frac{z_k}{\|z_k\|_2}.
-$$
+$$z_{kj} = sgn(r_{kj}) \left(\kappa_k |r_{kj}|-\lambda_\mu\right)_+, \qquad \mu_k = \frac{z_k}{\|z_k\|_2}.$$
 
 차이는 $\kappa_k$ update다. concentration penalty가 있으므로
 
-$$
-\rho_k
-=
-\frac{\mu_k^\top r_k-\lambda_\kappa}{N_k}
-$$
+$$\rho_k = \frac{\mu_k^\top r_k-\lambda_\kappa}{N_k}$$
 
 를 사용하고,
 
-$$
-\kappa_k \approx
-\frac{d\rho_k-\rho_k^3}{1-\rho_k^2}
-$$
+$$\kappa_k \approx \frac{d\rho_k-\rho_k^3}{1-\rho_k^2}$$
 
 로 업데이트한다.
 
@@ -303,18 +215,11 @@ K=4 6-method 비교에서는 계산 시간을 줄이기 위해 조금 더 작은
 
 에타 패널티의 핵심은 vMF mixture를 natural parameter로 보는 것이다.
 
-$$
-\eta_k = \kappa_k \mu_k.
-$$
+$$\eta_k = \kappa_k \mu_k.$$
 
 그러면 density는
 
-$$
-f(x_i\mid \eta_k)
-=
-C_d(\|\eta_k\|_2)
-\exp(\eta_k^\top x_i)
-$$
+$$f(x_i\mid \eta_k) = C_d(\|\eta_k\|_2) \exp(\eta_k^\top x_i)$$
 
 로 쓸 수 있다. posterior decision에 직접 들어가는 항은 $\mu_k$가 아니라 $\eta_k^\top x_i$다. 따라서 coordinate $j$가 군집 구분에 기여하는지는 $\mu_{kj}$보다 $\eta_{kj}$의 component 간 차이를 보는 것이 자연스럽다.
 
@@ -322,19 +227,11 @@ $$
 
 K=2에서는 직접적으로
 
-$$
-\delta_j = \eta_{2j}-\eta_{1j}
-$$
+$$\delta_j = \eta_{2j}-\eta_{1j}$$
 
 를 정의하고,
 
-$$
-\ell_{\mathrm{pen}}(\eta)
-=
-\ell(\eta)
--
-\lambda_\eta\sum_j |\delta_j|
-$$
+$$\ell_{pen}(\eta) = \ell(\eta) - \lambda_\eta\sum_j |\delta_j|$$
 
 를 사용했다.
 
@@ -346,48 +243,19 @@ exact penalized M-step은 closed form으로 바로 풀기 어렵다. 이유는 l
 2. unpenalized vMF M-step을 수행해 $\eta_1,\eta_2$를 얻는다.
 3. 평균 eta와 contrast를 만든다.
 
-$$
-\bar{\eta}
-=
-\frac{\eta_1+\eta_2}{2},
-\qquad
-\delta
-=
-\eta_2-\eta_1.
-$$
+$$\bar{\eta} = \frac{\eta_1+\eta_2}{2}, \qquad \delta = \eta_2-\eta_1.$$
 
 4. contrast에 coordinate-wise soft-thresholding을 적용한다.
 
-$$
-\delta_{\lambda,j}
-=
-\mathrm{sign}(\delta_j)
-\left(|\delta_j|-\lambda_\eta\right)_+.
-$$
+$$\delta_{\lambda,j} = sgn(\delta_j) \left(|\delta_j|-\lambda_\eta\right)_+.$$
 
 5. 다시 eta로 변환한다.
 
-$$
-\eta_{1,\lambda}
-=
-\bar{\eta}
--
-\frac{1}{2}\delta_\lambda,
-\qquad
-\eta_{2,\lambda}
-=
-\bar{\eta}
-+
-\frac{1}{2}\delta_\lambda.
-$$
+$$\eta_{1,\lambda} = \bar{\eta} - \frac{1}{2}\delta_\lambda, \qquad \eta_{2,\lambda} = \bar{\eta} + \frac{1}{2}\delta_\lambda.$$
 
 6. $\eta_k$에서 $\kappa_k$, $\mu_k$를 복원한다.
 
-$$
-\kappa_k = \|\eta_k\|_2,
-\qquad
-\mu_k = \frac{\eta_k}{\|\eta_k\|_2}.
-$$
+$$\kappa_k = \|\eta_k\|_2, \qquad \mu_k = \frac{\eta_k}{\|\eta_k\|_2}.$$
 
 코드 위치는 `eta_penalty_vmf_run.r`의 `fit_eta_penalty_em()`과 `prox_eta_contrast_k2()`다.
 
@@ -403,52 +271,23 @@ K=2 eta grid는 다음이었다.
 
 K=4에서는 $\eta_2-\eta_1$ 하나만으로 전체 component 차이를 표현할 수 없다. 그래서 coordinate별 centered eta를 사용했다.
 
-$$
-\bar{\eta}_j
-=
-\frac{1}{K}\sum_{k=1}^{K}\eta_{kj},
-\qquad
-c_{kj}
-=
-\eta_{kj}-\bar{\eta}_j.
-$$
+$$\bar{\eta}_j = \frac{1}{K}\sum_{k=1}^{K}\eta_{kj}, \qquad c_{kj} = \eta_{kj}-\bar{\eta}_j.$$
 
 coordinate $j$의 component 간 eta 차이는
 
-$$
-\|c_{\cdot j}\|_2
-=
-\sqrt{\sum_{k=1}^{K} c_{kj}^2}
-$$
+$$\|c_{\cdot j}\|_2 = \sqrt{\sum_{k=1}^{K} c_{kj}^2}$$
 
 로 측정했다. penalty는 group-lasso 형태다.
 
-$$
-\ell_{\mathrm{pen}}(\eta)
-=
-\ell(\eta)
--
-\lambda_\eta \sum_{j=1}^{d}\|c_{\cdot j}\|_2.
-$$
+$$\ell_{pen}(\eta) = \ell(\eta) - \lambda_\eta \sum_{j=1}^{d}\|c_{\cdot j}\|_2.$$
 
 proximal update는 coordinate별로 다음 shrinkage를 적용한다.
 
-$$
-c_{\cdot j,\lambda}
-=
-\left(1-\frac{\lambda_\eta}{\|c_{\cdot j}\|_2}\right)_+
-c_{\cdot j}.
-$$
+$$c_{\cdot j,\lambda} = \left(1-\frac{\lambda_\eta}{\|c_{\cdot j}\|_2}\right)_+ c_{\cdot j}.$$
 
 그 다음
 
-$$
-\eta_{kj,\lambda}
-=
-\bar{\eta}_j
-+
-c_{kj,\lambda}
-$$
+$$\eta_{kj,\lambda} = \bar{\eta}_j + c_{kj,\lambda}$$
 
 로 되돌린다.
 
@@ -468,45 +307,21 @@ K=4 6-method 비교의 eta grid는 다음이었다.
 
 모형 선택은 주로 BIC를 사용했다.
 
-$$
-\mathrm{BIC}
-=
-\log(n)\,\mathrm{df}
--
-2\ell(\hat{\Theta}).
-$$
+$$BIC = \log(n)df - 2\ell(\hat{\Theta}).$$
 
 EBIC도 같이 계산했다.
 
-$$
-\mathrm{EBIC}
-=
-\{\log(n)+2\gamma\log(d)\}\,\mathrm{df}
--
-2\ell(\hat{\Theta}),
-\qquad
-\gamma=0.5.
-$$
+$$EBIC = \{\log(n)+2\gamma\log(d)\}df - 2\ell(\hat{\Theta}), \qquad \gamma=0.5.$$
 
 Rossi sparse vMF의 자유도는 코드에서 다음처럼 근사했다.
 
-$$
-\mathrm{df}
-=
-(2K-1)
-+
-\sum_{k=1}^{K}\max(1, \mathrm{nnz}_k-1).
-$$
+$$df = (2K-1) + \sum_{k=1}^{K}\max(1, nnz_k-1).$$
 
-여기서 $(2K-1)$은 mixing proportion과 component별 $\kappa_k$를 포함한 항이고, $\mathrm{nnz}_k-1$은 $\|\mu_k\|_2=1$ 제약 때문에 component direction에서 자유도 하나를 뺀 것이다.
+여기서 $(2K-1)$은 mixing proportion과 component별 $\kappa_k$를 포함한 항이고, $nnz_k-1$은 $\|\mu_k\|_2=1$ 제약 때문에 component direction에서 자유도 하나를 뺀 것이다.
 
 K=4 centered eta penalty에서는 선택된 coordinate 수를 $m$이라 두고,
 
-$$
-\mathrm{df}
-=
-(K-1)+d+(K-1)m
-$$
+$$df = (K-1)+d+(K-1)m$$
 
 로 계산했다. 이는 구현상 eta의 coordinate-level contrast support를 반영하기 위한 근사 자유도다.
 
@@ -552,28 +367,6 @@ K=2에서는 $\eta_2-\eta_1$ 직접 contrast를 사용했다. K=4에서는 cente
 | K=2 eta penalty | `eta_penalty_vmf_run.r` | `fit_eta_penalty_em()`, `prox_eta_contrast_k2()` |
 | K=2 separate penalty | `separate_penalty_vmf_run.r` | `fit_separate_penalty_em()`, `update_mu_kappa_separate_one()` |
 | score/refit 초기 비교 | `compare_three_methods_kappa_limit_run.r` | `eta_contrast_score()`, `fit_score_refit_bic()` |
-
----
-
-## 11. 연구미팅에서 답할 핵심 포인트
-
-**Q1. Rossi의 beta grid는 어떻게 정했는가?**  
-임의 grid가 아니다. 논문 Algorithm 3의 path-following 아이디어를 따라, 현재 해에서 다음 coordinate가 0이 될 수 있는 threshold를 계산해 beta 후보를 만든다. 각 beta에서 EM을 warm start로 돌리고 BIC가 가장 작은 해를 선택했다.
-
-**Q2. 분리 패널티와 에타 패널티의 lambda는 어떻게 정했는가?**  
-현재 구현에서는 fixed grid search를 사용했다. 각 lambda 후보에서 EM을 돌리고 BIC가 가장 작은 값을 선택했다. K=4 6방법 비교에서는 계산 시간을 고려해 grid를 줄였다.
-
-**Q3. eta penalty EM은 exact EM인가?**  
-현재 구현은 exact closed-form M-step이 아니라 proximal EM prototype이다. 먼저 unpenalized eta M-step을 한 뒤 eta contrast에 soft-threshold 또는 group shrinkage를 적용하고, 다시 $(\mu,\kappa)$로 변환한다. 연구 방향을 확인하기 위한 구현이며, 논문 단계에서는 이 proximal step의 목적함수 감소 또는 MM 해석을 더 정리할 필요가 있다.
-
-**Q4. refit은 왜 필요한가?**  
-L1 penalty는 support 선택에는 유리하지만 parameter magnitude를 줄이는 bias를 만든다. 특히 eta penalty는 $\eta_k=\kappa_k\mu_k$ 자체를 shrink하므로 $\kappa$가 작게 추정될 수 있다. Refit은 support만 고정하고 penalty 없이 다시 EM을 돌려 이 shrinkage bias를 줄이는 역할을 한다.
-
-**Q5. kappa 추정 근사식은 어디서 왔는가?**  
-vMF mixture EM에서 쓰이는 Banerjee et al. (2005)의 concentration update approximation을 사용했다. 코드는 `estimate_kappa()`에 구현되어 있다.
-
-**Q6. 다음 구현 개선점은 무엇인가?**  
-분리 패널티와 에타 패널티도 Rossi처럼 data-driven lambda path를 만들 필요가 있다. 예를 들어 dense fit에서 얻은 $|\eta_2-\eta_1|$ 또는 $\|c_{\cdot j}\|_2$의 분위수를 이용해 $\lambda_\eta$ 후보를 만들 수 있다. 또한 eta proximal EM의 이론적 정당화와 자유도 계산을 더 엄밀하게 정리해야 한다.
 
 ---
 
