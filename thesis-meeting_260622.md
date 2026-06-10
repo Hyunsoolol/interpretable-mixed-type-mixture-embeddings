@@ -247,35 +247,34 @@ BIC는 공식 tuning 선택 기준이고, EBIC는 보조 적합 지표로 계산
 * ARI는 전체적으로 낮다. 이는 $K=4$에서 평균 방향이 완전히 같고 집중도만 다른 상황 자체가 군집화하기 어려운 stress setting임을 의미한다.
 * 모수 MSE는 기존 코드가 $\mu$ cosine 기준으로 label matching을 수행하므로 보조 지표로만 본다. 이 결과에서는 ARI, 변수 선택 지표, BIC와 보조 EBIC를 우선적으로 해석한다.
 
-## 4. K=4 realistic concentration-dominant setting
+## 4. K=4 controlled concentration-dominant setting
 
-Stress setting은 평균 방향을 완전히 같게 둔 강한 한계 상황이다. 실제 자료에서는 군집 평균 방향이 완전히 같기보다는 상당 부분을 공유하면서 일부 좌표에서 차이가 있고, 동시에 집중도 차이도 존재할 가능성이 높다. 이를 반영하여 다음과 같은 실제 유사 환경을 구성했다.
+Stress setting은 평균 방향을 완전히 같게 둔 강한 한계 상황이다. 여기서는 변수 구조는 3번 stress setting과 동일하게 고정하고, 평균 방향만 완전히 같지 않도록 완화했다. 따라서 active variable 구조의 차이는 제거하고, 평균 방향 차이가 약간 존재하는 상황에서 concentration 차이를 반영하는 방법이 어떻게 작동하는지 확인한다.
 
 ### 4.1. Simulation setting
 
 * **Setting:** $K=4$, $n=1000$, 군집 비율 균일.
 * **Simulation:** 반복 수 20회, random start 5회.
 * **Tuning:** Rossi는 $\beta$ path, 분리 패널티는 $\lambda_\kappa$ grid와 $\lambda_\mu$ path, 에타 패널티는 centered $\eta$ norm의 $\lambda_\eta$ path에서 BIC 기준으로 선택.
-* **Mean direction:** 평균 방향은 완전히 같지 않지만 매우 유사하게 설정. Pairwise cosine은 약 0.90 수준.
-* **Variables:** 전체 변수 개수는 $d=100$개, union 기준 유효 변수 개수는 19개.
-  * Component별 active coordinate는 10개.
-  * 모든 component가 공유하는 공통 active coordinate는 7개.
-  * Component별 specific active coordinate는 3개씩.
+* **Mean direction:** 평균 방향은 완전히 같지 않지만 매우 유사하게 설정. Pairwise cosine은 0.95.
+* **Variables:** 전체 변수 개수는 $d=100$개, union 기준 유효 변수 개수는 10개.
+  * 변수 구조는 3번 stress setting과 동일하게 둔다.
+  * 모든 component가 같은 10개 active coordinate를 공유한다.
   * Entry-level active 개수는 $4\times10=40$개.
 * **Concentration:** $\kappa=(25,40,65,100)$.
 
-이 세팅은 Rossi가 완전히 불리한 stress setting이 아니라, 평균 방향 차이도 일부 존재하여 Rossi가 작동할 여지를 남긴 상태에서 concentration 차이의 영향을 함께 보는 중간 난이도 설정이다.
+이 세팅은 평균 방향이 완전히 같은 3번보다 현실적이지만, 변수 구조는 동일하게 통제한 설정이다. 따라서 기존 4번처럼 component-specific active coordinate가 섞인 상황보다 해석이 단순하고, 모수 차이에 따른 방법별 작동을 더 직접적으로 비교할 수 있다.
 
 ### 4.2. 군집화 및 변수 선택 성능
 
 | Method | ARI | True union $q$ | Selected $q$ | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|---:|
-| Rossi path BIC | 0.640 | 19.000 | 48.850 | 1.000 | 0.369 | 0.415 | 0.580 |
-| Rossi path BIC + refit | 0.626 | 19.000 | 48.850 | 1.000 | 0.369 | 0.415 | 0.580 |
-| Separate 2D path/grid BIC | **0.641** | 19.000 | 67.700 | 1.000 | 0.601 | 0.303 | 0.458 |
-| Separate 2D path/grid BIC + refit | 0.615 | 19.000 | 67.700 | 1.000 | 0.601 | 0.303 | 0.458 |
-| Eta centered path BIC | 0.567 | 19.000 | **37.200** | 0.968 | **0.232** | **0.565** | **0.692** |
-| Eta centered path BIC + refit | 0.609 | 19.000 | **37.200** | 0.968 | **0.232** | **0.565** | **0.692** |
+| Rossi path BIC | 0.513 | 10.000 | 98.500 | 1.000 | 0.983 | 0.102 | 0.184 |
+| Rossi path BIC + refit | 0.485 | 10.000 | 98.500 | 1.000 | 0.983 | 0.102 | 0.184 |
+| Separate 2D path/grid BIC | **0.525** | 10.000 | 95.600 | 1.000 | 0.951 | 0.105 | 0.190 |
+| Separate 2D path/grid BIC + refit | 0.486 | 10.000 | 95.600 | 1.000 | 0.951 | 0.105 | 0.190 |
+| Eta centered path BIC | 0.489 | 10.000 | **28.800** | 1.000 | **0.209** | **0.443** | **0.586** |
+| **Eta centered path BIC + refit** | 0.523 | 10.000 | **28.800** | 1.000 | **0.209** | **0.443** | **0.586** |
 
 ### 4.3. 모형 적합 지표
 
@@ -283,12 +282,12 @@ BIC는 공식 tuning 선택 기준이고, EBIC는 보조 적합 지표로 계산
 
 | Method | loglik | df | BIC | EBIC |
 |:---|---:|---:|---:|---:|
-| **Rossi path BIC** | 97548.322 | 80.200 | **-194542.643** | **-194173.308** |
-| Rossi path BIC + refit | 97646.273 | 198.400 | -193922.048 | -193008.382 |
-| Separate 2D path/grid BIC | 97583.758 | 118.600 | -194348.256 | -193802.083 |
-| Separate 2D path/grid BIC + refit | 97681.027 | 273.800 | -193470.711 | -192209.816 |
-| Eta centered path BIC | 97522.296 | 214.600 | -193562.188 | -192573.919 |
-| Eta centered path BIC + refit | 97605.510 | 151.800 | -194162.422 | -193463.357 |
+| Rossi path BIC | 97790.511 | 267.300 | -193734.579 | -192503.617 |
+| Rossi path BIC + refit | 97843.888 | 397.000 | -192945.398 | -191117.145 |
+| Separate 2D path/grid BIC | 97759.380 | 221.850 | -193986.274 | -192964.617 |
+| Separate 2D path/grid BIC + refit | 97837.013 | 385.400 | -193011.778 | -191236.945 |
+| Eta centered path BIC | 97637.404 | 189.400 | -193966.480 | -193094.261 |
+| **Eta centered path BIC + refit** | 97697.307 | 118.200 | **-194578.117** | **-194033.786** |
 
 ### 4.4. 모수 추정 성능
 
@@ -296,20 +295,20 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 | Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
 |:---|---:|---:|---:|---:|
-| Rossi path BIC | 0.019 | **238.004** | **18.605** | 57.822 |
-| Rossi path BIC + refit | 0.026 | 324.928 | 41.337 | 58.239 |
-| Separate 2D path/grid BIC | **0.015** | 265.754 | 18.641 | 57.665 |
-| Separate 2D path/grid BIC + refit | 0.035 | 340.097 | 53.145 | 58.440 |
-| Eta centered path BIC | 0.053 | 9954.189 | 125.900 | 62.681 |
-| Eta centered path BIC + refit | 0.046 | 6773.728 | 126.210 | 60.987 |
+| Rossi path BIC | 0.069 | **5075.147** | **113.572** | 59.792 |
+| Rossi path BIC + refit | 0.117 | 8218.911 | 214.306 | 61.092 |
+| Separate 2D path/grid BIC | 0.051 | 15923.643 | 224.683 | 58.360 |
+| Separate 2D path/grid BIC + refit | 0.109 | 10013.210 | 216.211 | 60.722 |
+| Eta centered path BIC | **0.032** | 17712.209 | 152.040 | 65.087 |
+| Eta centered path BIC + refit | 0.039 | 13627.592 | 173.639 | 62.749 |
 
 ### 4.5. 해석
 
-* 실제 유사 환경에서는 Rossi가 BIC 기반 모형 적합에서 가장 좋고, ARI는 Rossi와 분리 패널티가 비슷하다. 이는 평균 방향 차이가 일부 존재하므로 $\mu_k$ sparsity가 여전히 유효하기 때문이다.
-* 그러나 Rossi는 selected $q=48.850$으로 true union $q=19$보다 많은 변수를 선택하고, FPR이 0.369로 남아 있다.
-* 에타 패널티 + refit은 ARI가 0.609로 Rossi + refit 0.626보다 낮지만, selected $q=37.200$, FPR 0.232, F1 0.692로 변수 선택 성능이 더 좋다.
-* 따라서 이 세팅의 핵심 메시지는 에타 방법이 clustering 자체를 압도한다는 것이 아니라, 군집 성능을 크게 잃지 않으면서 더 sparse하고 해석 가능한 변수 선택을 제공한다는 점이다.
-* 현실적인 중간 세팅에서는 Rossi가 모형 적합 기준에서 강하고, 에타 패널티는 해석 가능한 변수 선택 기준에서 강하다. 따라서 제안 방법의 장점은 concentration-driven effect를 반영한 sparse interpretation으로 정리하는 것이 적절하다.
+* 변수 구조를 3번과 동일하게 고정하고 평균 방향만 약간 다르게 두면, Rossi와 분리 패널티는 거의 모든 변수를 선택한다. Rossi + refit의 selected $q$는 98.500이고, 분리 패널티 + refit의 selected $q$는 95.600이다.
+* 에타 패널티 + refit은 selected $q=28.800$, FPR 0.209, Precision 0.443, F1 0.586으로 변수 선택 성능을 크게 개선한다.
+* Refit 기준 ARI도 에타 패널티가 0.523으로 Rossi + refit 0.485, 분리 패널티 + refit 0.486보다 높다.
+* 모형 적합 지표 표에서도 에타 패널티 + refit이 가장 좋다. 이는 평균 방향 차이가 약간 존재하더라도 concentration-driven support를 직접 겨냥하는 방식이 유효할 수 있음을 보여준다.
+* 이 controlled setting은 기존 heterogeneous-support setting보다 논문 연결에 더 적합하다. 변수 구조를 고정했기 때문에 3번 stress setting에서 4번 controlled setting으로 자연스럽게 난이도를 완화하는 흐름을 만들 수 있다.
 
 ## 5. 요약 결론
 
@@ -317,7 +316,7 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 * **Refit 역할:** $\eta$-penalty 단독은 $\kappa$ 수축 편향이 생길 수 있으나, 선택된 support를 고정한 refit을 수행하면 $\kappa$ ratio와 $\eta$ contrast가 true value에 가깝게 복원된다.
 * **논문 재현:** Rossi & Barbaro (2022)의 sparse vMF는 논문 Figure와 유사하게 재현된다. 특히 논문 기준 sparsity는 zero coordinate 비율로 해석해야 한다.
 * **K=4 stress setting:** 평균 방향이 같고 집중도만 다른 어려운 상황에서는 path tuning 후에도 Rossi와 분리 패널티가 불필요한 변수를 많이 선택한다. $\eta$-penalty는 FPR을 낮추고 해석 가능한 변수 선택을 제공한다.
-* **현실적 중간 setting:** 평균 차이도 일부 존재하는 경우 Rossi가 BIC 기반 모형 적합에서 강하지만, $\eta$-penalty + refit은 ARI 손실을 감수하는 대신 더 sparse한 변수 선택을 제공한다.
+* **Controlled concentration-dominant setting:** 변수 구조를 K=4 stress setting과 동일하게 고정하고 평균 방향만 약간 다르게 두면, Rossi와 분리 패널티는 거의 전체 변수를 선택하지만 $\eta$-penalty + refit은 FPR을 낮추고 refit 기준 ARI와 BIC도 가장 좋다.
 
 ---
 
