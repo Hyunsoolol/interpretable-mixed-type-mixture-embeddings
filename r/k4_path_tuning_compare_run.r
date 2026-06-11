@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # K=4 fair path-tuning comparison
 # ------------------------------------------------------------------------------
 # Scenarios:
@@ -23,7 +23,7 @@ source_until_before <- function(file, marker, back = 2L) {
   eval(parse(text = lines[keep]), envir = .GlobalEnv)
 }
 
-source_until_before("rb2022_k4_pilot_compare_run.r", "Running K=4 pilot", back = 2L)
+source_until_before(file.path("r", "rb2022_k4_pilot_compare_run.r"), "Running K=4 pilot", back = 2L)
 
 parse_num_grid <- function(x) as.numeric(strsplit(x, ",", fixed = TRUE)[[1]])
 

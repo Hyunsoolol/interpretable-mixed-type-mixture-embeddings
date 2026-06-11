@@ -1,4 +1,4 @@
-# Sparse vMF Mixture 및 Eta Penalty 정리
+﻿# Sparse vMF Mixture 및 Eta Penalty 정리
 
 ## 1. vMF 분포
 
@@ -171,7 +171,7 @@ A_d(\kappa)
 
 이 근사식은 vMF mixture EM에서 널리 쓰이는 Banerjee et al. (2005)의 concentration update approximation에 기반한다. 방향자료 MLE의 기본식은 Mardia and Jupp (2000)에서 표준적으로 다루고, vMF concentration inverse approximation 관련 논의는 Sra (2012)에서도 볼 수 있다.
 
-현재 코드에서는 이 근사식이 `rossi_barbaro_2022_reproduction.r`의 `estimate_kappa()`에 구현되어 있다.
+현재 코드에서는 이 근사식이 `r/rossi_barbaro_2022_reproduction.r`의 `estimate_kappa()`에 구현되어 있다.
 
 ## 5. Rossi & Barbaro (2022) Sparse vMF
 
@@ -492,7 +492,7 @@ unpenalized M-step 결과를 `eta_1`, `eta_2`라고 하면,
 
 를 사용해 vMF parameter로 되돌린다.
 
-현재 구현에서 이 부분은 `eta_penalty_vmf_run.r`의 `fit_eta_penalty_em()`과 `prox_eta_contrast_k2()`에 해당한다.
+현재 구현에서 이 부분은 `r/eta_penalty_vmf_run.r`의 `fit_eta_penalty_em()`과 `prox_eta_contrast_k2()`에 해당한다.
 
 ### K>2 Eta Penalty 일반화
 
@@ -696,13 +696,13 @@ K>2에서는 다음 값이 기준이 된다.
 
 | 주제 | 파일 | 주요 함수 |
 |---|---|---|
-| 공통 vMF 함수 | `rossi_barbaro_2022_reproduction.r` | `estimate_kappa()`, `e_step_vmf()`, `fit_svMF_em()` |
-| Rossi 2022 sparse vMF | `rossi_barbaro_2022_reproduction.r` | `update_mu_kappa_one()`, `fit_svMF_path()` |
-| 정보기준 계산 | `rossi_barbaro_2022_reproduction.r` | `model_df()`, `model_ic()` |
-| Rossi + refit | `rossi_refit_limit_run.r` | `fit_support_constrained_vmf()` |
-| 분리 패널티 EM | `separate_penalty_vmf_run.r` | `fit_separate_penalty_em()`, `update_mu_kappa_separate_one()` |
-| 에타 패널티 EM | `eta_penalty_vmf_run.r` | `fit_eta_penalty_em()`, `prox_eta_contrast_k2()` |
-| K=4 pilot 비교 | `rb2022_k4_pilot_compare_run.r` | `fit_eta_centered_em()`, `prox_eta_centered()` |
+| 공통 vMF 함수 | `r/rossi_barbaro_2022_reproduction.r` | `estimate_kappa()`, `e_step_vmf()`, `fit_svMF_em()` |
+| Rossi 2022 sparse vMF | `r/rossi_barbaro_2022_reproduction.r` | `update_mu_kappa_one()`, `fit_svMF_path()` |
+| 정보기준 계산 | `r/rossi_barbaro_2022_reproduction.r` | `model_df()`, `model_ic()` |
+| Rossi + refit | `r/rossi_refit_limit_run.r` | `fit_support_constrained_vmf()` |
+| 분리 패널티 EM | `r/separate_penalty_vmf_run.r` | `fit_separate_penalty_em()`, `update_mu_kappa_separate_one()` |
+| 에타 패널티 EM | `r/eta_penalty_vmf_run.r` | `fit_eta_penalty_em()`, `prox_eta_contrast_k2()` |
+| K=4 pilot 비교 | `r/rb2022_k4_pilot_compare_run.r` | `fit_eta_centered_em()`, `prox_eta_centered()` |
 
 구현상 공통 흐름은 다음과 같다.
 

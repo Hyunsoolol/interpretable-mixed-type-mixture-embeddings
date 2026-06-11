@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # K=4 paper-like pilot comparison
 # ------------------------------------------------------------------------------
 # Data: Rossi & Barbaro (2022) artificial simulation style.
@@ -11,7 +11,7 @@
 #   6. Centered eta penalty EM + coordinate-support refit
 # ==============================================================================
 
-source("rossi_barbaro_2022_reproduction.r")
+source(file.path("r", "rossi_barbaro_2022_reproduction.r"))
 
 parse_num_grid <- function(x) {
   as.numeric(strsplit(x, ",", fixed = TRUE)[[1]])

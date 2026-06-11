@@ -1,4 +1,4 @@
-# Thesis Meeting 260622
+﻿# Thesis Meeting 260622
 
 업데이트: 2026-06-11
 상세 시뮬레이션 결과는 `thesis-simulation_260611.md`, 구현 및 추정 방법은 `thesis-implementation_260622.md`에 분리했다.

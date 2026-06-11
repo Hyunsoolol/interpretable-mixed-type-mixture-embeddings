@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # Fair tuning comparison: Rossi path, separate 2D path/grid, eta path
 # ------------------------------------------------------------------------------
 # Goal:
@@ -18,7 +18,7 @@
 # generated from current M-step thresholds, analogous to the Rossi threshold path.
 # ==============================================================================
 
-source("rossi_barbaro_2022_reproduction.r")
+source(file.path("r", "rossi_barbaro_2022_reproduction.r"))
 
 parse_num_grid <- function(x) as.numeric(strsplit(x, ",", fixed = TRUE)[[1]])
 

@@ -1,4 +1,4 @@
-# Thesis Simulation Archive 260611
+﻿# Thesis Simulation Archive 260611
 
 업데이트: 2026-06-11
 

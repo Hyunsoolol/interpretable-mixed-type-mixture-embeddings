@@ -1,4 +1,4 @@
-# Interpretable Mixed-type Mixture Modeling (IM3)
+﻿# Interpretable Mixed-type Mixture Modeling (IM3)
 
 ![Repo Name](https://img.shields.io/badge/Repo-interpretable--mixed--mixture-blueviolet)
 ![Status](https://img.shields.io/badge/Status-Research%20Proposal-blue)

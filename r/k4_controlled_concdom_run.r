@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # K=4 controlled concentration-dominant simulation
 # ------------------------------------------------------------------------------
 # This is a revised version of the previous realistic concentration-dominant
@@ -18,7 +18,7 @@ source_until_before <- function(file, marker, back = 1L) {
   eval(parse(text = lines[keep]), envir = .GlobalEnv)
 }
 
-source_until_before("k4_path_tuning_compare_run.r", "rows <- list()", back = 1L)
+source_until_before(file.path("r", "k4_path_tuning_compare_run.r"), "rows <- list()", back = 1L)
 
 cfg$run_label <- Sys.getenv("K4_CONTROLLED_LABEL", "k4_controlled_concdom_260622")
 cfg$n_rep <- as.integer(Sys.getenv("K4_CONTROLLED_N_REP", "20"))

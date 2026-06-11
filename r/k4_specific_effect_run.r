@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # K=4 specific-effect variable simulation
 # ------------------------------------------------------------------------------
 # Variable construction:
@@ -19,7 +19,7 @@ source_until_before <- function(file, marker, back = 1L) {
   eval(parse(text = lines[keep]), envir = .GlobalEnv)
 }
 
-source_until_before("k4_path_tuning_compare_run.r", "rows <- list()", back = 1L)
+source_until_before(file.path("r", "k4_path_tuning_compare_run.r"), "rows <- list()", back = 1L)
 
 cfg$run_label <- Sys.getenv("K4_SPECIFIC_LABEL", "k4_specific_effect")
 cfg$n_rep <- as.integer(Sys.getenv("K4_SPECIFIC_N_REP", "3"))
@@ -32,6 +32,10 @@ cfg$max_path_steps <- as.integer(Sys.getenv("K4_SPECIFIC_ROSSI_STEPS", "100"))
 cfg$sep_mu_path_steps <- as.integer(Sys.getenv("K4_SPECIFIC_SEP_MU_STEPS", "140"))
 cfg$eta_path_steps <- as.integer(Sys.getenv("K4_SPECIFIC_ETA_STEPS", "80"))
 cfg$base_seed <- as.integer(Sys.getenv("K4_SPECIFIC_BASE_SEED", "20260623"))
+cfg$select_ic <- toupper(Sys.getenv("K4_SPECIFIC_SELECT_IC", "BIC"))
+if (!cfg$select_ic %in% c("BIC", "EBIC")) {
+  stop("K4_SPECIFIC_SELECT_IC must be either BIC or EBIC.")
+}
 cfg$out_dir <- Sys.getenv(
   "K4_SPECIFIC_OUT_DIR",
   "results/k4_specific_effect"
@@ -97,6 +101,14 @@ append_type_metrics <- function(row, active, params) {
   cbind(row, selection_type_metrics(active, params))
 }
 
+method_name <- function(base, cfg, refit = FALSE) {
+  paste0(base, " ", cfg$select_ic, if (refit) " + refit" else "")
+}
+
+best_ic_index <- function(tab, cfg) {
+  which.min(tab[[cfg$select_ic]])
+}
+
 fit_rossi_specific_pair <- function(X, z, params, cfg) {
   path <- fit_svMF_path(
     X = X,
@@ -110,19 +122,19 @@ fit_rossi_specific_pair <- function(X, z, params, cfg) {
     gamma = 0.5,
     verbose = FALSE
   )
-  idx <- which.min(path$path$BIC)
+  idx <- best_ic_index(path$path, cfg)
   fit <- path$fits[[idx]]
   prow <- path$path[idx, , drop = FALSE]
   active <- active_mu_coord(fit)
   support_entry <- abs(fit$mu) > 1e-8
   out <- eval_method(
-    "Rossi path BIC", fit, X, z, params, active, support_entry,
+    method_name("Rossi path", cfg), fit, X, z, params, active, support_entry,
     beta = prow$beta,
     ic = prow[, c("df", "BIC", "EBIC"), drop = FALSE]
   )
   refit <- fit_support_refit(X, cfg$K, active, fit, max_iter = cfg$max_iter)
   out_refit <- eval_method(
-    "Rossi path BIC + refit", refit, X, z, params, active, NULL,
+    method_name("Rossi path", cfg, refit = TRUE), refit, X, z, params, active, NULL,
     beta = prow$beta
   )
   rbind(
@@ -150,13 +162,14 @@ fit_separate_specific_pair <- function(X, z, params, cfg) {
   }
   if (length(all_rows) == 0) stop("Separate path produced no valid fit.")
   tab <- do.call(rbind, all_rows)
-  best <- which.min(tab$BIC)
+  best <- best_ic_index(tab, cfg)
   fit <- all_fits[[best]]
   active <- active_mu_coord(fit)
   out <- tab[best, , drop = FALSE]
+  out$method <- method_name("Separate 2D path/grid", cfg)
   refit <- fit_support_refit(X, cfg$K, active, fit, max_iter = cfg$max_iter)
   out_refit <- eval_method(
-    "Separate 2D path/grid BIC + refit", refit, X, z, params, active, NULL,
+    method_name("Separate 2D path/grid", cfg, refit = TRUE), refit, X, z, params, active, NULL,
     lambda_mu = out$lambda_mu,
     lambda_kappa = out$lambda_kappa
   )
@@ -181,7 +194,7 @@ fit_eta_specific_pair <- function(X, z, params, cfg) {
     active <- active_eta_centered(fit)
     ic <- eta_centered_ic(fit, nrow(X), ncol(X), fit$loglik)
     eval_method(
-      "Eta centered path BIC", fit, X, z, params, active, NULL,
+      method_name("Eta centered path", cfg), fit, X, z, params, active, NULL,
       lambda_eta = lambda_eta,
       ic = ic
     )
@@ -217,13 +230,13 @@ fit_eta_specific_pair <- function(X, z, params, cfg) {
   }
 
   tab <- do.call(rbind, rows)
-  best <- which.min(tab$BIC)
+  best <- best_ic_index(tab, cfg)
   fit <- fits[[best]]
   active <- active_eta_centered(fit)
   out <- tab[best, , drop = FALSE]
   refit <- fit_support_refit(X, cfg$K, active, fit, max_iter = cfg$max_iter)
   out_refit <- eval_method(
-    "Eta centered path BIC + refit", refit, X, z, params, active, NULL,
+    method_name("Eta centered path", cfg, refit = TRUE), refit, X, z, params, active, NULL,
     lambda_eta = out$lambda_eta
   )
   rbind(
@@ -268,12 +281,14 @@ run_one_specific <- function(rep_id, cfg) {
   out$kappa_true_min <- min(kappa_vec)
   out$kappa_true_max <- max(kappa_vec)
   out$kappa_true_ratio <- max(kappa_vec) / min(kappa_vec)
+  out$error <- NA_character_
   out
 }
 
 cat(sprintf(
-  "Running K=4 specific-effect simulation: reps=%d, n=%d, d=%d, common=%d, specific/component=%d, weight=%.2f, nstart=%d\n",
-  cfg$n_rep, cfg$n, cfg$d, common_q, specific_q, specific_weight, cfg$nstart
+  "Running K=4 specific-effect simulation: reps=%d, n=%d, d=%d, common=%d, specific/component=%d, weight=%.2f, nstart=%d, select=%s\n",
+  cfg$n_rep, cfg$n, cfg$d, common_q, specific_q, specific_weight, cfg$nstart,
+  cfg$select_ic
 ))
 
 rows <- list()
@@ -293,6 +308,9 @@ for (rep_id in seq_len(cfg$n_rep)) {
         MSE_mu = NA_real_, MSE_kappa = NA_real_,
         MSE_centered_eta = NA_real_, kappa_hat_mean = NA_real_,
         df = NA_real_, BIC = NA_real_, EBIC = NA_real_,
+        common_selection_rate = NA_real_,
+        specific_selection_rate = NA_real_,
+        noise_selection_rate = NA_real_,
         scenario = "specific_effect_common6_specific4",
         rep = rep_id, n = cfg$n, d = cfg$d, K_true = cfg$K,
         common_q = common_q,
@@ -334,9 +352,10 @@ summary <- do.call(rbind, lapply(seq_len(nrow(groups)), function(i) {
 }))
 
 method_order <- c(
-  "Rossi path BIC", "Rossi path BIC + refit",
-  "Separate 2D path/grid BIC", "Separate 2D path/grid BIC + refit",
-  "Eta centered path BIC", "Eta centered path BIC + refit",
+  method_name("Rossi path", cfg), method_name("Rossi path", cfg, refit = TRUE),
+  method_name("Separate 2D path/grid", cfg),
+  method_name("Separate 2D path/grid", cfg, refit = TRUE),
+  method_name("Eta centered path", cfg), method_name("Eta centered path", cfg, refit = TRUE),
   "ERROR"
 )
 summary$method <- factor(summary$method, levels = method_order)

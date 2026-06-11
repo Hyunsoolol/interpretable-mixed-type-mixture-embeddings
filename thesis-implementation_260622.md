@@ -1,4 +1,4 @@
-# 모형, 추정 방법, 코드 구현 정리
+﻿# 모형, 추정 방법, 코드 구현 정리
 
 업데이트: 2026-06-11
 이 문서는 260622 연구미팅에서 구현 관련 질문에 답하기 위한 정리다. 연구미팅용 요약은 `thesis-meeting_260622.md`, 전체 시뮬레이션 결과는 `thesis-simulation_260611.md`에 분리했다.
@@ -309,13 +309,13 @@ $$df = (K-1)+d+(K-1)m.$$
 
 | 역할 | 파일 | 주요 함수 또는 내용 |
 |:---|:---|:---|
-| 공통 vMF 및 Rossi 재현 | `rossi_barbaro_2022_reproduction.r` | `e_step_vmf()`, `estimate_kappa()`, `fit_svMF_em()`, `fit_svMF_path()` |
-| K=2 path tuning 비교 | `eta_path_tuning_compare_run.r` | Rossi beta path, separate path/grid, eta path |
-| K=4 path tuning 비교 | `k4_path_tuning_compare_run.r` | paperlike sparse-active, same-mean stress, realistic concentration-dominant |
-| K=4 controlled setting | `k4_controlled_concdom_run.r` | stress setting과 같은 support, 평균 방향만 완화 |
-| K=4 specific-effect setting | `k4_specific_effect_run.r` | 공통 변수 + component-specific 변수 |
-| K=4 공통 함수 | `rb2022_k4_pilot_compare_run.r` | centered eta penalty, support refit, metric 계산 |
-| 초기 prototype | `eta_penalty_vmf_run.r`, `separate_penalty_vmf_run.r` | path tuning 정리 전 grid/prototype 기록 |
+| 공통 vMF 및 Rossi 재현 | `r/rossi_barbaro_2022_reproduction.r` | `e_step_vmf()`, `estimate_kappa()`, `fit_svMF_em()`, `fit_svMF_path()` |
+| K=2 path tuning 비교 | `r/eta_path_tuning_compare_run.r` | Rossi beta path, separate path/grid, eta path |
+| K=4 path tuning 비교 | `r/k4_path_tuning_compare_run.r` | paperlike sparse-active, same-mean stress, realistic concentration-dominant |
+| K=4 controlled setting | `r/k4_controlled_concdom_run.r` | stress setting과 같은 support, 평균 방향만 완화 |
+| K=4 specific-effect setting | `r/k4_specific_effect_run.r` | 공통 변수 + component-specific 변수 |
+| K=4 공통 함수 | `r/rb2022_k4_pilot_compare_run.r` | centered eta penalty, support refit, metric 계산 |
+| 초기 prototype | `r/eta_penalty_vmf_run.r`, `r/separate_penalty_vmf_run.r` | path tuning 정리 전 grid/prototype 기록 |
 
 ## 13. 시뮬레이션 setting 생성 방식
 

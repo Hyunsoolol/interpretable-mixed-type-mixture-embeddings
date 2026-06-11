@@ -1,4 +1,4 @@
-## 핵심 선행 연구 지형 분석 및 제안 모형의 차별성
+﻿## 핵심 선행 연구 지형 분석 및 제안 모형의 차별성
 
 본 문서는 고차원 Gaussian mixture clustering에서 mean-heterogeneity-driving variable selection을 다루는 본 연구와 핵심 선행연구의 관계를 정리합니다. 특히 Caroline Meynet의 박사학위논문(Variable selection in model-based clustering for high-dimensional data, Lasso-MLE procedure)을 반영하여, 본 연구의 Novelty claim과 논문 포지셔닝을 전면 재정리하였습니다.
 

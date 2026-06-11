@@ -1,4 +1,4 @@
-# [연구 미팅 보고서] 고차원 혼합 평균 효과 클러스터링을 위한 Debiased Sum-to-Zero Lasso
+﻿# [연구 미팅 보고서] 고차원 혼합 평균 효과 클러스터링을 위한 Debiased Sum-to-Zero Lasso
 
 **미팅 일자:** 2026년 5월 8일
 
