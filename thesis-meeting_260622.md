@@ -7,7 +7,7 @@
 * **분리 패널티:** $\lambda_\kappa$는 데이터 기반 2D grid로 두고, 각 $\lambda_\kappa$에서 $\lambda_\mu$ path를 따라 적합한 뒤 전체 후보 중 BIC 최소 지점을 선택.
 * **에타 패널티:** $\lambda_\eta$ path를 따라 적합하고 BIC가 최소인 지점을 선택.
 * **Refit:** 각 penalized fit에서 선택된 coordinate support를 고정한 뒤 penalty 없이 vMF mixture를 다시 추정.
-* **Simulation:** 반복 수 20회, random start 5회.
+* **Simulation:** 반복 수 100회, random start 5회.
 
 ### 1.1. 집중도 주도 환경
 
@@ -325,7 +325,7 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
   * Component 1의 특정 변수는 7-10번, component 2는 11-14번, component 3은 15-18번, component 4는 19-22번이다.
   * 노이즈 변수는 23-100번 coordinate이다.
   * Entry-level active 개수는 공통 변수 $4\times6=24$개와 특정 변수 $4\times4=16$개를 합쳐 40개이다.
-* **Mean direction:** raw vector에서 공통 변수는 1.0, 자기 component의 특정 변수는 0.5, 나머지는 0으로 둔 뒤 normalize했다.
+* **Mean direction:** raw vector에서 공통 변수는 1.0, 자기 component의 특정 변수는 $w=0.50$, 나머지는 0으로 둔 뒤 normalize했다.
 * **Concentration:** $\kappa=(30,45,65,90)$.
 
 Raw mean vector는 다음과 같다.
@@ -343,23 +343,23 @@ mu_k = v_k / ||v_k||
 
 | Method | ARI | True union $q$ | Selected $q$ | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|---:|
-| Rossi path BIC | 0.685 | 22.000 | 98.800 | 1.000 | 0.985 | 0.223 | 0.364 |
-| Rossi path BIC + refit | 0.653 | 22.000 | 98.800 | 1.000 | 0.985 | 0.223 | 0.364 |
-| Separate 2D path/grid BIC | 0.684 | 22.000 | 89.450 | 1.000 | 0.865 | 0.248 | 0.397 |
-| Separate 2D path/grid BIC + refit | 0.657 | 22.000 | 89.450 | 1.000 | 0.865 | 0.248 | 0.397 |
-| Eta centered path BIC | 0.623 | 22.000 | **24.550** | 0.995 | **0.034** | **0.899** | **0.943** |
-| **Eta centered path BIC + refit** | **0.686** | 22.000 | **24.550** | 0.995 | **0.034** | **0.899** | **0.943** |
+| Rossi path BIC | 0.680 | 22.000 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
+| Rossi path BIC + refit | 0.653 | 22.000 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
+| Separate 2D path/grid BIC | 0.684 | 22.000 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
+| Separate 2D path/grid BIC + refit | 0.657 | 22.000 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
+| Eta centered path BIC | 0.625 | 22.000 | **24.750** | 0.994 | **0.037** | **0.890** | **0.937** |
+| **Eta centered path BIC + refit** | **0.686** | 22.000 | **24.750** | 0.994 | **0.037** | **0.890** | **0.937** |
 
 ### 5.3. 변수 유형별 선택률
 
 | Method | Common selection | Specific selection | Noise selection |
 |:---|---:|---:|---:|
-| Rossi path BIC | 1.000 | 1.000 | 0.985 |
-| Rossi path BIC + refit | 1.000 | 1.000 | 0.985 |
-| Separate 2D path/grid BIC | 1.000 | 1.000 | 0.865 |
-| Separate 2D path/grid BIC + refit | 1.000 | 1.000 | 0.865 |
-| Eta centered path BIC | 1.000 | 0.994 | **0.034** |
-| **Eta centered path BIC + refit** | **1.000** | **0.994** | **0.034** |
+| Rossi path BIC | 1.000 | 1.000 | 0.981 |
+| Rossi path BIC + refit | 1.000 | 1.000 | 0.981 |
+| Separate 2D path/grid BIC | 1.000 | 1.000 | 0.826 |
+| Separate 2D path/grid BIC + refit | 1.000 | 1.000 | 0.826 |
+| Eta centered path BIC | 1.000 | 0.992 | **0.037** |
+| **Eta centered path BIC + refit** | **1.000** | **0.992** | **0.037** |
 
 ### 5.4. 모형 적합 지표
 
@@ -367,12 +367,12 @@ BIC는 공식 tuning 선택 기준이고, EBIC는 보조 적합 지표로 계산
 
 | Method | loglik | df | BIC | EBIC |
 |:---|---:|---:|---:|---:|
-| Rossi path BIC | 97505.999 | 280.850 | -193071.956 | -191778.594 |
-| Rossi path BIC + refit | 97537.376 | 398.200 | -192324.083 | -190490.304 |
-| Separate 2D path/grid BIC | 97436.277 | 183.250 | -193606.709 | -192762.811 |
-| Separate 2D path/grid BIC + refit | 97529.051 | 360.800 | -192565.785 | -190904.239 |
-| Eta centered path BIC | 97325.887 | 176.650 | -193431.519 | -192618.015 |
-| **Eta centered path BIC + refit** | 97387.235 | 101.200 | **-194075.404** | **-193609.361** |
+| Rossi path BIC | 97540.991 | 277.850 | -193162.661 | -191883.115 |
+| Rossi path BIC + refit | 97574.528 | 397.080 | -192406.124 | -190577.503 |
+| Separate 2D path/grid BIC | 97465.244 | 172.040 | -193742.077 | -192949.804 |
+| Separate 2D path/grid BIC + refit | 97562.901 | 348.840 | -192716.101 | -191109.633 |
+| Eta centered path BIC | 97362.221 | 177.250 | -193500.043 | -192683.777 |
+| **Eta centered path BIC + refit** | 97423.650 | 102.000 | **-194142.708** | **-193672.981** |
 
 ### 5.5. 모수 추정 성능
 
@@ -380,21 +380,39 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 | Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
 |:---|---:|---:|---:|---:|
-| Rossi path BIC | 0.015 | 227.318 | 30.609 | 58.431 |
-| Rossi path BIC + refit | 0.033 | 266.883 | 58.140 | 58.467 |
-| Separate 2D path/grid BIC | **0.008** | 987.648 | 18.492 | 55.769 |
-| Separate 2D path/grid BIC + refit | 0.031 | 248.971 | 55.333 | 58.365 |
-| Eta centered path BIC | 0.029 | 1401.665 | 41.531 | 58.306 |
-| **Eta centered path BIC + refit** | 0.010 | **177.046** | **17.414** | 57.909 |
+| Rossi path BIC | 0.015 | 298.864 | 31.435 | 58.661 |
+| Rossi path BIC + refit | 0.033 | 342.749 | 59.409 | 58.735 |
+| Separate 2D path/grid BIC | **0.008** | 876.187 | **17.939** | 56.089 |
+| Separate 2D path/grid BIC + refit | 0.030 | 306.433 | 55.247 | 58.599 |
+| Eta centered path BIC | 0.029 | 1448.494 | 42.419 | 58.468 |
+| **Eta centered path BIC + refit** | 0.010 | **190.092** | 18.541 | 58.040 |
 
 ### 5.6. 해석
 
 * 공통 변수와 군집별 특정 변수가 함께 있는 setting에서도 Rossi와 분리 패널티는 true active variable을 모두 선택하지만, 노이즈 변수도 대부분 함께 선택한다.
-* Rossi path BIC의 selected $q$는 98.800이고, 분리 패널티의 selected $q$는 89.450이다. True union $q=22$에 비해 지나치게 많은 변수를 선택한다.
-* 에타 패널티 + refit은 selected $q=24.550$으로 true union $q=22$에 가장 가깝고, FPR은 0.034로 가장 낮다.
-* 변수 유형별로 보면 에타 패널티 + refit은 공통 변수 선택률 1.000, 군집별 특정 변수 선택률 0.994를 유지하면서 노이즈 선택률을 0.034로 낮춘다.
-* Refit 기준 ARI는 에타 패널티 + refit이 0.686으로 Rossi path BIC 0.685와 비슷하며, BIC와 모수 추정 MSE_centered_eta는 가장 좋다.
+* Rossi path BIC의 selected $q$는 98.520이고, 분리 패널티의 selected $q$는 86.460이다. True union $q=22$에 비해 지나치게 많은 변수를 선택한다.
+* 에타 패널티 + refit은 selected $q=24.750$으로 true union $q=22$에 가장 가깝고, FPR은 0.037로 가장 낮다.
+* 변수 유형별로 보면 에타 패널티 + refit은 공통 변수 선택률 1.000, 군집별 특정 변수 선택률 0.992를 유지하면서 노이즈 선택률을 0.037로 낮춘다.
+* Refit 기준 ARI는 에타 패널티 + refit이 0.686으로 가장 높고, BIC도 가장 좋다.
 * 이 setting은 제안 방법이 단순히 공통 support를 찾는 것이 아니라, 군집별 특정 변수까지 유지하면서 노이즈 변수를 제거할 수 있음을 보여준다.
+
+### 5.7. 군집별 특정 변수 weight 변화
+
+군집별 특정 변수의 신호 세기 $w$를 변화시켜 robustness를 확인했다. 나머지 조건은 5.1과 동일하고, 각 setting은 100회 반복했다.
+
+| $w$ | mean pairwise cosine | Method | ARI | Selected $q$ | FPR | F1 | Specific selection | Noise selection |
+|---:|---:|:---|---:|---:|---:|---:|---:|---:|
+| 0.25 | 0.960 | Rossi + refit | 0.368 | 98.070 | 0.975 | 0.367 | 1.000 | 0.975 |
+| 0.25 | 0.960 | Separate + refit | 0.367 | 93.500 | 0.917 | 0.382 | 0.998 | 0.917 |
+| 0.25 | 0.960 | Eta + refit | **0.399** | **32.130** | **0.183** | **0.682** | 0.743 | **0.183** |
+| 0.35 | 0.924 | Rossi + refit | 0.481 | 98.820 | 0.985 | 0.364 | 1.000 | 0.985 |
+| 0.35 | 0.924 | Separate + refit | 0.488 | 90.700 | 0.881 | 0.394 | 1.000 | 0.881 |
+| 0.35 | 0.924 | Eta + refit | **0.505** | **29.810** | **0.123** | **0.794** | 0.888 | **0.123** |
+| 0.50 | 0.857 | Rossi + refit | 0.653 | 98.520 | 0.981 | 0.365 | 1.000 | 0.981 |
+| 0.50 | 0.857 | Separate + refit | 0.657 | 86.460 | 0.826 | 0.409 | 1.000 | 0.826 |
+| 0.50 | 0.857 | Eta + refit | **0.686** | **24.750** | **0.037** | **0.937** | 0.992 | **0.037** |
+
+Specific signal이 강해질수록 에타 패널티의 specific selection은 높아지고 noise selection은 낮아진다. $w=0.25$는 평균 방향이 매우 유사한 어려운 상황으로, 에타 패널티도 일부 군집별 특정 변수를 놓친다. 그러나 이 경우에도 Rossi와 분리 패널티에 비해 노이즈 변수 선택률은 크게 낮다. $w=0.25$에서는 에타 refit 중 일부 반복에서 $\kappa$ 추정이 크게 튀는 outlier가 있어, 모수 MSE 평균은 보조적으로 해석한다.
 
 ## 6. 1-5번 변수 구조 요약
 
