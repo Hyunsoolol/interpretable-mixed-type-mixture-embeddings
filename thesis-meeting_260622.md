@@ -491,19 +491,6 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 * **공통 변수 + 군집별 특정 변수 setting:** $\eta$-penalty + refit은 공통 변수와 군집별 특정 변수를 거의 모두 유지하면서 노이즈 선택률을 0.034로 낮춘다. 이는 제안 방법이 특정 군집 변수까지 반영하는 sparse structure에서 유리할 수 있음을 보여준다.
 * **약한 집중도 차이 setting:** $\kappa=(40,50,60,70)$로 concentration contrast를 줄여도 $\eta$-penalty + refit은 selected $q=23.980$, FPR 0.025, F1 0.958로 가장 안정적인 변수 선택을 보인다.
 
----
-
-## 8. 앞으로 할 일
-
-* 현재 5번 계열 결과를 기준으로, 교수님과 main simulation setting을 확정한다.
-* $w=0.25$처럼 군집별 특정 변수 신호가 약한 경우에서 missed specific variable이 어느 component에서 발생하는지 확인한다.
-* 집중도 차이가 더 약한 경우에 대해 pilot simulation을 추가로 확인하고, 필요하면 100회 반복으로 확장한다.
-* 최종 simulation table은 군집화 성능, 변수 선택 성능, 모수 추정 성능을 분리해서 유지한다.
-* 제안 방법의 tuning은 path 기반 BIC를 기본 기준으로 두고, EBIC는 sensitivity check로만 사용할지 결정한다.
-* 다음 단계에서 $d=200$ 이상의 high-dimensional robustness를 확인한다.
-
----
-
 ## 부록. $\eta$-Penalty 모형의 수리적 타당성
 
 **① 베이즈 결정 경계 직접 수축**
