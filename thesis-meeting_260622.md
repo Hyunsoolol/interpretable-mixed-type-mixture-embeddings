@@ -212,11 +212,3 @@ $\kappa$를 고정하고 차원만 늘리면 concentration signal이 상대적�
 | 에타 패널티 장점 | ARI를 유지하면서 selected q, FPR, Precision, F1을 개선한다 |
 | refit 역할 | penalty shrinkage를 줄이고 선택된 support 위에서 모수를 재추정한다 |
 | 고차원 이슈 | BIC만으로는 약할 수 있어 EBIC 검토가 필요하다 |
-
-## 10. 연구미팅에서 확인할 점
-
-1. 제안 방법의 중심을 $\eta_k$ penalty로 두는 방향이 적절한지
-2. 분리 패널티는 교수님 제안 baseline으로 유지하고, 주 방법은 에타 패널티 + refit으로 가져갈지
-3. 고차원 setting에서 EBIC 또는 더 강한 tuning 기준을 추가할지
-4. real data 분석을 어떤 자료로 진행할지
-5. 논문 목표를 Journal of Classification 또는 CSDA 수준으로 두는 것이 적절한지
