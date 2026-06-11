@@ -7,9 +7,7 @@
 
 Rossi & Barbaro (2022)의 sparse vMF mixture는 component direction $\mu_k$에 sparsity penalty를 둔다. 그러나 vMF mixture에서 posterior classification에 직접 들어가는 항은 $\mu_k$ 자체가 아니라
 
-$$
-\eta_k = \kappa_k \mu_k
-$$
+$$\eta_k = \kappa_k \mu_k$$
 
 이다. 따라서 평균 방향 차이보다 집중도 차이가 군집을 만드는 상황에서는 $\eta_k$에 penalty를 두는 방식이 더 자연스럽다.
 
@@ -38,35 +36,17 @@ Tuning은 기본적으로 path 기반 후보를 만들고 BIC가 최소인 지�
 
 vMF mixture의 posterior probability는 다음 항에 의해 결정된다.
 
-$$
-\tau_{ik}
-=
-\frac{\alpha_k C_d(\kappa_k)\exp(\eta_k^T x_i)}
-{\sum_{\ell=1}^K \alpha_\ell C_d(\kappa_\ell)\exp(\eta_\ell^T x_i)}.
-$$
+$$\tau_{ik} = \frac{\alpha_k C_d(\kappa_k)\exp(\eta_k^T x_i)}{\sum_{\ell=1}^K \alpha_\ell C_d(\kappa_\ell)\exp(\eta_\ell^T x_i)}.$$
 
 두 component의 posterior decision boundary는 다음처럼 쓸 수 있다.
 
-$$
-\log\frac{\tau_{i2}}{\tau_{i1}}
-=
-\text{constant}
-+(\eta_2-\eta_1)^T x_i.
-$$
+$$\log\frac{\tau_{i2}}{\tau_{i1}} = \mathrm{const} + (\eta_2-\eta_1)^T x_i.$$
 
 따라서 변수 선택 관점에서는 $\mu_k$의 sparsity보다 $\eta_k$ 또는 $\eta_k$ contrast의 sparsity가 posterior decision에 더 직접적으로 연결된다.
 
 에타 패널티의 기본 형태는 다음과 같이 둔다.
 
-$$
-Q_{\eta}
-=
-\ell(\Theta)
--
-\lambda_\eta
-\sum_k
-\|\eta_k-\bar{\eta}\|_1.
-$$
+$$Q_{\eta} = \ell(\Theta) - \lambda_\eta \sum_k \|\eta_k-\bar{\eta}\|_1.$$
 
 여기서 $\bar{\eta}$는 component별 $\eta_k$의 중심값이다. 이 방식은 component 간 decision contrast에 기여하지 않는 좌표를 줄이는 방향으로 작동한다.
 
