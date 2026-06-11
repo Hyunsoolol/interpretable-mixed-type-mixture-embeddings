@@ -1,3 +1,62 @@
+# Thesis Simulation Archive 260611
+
+업데이트: 2026-06-11
+
+이 문서는 260622 연구미팅 자료에서 사용한 시뮬레이션 결과를 전체 형태로 보관한 archive다. 연구미팅용 핵심 요약은 `thesis-meeting_260622.md`, 추정 방법과 코드 구현 설명은 `thesis-implementation_260622.md`에 정리했다.
+
+## 0. 읽는 방법
+
+### 0.1. 공식 비교 기준
+
+| 항목 | 기준 |
+|:---|:---|
+| 비교 방법 | Rossi, Rossi + refit, 분리 패널티, 분리 패널티 + refit, 에타 패널티, 에타 패널티 + refit |
+| tuning 후보 | path 기반 후보 생성 |
+| 공식 tuning 선택 | BIC 최소 지점 |
+| EBIC | 고차원 setting의 보조 지표 |
+| refit | 선택된 coordinate support를 고정하고 penalty 없이 vMF mixture 재추정 |
+| 기본 해석 순서 | ARI보다 variable selection 지표를 함께 해석 |
+
+### 0.2. 지표 정의
+
+| 지표 | 의미 | 좋게 보는 방향 |
+|:---|:---|:---|
+| ARI | 추정 군집과 true label의 일치도 | 클수록 좋음 |
+| Selected q | 선택된 coordinate 수 | true union q에 가까울수록 좋음 |
+| TPR | true active coordinate 중 선택된 비율 | 클수록 좋음 |
+| FPR | noise coordinate 중 잘못 선택된 비율 | 작을수록 좋음 |
+| Precision | 선택된 coordinate 중 true active 비율 | 클수록 좋음 |
+| F1 | TPR과 Precision의 조화평균 | 클수록 좋음 |
+| BIC, EBIC | 모형 적합 정보기준 | 작을수록 좋음 |
+| MSE_mu | 평균 방향 추정 오차 | 작을수록 좋음 |
+| MSE_kappa | 집중도 추정 오차 | 작을수록 좋음 |
+| MSE_centered_eta | centered eta 기준 추정 오차 | 작을수록 좋음 |
+
+ARI는 군집 라벨이 맞았는지만 본다. 따라서 Rossi의 ARI가 높아도 Selected q와 FPR이 매우 크면 sparse variable selection에는 실패한 것으로 해석한다. 이번 연구의 핵심은 군집화 성능을 유지하면서 불필요한 노이즈 변수를 줄이는 것이다.
+
+### 0.3. 시뮬레이션 구조 요약
+
+| 번호 | setting | 목적 | 전체 변수 d | true union q | 반복수 |
+|:---|:---|:---|---:|---:|---:|
+| 1 | K=2 기본 메커니즘 | concentration-dominant 상황에서 eta penalty의 기본 작동 확인 | 100 | 10 | 20 |
+| 2.1 | Rossi 2022 corrected reproduction | Rossi 원 논문 setting 재현 | 100 | 반복별 상이 | 100 |
+| 2.2 | K=4 sparse-active 비교 | Rossi가 유리한 sparse direction setting에서 6개 방법 비교 | 100 | 평균 34.1 | 20 |
+| 3 | K=4 stress setting | 평균 방향 동일, 집중도 차이만 존재하는 한계 setting | 100 | 10 | 20 |
+| 4 | K=4 controlled concentration-dominant | 평균 방향 차이를 약간 추가한 controlled setting | 100 | 10 | 20 |
+| 5 | 공통 변수 + 군집별 특정 변수 | 현실적인 sparse structure에서 변수 선택 확인 | 100 | 22 | 100 |
+| 5.7 | 군집별 특정 변수 weight 변화 | specific signal 강도에 따른 robustness 확인 | 100 | 22 | 100 |
+| 5.8 | 약한 집중도 차이 | concentration contrast가 약한 상황 확인 | 100 | 22 | 100 |
+| 6.1 | 고차원, kappa 차원별 조정 | d 증가 시 eta penalty의 robustness 확인 | 100, 200, 500 | 22 | 20 |
+| 6.2 | 고차원, kappa 고정 | 차원 증가로 signal이 약해지는 stress setting 확인 | 100, 200, 400 | 22 | 20 |
+
+### 0.4. 전체 결론 요약
+
+* Rossi 2022 방법은 원 논문 setting에서는 정상적으로 재현된다.
+* Rossi가 유리한 sparse direction setting에서는 Rossi와 분리 패널티가 좋은 성능을 보인다.
+* 평균 방향 차이가 작고 집중도 차이가 중요한 setting에서는 Rossi와 분리 패널티가 true active variable을 포함하면서도 노이즈 변수를 과도하게 선택한다.
+* 에타 패널티 + refit은 selected q를 true union q에 가깝게 유지하고 FPR을 크게 낮춘다.
+* 고차원에서는 BIC가 느슨할 수 있으므로 EBIC 또는 더 강한 tuning 기준을 추가 검토해야 한다.
+
 ## 1. 기본 메커니즘 시뮬레이션
 
 제안 방법의 작동 원리를 확인하기 위해 $K=2$의 단순한 환경에서 6가지 방법을 비교했다. 이전 결과에서는 일부 방법의 tuning 방식이 서로 달랐으므로, 아래 환경에서는 가능한 한 동일한 원칙으로 path 기반 tuning을 적용했다.
@@ -819,23 +878,23 @@ $\kappa$를 고정하고 $d$만 증가시키면 concentration signal이 상대�
 ## 부록. $\eta$-Penalty 모형의 수리적 타당성
 
 **① 베이즈 결정 경계 직접 수축**
-$$\log \frac{\tau_{i2}}{\tau_{i1}} = \text{Const} + (\eta_2 - \eta_1)^\top x_i$$
-* 사후 확률을 결정하는 실질적 선형 판별 계수는 $\mu$가 아닌 $\eta$의 대조임.
-* $-\lambda_\eta \|\eta_2 - \eta_1\|_1$ 패널티는 노이즈 차원의 판별 계수를 직접 0으로 강제하여 정확한 변수 선택을 수행함.
+$$\log \frac{\tau_{i2}}{\tau_{i1}} = \mathrm{const} + (\eta_2 - \eta_1)^T x_i$$
+* 사후 확률을 결정하는 실질적 선형 판별 계수는 $\mu$가 아닌 $\eta$의 대조다.
+* $-\lambda_\eta \|\eta_2 - \eta_1\|_1$ 패널티는 노이즈 차원의 판별 계수를 직접 줄이는 방향으로 작동한다.
 
 **② 집중도 주도 환경 식별**
-* **조건:** $\mu_1 = \mu_2$, $\kappa_1 \ll \kappa_2$ 
-* **$\mu$-penalty (기존)**: $\|\mu_2 - \mu_1\| = 0 \rightarrow$ 군집 식별 불가, False Positive 증가.
-* **$\eta$-penalty (제안)**: $\|\eta_2 - \eta_1\| = \kappa_2 - \kappa_1 \neq 0 \rightarrow$ 평균 방향이 동일하더라도 집중도 차이로 발생하는 좌표별(Coordinate-level) 분리 효과를 완벽히 포착.
+* **조건:** $\mu_1 = \mu_2$, $\kappa_1 \ll \kappa_2$
+* **$\mu$-penalty (기존)**: $\|\mu_2 - \mu_1\| = 0$이므로 평균 방향 차이만으로는 집중도 차이를 설명하기 어렵다.
+* **$\eta$-penalty (제안)**: $\eta_2 - \eta_1 = (\kappa_2-\kappa_1)\mu_1$이므로 평균 방향이 동일하더라도 집중도 차이로 생기는 coordinate-level 효과를 반영할 수 있다.
 
 **③ 내재적 정규화**
 $$\|\eta_k\|_2 = \|\kappa_k \mu_k\|_2 = \kappa_k$$
-* 자연 모수의 $L_2$ 노름이 곧 집중도($\kappa$)이므로, $\eta$ 벡터에 대한 $L_1$ 패널티는 필연적으로 $\kappa$ 스케일의 수축을 유도함.
-* 고차원 모형의 고질적 한계인 $\kappa_k \rightarrow \infty$ (소수 관측치 과적합 발산) 현상을 인위적인 제약(`shared kappa`) 없이 수리적으로 원천 차단.
+* 자연모수의 $L_2$ 노름이 곧 집중도 $\kappa$이므로, $\eta$ 벡터에 대한 penalty는 $\kappa$ scale에도 영향을 준다.
+* 이 성질은 고차원에서 $\kappa_k$가 과도하게 커지는 현상을 완화할 가능성이 있다. 다만 이는 추가 이론 검토가 필요한 부분이다.
 
 **④ 수축 편향 제거**
 
 $$\hat{S}_\eta = \{j : |\hat{\eta}_{2j} - \hat{\eta}_{1j}| > 0 \}$$
-$$\text{Refit constraint: } \mu_{kj} = 0 \text{ for } j \notin \hat{S}_\eta$$
-* Phase 1에서 도출된 Support($\hat{S}_\eta$)를 고정한 채, 패널티 없이 재학습(Unpenalized EM)하는 Relaxed LASSO 구조 도입.
-* $L_1$ 패널티로 인해 축소된 $\kappa$ 추정치와 $\eta$ Contrast를 True Value 스케일로 복원하여 FPR 통제와 모수 추정 정확도를 동시에 달성.
+$$\mu_{kj}=0 \quad \mathrm{for}\quad j\notin\hat{S}_\eta$$
+* Phase 1에서 도출된 support $\hat{S}_\eta$를 고정한 채, penalty 없이 unpenalized EM을 수행한다.
+* 이 단계는 $L_1$ penalty로 인해 축소된 $\kappa$ 추정치와 eta contrast를 보정하기 위한 post-selection refit으로 해석한다.
