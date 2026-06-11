@@ -2,17 +2,28 @@
 
 제안 방법의 작동 원리를 확인하기 위해 $K=2$의 단순한 환경에서 6가지 방법을 비교했다. 이전 결과에서는 일부 방법의 tuning 방식이 서로 달랐으므로, 아래 환경에서는 가능한 한 동일한 원칙으로 path 기반 tuning을 적용했다.
 
+**공통 시뮬레이션 환경**
+
+```text
+K = 2
+n = 1000
+반복수 = 20
+random start = 5
+d = 100
+공통 변수 = 10개
+군집별 특정 변수 = 없음
+w = 해당 없음
+max long path = Rossi 220 / Separate 220 / Eta 120
+```
+
 * **Tuning:** path 기반 후보를 생성하고, 각 path 위에서 BIC가 최소인 지점을 선택.
 * **Rossi:** $\beta$ path를 따라 적합하고 BIC가 최소인 지점을 선택.
 * **분리 패널티:** $\lambda_\kappa$는 데이터 기반 2D grid로 두고, 각 $\lambda_\kappa$에서 $\lambda_\mu$ path를 따라 적합한 뒤 전체 후보 중 BIC 최소 지점을 선택.
 * **에타 패널티:** $\lambda_\eta$ path를 따라 적합하고 BIC가 최소인 지점을 선택.
 * **Refit:** 각 penalized fit에서 선택된 coordinate support를 고정한 뒤 penalty 없이 vMF mixture를 다시 추정.
-* **Simulation:** 반복 수 100회, random start 5회.
 
 ### 1.1. 집중도 주도 환경
 
-* **Setting:** $K=2$, $n=1000$.
-* **Variables:** 전체 변수 개수는 $d=100$개, 유효 변수 개수는 $q=10$개.
 * **True Params:** $\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=200$. (True $\kappa$ ratio = 10, True $\|\eta_2-\eta_1\| = 180$)
 
 **a. 군집화 및 변수 선택 성능**
@@ -41,8 +52,6 @@
 
 ### 1.2. 집중도 차이가 약한 환경
 
-* **Setting:** $K=2$, $n=1000$.
-* **Variables:** 전체 변수 개수는 $d=100$개, 유효 변수 개수는 $q=10$개.
 * **True Params:** $\mu_1 = \mu_2$, $\kappa_1=20, \kappa_2=40$. (True $\kappa$ ratio = 2, True $\|\eta_2-\eta_1\| = 20$)
 
 **a. 군집화 및 변수 선택 성능**
@@ -71,8 +80,6 @@
 
 ### 1.3. 평균과 집중도 차이가 모두 존재하는 환경
 
-* **Setting:** $K=2$, $n=1000$.
-* **Variables:** 전체 변수 개수는 $d=100$개, 유효 변수 개수는 $q=10$개.
 * **True Params:** $\mu_{cos} = 0.95$, $\kappa_1=20, \kappa_2=100$. (True $\kappa$ ratio = 5, True $\|\eta_2-\eta_1\| = 81.240$)
 
 **a. 군집화 및 변수 선택 성능**
@@ -114,11 +121,25 @@
 ### 2.1. 논문 기준 corrected reproduction
 
 * **목적:** Rossi & Barbaro (2022)의 artificial simulation setting에서 Rossi sparse vMF가 논문 Figure와 유사하게 재현되는지 확인.
-* **Setting:** $K=4$ 고정, 군집 비율 균일, $n=1000$, $d=100$, overlap $=0.05$.
+
+**시뮬레이션 환경**
+
+```text
+K = 4
+n = 1000
+반복수 = 100
+random start = 10
+d = 100
+공통 변수 = 명시적으로 분리하지 않음
+군집별 특정 변수 = 명시적으로 분리하지 않음
+w = 해당 없음
+max long path = Rossi beta path 700
+```
+
 * **Concentration:** 논문 기준 $d=100$, overlap $=0.05$에서 base $\kappa=15.09$를 사용하고, component별 $\kappa_k$는 $N(\kappa, 0.025\kappa)$에서 생성한 뒤 평균 방향 간 분리에 맞게 조정했다.
 * **Sparsity 정의:** 논문은 directional mean의 일부 좌표를 0으로 만드는 방식으로 sparsity를 설정한다. 따라서 논문 sparsity $=0.10$은 zero coordinate가 10%라는 뜻이고, 코드에서는 `nonzero_fraction = 0.90`으로 실행해야 한다.
 * **Variables:** component별 zero coordinate는 10개, nonzero coordinate는 90개. Entry-level 기준 true nonzero는 $4 \times 90 = 360$개, true zero는 $4 \times 10 = 40$개.
-* **Simulation:** 반복 수 100회, random start 10회, Rossi beta path 최대 700 steps.
+* **Overlap:** 0.05.
 * **Tuning:** Rossi $\beta$ path에서 BIC 기준으로 penalty parameter 선택. Corrected run의 평균 $\beta=72.673$.
 
 논문 결과는 exact table이 아니라 Figure 13, Figure 15, Figure 16으로 제시되어 있다. 아래 논문 값은 $K=4$, $n=1000$, overlap $=0.05$, sparsity $=0.10$, BIC panel에서 읽은 근사 범위다.
@@ -137,7 +158,23 @@
 
 ### 2.2. 추가 비교: nonzero 10% 기준 6가지 방법
 
-아래 2.2-2.4의 6가지 방법 비교는 우리 연구에서 먼저 살펴본 sparse active-variable 세팅이다. 전체 변수는 $d=100$개이고, component별 nonzero coordinate는 10개이며, union 기준 유효 변수 개수는 반복 평균 34.1개다. 반복 수는 20회, random start는 5회다.
+아래 2.2-2.4의 6가지 방법 비교는 우리 연구에서 먼저 살펴본 sparse active-variable 세팅이다.
+
+**시뮬레이션 환경**
+
+```text
+K = 4
+n = 1000
+반복수 = 20
+random start = 5
+d = 100
+공통 변수 = 랜덤 support 구조라 고정하지 않음
+군집별 특정 변수 = 랜덤 support 구조라 고정하지 않음
+w = 해당 없음
+max long path = Rossi 220 / Separate 300 / Eta 120
+```
+
+component별 nonzero coordinate는 10개이며, union 기준 유효 변수 개수는 반복 평균 34.1개다.
 
 * **Tuning:** 1절과 같은 path tuning 기준으로 맞췄다. Rossi는 $\beta$ path에서 BIC를 최소화하는 지점을 선택하고, 분리 패널티는 $\lambda_\kappa$ grid와 $\lambda_\mu$ path의 2D 후보 중 BIC 최소 지점을 선택한다. 에타 패널티는 centered $\eta$ norm의 $\lambda_\eta$ path에서 BIC 최소 지점을 선택한다.
 
@@ -192,9 +229,20 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 ### 3.1. Simulation setting
 
-* **Setting:** $K=4$, $n=1000$, 군집 비율 균일.
-* **Variables:** 전체 변수 개수는 $d=100$개, 유효 변수 개수는 $q=10$개.
-* **Simulation:** 반복 수 20회, random start 5회.
+**시뮬레이션 환경**
+
+```text
+K = 4
+n = 1000
+반복수 = 20
+random start = 5
+d = 100
+공통 변수 = 10개
+군집별 특정 변수 = 없음
+w = 해당 없음
+max long path = Rossi 220 / Separate 300 / Eta 120
+```
+
 * **Tuning:** Rossi는 $\beta$ path, 분리 패널티는 $\lambda_\kappa$ grid와 $\lambda_\mu$ path, 에타 패널티는 centered $\eta$ norm의 $\lambda_\eta$ path에서 BIC 기준으로 선택.
 * **Mean direction:** $\mu_1=\mu_2=\mu_3=\mu_4$.
 * **Sparsity:** 공통 평균 방향은 유효 변수 10개에서만 nonzero.
@@ -253,12 +301,23 @@ Stress setting은 평균 방향을 완전히 같게 둔 강한 한계 상황이�
 
 ### 4.1. Simulation setting
 
-* **Setting:** $K=4$, $n=1000$, 군집 비율 균일.
-* **Simulation:** 반복 수 20회, random start 5회.
+**시뮬레이션 환경**
+
+```text
+K = 4
+n = 1000
+반복수 = 20
+random start = 5
+d = 100
+공통 변수 = 10개
+군집별 특정 변수 = 없음
+w = 해당 없음
+max long path = Rossi 220 / Separate 300 / Eta 120
+```
+
 * **Tuning:** Rossi는 $\beta$ path, 분리 패널티는 $\lambda_\kappa$ grid와 $\lambda_\mu$ path, 에타 패널티는 centered $\eta$ norm의 $\lambda_\eta$ path에서 BIC 기준으로 선택.
 * **Mean direction:** 평균 방향은 완전히 같지 않지만 매우 유사하게 설정. Pairwise cosine은 0.95.
-* **Variables:** 전체 변수 개수는 $d=100$개, union 기준 유효 변수 개수는 10개.
-  * 변수 구조는 3번 stress setting과 동일하게 둔다.
+* **Variables:** 변수 구조는 3번 stress setting과 동일하게 둔다.
   * 모든 component가 같은 10개 active coordinate를 공유한다.
   * Entry-level active 개수는 $4\times10=40$개.
 * **Concentration:** $\kappa=(25,40,65,100)$.
@@ -316,10 +375,22 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 ### 5.1. Simulation setting
 
-* **Setting:** $K=4$, $n=1000$, 군집 비율 균일.
-* **Simulation:** 반복 수 20회, random start 5회.
+**시뮬레이션 환경**
+
+```text
+K = 4
+n = 1000
+반복수 = 100
+random start = 10
+d = 100
+공통 변수 = 6개
+군집별 특정 변수 = component마다 4개, 총 16개
+w = 0.50
+max long path = Rossi 100 / Separate 140 / Eta 80
+```
+
 * **Tuning:** Rossi는 $\beta$ path, 분리 패널티는 $\lambda_\kappa$ grid와 $\lambda_\mu$ path, 에타 패널티는 centered $\eta$ norm의 $\lambda_\eta$ path에서 BIC 기준으로 선택.
-* **Variables:** 전체 변수 개수는 $d=100$개, union 기준 유효 변수 개수는 22개.
+* **Variables:** union 기준 유효 변수 개수는 22개.
   * 공통 변수는 1-6번 coordinate로 두고, 모든 component에서 nonzero로 설정했다.
   * 군집별 특정 변수는 component마다 4개씩 부여했다.
   * Component 1의 특정 변수는 7-10번, component 2는 11-14번, component 3은 15-18번, component 4는 19-22번이다.
@@ -398,7 +469,23 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 ### 5.7. 군집별 특정 변수 weight 변화
 
-군집별 특정 변수의 신호 세기 $w$를 변화시켜 robustness를 확인했다. 나머지 조건은 5.1과 동일하고, 각 setting은 100회 반복했다.
+군집별 특정 변수의 신호 세기 $w$를 변화시켜 robustness를 확인했다.
+
+**시뮬레이션 환경**
+
+```text
+K = 4
+n = 1000
+반복수 = 100
+random start = 10
+d = 100
+공통 변수 = 6개
+군집별 특정 변수 = component마다 4개, 총 16개
+w = 0.25, 0.35, 0.50
+max long path = Rossi 100 / Separate 140 / Eta 80
+```
+
+나머지 변수 구조와 tuning 기준은 5.1과 동일하다.
 
 | $w$ | mean cosine | Method | ARI | Selected $q$ | TPR | FPR | Precision | F1 | Specific selection | Noise selection |
 |---:|---:|:---|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -425,7 +512,23 @@ Specific signal이 강해질수록 에타 패널티의 specific selection은 높
 
 ### 5.8. 집중도 차이가 약한 setting
 
-5.1의 specific-effect 구조를 유지하되, 집중도 차이를 약하게 설정했다. 즉 $w=0.50$, $\kappa=(40,50,60,70)$로 두었고, true $\kappa$ ratio는 1.75이다. 반복 수는 100회이다.
+5.1의 specific-effect 구조를 유지하되, 집중도 차이를 약하게 설정했다.
+
+**시뮬레이션 환경**
+
+```text
+K = 4
+n = 1000
+반복수 = 100
+random start = 10
+d = 100
+공통 변수 = 6개
+군집별 특정 변수 = component마다 4개, 총 16개
+w = 0.50
+max long path = Rossi 100 / Separate 140 / Eta 80
+```
+
+집중도는 $\kappa=(40,50,60,70)$로 두었고, true $\kappa$ ratio는 1.75이다.
 
 **a. 군집화 및 변수 선택 성능**
 
