@@ -466,18 +466,20 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 
 집중도 차이가 약해져도 에타 패널티 + refit은 selected $q=23.980$으로 true union $q=22$에 가장 가깝고, noise selection을 0.025로 낮춘다. 모형 적합 지표에서도 에타 패널티 + refit의 BIC와 EBIC가 가장 좋다.
 
-## 6. 1-5번 변수 구조 요약
+## 6. 시뮬레이션 변수 구조 요약
 
-| 번호 | setting | 공통 active 변수 | 군집별 특정 변수 | 노이즈 변수 | union active $q$ |
-|:---|:---|:---|:---|:---|---:|
-| 1 | K=2 기본 메커니즘 | 두 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
-| 2.1 | Rossi 2022 corrected reproduction | component별 nonzero가 90개로 매우 많아 대부분의 coordinate가 여러 component에서 active | 명시적으로 설계하지 않음 | component별 zero coordinate 10개 | 반복별 상이 |
-| 2.2 | K=4 sparse-active 비교 | component별 support를 랜덤 생성하므로 반복마다 겹침 정도가 달라짐 | 명시적으로 설계하지 않았지만, 랜덤 support 때문에 일부 coordinate는 특정 component에서만 active | 평균 약 65.9개 | 평균 34.1 |
-| 3 | K=4 stress setting | 모든 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
-| 4 | K=4 controlled concentration-dominant setting | 모든 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
-| 5 | K=4 공통 변수 + 군집별 특정 변수 setting | 6개 | component마다 4개씩, 총 16개 | 78개 | 22 |
+| 번호 | setting | 전체 변수 $d$ | 공통 active 변수 | 군집별 특정 변수 | 노이즈 변수 | union active $q$ |
+|:---|:---|---:|:---|:---|:---|---:|
+| 1 | K=2 기본 메커니즘 | 100 | 두 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
+| 2.1 | Rossi 2022 corrected reproduction | 100 | component별 nonzero가 90개로 매우 많아 대부분의 coordinate가 여러 component에서 active | 명시적으로 설계하지 않음 | component별 zero coordinate 10개 | 반복별 상이 |
+| 2.2 | K=4 sparse-active 비교 | 100 | component별 support를 랜덤 생성하므로 반복마다 겹침 정도가 달라짐 | 명시적으로 설계하지 않았지만, 랜덤 support 때문에 일부 coordinate는 특정 component에서만 active | 평균 약 65.9개 | 평균 34.1 |
+| 3 | K=4 stress setting | 100 | 모든 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
+| 4 | K=4 controlled concentration-dominant setting | 100 | 모든 component가 같은 10개 active coordinate 공유 | 없음 | 90개 | 10 |
+| 5 | K=4 공통 변수 + 군집별 특정 변수 setting | 100 | 6개 | component마다 4개씩, 총 16개 | 78개 | 22 |
+| 5.7 | 군집별 특정 변수 weight 변화 | 100 | 6개 | component마다 4개씩, 총 16개. $w=0.25,0.35,0.50$ 변화 | 78개 | 22 |
+| 5.8 | 집중도 차이가 약한 setting | 100 | 6개 | component마다 4개씩, 총 16개. $w=0.50$ 고정 | 78개 | 22 |
 
-1, 3, 4번은 같은 active coordinate를 공유하는 공통 support setting이다. 2번은 Rossi 논문식 sparse prototype 구조 또는 랜덤 sparse-active 구조이므로 공통 변수와 군집별 특정 변수를 명시적으로 통제하지 않는다. 5번은 공통 변수와 군집별 특정 변수를 명시적으로 나누어, 제안 방법이 특정 군집 변수와 노이즈 변수를 구분할 수 있는지 확인하는 setting이다.
+1, 3, 4번은 같은 active coordinate를 공유하는 공통 support setting이다. 2번은 Rossi 논문식 sparse prototype 구조 또는 랜덤 sparse-active 구조이므로 공통 변수와 군집별 특정 변수를 명시적으로 통제하지 않는다. 5번 계열은 공통 변수와 군집별 특정 변수를 명시적으로 나누어, 제안 방법이 특정 군집 변수와 노이즈 변수를 구분할 수 있는지 확인하는 setting이다. 5.7은 군집별 특정 변수의 신호 세기 $w$를 바꾼 robustness 확인이고, 5.8은 같은 변수 구조에서 집중도 차이만 약하게 만든 추가 확인이다.
 
 ## 7. 요약 결론
 
@@ -488,6 +490,17 @@ MSE 지표는 기존 표와 같이 $\times 100$으로 표시했다.
 * **Controlled concentration-dominant setting:** 변수 구조를 K=4 stress setting과 동일하게 고정하고 평균 방향만 약간 다르게 두면, Rossi와 분리 패널티는 거의 전체 변수를 선택하지만 $\eta$-penalty + refit은 FPR을 낮추고 refit 기준 ARI와 BIC도 가장 좋다.
 * **공통 변수 + 군집별 특정 변수 setting:** $\eta$-penalty + refit은 공통 변수와 군집별 특정 변수를 거의 모두 유지하면서 노이즈 선택률을 0.034로 낮춘다. 이는 제안 방법이 특정 군집 변수까지 반영하는 sparse structure에서 유리할 수 있음을 보여준다.
 * **약한 집중도 차이 setting:** $\kappa=(40,50,60,70)$로 concentration contrast를 줄여도 $\eta$-penalty + refit은 selected $q=23.980$, FPR 0.025, F1 0.958로 가장 안정적인 변수 선택을 보인다.
+
+---
+
+## 8. 앞으로 할 일
+
+* 현재 5번 계열 결과를 기준으로, 교수님과 main simulation setting을 확정한다.
+* $w=0.25$처럼 군집별 특정 변수 신호가 약한 경우에서 missed specific variable이 어느 component에서 발생하는지 확인한다.
+* 집중도 차이가 더 약한 경우에 대해 pilot simulation을 추가로 확인하고, 필요하면 100회 반복으로 확장한다.
+* 최종 simulation table은 군집화 성능, 변수 선택 성능, 모수 추정 성능을 분리해서 유지한다.
+* 제안 방법의 tuning은 path 기반 BIC를 기본 기준으로 두고, EBIC는 sensitivity check로만 사용할지 결정한다.
+* 다음 단계에서 $d=200$ 이상의 high-dimensional robustness를 확인한다.
 
 ---
 
