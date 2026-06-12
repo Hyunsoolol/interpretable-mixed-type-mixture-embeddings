@@ -380,16 +380,6 @@ $$\eta_{kj}^c = \eta_{kj} - K^{-1}\sum_{\ell=1}^{K}\eta_{\ell j}.$$
 * ARI가 비슷하더라도 selected q와 FPR이 크면 variable selection 성능은 좋지 않은 것으로 해석해야 한다.
 * `thesis-simulation_260611.md`의 고차원 fixed-kappa setting은 signal이 약해지는 stress setting이므로, 일반적인 high-dimensional robustness 결과와 구분해야 한다.
 
-## 16. 연구미팅에서 답할 핵심 논리
-
-| 질문 | 답변 방향 |
-|:---|:---|
-| 왜 $\mu_k$가 아니라 $\eta_k$인가? | posterior decision에 직접 들어가는 항이 $\eta_k^T x_i$이기 때문 |
-| separate penalty와 무엇이 다른가? | $\lambda_\kappa$는 component-level scalar shrinkage이고, eta penalty는 coordinate-level decision effect를 shrink한다 |
-| 왜 refit을 하는가? | L1 penalty로 인한 shrinkage bias를 줄이기 위해 선택 support 위에서 penalty 없이 재추정한다 |
-| ARI 차이가 작아도 왜 eta가 좋은가? | ARI는 군집 라벨만 보고, eta penalty는 노이즈 변수 선택을 크게 줄여 해석 가능성을 높인다 |
-| 고차원에서 왜 EBIC가 필요한가? | BIC penalty가 d 증가에 비해 약해 selected q가 커질 수 있기 때문이다 |
-
 ## 참고문헌
 
 * Banerjee, A., Dhillon, I. S., Ghosh, J., and Sra, S. (2005). Clustering on the unit hypersphere using von Mises-Fisher distributions.
