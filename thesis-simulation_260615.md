@@ -75,7 +75,7 @@ Strong concentration setting에서는 Rossi, Separate, Eta+refit의 ARI가 거�
 
 Rossi는 평균적으로 약 96개 변수를 선택하여 거의 dense하게 작동한다. Separate penalty도 약 71개 변수를 선택하여 false positive가 여전히 크다. 반면 Eta+refit은 약 25개 변수만 선택하면서 true union q = 22에 가장 가깝고, FPR도 0.037로 낮다.
 
-따라서 이 setting은 Eta penalty의 장점을 "ARI를 유지하면서 해석 가능한 sparse contrast를 회복한다"는 방향으로 보여주기에 적합하다.
+따라서 이 setting은 Eta penalty의 장점을 "ARI를 유지하면서 해석 가능한 sparse contrast를 회복한다"는 방향으로 보여주기에 적합해보임.
 
 ## 4. Main setting 2: weak concentration difference
 
@@ -132,39 +132,10 @@ w가 커질수록 군집 구분이 쉬워져 Rossi의 ARI도 높아진다. 그�
 | d = 200, strong kappa | 0.366 | 0.428 | 199.10 | 28.60 | 0.995 | 0.070 |
 | d = 400, strong kappa | 0.126 | 0.192 | 396.00 | 17.67 | 0.989 | 0.021 |
 
-d = 200에서는 Eta+refit이 ARI와 변수 선택 모두에서 Rossi보다 좋다. d = 400에서는 Eta가 상대적으로 낫지만 전체 ARI가 낮고 일부 replication에서 실패가 있어 본문 주력 결과보다는 부록 또는 한계로 두는 것이 적절하다.
+d = 200에서는 Eta+refit이 ARI와 변수 선택 모두에서 Rossi보다 좋다. d = 400에서는 Eta가 상대적으로 낫지만 전체 ARI가 낮고 일부 replication에서 실패가 있어 본문 주력 결과보다는 부록 또는 한계로 두는 것이 적절해보임
 
 ## 7. 현재 결론
-
-본문 시뮬레이션 후보는 다음 순서가 적절하다.
-
-1. Weak concentration setting: kappa = (40, 50, 60, 70)
-2. Strong concentration setting: kappa = (30, 45, 65, 90)
-3. High-dimensional pilot: d = 200
-
-주요 메시지는 다음과 같다.
 
 - Rossi sparse vMF는 ARI는 괜찮지만 공통 변수와 군집별 특정 변수가 섞인 환경에서 noise 변수를 많이 포함한다.
 - Separate penalty는 Rossi보다 변수 선택이 나아지지만 여전히 selected q와 FPR이 크다.
 - Eta contrast + refit은 군집 성능을 유지하면서 true union q에 가까운 변수를 선택한다.
-- 따라서 제안 방법의 기여는 "clustering accuracy만 개선"이 아니라 "posterior decision에 직접 들어가는 eta contrast의 sparse recovery"로 설명하는 것이 자연스럽다.
-
-## 8. 저장 위치
-
-로컬 결과는 다음 경로에 저장되어 있다.
-
-```text
-results/simulation_search_260614/
-```
-
-주요 파일은 다음과 같다.
-
-```text
-results/simulation_search_260614/pilot_summary_mobile.md
-results/simulation_search_260614/pilot_compact_summary.csv
-results/simulation_search_260614/pilot_rossi_vs_eta_refit.csv
-results/simulation_search_260614/final_specific_w050_strong_n1000_d100_rep100/
-results/simulation_search_260614/final_specific_w050_weak_n1000_d100_rep100/
-```
-
-이번 git 업데이트에는 R 코드와 csv/raw 결과를 포함하지 않고, 본 md 요약 파일만 포함한다.
