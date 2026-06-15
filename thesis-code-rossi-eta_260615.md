@@ -619,11 +619,3 @@ We implement a proximal EM update for the centered eta-contrast penalty.
 ```
 
 또한 tuning은 현재 공식 비교에서 path tuning + BIC로 통일했지만, 고차원에서는 BIC가 dense한 model을 선호하거나 반대로 과도하게 sparse한 선택을 할 수 있다. 따라서 본문에서는 BIC 기준 결과를 제시하고, EBIC/RICc는 sensitivity analysis 또는 appendix로 두는 것이 적절하다.
-
-## 17. 연구미팅에서 답할 핵심 문장
-
-Rossi 방법은 component direction mu에 L1 penalty를 둔다. 하지만 vMF posterior decision에는 kappa와 mu의 곱인 eta가 직접 들어간다. 그래서 평균 방향의 sparsity보다 eta contrast의 sparsity가 군집 구분 변수 선택에는 더 직접적인 기준이다.
-
-현재 R 구현에서는 Rossi의 beta path와 유사하게, Eta도 centered eta contrast norm을 기준으로 lambda path를 만들고 BIC로 선택한다. 선택된 변수 support에 대해서는 penalty 없이 refit하여 shrinkage bias를 줄였다.
-
-따라서 제안 방법의 장점은 ARI를 크게 올리는 것보다, ARI를 유지하면서 selected q와 FPR을 크게 줄이고 posterior decision에 직접 관련된 sparse contrast를 회복하는 데 있다.
