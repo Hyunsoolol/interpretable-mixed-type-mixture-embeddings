@@ -170,7 +170,7 @@ K=4 driver에서는 주로 `fit_separate_path_for_kappa()`, `fit_separate_specif
 
 해석상 중요한 한계는 $\lambda_\kappa$가 component-level scalar penalty라는 점이다. 즉 concentration 크기는 줄일 수 있지만, 어떤 coordinate가 concentration-driven separation에 기여하는지는 직접 선택하지 못한다.
 
-## 8. 에타 패널티 EM
+## 8. 에타 패널티 proximal EM-type update
 
 에타 패널티의 출발점은 $\eta_k=\kappa_k\mu_k$가 posterior decision에 직접 들어간다는 점이다. 두 component의 경우 posterior log odds는 다음 형태다.
 
@@ -188,7 +188,7 @@ $$\delta_j = \eta_{2j}-\eta_{1j}.$$
 
 $$\ell_{\mathrm{pen}}(\eta) = \ell(\eta) - \lambda_\eta\sum_j|\delta_j|.$$
 
-Exact penalized M-step은 closed form으로 바로 풀기 어렵다. 이유는 likelihood에 $C_d(\|\eta_k\|_2)$가 들어가고, 동시에 $\eta_2-\eta_1$에 L1 penalty가 걸리기 때문이다. 현재 구현은 proximal EM prototype이다.
+Exact penalized M-step은 closed form으로 바로 풀기 어렵다. 이유는 likelihood에 $C_d(\|\eta_k\|_2)$가 들어가고, 동시에 $\eta_2-\eta_1$ 또는 centered eta contrast에 penalty가 걸리기 때문이다. 현재 구현은 unpenalized eta M-step 후 soft-thresholding을 적용하는 proximal EM-type update이며, monotone EM 보장을 아직 갖고 있지는 않다.
 
 절차는 다음이다.
 
@@ -231,7 +231,7 @@ $$c_{\cdot j,\lambda} = (1-\lambda_\eta/\|c_{\cdot j}\|_2)_+c_{\cdot j}.$$
 
 $$\eta_{kj,\lambda} = \bar{\eta}_j + c_{kj,\lambda}.$$
 
-관련 함수는 `prox_eta_centered()`, `fit_eta_centered_em()`, `fit_eta_centered_path_pair()`다.
+관련 함수는 `prox_eta_centered()`, `fit_eta_centered_em()`, `fit_eta_centered_path_pair()`다. 함수명에는 `em`이 들어가지만, 논문 표현에서는 exact EM이 아니라 proximal EM-type update로 부르는 것이 안전하다.
 
 ### 8.3. 에타 패널티 path
 
@@ -276,17 +276,17 @@ EBIC는 고차원 setting에서 보조 지표로 계산했다.
 
 $$\mathrm{EBIC} = \{\log(n)+2\gamma\log(d)\}df - 2\ell(\hat{\Theta}), \qquad \gamma=0.5.$$
 
-Rossi 및 분리 패널티의 자유도는 component별 선택 coordinate 수를 이용해 근사한다.
+현재 구현에서 사용하는 자유도 근사는 다음과 같다.
 
-$$df = (2K-1) + \sum_{k=1}^{K}\max(1, nnz_k-1).$$
+| 방법 | 자유도 근사 | 해석 |
+|:---|:---|:---|
+| Rossi | `(2K - 1) + sum_k max(1, nnz_k - 1)` | mixing proportion, component별 kappa, 그리고 unit-norm 제약을 반영한 active mu 자유도 |
+| Separate penalty | `(K - 1) + active_kappa + sum_k max(1, nnz_k - 1)` | mixing proportion, 살아남은 kappa, active mu 자유도 |
+| Eta centered penalty | `(K - 1) + d + (K - 1) * m` | mixing proportion, coordinate별 공통 eta baseline, active centered eta contrast 자유도 |
 
-여기서 $(2K-1)$은 mixing proportion과 component별 concentration을 포함한 항이고, $nnz_k-1$은 $\|\mu_k\|_2=1$ 제약을 반영한 항이다.
+Eta centered penalty에서 `m`은 active centered eta coordinate 수다. `d`는 모든 component에 공통으로 남는 eta baseline을 나타내고, `(K - 1) * m`은 선택된 coordinate에서 component 간 centered contrast가 갖는 자유도를 근사한다.
 
-K=4 centered eta penalty에서는 선택된 coordinate 수를 $m$이라 두고 다음처럼 근사한다.
-
-$$df = (K-1)+d+(K-1)m.$$
-
-이는 eta의 coordinate-level contrast support를 반영하기 위한 구현상 근사 자유도다. 고차원에서는 이 자유도와 BIC penalty가 충분히 강한지 추가 검토가 필요하다.
+이 df는 현재 구현에서 BIC/EBIC를 계산하기 위한 implementation-level approximation이다. 아직 엄밀한 effective degrees of freedom 이론으로 증명한 것은 아니므로, 논문에서는 sensitivity 기준으로 BIC, EBIC, RICc를 함께 확인하는 것이 안전하다. 특히 고차원에서는 BIC가 dense한 model을 선택할 수 있어 EBIC/RICc 또는 stability selection 검토가 필요하다.
 
 관련 함수는 `model_ic()`, `separate_model_ic()`, `eta_centered_ic()`, `support_ic()`다.
 
@@ -375,7 +375,7 @@ $$\eta_{kj}^c = \eta_{kj} - K^{-1}\sum_{\ell=1}^{K}\eta_{\ell j}.$$
 
 주의할 점은 다음이다.
 
-* 현재 에타 패널티 M-step은 exact penalized M-step이 아니라 proximal EM prototype이다.
+* 현재 에타 패널티 M-step은 exact penalized M-step이 아니라 proximal EM-type update다. Objective trace smoke test에서는 일부 lambda 후보에서 penalized objective 감소가 관찰되므로, 논문 버전에서는 line search/MM 보강이 필요하다.
 * 고차원 일부 반복에서는 $\kappa$ 추정 outlier가 생겨 MSE_kappa 평균이 매우 커질 수 있다.
 * ARI가 비슷하더라도 selected q와 FPR이 크면 variable selection 성능은 좋지 않은 것으로 해석해야 한다.
 * `thesis-simulation_260611.md`의 고차원 fixed-kappa setting은 signal이 약해지는 stress setting이므로, 일반적인 high-dimensional robustness 결과와 구분해야 한다.

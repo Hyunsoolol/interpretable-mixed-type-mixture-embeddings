@@ -1,4 +1,4 @@
-# Thesis Simulation 260615
+﻿# Thesis Simulation 260615
 
 ## 1. 목적
 
@@ -49,6 +49,8 @@ mu_k = v_k / ||v_k||
 | 6 | Eta contrast penalty + refit |
 
 평가 지표는 ARI, NMI, purity, selected q, TPR, FPR, Precision, F1, MSE_mu, MSE_kappa, MSE_centered_eta를 사용하였다.
+
+주의: Eta fitting은 현재 exact EM이 아니라 proximal EM-type update로 구현되어 있다. 즉 unpenalized eta M-step 후 centered eta contrast shrinkage를 적용하며, monotone objective 보장은 별도 line search/MM 보강 전까지는 주장하지 않는다.
 
 ## 3. Main setting 1: strong concentration difference
 

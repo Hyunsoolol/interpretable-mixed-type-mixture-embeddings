@@ -1,4 +1,4 @@
-# Rossi 모형과 Eta 제안 모형 R 코드 구현 설명
+﻿# Rossi 모형과 Eta 제안 모형 R 코드 구현 설명
 
 업데이트: 2026-06-15
 
@@ -335,7 +335,7 @@ penalized loglik = loglik - lambda_eta * sum_j contrast_j
 
 Eta penalty의 exact M-step은 닫힌형으로 바로 풀기 어렵다. 이유는 vMF normalizing constant가 `||eta_k||_2`에 의존하고, penalty는 component 간 centered eta에 걸려 있기 때문이다.
 
-현재 구현은 proximal EM 형태다.
+현재 구현은 proximal EM-type update다. 즉 exact closed-form penalized M-step을 푸는 것이 아니라, unpenalized eta M-step 후보에 centered eta group soft-thresholding을 적용한다.
 
 구현 위치는 다음 함수들이다.
 
@@ -344,7 +344,7 @@ Eta penalty의 exact M-step은 닫힌형으로 바로 풀기 어렵다. 이유�
 | `unpenalized_eta_mstep()` | penalty 없는 vMF M-step으로 eta 후보 계산 |
 | `prox_eta_centered()` | centered eta에 group soft-thresholding 적용 |
 | `eta_to_theta()` | eta에서 mu, kappa 복원 |
-| `fit_eta_centered_em()` | Eta penalty EM 반복 |
+| `fit_eta_centered_em()` | Eta penalty proximal EM-type 반복 |
 
 ### 9.1 unpenalized eta M-step
 
@@ -406,9 +406,9 @@ mu_k = eta_k / ||eta_k||_2
 
 만약 `eta_k` norm이 너무 작아지는 경우에는 이전 `mu_k`를 fallback으로 사용해 수치적 실패를 줄인다.
 
-## 10. Eta EM loop
+## 10. Eta proximal EM-type loop
 
-`fit_eta_centered_em()`의 반복 구조는 다음과 같다.
+`fit_eta_centered_em()`의 반복 구조는 다음과 같다. 함수명은 기존 코드와의 호환을 위해 `em`으로 남아 있지만, 논문 표현에서는 proximal EM-type update로 부르는 것이 더 정확하다.
 
 ```text
 1. dense vMF 또는 이전 fit으로 초기화
@@ -608,8 +608,24 @@ refit: 선택된 support에서 alpha, mu, kappa 재추정
 
 따라서 결과표에서는 penalty fit과 penalty + refit을 함께 보는 것이 좋다.
 
-## 16. 현재 코드의 한계
+## 16. 현재 코드의 한계와 검증 포인트
 
-현재 Eta 구현은 exact closed-form penalized M-step이라기보다 proximal EM prototype임.
+현재 Eta 구현은 exact closed-form penalized M-step이 아니라 proximal EM-type update다. 따라서 논문 작성 시 표현은 다음처럼 조심하는 것이 좋다.
 
-또한 tuning은 현재 공식 비교에서 path tuning + BIC로 통일했지만, 고차원에서는 BIC가 dense한 model을 선호하거나 반대로 과도하게 sparse한 선택을 할 수 있다. 따라서 본문에서는 BIC 기준 결과를 제시하고, EBIC/RICc는 sensitivity analysis 또는 appendix로 둘 예정임.
+```text
+We implement a proximal EM-type update for the centered eta-contrast penalty.
+```
+
+Objective trace smoke test는 `results/eta_objective_trace_260615/`에 저장했다. 해당 smoke test에서는 일부 lambda 후보에서 penalized objective 감소가 관찰되었다. 따라서 현재 버전은 monotone EM algorithm이라고 주장하면 안 되고, 논문 버전에서는 line search 또는 MM safeguard를 추가하는 것이 필요하다.
+
+BIC 자유도 역시 구현상 근사다. Eta centered penalty에서는 `df = (K - 1) + d + (K - 1) * m`을 사용한다. 여기서 `m`은 active centered eta coordinate 수, `d`는 coordinate별 공통 eta baseline, `(K - 1) * m`은 선택된 coordinate의 centered contrast 자유도를 나타낸다.
+
+또한 tuning은 현재 공식 비교에서 path tuning + BIC로 통일했지만, 고차원에서는 BIC가 dense한 model을 선호하거나 반대로 과도하게 sparse한 선택을 할 수 있다. 따라서 본문에서는 BIC 기준 결과를 제시하고, EBIC/RICc는 sensitivity analysis 또는 appendix로 두는 것이 적절하다.
+
+## 17. 연구미팅에서 답할 핵심 문장
+
+Rossi 방법은 component direction mu에 L1 penalty를 둔다. 하지만 vMF posterior decision에는 kappa와 mu의 곱인 eta가 직접 들어간다. 그래서 평균 방향의 sparsity보다 eta contrast의 sparsity가 군집 구분 변수 선택에는 더 직접적인 기준이다.
+
+현재 R 구현에서는 Rossi의 beta path와 유사하게, Eta도 centered eta contrast norm을 기준으로 lambda path를 만들고 BIC로 선택한다. 선택된 변수 support에 대해서는 penalty 없이 refit하여 shrinkage bias를 줄였다.
+
+따라서 제안 방법의 장점은 ARI를 크게 올리는 것보다, ARI를 유지하면서 selected q와 FPR을 크게 줄이고 posterior decision에 직접 관련된 sparse contrast를 회복하는 데 있다.

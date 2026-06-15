@@ -31,8 +31,8 @@ $$\eta_k = \kappa_k \mu_k$$
 | Rossi + refit | Rossi와 동일 | 선택 support 고정 후 unpenalized EM |
 | 분리 패널티 | $\mu_k$ L1 penalty + $\kappa_k$ penalty | penalized EM |
 | 분리 패널티 + refit | 분리 패널티와 동일 | 선택 support 고정 후 unpenalized EM |
-| 에타 패널티 | $\eta_k$ contrast 또는 centered $\eta_k$ penalty | penalized EM |
-| 에타 패널티 + refit | 에타 패널티와 동일 | 선택 support 고정 후 unpenalized EM |
+| 에타 패널티 | $\eta_k$ contrast 또는 centered $\eta_k$ penalty | proximal EM-type update |
+| 에타 패널티 + refit | 에타 패널티와 동일 | proximal update로 선택한 support 고정 후 unpenalized EM |
 
 공식 비교에서는 각 방법의 path 기반 후보를 만들고 BIC가 최소인 지점을 선택했다. EBIC는 고차원 setting에서 보조 지표로만 확인했다.
 
@@ -55,6 +55,8 @@ $$\bar{\eta}_j = K^{-1}\sum_{k=1}^K \eta_{kj}, \qquad c_{kj} = \eta_{kj}-\bar{\e
 에타 패널티는 다음 형태로 구현했다.
 
 $$Q_{\eta} = \ell(\Theta) - \lambda_\eta \sum_{j=1}^d \|c_{\cdot j}\|_2.$$
+
+현재 구현은 exact M-step이 아니라 unpenalized eta M-step 후 centered eta contrast shrinkage를 적용하는 proximal EM-type update다. 따라서 monotone EM 보장은 아직 없고, 논문 버전에서는 objective trace 확인과 line search/MM 보강을 검토한다.
 
 Refit은 penalized fit에서 선택된 support를 고정하고 penalty 없이 vMF mixture를 다시 추정하는 단계다. Support는 바꾸지 않고, $\alpha_k$, $\mu_k$, $\kappa_k$만 다시 추정한다.
 
@@ -212,3 +214,12 @@ $\kappa$를 고정하고 차원만 늘리면 concentration signal이 상대적�
 | 에타 패널티 장점 | ARI를 유지하면서 selected q, FPR, Precision, F1을 개선한다 |
 | refit 역할 | penalty shrinkage를 줄이고 선택된 support 위에서 모수를 재추정한다 |
 | 고차원 이슈 | BIC만으로는 약할 수 있어 EBIC 검토가 필요하다 |
+
+## 10. Real data 결과의 위치
+
+현재 real data 결과는 본문 핵심 주장보다는 보조 근거로 조심스럽게 배치한다.
+
+| 데이터 | 현재 해석 |
+|:---|:---|
+| PBMC 3K lymphoid3 | vMF mixture 계열에서는 Eta가 Rossi보다 높고 sparse marker selection을 제공한다. 다만 sparse k-means가 ARI만 보면 더 높으므로 전체 baseline 최고라고 주장하지 않는다. |
+| BBC News text | 높은 ARI와 selected q 감소를 보이는 보조 사례다. 그러나 kappa ratio가 1에 가깝고 Rossi 대비 개선폭이 작으므로 본문 핵심 real-data benchmark보다는 appendix 또는 supplementary 사례가 적절하다. |
