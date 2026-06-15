@@ -214,12 +214,3 @@ $\kappa$를 고정하고 차원만 늘리면 concentration signal이 상대적�
 | 에타 패널티 장점 | ARI를 유지하면서 selected q, FPR, Precision, F1을 개선한다 |
 | refit 역할 | penalty shrinkage를 줄이고 선택된 support 위에서 모수를 재추정한다 |
 | 고차원 이슈 | BIC만으로는 약할 수 있어 EBIC 검토가 필요하다 |
-
-## 10. Real data 결과의 위치
-
-현재 real data 결과는 본문 핵심 주장보다는 보조 근거로 조심스럽게 배치한다.
-
-| 데이터 | 현재 해석 |
-|:---|:---|
-| PBMC 3K lymphoid3 | vMF mixture 계열에서는 Eta가 Rossi보다 높고 sparse marker selection을 제공한다. 다만 sparse k-means가 ARI만 보면 더 높으므로 전체 baseline 최고라고 주장하지 않는다. |
-| BBC News text | 높은 ARI와 selected q 감소를 보이는 보조 사례다. 그러나 kappa ratio가 1에 가깝고 Rossi 대비 개선폭이 작으므로 본문 핵심 real-data benchmark보다는 appendix 또는 supplementary 사례가 적절하다. |
