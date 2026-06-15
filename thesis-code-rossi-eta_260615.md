@@ -610,12 +610,6 @@ refit: 선택된 support에서 alpha, mu, kappa 재추정
 
 ## 16. 현재 코드의 한계
 
-현재 Eta 구현은 exact closed-form penalized M-step이라기보다 proximal EM prototype이다.
+현재 Eta 구현은 exact closed-form penalized M-step이라기보다 proximal EM prototype임.
 
-따라서 논문 작성 시 표현은 다음처럼 조심하는 것이 좋다.
-
-```text
-We implement a proximal EM update for the centered eta-contrast penalty.
-```
-
-또한 tuning은 현재 공식 비교에서 path tuning + BIC로 통일했지만, 고차원에서는 BIC가 dense한 model을 선호하거나 반대로 과도하게 sparse한 선택을 할 수 있다. 따라서 본문에서는 BIC 기준 결과를 제시하고, EBIC/RICc는 sensitivity analysis 또는 appendix로 두는 것이 적절하다.
+또한 tuning은 현재 공식 비교에서 path tuning + BIC로 통일했지만, 고차원에서는 BIC가 dense한 model을 선호하거나 반대로 과도하게 sparse한 선택을 할 수 있다. 따라서 본문에서는 BIC 기준 결과를 제시하고, EBIC/RICc는 sensitivity analysis 또는 appendix로 둘 예정임.
