@@ -14,84 +14,35 @@ Eta penalty는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에
 
 **Mixture model**
 
-$$
-p(x_i;\Theta) =
-\sum_{k=1}^K
-\alpha_k C_d(\kappa_k)
-\exp(\kappa_k \mu_k^\top x_i),
-\qquad
-\|\mu_k\|_2 = 1,\quad \kappa_k > 0
-$$
+$$p(x_i;\Theta)=\sum_{k=1}^K \alpha_k C_d(\kappa_k)\exp(\kappa_k \mu_k^\top x_i), \qquad \|\mu_k\|_2=1,\quad \kappa_k>0$$
 
 **Natural parameter**
 
-$$
-\eta_k = \kappa_k \mu_k
-$$
+$$\eta_k=\kappa_k\mu_k$$
 
 Posterior responsibility는 다음과 같다.
 
-$$
-\tau_{ik}
-=
-\frac{
-\alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)
-}{
-\sum_{\ell=1}^K
-\alpha_\ell C_d(\kappa_\ell)\exp(\eta_\ell^\top x_i)
-}
-$$
+$$\tau_{ik}=\frac{\alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)}{\sum_{\ell=1}^K \alpha_\ell C_d(\kappa_\ell)\exp(\eta_\ell^\top x_i)}$$
 
 K=2에서 posterior decision boundary는
 
-$$
-\log\frac{\tau_{i2}}{\tau_{i1}}
-=
-\mathrm{const}
-+(\eta_2-\eta_1)^\top x_i
-$$
+$$\log\frac{\tau_{i2}}{\tau_{i1}}=\mathrm{const}+(\eta_2-\eta_1)^\top x_i$$
 
 로 정리된다. 따라서 변수 선택은 $\mu_k$ 자체보다 posterior decision에 직접 들어가는 $\eta_k$ contrast를 기준으로 하는 것이 자연스럽다.
 
 **Observed log-likelihood**
 
-$$
-\ell(\Theta)
-=
-\sum_{i=1}^n
-\log\left[
-\sum_{k=1}^K
-\alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)
-\right]
-$$
+$$\ell(\Theta)=\sum_{i=1}^n \log\left[\sum_{k=1}^K \alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)\right]$$
 
 K>2에서는 coordinate별 centered eta contrast를 사용한다.
 
-$$
-\bar{\eta}_j
-=
-\frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j},
-\qquad
-c_{kj}
-=
-\eta_{kj}-\bar{\eta}_j
-$$
+$$\bar{\eta}_j=\frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j}, \qquad c_{kj}=\eta_{kj}-\bar{\eta}_j$$
 
 **Penalty and objective**
 
-$$
-P_\eta(\Theta)
-=
-\lambda_\eta
-\sum_{j=1}^d
-\|c_{\cdot j}\|_2
-$$
+$$P_\eta(\Theta)=\lambda_\eta\sum_{j=1}^d \|c_{\cdot j}\|_2$$
 
-$$
-\mathcal{L}_p(\Theta)
-=
-\ell(\Theta)-P_\eta(\Theta)
-$$
+$$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_\eta(\Theta)$$
 
 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
 
