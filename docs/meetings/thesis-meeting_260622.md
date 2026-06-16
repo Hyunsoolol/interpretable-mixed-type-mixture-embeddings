@@ -114,17 +114,14 @@ K=2 toy setting에서는 모든 방법의 ARI가 1.000이지만, Eta penalty가 
 
 설정:
 
-```text
-K = 4, n = 1000, d = 100, rep = 100
-common variables = 6
-component-specific variables = 16
-true union q = 22
-mu raw loading = common coordinates 1.0 for every component; own specific coordinates w = 0.5; others 0
-mu normalization = row-normalize each mu_k
-normalized mu values = common 0.378, own specific 0.189, others 0
-mean pairwise cos(mu_k, mu_l) = 0.857
-kappa = (30, 45, 65, 90)
-```
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 4, n = 1000, d = 100, rep = 100 |
+| 활성 변수 구조 | common 6개 + component-specific 4개씩 = true union q 22 |
+| raw mu loading | common = 1.0, own-specific = w = 0.5, 나머지 = 0 |
+| normalized mu 값 | common = 0.378, own-specific = 0.189, 나머지 = 0 |
+| 평균방향 유사도 | mean pairwise cos(mu_k, mu_l) = 0.857 |
+| concentration | kappa = (30, 45, 65, 90) |
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
@@ -154,16 +151,14 @@ Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 suppo
 
 설정:
 
-```text
-K = 4, n = 1000, d = 100, rep = 100
-common variables = 6
-component-specific variables = 16
-true union q = 22
-mu raw loading = common coordinates 1.0 for every component; own specific coordinates w; others 0
-mu normalization = row-normalize each mu_k
-w = 0.25, 0.35, 0.50
-kappa = (30, 45, 65, 90)
-```
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 4, n = 1000, d = 100, rep = 100 |
+| 활성 변수 구조 | common 6개 + component-specific 4개씩 = true union q 22 |
+| 변화시킨 값 | component-specific raw loading w = 0.25, 0.35, 0.50 |
+| 고정한 값 | common raw loading = 1.0, 나머지 = 0 |
+| normalization | 각 component의 raw mu vector를 row-normalize |
+| concentration | kappa = (30, 45, 65, 90) |
 
 정규화 후 실제 mu 좌표값은 다음과 같다.
 
@@ -227,14 +222,13 @@ w가 커질수록 component-specific signal이 강해지고, 평균 방향 간 c
 
 설정:
 
-```text
-K = 4, n = 1000, d = 100
-shared active variables = 10
-true q = 10
-mu construction = first 10 coordinates active for all components; pairwise cosine between mu_k near 0.95
-w = not used because there are no component-specific weights
-kappa = (25, 40, 65, 100)
-```
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 4, n = 1000, d = 100 |
+| 활성 변수 구조 | 모든 component가 같은 10개 좌표 사용 = true q 10 |
+| mu construction | 첫 10개 좌표만 active, 평균방향 간 pairwise cosine을 약 0.95로 설정 |
+| w 사용 여부 | component-specific weight가 없는 설계라 w는 사용하지 않음 |
+| concentration | kappa = (25, 40, 65, 100) |
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
@@ -252,19 +246,15 @@ Rossi와 separate penalty는 clustering은 어느 정도 되지만 거의 모든
 
 설정:
 
-```text
-K = 4, n = 1000, d = 100, rep = 100
-common variables = 6
-component-specific variables = 16
-true union q = 22
-mu raw loading = common coordinates 1.0 for every component; own specific coordinates w = 0.5; others 0
-mu normalization = row-normalize each mu_k
-normalized mu values = common 0.378, own specific 0.189, others 0
-mean pairwise cos(mu_k, mu_l) = 0.857
-kappa = (40, 50, 60, 70)
-official path+BIC
-target/adaptive/stability refinement = off
-```
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 4, n = 1000, d = 100, rep = 100 |
+| 활성 변수 구조 | common 6개 + component-specific 4개씩 = true union q 22 |
+| raw mu loading | common = 1.0, own-specific = w = 0.5, 나머지 = 0 |
+| normalized mu 값 | common = 0.378, own-specific = 0.189, 나머지 = 0 |
+| 평균방향 유사도 | mean pairwise cos(mu_k, mu_l) = 0.857 |
+| concentration | kappa = (40, 50, 60, 70) |
+| tuning | official path+BIC, target/adaptive/stability refinement off |
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
