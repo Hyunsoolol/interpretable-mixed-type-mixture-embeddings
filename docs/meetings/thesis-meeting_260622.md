@@ -4,11 +4,9 @@
 
 ## 1. 핵심 결론
 
-현재 연구의 가장 안전한 주장은 다음이다.
+Eta penalty는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어, ARI를 유지하면서 해석 가능한 변수 선택을 제공하는 방법이다.
 
-> Eta penalty는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어, ARI를 유지하면서 해석 가능한 변수 선택을 제공하는 방법이다.
-
-따라서 본문 주장은 “clustering accuracy 개선”보다 “model-based sparse interpretation”에 맞추는 것이 안전하다.
+따라서 본문 주장은 “clustering accuracy 개선”보다 “model-based sparse interpretation”으로 정리함.
 
 ## 2. 모형 아이디어
 
