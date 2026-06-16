@@ -1,4 +1,4 @@
-# Thesis Meeting 260622
+# Thesis Meeting 260624
 
 업데이트: 2026-06-16
 
