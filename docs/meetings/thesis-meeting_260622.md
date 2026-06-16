@@ -4,7 +4,7 @@
 
 ## 1. 핵심 결론
 
-Eta penalty는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어, ARI를 유지하면서 해석 가능한 변수 선택을 제공하는 방법이다.
+Centered eta group lasso는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어, ARI를 유지하면서 해석 가능한 변수 선택을 제공하는 방법이다.
 
 따라서 본문 주장은 “clustering accuracy 개선”보다 “model-based sparse interpretation”으로 정리함.
 
@@ -38,23 +38,23 @@ $$P_{\mathrm{ANOVA}\text{-}L1}(\Theta)=\lambda_\eta\sum_{j=1}^d\sum_{k=1}^K |c_{
 
 $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
-현재 주 penalty는 centered eta group lasso다. 이유는 coordinate-level eta contrast 선택이 목표이고, ANOVA-type L1은 pilot에서 dense support로 갔기 때문이다.
+현재 주 penalty는 centered eta group lasso다. 이유는 coordinate-level eta contrast 선택이 목표이고, centered eta ANOVA-L1은 pilot에서 dense support로 갔기 때문이다.
 
 | Scenario | Penalty | ARI | Selected q | FPR | Precision | F1 |
 |:---|:---|---:|---:|---:|---:|---:|
-| strong | Group lasso + refit | 0.684 | 25.45 | 0.046 | 0.867 | 0.925 |
-| strong | ANOVA L1 + refit | 0.652 | 99.90 | 0.999 | 0.220 | 0.361 |
-| weak | Group lasso + refit | 0.565 | 23.90 | 0.024 | 0.924 | 0.960 |
-| weak | ANOVA L1 + refit | 0.515 | 99.50 | 0.994 | 0.221 | 0.362 |
+| strong | Centered eta group lasso + refit | 0.684 | 25.45 | 0.046 | 0.867 | 0.925 |
+| strong | Centered eta ANOVA-L1 + refit | 0.652 | 99.90 | 0.999 | 0.220 | 0.361 |
+| weak | Centered eta group lasso + refit | 0.565 | 23.90 | 0.024 | 0.924 | 0.960 |
+| weak | Centered eta ANOVA-L1 + refit | 0.515 | 99.50 | 0.994 | 0.221 | 0.362 |
 
 | Scenario | Penalty | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
 |:---|:---|---:|---:|---:|---:|
-| strong | Group lasso + refit | 0.000101 | 1.992 | 0.191 | 58.007 |
-| strong | ANOVA L1 + refit | 0.000329 | 3.604 | 0.581 | 58.677 |
-| weak | Group lasso + refit | 0.000073 | 1.614 | 0.172 | 55.298 |
-| weak | ANOVA L1 + refit | 0.000288 | 2.989 | 0.659 | 56.043 |
+| strong | Centered eta group lasso + refit | 0.000101 | 1.992 | 0.191 | 58.007 |
+| strong | Centered eta ANOVA-L1 + refit | 0.000329 | 3.604 | 0.581 | 58.677 |
+| weak | Centered eta group lasso + refit | 0.000073 | 1.614 | 0.172 | 55.298 |
+| weak | Centered eta ANOVA-L1 + refit | 0.000288 | 2.989 | 0.659 | 56.043 |
 
-ANOVA-type L1은 sensitivity 후보로만 남긴다. 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
+Centered eta ANOVA-L1은 sensitivity 후보로만 남긴다. 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
 
 ## 3. 핵심 simulation 결과
 
@@ -72,25 +72,25 @@ ANOVA-type L1은 sensitivity 후보로만 남긴다. 현재 구현은 exact pena
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
-| Rossi path BIC | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
-| Rossi path BIC + refit | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
-| Separate path/grid BIC | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
-| Separate path/grid BIC + refit | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
-| Eta path BIC | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
-| Eta path BIC + refit | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
+| Rossi sparse vMF path BIC | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Rossi sparse vMF path BIC + refit | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Separate mu/kappa penalty path/grid BIC | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Separate mu/kappa penalty path/grid BIC + refit | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Centered eta group lasso path BIC | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
+| Centered eta group lasso path BIC + refit | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
 
 모수 추정 결과는 다음과 같다. 3.1과 3.2의 MSE 지표는 모두 raw scale로 통일했다.
 
 | Method | MSE_mu | MSE_kappa | MSE_Delta_eta | kappa ratio | eta contrast norm |
 |:---|---:|---:|---:|---:|---:|
-| Rossi path BIC | 0.000176 | 1.276 | 0.245 | 10.062 | 181.179 |
-| Rossi path BIC + refit | 0.000061 | 1.410 | 0.378 | 9.951 | 180.821 |
-| Separate path/grid BIC | 0.000176 | 1.276 | 0.245 | 10.062 | 181.179 |
-| Separate path/grid BIC + refit | 0.000061 | 1.410 | 0.378 | 9.951 | 180.821 |
-| Eta path BIC | 0.000180 | 7.415 | 0.292 | 8.559 | 175.542 |
-| Eta path BIC + refit | 0.000041 | 1.185 | 0.216 | 9.960 | 180.630 |
+| Rossi sparse vMF path BIC | 0.000176 | 1.276 | 0.245 | 10.062 | 181.179 |
+| Rossi sparse vMF path BIC + refit | 0.000061 | 1.410 | 0.378 | 9.951 | 180.821 |
+| Separate mu/kappa penalty path/grid BIC | 0.000176 | 1.276 | 0.245 | 10.062 | 181.179 |
+| Separate mu/kappa penalty path/grid BIC + refit | 0.000061 | 1.410 | 0.378 | 9.951 | 180.821 |
+| Centered eta group lasso path BIC | 0.000180 | 7.415 | 0.292 | 8.559 | 175.542 |
+| Centered eta group lasso path BIC + refit | 0.000041 | 1.185 | 0.216 | 9.960 | 180.630 |
 
-K=2 toy setting에서는 모든 방법의 ARI가 1.000이지만, Eta penalty가 selected q와 FPR을 가장 낮춘다. Refit 후 kappa ratio와 eta contrast norm도 true value에 가장 가깝다.
+K=2 toy setting에서는 모든 방법의 ARI가 1.000이지만, centered eta group lasso가 selected q와 FPR을 가장 낮춘다. Refit 후 kappa ratio와 eta contrast norm도 true value에 가장 가깝다.
 
 ### 3.2 K=4 strong common+specific setting
 
@@ -104,30 +104,31 @@ K=2 toy setting에서는 모든 방법의 ARI가 1.000이지만, Eta penalty가 
 | normalized mu 값 | common = 0.378, own-specific = 0.189, 나머지 = 0 |
 | 평균방향 유사도 | mean pairwise cos(mu_k, mu_l) = 0.857 |
 | concentration | kappa = (30, 45, 65, 90) |
+| 목적 | common + component-specific 구조에서 ARI 유지와 sparse support recovery 확인 |
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
-| Rossi path BIC | 0.680 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
-| Rossi path BIC + refit | 0.653 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
-| Separate path/grid BIC | 0.684 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
-| Separate path/grid BIC + refit | 0.657 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
-| Eta centered path BIC | 0.625 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
-| Eta centered path BIC + refit | 0.686 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
+| Rossi sparse vMF path BIC | 0.680 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
+| Rossi sparse vMF path BIC + refit | 0.653 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
+| Separate mu/kappa penalty path/grid BIC | 0.684 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
+| Separate mu/kappa penalty path/grid BIC + refit | 0.657 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
+| Centered eta group lasso path BIC | 0.625 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
+| Centered eta group lasso path BIC + refit | 0.686 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
 
 모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
 
 | Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
 |:---|---:|---:|---:|---:|
-| Rossi path BIC | 0.00015 | 2.989 | 0.314 | 58.661 |
-| Rossi path BIC + refit | 0.00033 | 3.427 | 0.594 | 58.735 |
-| Separate path/grid BIC | 0.00008 | 8.762 | 0.179 | 56.089 |
-| Separate path/grid BIC + refit | 0.00030 | 3.064 | 0.552 | 58.599 |
-| Eta centered path BIC | 0.00029 | 14.485 | 0.424 | 58.468 |
-| Eta centered path BIC + refit | 0.00010 | 1.901 | 0.185 | 58.040 |
+| Rossi sparse vMF path BIC | 0.00015 | 2.989 | 0.314 | 58.661 |
+| Rossi sparse vMF path BIC + refit | 0.00033 | 3.427 | 0.594 | 58.735 |
+| Separate mu/kappa penalty path/grid BIC | 0.00008 | 8.762 | 0.179 | 56.089 |
+| Separate mu/kappa penalty path/grid BIC + refit | 0.00030 | 3.064 | 0.552 | 58.599 |
+| Centered eta group lasso path BIC | 0.00029 | 14.485 | 0.424 | 58.468 |
+| Centered eta group lasso path BIC + refit | 0.00010 | 1.901 | 0.185 | 58.040 |
 
 해석:
 
-Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Refit 후 MSE_kappa도 1.901로 가장 낮다. 이 결과가 현재 본문에 가장 적합하다.
+Centered eta group lasso + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Refit 후 MSE_kappa도 1.901로 가장 낮다. 이 결과가 현재 본문에 가장 적합하다.
 
 ### 3.3 Specific signal strength w setting
 
@@ -141,6 +142,7 @@ Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 suppo
 | 고정한 값 | common raw loading = 1.0, 나머지 = 0 |
 | normalization | 각 component의 raw mu vector를 row-normalize |
 | concentration | kappa = (30, 45, 65, 90) |
+| 목적 | component-specific signal strength가 변할 때 variable selection 안정성 확인 |
 
 정규화 후 실제 mu 좌표값은 다음과 같다.
 
@@ -154,51 +156,51 @@ Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 suppo
 
 | w | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |---:|:---|---:|---:|---:|---:|---:|---:|
-| 0.25 | Rossi path BIC | 0.394 | 98.07 | 1.000 | 0.975 | 0.225 | 0.367 |
-| 0.25 | Rossi path BIC + refit | 0.368 | 98.07 | 1.000 | 0.975 | 0.225 | 0.367 |
-| 0.25 | Separate 2D path/grid BIC | 0.401 | 93.50 | 0.999 | 0.917 | 0.236 | 0.382 |
-| 0.25 | Separate 2D path/grid BIC + refit | 0.367 | 93.50 | 0.999 | 0.917 | 0.236 | 0.382 |
-| 0.25 | Eta centered path BIC | 0.358 | 32.13 | 0.813 | 0.183 | 0.621 | 0.682 |
-| 0.25 | Eta centered path BIC + refit | 0.399 | 32.13 | 0.813 | 0.183 | 0.621 | 0.682 |
-| 0.35 | Rossi path BIC | 0.514 | 98.82 | 1.000 | 0.985 | 0.223 | 0.364 |
-| 0.35 | Rossi path BIC + refit | 0.481 | 98.82 | 1.000 | 0.985 | 0.223 | 0.364 |
-| 0.35 | Separate 2D path/grid BIC | 0.528 | 90.70 | 1.000 | 0.881 | 0.247 | 0.394 |
-| 0.35 | Separate 2D path/grid BIC + refit | 0.488 | 90.70 | 1.000 | 0.881 | 0.247 | 0.394 |
-| 0.35 | Eta centered path BIC | 0.458 | 29.81 | 0.919 | 0.123 | 0.723 | 0.794 |
-| 0.35 | Eta centered path BIC + refit | 0.505 | 29.81 | 0.919 | 0.123 | 0.723 | 0.794 |
-| 0.50 | Rossi path BIC | 0.680 | 98.52 | 1.000 | 0.981 | 0.223 | 0.365 |
-| 0.50 | Rossi path BIC + refit | 0.653 | 98.52 | 1.000 | 0.981 | 0.223 | 0.365 |
-| 0.50 | Separate 2D path/grid BIC | 0.684 | 86.46 | 1.000 | 0.826 | 0.258 | 0.409 |
-| 0.50 | Separate 2D path/grid BIC + refit | 0.657 | 86.46 | 1.000 | 0.826 | 0.258 | 0.409 |
-| 0.50 | Eta centered path BIC | 0.625 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 |
-| 0.50 | Eta centered path BIC + refit | 0.686 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 |
+| 0.25 | Rossi sparse vMF path BIC | 0.394 | 98.07 | 1.000 | 0.975 | 0.225 | 0.367 |
+| 0.25 | Rossi sparse vMF path BIC + refit | 0.368 | 98.07 | 1.000 | 0.975 | 0.225 | 0.367 |
+| 0.25 | Separate mu/kappa penalty path/grid BIC | 0.401 | 93.50 | 0.999 | 0.917 | 0.236 | 0.382 |
+| 0.25 | Separate mu/kappa penalty path/grid BIC + refit | 0.367 | 93.50 | 0.999 | 0.917 | 0.236 | 0.382 |
+| 0.25 | Centered eta group lasso path BIC | 0.358 | 32.13 | 0.813 | 0.183 | 0.621 | 0.682 |
+| 0.25 | Centered eta group lasso path BIC + refit | 0.399 | 32.13 | 0.813 | 0.183 | 0.621 | 0.682 |
+| 0.35 | Rossi sparse vMF path BIC | 0.514 | 98.82 | 1.000 | 0.985 | 0.223 | 0.364 |
+| 0.35 | Rossi sparse vMF path BIC + refit | 0.481 | 98.82 | 1.000 | 0.985 | 0.223 | 0.364 |
+| 0.35 | Separate mu/kappa penalty path/grid BIC | 0.528 | 90.70 | 1.000 | 0.881 | 0.247 | 0.394 |
+| 0.35 | Separate mu/kappa penalty path/grid BIC + refit | 0.488 | 90.70 | 1.000 | 0.881 | 0.247 | 0.394 |
+| 0.35 | Centered eta group lasso path BIC | 0.458 | 29.81 | 0.919 | 0.123 | 0.723 | 0.794 |
+| 0.35 | Centered eta group lasso path BIC + refit | 0.505 | 29.81 | 0.919 | 0.123 | 0.723 | 0.794 |
+| 0.50 | Rossi sparse vMF path BIC | 0.680 | 98.52 | 1.000 | 0.981 | 0.223 | 0.365 |
+| 0.50 | Rossi sparse vMF path BIC + refit | 0.653 | 98.52 | 1.000 | 0.981 | 0.223 | 0.365 |
+| 0.50 | Separate mu/kappa penalty path/grid BIC | 0.684 | 86.46 | 1.000 | 0.826 | 0.258 | 0.409 |
+| 0.50 | Separate mu/kappa penalty path/grid BIC + refit | 0.657 | 86.46 | 1.000 | 0.826 | 0.258 | 0.409 |
+| 0.50 | Centered eta group lasso path BIC | 0.625 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 |
+| 0.50 | Centered eta group lasso path BIC + refit | 0.686 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 |
 
 모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
 
 | w | Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
 |---:|:---|---:|---:|---:|---:|
-| 0.25 | Rossi path BIC | 0.000466 | 53.570 | 1.288 | 61.007 |
-| 0.25 | Rossi path BIC + refit | 0.000878 | 78.474 | 2.351 | 61.228 |
-| 0.25 | Separate 2D path/grid BIC | 0.000289 | 60.743 | 0.935 | 58.975 |
-| 0.25 | Separate 2D path/grid BIC + refit | 0.000731 | 66.807 | 1.967 | 60.640 |
-| 0.25 | Eta centered path BIC | 0.000543 | 4.999e9 | 3.352e7 | 5062.159 |
-| 0.25 | Eta centered path BIC + refit | 0.000682 | 4.999e9 | 3.352e7 | 5062.191 |
-| 0.35 | Rossi path BIC | 0.000285 | 16.756 | 0.656 | 59.694 |
-| 0.35 | Rossi path BIC + refit | 0.000556 | 20.778 | 1.167 | 59.713 |
-| 0.35 | Separate 2D path/grid BIC | 0.000149 | 12.341 | 0.318 | 57.198 |
-| 0.35 | Separate 2D path/grid BIC + refit | 0.000460 | 12.747 | 0.927 | 59.190 |
-| 0.35 | Eta centered path BIC | 0.000405 | 99.000 | 1.283 | 61.973 |
-| 0.35 | Eta centered path BIC + refit | 0.000359 | 43.882 | 0.969 | 60.408 |
-| 0.50 | Rossi path BIC | 0.000153 | 2.989 | 0.314 | 58.661 |
-| 0.50 | Rossi path BIC + refit | 0.000326 | 3.427 | 0.594 | 58.735 |
-| 0.50 | Separate 2D path/grid BIC | 0.000084 | 8.762 | 0.179 | 56.089 |
-| 0.50 | Separate 2D path/grid BIC + refit | 0.000302 | 3.064 | 0.552 | 58.599 |
-| 0.50 | Eta centered path BIC | 0.000291 | 14.485 | 0.424 | 58.468 |
-| 0.50 | Eta centered path BIC + refit | 0.000102 | 1.901 | 0.185 | 58.040 |
+| 0.25 | Rossi sparse vMF path BIC | 0.000466 | 53.570 | 1.288 | 61.007 |
+| 0.25 | Rossi sparse vMF path BIC + refit | 0.000878 | 78.474 | 2.351 | 61.228 |
+| 0.25 | Separate mu/kappa penalty path/grid BIC | 0.000289 | 60.743 | 0.935 | 58.975 |
+| 0.25 | Separate mu/kappa penalty path/grid BIC + refit | 0.000731 | 66.807 | 1.967 | 60.640 |
+| 0.25 | Centered eta group lasso path BIC | 0.000543 | 4.999e9 | 3.352e7 | 5062.159 |
+| 0.25 | Centered eta group lasso path BIC + refit | 0.000682 | 4.999e9 | 3.352e7 | 5062.191 |
+| 0.35 | Rossi sparse vMF path BIC | 0.000285 | 16.756 | 0.656 | 59.694 |
+| 0.35 | Rossi sparse vMF path BIC + refit | 0.000556 | 20.778 | 1.167 | 59.713 |
+| 0.35 | Separate mu/kappa penalty path/grid BIC | 0.000149 | 12.341 | 0.318 | 57.198 |
+| 0.35 | Separate mu/kappa penalty path/grid BIC + refit | 0.000460 | 12.747 | 0.927 | 59.190 |
+| 0.35 | Centered eta group lasso path BIC | 0.000405 | 99.000 | 1.283 | 61.973 |
+| 0.35 | Centered eta group lasso path BIC + refit | 0.000359 | 43.882 | 0.969 | 60.408 |
+| 0.50 | Rossi sparse vMF path BIC | 0.000153 | 2.989 | 0.314 | 58.661 |
+| 0.50 | Rossi sparse vMF path BIC + refit | 0.000326 | 3.427 | 0.594 | 58.735 |
+| 0.50 | Separate mu/kappa penalty path/grid BIC | 0.000084 | 8.762 | 0.179 | 56.089 |
+| 0.50 | Separate mu/kappa penalty path/grid BIC + refit | 0.000302 | 3.064 | 0.552 | 58.599 |
+| 0.50 | Centered eta group lasso path BIC | 0.000291 | 14.485 | 0.424 | 58.468 |
+| 0.50 | Centered eta group lasso path BIC + refit | 0.000102 | 1.901 | 0.185 | 58.040 |
 
 해석:
 
-w가 커질수록 component-specific signal이 강해지고, 평균 방향 간 cosine은 낮아져 군집 구분이 쉬워진다. Rossi와 separate penalty는 모든 w에서 거의 모든 변수를 선택한다. Eta penalty는 w=0.25에서도 selected q와 FPR을 크게 줄이지만 specific 변수 일부를 놓친다. w=0.50에서는 true union q=22에 가장 가깝고 F1도 가장 높다. 단, w=0.25의 Eta 모수 MSE 평균은 일부 kappa outlier 때문에 보조적으로만 해석한다.
+w가 커질수록 component-specific signal이 강해지고, 평균 방향 간 cosine은 낮아져 군집 구분이 쉬워진다. Rossi sparse vMF와 separate mu/kappa penalty는 모든 w에서 거의 모든 변수를 선택한다. Centered eta group lasso는 w=0.25에서도 selected q와 FPR을 크게 줄이지만 specific 변수 일부를 놓친다. w=0.50에서는 true union q=22에 가장 가깝고 F1도 가장 높다. 단, w=0.25의 centered eta group lasso 모수 MSE 평균은 일부 kappa outlier 때문에 보조적으로만 해석한다.
 
 ### 3.4 Concentration-dominant setting
 
@@ -211,16 +213,17 @@ w가 커질수록 component-specific signal이 강해지고, 평균 방향 간 c
 | mu construction | 첫 10개 좌표만 active, 평균방향 간 pairwise cosine을 약 0.95로 설정 |
 | w 사용 여부 | component-specific weight가 없는 설계라 w는 사용하지 않음 |
 | concentration | kappa = (25, 40, 65, 100) |
+| 목적 | 평균방향이 매우 유사하고 concentration 차이가 클 때 noise selection 감소 확인 |
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
-| Rossi | 0.513 | 98.500 | 1.000 | 0.983 | 0.102 | 0.184 |
-| Separate penalty | 0.525 | 95.600 | 1.000 | 0.951 | 0.105 | 0.190 |
-| Eta penalty + refit | 0.523 | 28.800 | 1.000 | 0.209 | 0.443 | 0.586 |
+| Rossi sparse vMF | 0.513 | 98.500 | 1.000 | 0.983 | 0.102 | 0.184 |
+| Separate mu/kappa penalty | 0.525 | 95.600 | 1.000 | 0.951 | 0.105 | 0.190 |
+| Centered eta group lasso + refit | 0.523 | 28.800 | 1.000 | 0.209 | 0.443 | 0.586 |
 
 해석:
 
-Rossi와 separate penalty는 clustering은 어느 정도 되지만 거의 모든 변수를 선택한다. Eta penalty는 ARI를 비슷하게 유지하면서 noise selection을 줄인다.
+Rossi sparse vMF와 separate mu/kappa penalty는 clustering은 어느 정도 되지만 거의 모든 변수를 선택한다. Centered eta group lasso는 ARI를 비슷하게 유지하면서 noise selection을 줄인다.
 
 ## 4. Weak concentration setting
 
@@ -237,27 +240,28 @@ Rossi와 separate penalty는 clustering은 어느 정도 되지만 거의 모든
 | 평균방향 유사도 | mean pairwise cos(mu_k, mu_l) = 0.857 |
 | concentration | kappa = (40, 50, 60, 70) |
 | tuning | official path+BIC, target/adaptive/stability refinement off |
+| 목적 | concentration 차이가 약할 때 sparse support recovery가 유지되는지 확인 |
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
-| Rossi path BIC | 0.542 | 99.95 | 1.000 | 0.999 | 0.220 | 0.361 |
-| Rossi path BIC + refit | 0.527 | 99.95 | 1.000 | 0.999 | 0.220 | 0.361 |
-| Separate 2D path/grid BIC | 0.543 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
-| Separate 2D path/grid BIC + refit | 0.526 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
-| Eta centered path BIC | 0.568 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
-| Eta centered path BIC + refit | 0.575 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
+| Rossi sparse vMF path BIC | 0.542 | 99.95 | 1.000 | 0.999 | 0.220 | 0.361 |
+| Rossi sparse vMF path BIC + refit | 0.527 | 99.95 | 1.000 | 0.999 | 0.220 | 0.361 |
+| Separate mu/kappa penalty path/grid BIC | 0.543 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
+| Separate mu/kappa penalty path/grid BIC + refit | 0.526 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
+| Centered eta group lasso path BIC | 0.568 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
+| Centered eta group lasso path BIC + refit | 0.575 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
 
 모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
 
 | Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
 |:---|---:|---:|---:|---:|
-| Rossi path BIC | 0.000219 | 3.437 | 0.519 | 56.249 |
-| Rossi path BIC + refit | 0.000285 | 3.623 | 0.668 | 56.247 |
-| Separate 2D path/grid BIC | 0.000188 | 8.596 | 0.415 | 54.429 |
-| Separate 2D path/grid BIC + refit | 0.000286 | 3.536 | 0.667 | 56.209 |
-| Eta centered path BIC | 0.000172 | 7.409 | 0.355 | 54.506 |
-| Eta centered path BIC + refit | 0.000075 | 1.824 | 0.183 | 55.497 |
+| Rossi sparse vMF path BIC | 0.000219 | 3.437 | 0.519 | 56.249 |
+| Rossi sparse vMF path BIC + refit | 0.000285 | 3.623 | 0.668 | 56.247 |
+| Separate mu/kappa penalty path/grid BIC | 0.000188 | 8.596 | 0.415 | 54.429 |
+| Separate mu/kappa penalty path/grid BIC + refit | 0.000286 | 3.536 | 0.667 | 56.209 |
+| Centered eta group lasso path BIC | 0.000172 | 7.409 | 0.355 | 54.506 |
+| Centered eta group lasso path BIC + refit | 0.000075 | 1.824 | 0.183 | 55.497 |
 
 해석:
 
-Eta penalty + refit은 weak setting에서도 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Rossi와 separate penalty는 거의 모든 변수를 선택하지만, Eta는 selected q=24.09와 FPR=0.027로 noise selection을 크게 줄인다. Refit 후 MSE_mu, MSE_kappa, MSE_centered_eta도 각각 0.000075, 1.824, 0.183으로 가장 낮다.
+Centered eta group lasso + refit은 weak setting에서도 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Rossi sparse vMF와 separate mu/kappa penalty는 거의 모든 변수를 선택하지만, centered eta group lasso는 selected q=24.09와 FPR=0.027로 noise selection을 크게 줄인다. Refit 후 MSE_mu, MSE_kappa, MSE_centered_eta도 각각 0.000075, 1.824, 0.183으로 가장 낮다.
