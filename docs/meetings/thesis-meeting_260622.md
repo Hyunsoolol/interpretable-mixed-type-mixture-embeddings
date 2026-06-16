@@ -160,7 +160,7 @@ Rossi와 separate penalty는 clustering은 어느 정도 되지만 거의 모든
 
 ## 4. Weak setting 결과와 진단
 
-### 4.1 초기 weak simulation 결과
+### 4.1 Meeting weak 100회 rerun
 
 설정:
 
@@ -170,55 +170,59 @@ common variables = 6
 component-specific variables = 16
 true union q = 22
 kappa = (40, 50, 60, 70)
+official path+BIC, no target/adaptive/stability refinement
 ```
 
-초기 path/BIC summary에서는 Eta penalty가 잘 작동하는 것처럼 보였다.
+260622 미팅용으로 current official path+BIC 기준 weak 100회를 다시 실행했다. MSE 지표는 raw scale이다.
 
-| Method | ARI | Selected q | TPR | FPR | Precision | F1 |
-|:---|---:|---:|---:|---:|---:|---:|
-| Rossi | 0.570 | 94.04 | 1.000 | 0.924 | 0.235 | 0.380 |
-| Rossi + refit | 0.529 | 94.04 | 1.000 | 0.924 | 0.235 | 0.380 |
-| Separate penalty | 0.572 | 56.79 | 1.000 | 0.446 | 0.456 | 0.602 |
-| Separate penalty + refit | 0.553 | 56.79 | 1.000 | 0.446 | 0.456 | 0.602 |
-| Eta contrast | 0.564 | 23.98 | 1.000 | 0.025 | 0.921 | 0.958 |
-| Eta contrast + refit | 0.575 | 23.98 | 1.000 | 0.025 | 0.921 | 0.958 |
+| Method | reps | valid reps | ARI | Selected q | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Rossi path BIC | 100 | 100 | 0.542 | 99.95 | 0.999 | 0.220 | 0.361 | 0.000219 | 3.437 | 0.519 |
+| Rossi path BIC + refit | 100 | 100 | 0.527 | 99.95 | 0.999 | 0.220 | 0.361 | 0.000285 | 3.623 | 0.668 |
+| Separate 2D path/grid BIC | 100 | 100 | 0.543 | 99.67 | 0.996 | 0.221 | 0.362 | 0.000188 | 8.596 | 0.415 |
+| Separate 2D path/grid BIC + refit | 100 | 100 | 0.526 | 99.67 | 0.996 | 0.221 | 0.362 | 0.000286 | 3.536 | 0.667 |
+| Eta centered path BIC | 100 | 100 | 0.568 | 24.09 | 0.027 | 0.918 | 0.956 | 0.000172 | 7.409 | 0.355 |
+| Eta centered path BIC + refit | 100 | 100 | 0.575 | 24.09 | 0.027 | 0.918 | 0.956 | 0.000075 | 1.824 | 0.183 |
+| Eta centered path BIC positive-support | 100 | 100 | 0.568 | 24.09 | 0.027 | 0.918 | 0.956 | 0.000172 | 7.409 | 0.355 |
+| Eta centered path BIC positive-support + refit | 100 | 100 | 0.575 | 24.09 | 0.027 | 0.918 | 0.956 | 0.000075 | 1.824 | 0.183 |
 
-모수 추정 결과도 초기 summary에서는 Eta contrast + refit이 좋게 보였다.
+해석:
 
-| Method | MSE_mu | MSE_kappa | MSE_eta |
-|:---|---:|---:|---:|
-| Rossi | 0.00011 | 2.536 | 0.256 |
-| Rossi + refit | 0.00028 | 3.433 | 0.646 |
-| Separate penalty | 0.00006 | 12.282 | 0.150 |
-| Separate penalty + refit | 0.00018 | 2.463 | 0.431 |
-| Eta contrast | 0.00018 | 7.333 | 0.355 |
-| Eta contrast + refit | 0.00007 | 1.801 | 0.181 |
+이번 rerun에서는 Eta centered path BIC가 null support나 dense support로 튀지 않았다. Eta + refit은 ARI 0.575를 유지하면서 selected q=24.09로 true union q=22에 가깝고, FPR은 0.027로 낮다. MSE_mu와 MSE_centered_eta도 refit 후 각각 0.000075, 0.183으로 가장 낮은 편이다.
 
-하지만 line-search safeguard, zero-support 처리, path candidates 저장 후 다시 확인하니 Eta BIC가 null support 또는 dense support로 불안정하게 튀는 문제가 확인됐다. 따라서 위 결과는 본문 주력 성공 사례로 쓰기보다, “초기에는 좋아 보였지만 재검증에서 tuning instability가 드러난 setting”으로 해석하는 것이 안전하다.
+### 4.2 Weak instability diagnostic
 
-### 4.2 재검증 결과
+이번 rerun의 path 후보와 선택 결과는 다음과 같다.
+
+| Diagnostic | 결과 |
+|:---|:---|
+| raw ERROR rows | 0 |
+| eta path candidates | 5508 rows, 100 reps |
+| rep with q=17-27 candidate | 99/100 |
+| Eta BIC selected q=0 | 0/100 |
+| Eta BIC selected q=17-27 | 97/100 |
+| Eta BIC selected q>=75 | 0/100 |
+| positive-support selected q>=75 | 0/100 |
+| Eta + refit zero-support reps | 0/100 |
+| objective n_decrease max | 0 |
+| min objective diff | -8.37e-09 |
+| max line-search halving | 19 |
+| line-search rejected candidates | 0 |
+
+다만 이전 diagnostic run에서는 path construction에 따라 null/dense instability가 나타났다.
 
 | path construction | scope | near22 후보율 | BIC null률 | positive dense률 | 판단 |
 |:---|:---|---:|---:|---:|:---|
-| no refinement | weak100 | 0.23 | 0.73 | 0.72 | 기본 path가 중간 support를 충분히 만들지 못함 |
+| no refinement diagnostic | weak100 | 0.23 | 0.73 | 0.72 | path/BIC가 불안정할 수 있음을 보임 |
 | oracle target-refine | weak100 | 0.89 | 0.14 | 0.09 | true q 주변 정보를 쓰므로 공식 알고리즘 불가 |
 | adaptive v1 | weak100 | 0.73 | 0.24 | 0.24 | 개선은 있으나 oracle 수준은 아님 |
 | adaptive v2 | smoke10 | 0.50 | 0.50 | 0.50 | midpoint refinement만으로 부족 |
 | adaptive v2.1 | smoke10 | 0.50 | 0.40 | 0.40 | duplicate endpoint를 써도 support 다양성 부족 |
 | adaptive v3 | smoke10 | 0.50 | 0.60 | 0.40 | 990개 평가에도 saved unique support 6개뿐 |
 
-zero-support 처리와 path 후보 저장 후의 weak100 summary는 다음과 같다.
-
-| Method | valid reps | ARI | Selected q | TPR | FPR | Precision | F1 | 판단 |
-|:---|---:|---:|---:|---:|---:|---:|---:|:---|
-| Eta centered path BIC | 100 | 0.131 | 5.12 | 0.200 | 0.009 | 0.724 | 0.285 | null support 쪽으로 과수축 |
-| Eta centered path BIC + refit | 27 | 0.515 | 5.12 | 0.200 | 0.009 | 0.724 | 0.285 | 73/100 zero-support refit |
-| Eta centered path BIC positive-support | 100 | 0.517 | 76.63 | 0.900 | 0.728 | 0.277 | 0.421 | dense support로 튐 |
-| Eta centered path BIC positive-support + refit | 100 | 0.522 | 76.63 | 0.900 | 0.728 | 0.277 | 0.421 | refit해도 dense support 유지 |
-
 결론:
 
-Weak setting의 문제는 단순히 lambda grid가 성긴 문제가 아니다. Proximal path가 같은 support plateau에 머물고, BIC가 null/dense 쪽으로 불안정하게 선택하는 문제로 보는 것이 더 타당하다. 따라서 weak setting은 본문 성공 사례가 아니라 appendix diagnostic 또는 limitation으로 낮추는 것이 안전하다.
+이번 official path+BIC rerun 자체는 weak setting에서도 Eta의 변수 선택 주장을 지지한다. 그러나 이전 diagnostic run에서 path/BIC instability가 확인되었기 때문에, weak setting을 논문의 핵심 성공 사례로 과하게 밀기보다는 robustness result로 두고, strong common+specific setting을 주 evidence로 삼는 것이 안전하다. 교수님께는 “weak rerun은 좋아졌지만 path construction에 민감한 setting”으로 설명하는 편이 맞다.
 
 ## 5. Stability selection 진단
 
@@ -232,3 +236,8 @@ Stability selection도 바로 해결책이 되지는 않았다.
 | IC slope sensitivity | gamma를 낮추면 zero는 줄지만 dense/FPR 증가 | 단순 df 상수항 수정은 해결책 아님 |
 
 다음 보강은 stability threshold 조정보다 alternative IC, selection rule, 또는 Eta update 자체의 개선 쪽이 우선이다.
+
+## 6. 교수님께 확인할 질문
+
+1. Weak setting은 이번 official rerun에서는 안정적이지만 이전 diagnostic에서는 path/BIC instability가 보였다. 본문 보조 결과로 둘지, appendix/limitation으로 낮출지 결정이 필요하다.
+2. 다음 방법론 보강은 alternative IC/selection rule 쪽으로 갈지, proximal EM-type update를 MM 또는 coordinate update로 개선하는 쪽으로 갈지 결정이 필요하다.
