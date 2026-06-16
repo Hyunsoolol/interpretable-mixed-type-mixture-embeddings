@@ -40,9 +40,28 @@ $$\bar{\eta}_j=\frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j}, \qquad c_{kj}=\eta_{kj}
 
 **Penalty and objective**
 
-$$P_\eta(\Theta)=\lambda_\eta\sum_{j=1}^d \|c_{\cdot j}\|_2$$
+K>2에서는 두 가지 penalty 선택지가 있다.
 
-$$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_\eta(\Theta)$$
+$$P_{\mathrm{group}}(\Theta)=\lambda_\eta\sum_{j=1}^d \|c_{\cdot j}\|_2$$
+
+$$P_{\mathrm{ANOVA}\text{-}L1}(\Theta)=\lambda_\eta\sum_{j=1}^d\sum_{k=1}^K |c_{kj}|$$
+
+Group lasso는 coordinate $j$ 전체가 component contrast를 갖는지 선택한다. ANOVA-type L1은 coordinate 안의 component별 deviation을 개별적으로 shrink한다.
+
+현재 연구 목적은 component별 세부 deviation보다 “posterior decision에 관여하는 coordinate-level eta contrast 선택”이므로 group lasso가 더 자연스럽다.
+
+$$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
+
+같은 K=4 common+specific setting에서 rep=20 pilot으로 비교하면 ANOVA-type L1은 BIC에서 거의 모든 좌표를 선택했다.
+
+| Scenario | Penalty | ARI | Selected q | FPR | Precision | F1 |
+|:---|:---|---:|---:|---:|---:|---:|
+| strong | Group lasso + refit | 0.684 | 25.45 | 0.046 | 0.867 | 0.925 |
+| strong | ANOVA L1 + refit | 0.652 | 99.90 | 0.999 | 0.220 | 0.361 |
+| weak | Group lasso + refit | 0.565 | 23.90 | 0.024 | 0.924 | 0.960 |
+| weak | ANOVA L1 + refit | 0.515 | 99.50 | 0.994 | 0.221 | 0.362 |
+
+따라서 현재 구현과 논문 주장은 centered eta group lasso를 주 penalty로 두고, ANOVA-type L1은 대안 또는 sensitivity 후보로만 남기는 것이 적절하다.
 
 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
 
