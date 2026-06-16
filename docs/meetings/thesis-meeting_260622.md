@@ -10,74 +10,56 @@ Eta penalty는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에
 
 ## 2. 모형 아이디어
 
-관측값은 단위구면 위의 방향자료 $x_i \in \mathbb{S}^{d-1}$이고, $K$-component vMF mixture를 사용한다.
+관측값은 단위구면 위의 방향자료 x<sub>i</sub> ∈ S<sup>d-1</sup>이고, K-component vMF mixture를 사용한다.
 
-$$
-p(x_i;\Theta)
-= \sum_{k=1}^K \alpha_k C_d(\kappa_k)
-\exp(\kappa_k \mu_k^\top x_i),
-\qquad
-\|\mu_k\|_2 = 1,\quad \kappa_k > 0
-$$
+**Mixture model**
 
-Natural parameter를
+p(x<sub>i</sub>; Θ) =
+∑<sub>k=1</sub><sup>K</sup>
+α<sub>k</sub> C<sub>d</sub>(κ<sub>k</sub>)
+exp(κ<sub>k</sub> μ<sub>k</sub><sup>T</sup>x<sub>i</sub>),
+with ‖μ<sub>k</sub>‖<sub>2</sub> = 1 and κ<sub>k</sub> > 0.
 
-$$
-\eta_k = \kappa_k \mu_k
-$$
+**Natural parameter**
 
-로 두면 posterior responsibility는
+η<sub>k</sub> = κ<sub>k</sub> μ<sub>k</sub>
 
-$$
-\tau_{ik}
-=
-\frac{\alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)}
-{\sum_{\ell=1}^K \alpha_\ell C_d(\kappa_\ell)
-\exp(\eta_\ell^\top x_i)}
-$$
+Posterior responsibility는 다음과 같다.
 
-이고, $K=2$에서 posterior decision boundary는
+τ<sub>ik</sub> =
+[α<sub>k</sub> C<sub>d</sub>(κ<sub>k</sub>) exp(η<sub>k</sub><sup>T</sup>x<sub>i</sub>)]
+/
+[∑<sub>ℓ=1</sub><sup>K</sup> α<sub>ℓ</sub> C<sub>d</sub>(κ<sub>ℓ</sub>) exp(η<sub>ℓ</sub><sup>T</sup>x<sub>i</sub>)].
 
-$$
-\log\frac{\tau_{i2}}{\tau_{i1}}
-= \mathrm{const} + (\eta_2-\eta_1)^\top x_i
-$$
+K=2에서 posterior decision boundary는
 
-로 정리된다. 따라서 변수 선택은 $\mu_k$ 자체보다 posterior decision에 직접 들어가는 $\eta_k$ contrast를 기준으로 하는 것이 자연스럽다.
+log(τ<sub>i2</sub> / τ<sub>i1</sub>)
+= const + (η<sub>2</sub> - η<sub>1</sub>)<sup>T</sup>x<sub>i</sub>
 
-관측 log-likelihood는
+로 정리된다. 따라서 변수 선택은 μ<sub>k</sub> 자체보다 posterior decision에 직접 들어가는 η<sub>k</sub> contrast를 기준으로 하는 것이 자연스럽다.
 
-$$
-\ell(\Theta)
-=
-\sum_{i=1}^n
-\log\left[
-\sum_{k=1}^K \alpha_k C_d(\kappa_k)
-\exp(\eta_k^\top x_i)
-\right]
-$$
+**Observed log-likelihood**
 
-이다. $K>2$에서는 coordinate별 centered eta contrast를 사용한다.
+L(Θ) =
+∑<sub>i=1</sub><sup>n</sup>
+log[
+∑<sub>k=1</sub><sup>K</sup>
+α<sub>k</sub> C<sub>d</sub>(κ<sub>k</sub>)
+exp(η<sub>k</sub><sup>T</sup>x<sub>i</sub>)
+].
 
-$$
-c_{kj}
-=
-\eta_{kj}
--
-\frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j}
-$$
+K>2에서는 coordinate별 centered eta contrast를 사용한다.
 
-제안 penalty와 penalized objective는 다음과 같다.
+c<sub>kj</sub>
+= η<sub>kj</sub>
+- K<sup>-1</sup>∑<sub>ℓ=1</sub><sup>K</sup>η<sub>ℓj</sub>.
 
-$$
-P_\eta(\Theta)
-=
-\lambda_\eta \sum_{j=1}^d \|c_{\cdot j}\|_2,
-\qquad
-\mathcal{L}_p(\Theta)
-=
-\ell(\Theta) - P_\eta(\Theta)
-$$
+**Penalty and objective**
+
+P<sub>η</sub>(Θ)
+= λ<sub>η</sub>∑<sub>j=1</sub><sup>d</sup> ‖c<sub>·j</sub>‖<sub>2</sub>
+
+L<sub>p</sub>(Θ) = L(Θ) - P<sub>η</sub>(Θ)
 
 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
 
@@ -106,7 +88,7 @@ mu_1 = mu_2
 
 모수 추정 결과는 다음과 같다. MSE 지표는 기존 simulation 문서와 같이 100배 스케일로 표시했다.
 
-| Method | MSE_mu | MSE_kappa | MSE_Delta_eta | kappa ratio | $\lVert\eta_2-\eta_1\rVert$ |
+| Method | MSE_mu | MSE_kappa | MSE_Delta_eta | kappa ratio | eta contrast norm |
 |:---|---:|---:|---:|---:|---:|
 | Rossi path BIC | 0.0176 | 127.629 | 24.534 | 10.062 | 181.179 |
 | Rossi path BIC + refit | 0.0061 | 140.965 | 37.797 | 9.951 | 180.821 |
