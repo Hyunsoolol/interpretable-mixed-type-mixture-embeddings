@@ -348,7 +348,7 @@ d=100 strong setting의 Eta-group + refit은 ARI=0.686, selected q=24.75, FPR=0.
 
 ### 3.7 High-dimensional tuning/path diagnostic
 
-고차원에서 BIC가 dense support를 고르는지 확인하기 위해, 새 simulation 없이 저장된 Eta path candidates에서 stronger tuning criteria를 재계산했다. 이는 official tuning 변경이 아니라 diagnostic-only sensitivity다.
+고차원에서 BIC가 dense support를 고르는지 확인하기 위해, 먼저 저장된 Eta path candidates에서 stronger tuning criteria를 재계산했다. 이는 official tuning 변경이 아니라 diagnostic-only sensitivity다.
 
 | setting | criterion | Selected q | Zero rate | Dense rate | ARI | FPR | Precision | F1 |
 |:---|:---|---:|---:|---:|---:|---:|---:|---:|
@@ -363,13 +363,15 @@ d=100 strong setting의 Eta-group + refit은 ARI=0.686, selected q=24.75, FPR=0.
 
 해석:
 
-EBIC/RIC-like/log(d)-slope 재선택은 BIC 결과를 거의 바꾸지 못했다. 기본 d=200 path에서 q=17-27 후보가 존재한 replication은 2%뿐이고, d=400에서는 0%였다. 따라서 고차원 실패는 단순히 BIC penalty가 약해서 생긴 문제가 아니라, 현재 Eta path가 true-support-size 후보를 거의 만들지 못하는 path/update 문제로 보는 것이 더 타당하다.
+EBIC/RIC-like/log(d)-slope 재선택은 BIC 결과를 거의 바꾸지 못했다. 기본 d=200 path에서 q=17-27 후보가 존재한 replication은 2%뿐이고, 기본 d=400 path에서는 0%였다. 따라서 고차원 실패는 단순히 BIC penalty가 약해서 생긴 문제가 아니라, 현재 Eta path가 true-support-size 후보를 거의 만들지 못하는 path/update 문제로 보는 것이 더 타당하다.
 
-d=200에서 Eta path를 더 길게 잡은 diagnostic도 확인했다. 이는 official tuning 변경이 아니라, path density/range가 성능에 미치는 영향을 확인하기 위한 추가 점검이다.
+d=200과 d=400에서 Eta path를 더 길게 잡은 diagnostic도 확인했다. 이는 official tuning 변경이 아니라, path density/range가 성능에 미치는 영향을 확인하기 위한 추가 점검이다.
 
-| setting | path | reps | near22 후보율 | Selected q | Dense rate | ARI | FPR | Precision | F1 |
-|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| d=200 | 기본 path | 50 | 0.02 | 120.06 | 0.20 | 0.459 | 0.552 | 0.208 | 0.331 |
-| d=200 | long path 240 | 50 | 0.34 | 62.14 | 0.04 | 0.447 | 0.235 | 0.507 | 0.584 |
+| setting | path | reps | near22 후보율 | q<=50 후보율 | Selected q | Dense rate | ARI | TPR | FPR | Precision | F1 |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| d=200 | 기본 path | 50 | 0.02 | 0.02 | 120.06 | 0.20 | 0.459 | 0.989 | 0.552 | 0.208 | 0.331 |
+| d=200 | long path 240 | 50 | 0.34 | 0.46 | 62.14 | 0.04 | 0.447 | 0.920 | 0.235 | 0.507 | 0.584 |
+| d=400 | 기본 path | 20 | 0.00 | 0.00 | 262.95 | 0.30 | 0.206 | 0.920 | 0.642 | 0.080 | 0.146 |
+| d=400 | long path 240 | 20 | 0.40 | 0.55 | 68.75 | 0.00 | 0.214 | 0.620 | 0.146 | 0.491 | 0.441 |
 
-long path는 ARI를 크게 올리지는 않지만 selected q와 FPR을 줄이고 Precision/F1을 개선한다. 다만 selected q=62.14는 여전히 true union q=22보다 크고, near22 후보율도 34%에 그친다. 즉 고차원에서는 path density/range가 중요한 next tuning candidate이지만, 이 결과만으로 official tuning을 바꾸기는 이르다. 다음 보강 후보는 path construction, MM/coordinate update, 또는 고차원용 screening 전략이다.
+long path는 d=200과 d=400 모두에서 selected q와 FPR을 줄이고 Precision/F1을 개선한다. 특히 d=400에서는 dense 선택률이 0.30에서 0.00으로 줄고 FPR도 0.642에서 0.146으로 낮아진다. 하지만 d=400 long path의 TPR은 0.620으로 떨어지고, selected q=68.75는 여전히 true union q=22보다 크다. 모수 지표도 mixed하다: d=400 long path의 MSE_mu는 0.000485, MSE_centered_eta는 1.375로 낮아지지만 MSE_kappa는 273.021로 기본 path보다 커진다. 또한 q=0 선택이 2/20회 있어 refit valid reps는 18/20이다. 즉 고차원에서는 path density/range가 중요한 next tuning candidate이지만, path 확장만으로 충분하다고 보기는 어렵다. 다음 보강 후보는 path construction, MM/coordinate update, 또는 고차원용 screening 전략이다.
