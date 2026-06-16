@@ -1,0 +1,9 @@
+# Large generated simulation outputs
+results/**/cells/
+results/**/*raw.csv
+
+# Local R code kept on disk, not tracked
+r/*.r
+r/*.R
+r/**/*.r
+r/**/*.R
