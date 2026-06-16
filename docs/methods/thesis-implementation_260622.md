@@ -247,6 +247,37 @@ K=2에서는 현재 unpenalized eta M-step에서 얻은 $|\eta_{2j}-\eta_{1j}|$ 
 4. 이전 fit을 warm start로 사용해 새 $\lambda_\eta$에서 적합한다.
 5. path 위 후보 중 BIC가 가장 작은 fit을 선택한다.
 
+### 8.4. Weak setting path refinement 진단
+
+2026-06-16에 weak concentration setting에서 Eta path 후보 전체를 저장하고, target-free adaptive refinement를 여러 방식으로 점검했다. 목적은 공식 tuning rule을 바꾸는 것이 아니라, Eta BIC가 null support 또는 dense support로 튀는 원인이 단순 path grid 부족인지 확인하는 것이었다.
+
+| path construction | scope | near22 후보율 | BIC null 선택률 | positive-support dense 선택률 | 구현상 의미 |
+|:---|:---|---:|---:|---:|:---|
+| no refinement | weak100 | 0.23 | 0.73 | 0.72 | 기본 path가 q=22 근처 후보를 충분히 만들지 못함 |
+| oracle target-refine | weak100 | 0.89 | 0.14 | 0.09 | true q 주변 범위를 쓰므로 논문 공식 알고리즘 불가 |
+| adaptive v1 support-jump | weak100 | 0.73 | 0.24 | 0.24 | target-free refinement로 개선되지만 oracle에는 부족 |
+| adaptive v2 priority midpoint | smoke10 | 0.50 | 0.50 | 0.50 | priority interval midpoint만으로는 개선 부족 |
+| adaptive v2.1 duplicate endpoint | smoke10 | 0.50 | 0.40 | 0.40 | evaluated 254, saved 6, duplicate endpoint 248 |
+| adaptive v3 multi-point | smoke10 | 0.50 | 0.60 | 0.40 | evaluated 990, saved 6, duplicate endpoint 984 |
+
+중요한 해석은 다음이다.
+
+1. Oracle target-refine은 q=17-27이라는 true support 주변 정보를 사용하므로 공식 알고리즘에 넣을 수 없다.
+2. Adaptive v2/v2.1/v3는 target-free지만, smoke 결과에서 unique support 다양성을 충분히 늘리지 못했다.
+3. 특히 v3는 990개 후보를 평가했는데도 saved unique support가 6개뿐이었고, near22 후보율도 개선하지 못했다.
+4. 따라서 weak setting의 Eta BIC 실패는 단순히 lambda grid가 성긴 문제라기보다, proximal EM-type update가 만드는 support plateau와 BIC/positive-support tuning instability 문제로 보는 것이 더 타당하다.
+
+논문 본문 알고리즘에는 oracle target-refine 또는 adaptive v2/v3를 넣지 않는다. 이 결과는 appendix 또는 supplementary diagnostic으로 두고, 본문에서는 "weak concentration setting에서 현재 proximal path+BIC가 불안정할 수 있다"는 한계로 정리하는 것이 안전하다.
+
+다음 방법론 보강 후보는 path grid를 더 촘촘히 하는 방향보다 다음 쪽이 더 적절하다.
+
+| 후보 | 이유 |
+|:---|:---|
+| stability selection | BIC 한 번의 선택이 null/dense로 튀는 문제를 완화할 수 있음 |
+| alternative IC / EBIC / RICc | df approximation과 weak signal에서의 BIC 불안정성을 sensitivity로 점검 |
+| MM safeguard 또는 coordinate/proximal update 개선 | support plateau가 update 구조에서 오는지 확인하고 objective monotonicity를 강화 |
+| repeated random starts + path aggregation | local solution과 support plateau에 대한 민감도를 줄이는 보조 전략 |
+
 ## 9. Refit
 
 Refit은 variable selection 후 선택된 coordinate support를 고정하고 penalty 없이 vMF mixture를 다시 추정하는 단계다.
@@ -375,7 +406,8 @@ $$\eta_{kj}^c = \eta_{kj} - K^{-1}\sum_{\ell=1}^{K}\eta_{\ell j}.$$
 
 주의할 점은 다음이다.
 
-* 현재 에타 패널티 M-step은 exact penalized M-step이 아니라 proximal EM-type update다. Objective trace smoke test에서는 일부 lambda 후보에서 penalized objective 감소가 관찰되므로, 논문 버전에서는 line search/MM 보강이 필요하다.
+* 현재 에타 패널티 M-step은 exact penalized M-step이 아니라 proximal EM-type update다. Line-search safeguard 이후 objective trace smoke test는 통과했지만, 이것은 exact EM 이론을 의미하지 않는다.
+* Weak setting path diagnostic에서는 Eta BIC가 null/dense support로 불안정하게 선택되는 문제가 남아 있다. 이는 단순 grid density 문제가 아니라 support plateau/tuning instability로 정리하는 것이 현재 증거에 더 맞다.
 * 고차원 일부 반복에서는 $\kappa$ 추정 outlier가 생겨 MSE_kappa 평균이 매우 커질 수 있다.
 * ARI가 비슷하더라도 selected q와 FPR이 크면 variable selection 성능은 좋지 않은 것으로 해석해야 한다.
 * `thesis-simulation_260611.md`의 고차원 fixed-kappa setting은 signal이 약해지는 stress setting이므로, 일반적인 high-dimensional robustness 결과와 구분해야 한다.
