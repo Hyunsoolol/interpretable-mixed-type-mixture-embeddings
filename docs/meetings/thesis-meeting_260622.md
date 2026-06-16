@@ -10,25 +10,17 @@ Eta penalty는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에
 
 ## 2. 모형 아이디어
 
-관측값은 단위구면 위의 방향자료 $x_i \in \mathbb{S}^{d-1}$이고, $K$-component vMF mixture를 사용한다.
-
-**Mixture model**
+**Model**
 
 $$p(x_i;\Theta)=\sum_{k=1}^K \alpha_k C_d(\kappa_k)\exp(\kappa_k \mu_k^\top x_i), \qquad \|\mu_k\|_2=1,\quad \kappa_k>0$$
 
-**Natural parameter**
-
 $$\eta_k=\kappa_k\mu_k$$
 
-Posterior responsibility는 다음과 같다.
-
-$$\tau_{ik}=\frac{\alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)}{\sum_{\ell=1}^K \alpha_\ell C_d(\kappa_\ell)\exp(\eta_\ell^\top x_i)}$$
-
-K=2에서 posterior decision boundary는
+**Posterior decision**
 
 $$\log\frac{\tau_{i2}}{\tau_{i1}}=\mathrm{const}+(\eta_2-\eta_1)^\top x_i$$
 
-로 정리된다. 따라서 변수 선택은 $\mu_k$ 자체보다 posterior decision에 직접 들어가는 $\eta_k$ contrast를 기준으로 하는 것이 자연스럽다.
+변수 선택 대상은 $\mu_k$ 자체보다 posterior decision에 직접 들어가는 $\eta_k$ contrast로 둔다.
 
 **Observed log-likelihood**
 
@@ -38,21 +30,15 @@ K>2에서는 coordinate별 centered eta contrast를 사용한다.
 
 $$\bar{\eta}_j=\frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j}, \qquad c_{kj}=\eta_{kj}-\bar{\eta}_j$$
 
-**Penalty and objective**
-
-K>2에서는 두 가지 penalty 선택지가 있다.
+**Penalty**
 
 $$P_{\mathrm{group}}(\Theta)=\lambda_\eta\sum_{j=1}^d \|c_{\cdot j}\|_2$$
 
 $$P_{\mathrm{ANOVA}\text{-}L1}(\Theta)=\lambda_\eta\sum_{j=1}^d\sum_{k=1}^K |c_{kj}|$$
 
-Group lasso는 coordinate $j$ 전체가 component contrast를 갖는지 선택한다. ANOVA-type L1은 coordinate 안의 component별 deviation을 개별적으로 shrink한다.
-
-현재 연구 목적은 component별 세부 deviation보다 “posterior decision에 관여하는 coordinate-level eta contrast 선택”이므로 group lasso가 더 자연스럽다.
-
 $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
-같은 K=4 common+specific setting에서 rep=20 pilot으로 비교하면 ANOVA-type L1은 BIC에서 거의 모든 좌표를 선택했다.
+현재 주 penalty는 centered eta group lasso다. 이유는 coordinate-level eta contrast 선택이 목표이고, ANOVA-type L1은 pilot에서 dense support로 갔기 때문이다.
 
 | Scenario | Penalty | ARI | Selected q | FPR | Precision | F1 |
 |:---|:---|---:|---:|---:|---:|---:|
@@ -61,8 +47,6 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 | weak | Group lasso + refit | 0.565 | 23.90 | 0.024 | 0.924 | 0.960 |
 | weak | ANOVA L1 + refit | 0.515 | 99.50 | 0.994 | 0.221 | 0.362 |
 
-모수 추정 결과도 group lasso + refit 쪽이 더 안정적이었다.
-
 | Scenario | Penalty | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
 |:---|:---|---:|---:|---:|---:|
 | strong | Group lasso + refit | 0.000101 | 1.992 | 0.191 | 58.007 |
@@ -70,9 +54,7 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 | weak | Group lasso + refit | 0.000073 | 1.614 | 0.172 | 55.298 |
 | weak | ANOVA L1 + refit | 0.000288 | 2.989 | 0.659 | 56.043 |
 
-따라서 현재 구현과 논문 주장은 centered eta group lasso를 주 penalty로 두고, ANOVA-type L1은 대안 또는 sensitivity 후보로만 남기는 것이 적절하다.
-
-현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
+ANOVA-type L1은 sensitivity 후보로만 남긴다. 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
 
 ## 3. 핵심 simulation 결과
 
@@ -80,13 +62,13 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
 설정:
 
-```text
-K = 2, n = 1000, d = 100, rep = 20
-shared active variables = 10
-true q = 10
-kappa = (20, 200)
-mu_1 = mu_2
-```
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 2, n = 1000, d = 100, rep = 20 |
+| 활성 변수 구조 | 두 component가 같은 10개 active 좌표 사용 = true q 10 |
+| 평균방향 | mu_1 = mu_2 |
+| concentration | kappa = (20, 200) |
+| 목적 | 평균방향은 같고 kappa 차이만 있는 toy setting에서 eta contrast 선택 확인 |
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
