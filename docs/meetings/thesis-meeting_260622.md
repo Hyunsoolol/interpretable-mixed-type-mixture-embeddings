@@ -10,33 +10,73 @@ Eta penalty는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에
 
 ## 2. 모형 아이디어
 
-vMF mixture에서 component density는 다음과 같다.
+관측값은 단위구면 위의 방향자료 $x_i \in \mathbb{S}^{d-1}$이고, $K$-component vMF mixture를 사용한다.
 
 $$
-f_k(x) = C_d(\kappa_k)\exp(\kappa_k \mu_k^\top x)
+p(x_i;\Theta)
+= \sum_{k=1}^K \alpha_k C_d(\kappa_k)
+\exp(\kappa_k \mu_k^\top x_i),
+\qquad
+\|\mu_k\|_2 = 1,\quad \kappa_k > 0
 $$
 
-여기서 posterior classification에 직접 들어가는 natural parameter는
+Natural parameter를
 
 $$
 \eta_k = \kappa_k \mu_k
 $$
 
-이다. 두 component의 posterior log-odds는
+로 두면 posterior responsibility는
+
+$$
+\tau_{ik}
+=
+\frac{\alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)}
+{\sum_{\ell=1}^K \alpha_\ell C_d(\kappa_\ell)
+\exp(\eta_\ell^\top x_i)}
+$$
+
+이고, $K=2$에서 posterior decision boundary는
 
 $$
 \log\frac{\tau_{i2}}{\tau_{i1}}
 = \mathrm{const} + (\eta_2-\eta_1)^\top x_i
 $$
 
-로 쓸 수 있다. 따라서 변수 j가 군집 구분에 기여하는지는 `mu_kj` 자체보다 `eta_kj`의 component contrast를 보는 것이 더 직접적이다.
+로 정리된다. 따라서 변수 선택은 $\mu_k$ 자체보다 posterior decision에 직접 들어가는 $\eta_k$ contrast를 기준으로 하는 것이 자연스럽다.
 
-K>2에서는 coordinate별 centered eta contrast를 사용한다.
+관측 log-likelihood는
 
 $$
-c_{kj} = \eta_{kj} - \frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j},
+\ell(\Theta)
+=
+\sum_{i=1}^n
+\log\left[
+\sum_{k=1}^K \alpha_k C_d(\kappa_k)
+\exp(\eta_k^\top x_i)
+\right]
+$$
+
+이다. $K>2$에서는 coordinate별 centered eta contrast를 사용한다.
+
+$$
+c_{kj}
+=
+\eta_{kj}
+-
+\frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j}
+$$
+
+제안 penalty와 penalized objective는 다음과 같다.
+
+$$
+P_\eta(\Theta)
+=
+\lambda_\eta \sum_{j=1}^d \|c_{\cdot j}\|_2,
 \qquad
-P_\eta = \lambda_\eta \sum_{j=1}^d \|c_{\cdot j}\|_2
+\mathcal{L}_p(\Theta)
+=
+\ell(\Theta) - P_\eta(\Theta)
 $$
 
 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
@@ -154,9 +194,3 @@ Stability selection도 바로 해결책이 되지는 않았다.
 | IC slope sensitivity | gamma를 낮추면 zero는 줄지만 dense/FPR 증가 | 단순 df 상수항 수정은 해결책 아님 |
 
 다음 보강은 stability threshold 조정보다 alternative IC, selection rule, 또는 Eta update 자체의 개선 쪽이 우선이다.
-
-## 6. Real data 위치
-
-PBMC lymphoid3는 real-data 보조 사례로 사용할 수 있다. 다만 sparse k-means보다 ARI가 높다는 식의 주장은 피해야 한다. Eta의 장점은 vMF mixture 안에서 marker support를 더 해석 가능하게 준다는 점으로 제한한다.
-
-BBC News/text 결과는 본문 핵심 근거로는 약하다. appendix 또는 supplementary 사례로 두는 것이 안전하다.
