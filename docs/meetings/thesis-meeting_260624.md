@@ -233,6 +233,84 @@ w가 커질수록 component-specific signal이 강해지고, 평균 방향 간 c
 
 Rossi와 Separate는 clustering은 어느 정도 되지만 거의 모든 변수를 선택한다. Eta-group은 ARI를 비슷하게 유지하면서 noise selection을 줄인다.
 
+### 3.5 Moderate high-dimensional robustness: d=200
+
+설정:
+
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 4, n = 1000, d = 200, rep = 50 |
+| 활성 변수 구조 | common 6개 + component-specific 4개씩 = true union q 22 |
+| raw mu loading | common = 1.0, own-specific = w = 0.5, 나머지 = 0 |
+| normalized mu 값 | common = 0.378, own-specific = 0.189, 나머지 = 0 |
+| 평균방향 유사도 | mean pairwise cos(mu_k, mu_l) = 0.857 |
+| concentration | kappa = (30, 45, 65, 90) |
+| 목적 | d가 커질 때 Eta-group의 sparse support recovery가 유지되는지 확인 |
+
+| Method | ARI | Selected q | TPR | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|---:|
+| Rossi BIC | 0.393 | 200.00 | 1.000 | 1.000 | 0.110 | 0.198 |
+| Rossi BIC + refit | 0.389 | 200.00 | 1.000 | 1.000 | 0.110 | 0.198 |
+| Separate BIC | 0.398 | 200.00 | 1.000 | 1.000 | 0.110 | 0.198 |
+| Separate BIC + refit | 0.388 | 200.00 | 1.000 | 1.000 | 0.110 | 0.198 |
+| Eta-group BIC | 0.459 | 120.06 | 0.989 | 0.552 | 0.208 | 0.331 |
+| Eta-group BIC + refit | 0.430 | 120.06 | 0.989 | 0.552 | 0.208 | 0.331 |
+
+모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
+
+| Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
+|:---|---:|---:|---:|---:|
+| Rossi BIC | 0.000964 | 123.189 | 2.407 | 63.286 |
+| Rossi BIC + refit | 0.001040 | 123.889 | 2.572 | 63.223 |
+| Separate BIC | 0.000898 | 73.406 | 1.823 | 58.812 |
+| Separate BIC + refit | 0.001033 | 104.516 | 2.420 | 62.509 |
+| Eta-group BIC | 0.000434 | 62.041 | 0.905 | 60.350 |
+| Eta-group BIC + refit | 0.000691 | 93.797 | 1.818 | 62.299 |
+
+해석:
+
+d=200에서는 Rossi와 Separate가 모든 변수를 선택한다. Eta-group은 ARI와 모수 MSE에서는 상대적으로 낫지만, selected q=120.06, FPR=0.552로 true union q=22 근처의 sparse recovery는 유지하지 못한다. 따라서 d=200 결과는 본문 핵심 성공 사례라기보다, 고차원에서 Eta-group이 dense baseline보다는 낫지만 selection sparsity가 약해지는 robustness evidence로 보는 것이 안전하다.
+
+### 3.6 High-dimensional stress: d=400
+
+설정:
+
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 4, n = 1000, d = 400, rep = 20 |
+| 활성 변수 구조 | common 6개 + component-specific 4개씩 = true union q 22 |
+| raw mu loading | common = 1.0, own-specific = w = 0.5, 나머지 = 0 |
+| normalized mu 값 | common = 0.378, own-specific = 0.189, 나머지 = 0 |
+| 평균방향 유사도 | mean pairwise cos(mu_k, mu_l) = 0.857 |
+| concentration | kappa = (30, 45, 65, 90) |
+| 목적 | 더 강한 고차원 stress에서 Eta-group의 한계를 확인 |
+
+| Method | ARI | Selected q | TPR | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|---:|
+| Rossi BIC | 0.142 | 400.00 | 1.000 | 1.000 | 0.055 | 0.104 |
+| Rossi BIC + refit | 0.141 | 400.00 | 1.000 | 1.000 | 0.055 | 0.104 |
+| Separate BIC | 0.146 | 399.95 | 1.000 | 1.000 | 0.055 | 0.104 |
+| Separate BIC + refit | 0.144 | 399.95 | 1.000 | 1.000 | 0.055 | 0.104 |
+| Eta-group BIC | 0.206 | 262.95 | 0.920 | 0.642 | 0.080 | 0.146 |
+| Eta-group BIC + refit | 0.182 | 262.95 | 0.920 | 0.642 | 0.080 | 0.146 |
+
+모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
+
+| Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
+|:---|---:|---:|---:|---:|
+| Rossi BIC | 0.001252 | 411.108 | 4.692 | 71.872 |
+| Rossi BIC + refit | 0.001300 | 412.507 | 4.854 | 71.886 |
+| Separate BIC | 0.001246 | 306.790 | 4.196 | 67.977 |
+| Separate BIC + refit | 0.001330 | 397.506 | 4.860 | 71.287 |
+| Eta-group BIC | 0.000701 | 216.991 | 1.942 | 63.839 |
+| Eta-group BIC + refit | 0.001107 | 343.629 | 4.016 | 70.811 |
+
+해석:
+
+d=400에서는 모든 방법의 ARI가 낮고, Rossi와 Separate는 거의 완전히 dense하게 작동한다. Eta-group은 ARI와 FPR에서 상대적으로 낫지만 selected q=262.95로 여전히 매우 크고, true union q=22 근처의 sparse support recovery라고 보기 어렵다. 따라서 d=400은 본문 성공 사례가 아니라 high-dimensional stress limitation으로 두는 것이 적절하다. 이 결과는 고차원 setting에서 BIC/path tuning 또는 update 보강이 필요하다는 근거로 쓰는 편이 안전하다.
+
+d=100 strong setting의 Eta-group + refit은 ARI=0.686, selected q=24.75, FPR=0.037, F1=0.937이었다. 같은 구조에서 d=200, d=400으로 가면 Eta-group은 dense baseline보다는 낫지만 selected q와 FPR이 크게 증가한다. 즉 고차원에서는 clustering보다 sparse support recovery가 먼저 불안정해진다.
+
 ## 4. Weak concentration setting
 
 ### 4.1 K=4 weak common+specific setting
