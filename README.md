@@ -22,14 +22,14 @@ This repository is currently kept as a document-first research meeting archive.
 
 ## Key Documents
 
-- `docs/meetings/thesis-meeting_260622.md`: meeting-ready summary and current decisions.
+- `docs/meetings/thesis-meeting_260624.md`: meeting-ready summary and current decisions.
 - `docs/methods/thesis-implementation_260622.md`: implementation status and algorithm notes.
 - `docs/simulations/thesis-simulation_260615.md`: simulation design, diagnostics, and interpretation.
 - `docs/methods/thesis-code-rossi-eta_260615.md`: Rossi/Eta code-level notes.
 
 ## Current Research Position
 
-The main claim is not that Eta penalty greatly increases ARI. The safer claim is that eta-contrast penalization can preserve clustering performance while producing a sparser, more interpretable support inside a vMF mixture framework.
+The main claim is not that Eta-group greatly increases ARI. The safer claim is that centered eta group penalization can preserve clustering performance while producing a sparser, more interpretable support inside a vMF mixture framework.
 
 Weak concentration settings remain a diagnostic limitation: recent checks point to path/BIC instability rather than a simple grid-density or BIC constant-term issue.
 

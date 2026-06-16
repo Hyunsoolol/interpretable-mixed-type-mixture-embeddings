@@ -2,13 +2,13 @@
 
 업데이트: 2026-06-15
 
-이 문서는 현재 thesis-hp-clustering에서 사용한 R 코드 기준으로, Rossi & Barbaro (2022) sparse vMF 모형과 제안하는 Eta contrast penalty 모형이 어떻게 구현되어 있는지 정리한 것이다.
+이 문서는 현재 thesis-hp-clustering에서 사용한 R 코드 기준으로, Rossi & Barbaro (2022) sparse vMF 모형과 제안하는 Eta-group 모형이 어떻게 구현되어 있는지 정리한 것이다.
 
 목적은 연구미팅에서 다음 질문에 답할 수 있도록 하는 것이다.
 
-- Rossi sparse vMF는 코드에서 어떻게 추정했는가?
+- Rossi는 코드에서 어떻게 추정했는가?
 - penalty가 있을 때 EM update는 어떻게 구현했는가?
-- 제안 Eta penalty는 Rossi와 무엇이 다른가?
+- 제안 Eta-group은 Rossi와 무엇이 다른가?
 - lambda path와 BIC tuning은 코드에서 어떻게 처리했는가?
 - refit은 정확히 무엇을 다시 추정하는가?
 
@@ -17,7 +17,7 @@
 | 파일 | 역할 |
 |---|---|
 | `r/rossi_barbaro_2022_reproduction.r` | vMF density, vMF sampling, Rossi sparse vMF EM, beta path, BIC/EBIC 계산 |
-| `r/rb2022_k4_pilot_compare_run.r` | 공통 평가 함수, refit, Eta centered penalty EM prototype, K=4 비교용 기본 함수 |
+| `r/rb2022_k4_pilot_compare_run.r` | 공통 평가 함수, refit, Eta-group EM prototype, K=4 비교용 기본 함수 |
 | `r/k4_path_tuning_compare_run.r` | K=4에서 Rossi / Separate / Eta path tuning 비교 |
 | `r/k4_specific_effect_run.r` | common variable + component-specific variable 시뮬레이션 실행 코드 |
 
@@ -124,7 +124,7 @@ estimate_kappa <- function(rho, d, kappa_cap = 1e6) {
 
 이 근사식은 vMF mixture EM에서 자주 쓰이는 Banerjee et al. (2005) 계열의 update approximation이다.
 
-## 5. Rossi sparse vMF 구현
+## 5. Rossi 구현
 
 ### 5.1 모형
 
@@ -280,7 +280,7 @@ df = alpha/kappa 자유도 + active mu 자유도
 
 `mu_k`는 unit norm 제약이 있으므로 active coordinate 수가 m이면 방향 자유도는 대략 `m - 1`이다.
 
-## 7. 제안 Eta contrast penalty 구현
+## 7. 제안 Eta-group 구현
 
 ### 7.1 왜 eta를 쓰는가
 
@@ -333,7 +333,7 @@ penalized loglik = loglik - lambda_eta * sum_j contrast_j
 
 ## 9. Eta proximal M-step
 
-Eta penalty의 exact M-step은 닫힌형으로 바로 풀기 어렵다. 이유는 vMF normalizing constant가 `||eta_k||_2`에 의존하고, penalty는 component 간 centered eta에 걸려 있기 때문이다.
+Eta-group의 exact M-step은 닫힌형으로 바로 풀기 어렵다. 이유는 vMF normalizing constant가 `||eta_k||_2`에 의존하고, penalty는 component 간 centered eta에 걸려 있기 때문이다.
 
 현재 구현은 proximal EM-type update다. 즉 exact closed-form penalized M-step을 푸는 것이 아니라, unpenalized eta M-step 후보에 centered eta group soft-thresholding을 적용한다.
 
@@ -344,7 +344,7 @@ Eta penalty의 exact M-step은 닫힌형으로 바로 풀기 어렵다. 이유�
 | `unpenalized_eta_mstep()` | penalty 없는 vMF M-step으로 eta 후보 계산 |
 | `prox_eta_centered()` | centered eta에 group soft-thresholding 적용 |
 | `eta_to_theta()` | eta에서 mu, kappa 복원 |
-| `fit_eta_centered_em()` | Eta penalty proximal EM-type 반복 |
+| `fit_eta_centered_em()` | Eta-group proximal EM-type 반복 |
 
 ### 9.1 unpenalized eta M-step
 
@@ -519,7 +519,7 @@ active <- active_eta_centered(fit)
 - penalty 단계: 변수 선택
 - refit 단계: 선택된 변수만 사용해 bias를 줄인 모수 재추정
 
-따라서 Eta+refit 결과에서 clustering 성능과 kappa 추정이 개선되는 경우가 많다.
+따라서 Eta-group + refit 결과에서 clustering 성능과 kappa 추정이 개선되는 경우가 많다.
 
 ## 13. Evaluation code
 
@@ -572,7 +572,7 @@ mu_k = v_k / ||v_k||
 3. fit_eta_specific_pair()
 ```
 
-이 중 thesis의 핵심 비교는 Rossi와 Eta다. Separate penalty는 교수님 제안 baseline으로 함께 둔 것이다.
+이 중 thesis의 핵심 비교는 Rossi와 Eta-group이다. Separate는 교수님 제안 baseline으로 함께 둔 것이다.
 
 ## 15. 코드상 중요한 해석 포인트
 
@@ -586,16 +586,16 @@ penalty target: mu_k
 
 하지만 posterior decision에는 `kappa_k * mu_k`가 들어간다. 따라서 concentration 차이가 큰 상황에서는 `mu_k` sparsity만으로 군집 구분 변수의 중요도를 직접 설명하기 어렵다.
 
-### 15.2 Eta penalty의 대상
+### 15.2 Eta-group의 대상
 
-Eta penalty는 posterior decision에 직접 들어가는 자연모수 contrast를 shrink한다.
+Eta-group은 posterior decision에 직접 들어가는 자연모수 contrast를 shrink한다.
 
 ```text
 penalty target: centered eta contrast
 eta_k = kappa_k * mu_k
 ```
 
-그래서 common variable이 많고 component-specific variable이 일부만 존재하는 환경에서, Eta penalty는 공통 성분보다 component 간 차이를 만드는 변수에 더 직접적으로 반응한다.
+그래서 common variable이 많고 component-specific variable이 일부만 존재하는 환경에서, Eta-group은 공통 성분보다 component 간 차이를 만드는 변수에 더 직접적으로 반응한다.
 
 ### 15.3 Refit의 의미
 
@@ -618,7 +618,7 @@ We implement a proximal EM-type update for the centered eta-contrast penalty.
 
 Objective trace smoke test는 `results/eta_objective_trace_260615/`에 저장했다. 해당 smoke test에서는 일부 lambda 후보에서 penalized objective 감소가 관찰되었다. 따라서 현재 버전은 monotone EM algorithm이라고 주장하면 안 되고, 논문 버전에서는 line search 또는 MM safeguard를 추가하는 것이 필요하다.
 
-BIC 자유도 역시 구현상 근사다. Eta centered penalty에서는 `df = (K - 1) + d + (K - 1) * m`을 사용한다. 여기서 `m`은 active centered eta coordinate 수, `d`는 coordinate별 공통 eta baseline, `(K - 1) * m`은 선택된 coordinate의 centered contrast 자유도를 나타낸다.
+BIC 자유도 역시 구현상 근사다. Eta-group에서는 `df = (K - 1) + d + (K - 1) * m`을 사용한다. 여기서 `m`은 active centered eta coordinate 수, `d`는 coordinate별 공통 eta baseline, `(K - 1) * m`은 선택된 coordinate의 centered contrast 자유도를 나타낸다.
 
 또한 tuning은 현재 공식 비교에서 path tuning + BIC로 통일했지만, 고차원에서는 BIC가 dense한 model을 선호하거나 반대로 과도하게 sparse한 선택을 할 수 있다. 따라서 본문에서는 BIC 기준 결과를 제시하고, EBIC/RICc는 sensitivity analysis 또는 appendix로 두는 것이 적절하다.
 

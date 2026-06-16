@@ -9,7 +9,7 @@
 
 | 항목 | 기준 |
 |:---|:---|
-| 비교 방법 | Rossi, Rossi + refit, 분리 패널티, 분리 패널티 + refit, 에타 패널티, 에타 패널티 + refit |
+| 비교 방법 | Rossi, Rossi + refit, Separate, Separate + refit, Eta-group, Eta-group + refit |
 | tuning 후보 | path 기반 후보 생성 |
 | tuning 선택 | BIC 최소 지점 |
 | EBIC | 고차원 setting의 보조 지표 |
@@ -170,9 +170,9 @@ K=4 driver에서는 주로 `fit_separate_path_for_kappa()`, `fit_separate_specif
 
 해석상 중요한 한계는 $\lambda_\kappa$가 component-level scalar penalty라는 점이다. 즉 concentration 크기는 줄일 수 있지만, 어떤 coordinate가 concentration-driven separation에 기여하는지는 직접 선택하지 못한다.
 
-## 8. 에타 패널티 proximal EM-type update
+## 8. Eta-group proximal EM-type update
 
-에타 패널티의 출발점은 $\eta_k=\kappa_k\mu_k$가 posterior decision에 직접 들어간다는 점이다. 두 component의 경우 posterior log odds는 다음 형태다.
+Eta-group의 출발점은 $\eta_k=\kappa_k\mu_k$가 posterior decision에 직접 들어간다는 점이다. 두 component의 경우 posterior log odds는 다음 형태다.
 
 $$\log\frac{\tau_{i2}}{\tau_{i1}} = \mathrm{const} + (\eta_2-\eta_1)^T x_i.$$
 
@@ -233,9 +233,9 @@ $$\eta_{kj,\lambda} = \bar{\eta}_j + c_{kj,\lambda}.$$
 
 관련 함수는 `prox_eta_centered()`, `fit_eta_centered_em()`, `fit_eta_centered_path_pair()`다. 함수명에는 `em`이 들어가지만, 논문 표현에서는 exact EM이 아니라 proximal EM-type update로 부르는 것이 안전하다.
 
-### 8.3. 에타 패널티 path
+### 8.3. Eta-group path
 
-에타 패널티도 fixed grid가 아니라 threshold path를 사용한다.
+Eta-group도 fixed grid가 아니라 threshold path를 사용한다.
 
 K=2에서는 현재 unpenalized eta M-step에서 얻은 $|\eta_{2j}-\eta_{1j}|$ 값들이 support 변화 threshold가 된다. K=4에서는 $\|c_{\cdot j}\|_2$ 값들이 support 변화 threshold가 된다.
 
@@ -291,9 +291,9 @@ Refit은 variable selection 후 선택된 coordinate support를 고정하고 pen
 | $\kappa_k$ | 다시 추정 |
 | cluster label | refit posterior에서 다시 계산 |
 
-Rossi와 분리 패널티의 support는 $\mu_k$의 nonzero coordinate union으로 정의한다. 에타 패널티의 support는 eta contrast 또는 centered eta group norm이 0이 아닌 coordinate로 정의한다.
+Rossi와 Separate의 support는 $\mu_k$의 nonzero coordinate union으로 정의한다. Eta-group의 support는 eta contrast 또는 centered eta group norm이 0이 아닌 coordinate로 정의한다.
 
-Refit의 목적은 selection을 바꾸는 것이 아니라 shrinkage bias를 줄이는 것이다. 특히 에타 패널티는 $\eta_k=\kappa_k\mu_k$ 크기를 직접 줄이므로, refit 후 $\kappa$ ratio와 eta contrast norm이 true value에 가까워지는지 확인한다.
+Refit의 목적은 selection을 바꾸는 것이 아니라 shrinkage bias를 줄이는 것이다. 특히 Eta-group은 $\eta_k=\kappa_k\mu_k$ 크기를 직접 줄이므로, refit 후 $\kappa$ ratio와 eta contrast norm이 true value에 가까워지는지 확인한다.
 
 관련 함수는 `fit_support_refit()` 또는 K=2 실험의 `fit_support_constrained_vmf()`다.
 
@@ -312,10 +312,10 @@ $$\mathrm{EBIC} = \{\log(n)+2\gamma\log(d)\}df - 2\ell(\hat{\Theta}), \qquad \ga
 | 방법 | 자유도 근사 | 해석 |
 |:---|:---|:---|
 | Rossi | `(2K - 1) + sum_k max(1, nnz_k - 1)` | mixing proportion, component별 kappa, 그리고 unit-norm 제약을 반영한 active mu 자유도 |
-| Separate penalty | `(K - 1) + active_kappa + sum_k max(1, nnz_k - 1)` | mixing proportion, 살아남은 kappa, active mu 자유도 |
-| Eta centered penalty | `(K - 1) + d + (K - 1) * m` | mixing proportion, coordinate별 공통 eta baseline, active centered eta contrast 자유도 |
+| Separate | `(K - 1) + active_kappa + sum_k max(1, nnz_k - 1)` | mixing proportion, 살아남은 kappa, active mu 자유도 |
+| Eta-group | `(K - 1) + d + (K - 1) * m` | mixing proportion, coordinate별 공통 eta baseline, active centered eta contrast 자유도 |
 
-Eta centered penalty에서 `m`은 active centered eta coordinate 수다. `d`는 모든 component에 공통으로 남는 eta baseline을 나타내고, `(K - 1) * m`은 선택된 coordinate에서 component 간 centered contrast가 갖는 자유도를 근사한다.
+Eta-group에서 `m`은 active centered eta coordinate 수다. `d`는 모든 component에 공통으로 남는 eta baseline을 나타내고, `(K - 1) * m`은 선택된 coordinate에서 component 간 centered contrast가 갖는 자유도를 근사한다.
 
 이 df는 현재 구현에서 BIC/EBIC를 계산하기 위한 implementation-level approximation이다. 아직 엄밀한 effective degrees of freedom 이론으로 증명한 것은 아니므로, 논문에서는 sensitivity 기준으로 BIC, EBIC, RICc를 함께 확인하는 것이 안전하다. 특히 고차원에서는 BIC가 dense한 model을 선택할 수 있어 EBIC/RICc 또는 stability selection 검토가 필요하다.
 
@@ -400,13 +400,13 @@ $$\eta_{kj}^c = \eta_{kj} - K^{-1}\sum_{\ell=1}^{K}\eta_{\ell j}.$$
 | Rossi 재현 | 원 논문 setting에서 ARI와 sparsity pattern이 논문 Figure 범위와 유사 |
 | tuning 기준 | 연구미팅 공식 결과는 path 후보 + BIC 선택 |
 | 분리 패널티 | $\lambda_\kappa$ grid와 $\lambda_\mu$ path를 결합한 2D 후보 사용 |
-| 에타 패널티 | K=2는 eta contrast, K=4는 centered eta group norm 사용 |
+| Eta-group | K=2는 eta contrast, K=4는 centered eta group norm 사용 |
 | refit | support는 바꾸지 않고 penalty 없이 재추정 |
 | 고차원 | BIC가 느슨해질 수 있어 EBIC sensitivity가 필요 |
 
 주의할 점은 다음이다.
 
-* 현재 에타 패널티 M-step은 exact penalized M-step이 아니라 proximal EM-type update다. Line-search safeguard 이후 objective trace smoke test는 통과했지만, 이것은 exact EM 이론을 의미하지 않는다.
+* 현재 Eta-group M-step은 exact penalized M-step이 아니라 proximal EM-type update다. Line-search safeguard 이후 objective trace smoke test는 통과했지만, 이것은 exact EM 이론을 의미하지 않는다.
 * Weak setting path diagnostic에서는 Eta BIC가 null/dense support로 불안정하게 선택되는 문제가 남아 있다. 이는 단순 grid density 문제가 아니라 support plateau/tuning instability로 정리하는 것이 현재 증거에 더 맞다.
 * 고차원 일부 반복에서는 $\kappa$ 추정 outlier가 생겨 MSE_kappa 평균이 매우 커질 수 있다.
 * ARI가 비슷하더라도 selected q와 FPR이 크면 variable selection 성능은 좋지 않은 것으로 해석해야 한다.
