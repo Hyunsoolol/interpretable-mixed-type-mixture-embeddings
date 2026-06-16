@@ -182,8 +182,6 @@ target/adaptive/stability refinement = off
 | Separate 2D path/grid BIC + refit | 0.526 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
 | Eta centered path BIC | 0.568 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
 | Eta centered path BIC + refit | 0.575 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
-| Eta centered path BIC positive-support | 0.568 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
-| Eta centered path BIC positive-support + refit | 0.575 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
 
 모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
 
@@ -195,8 +193,6 @@ target/adaptive/stability refinement = off
 | Separate 2D path/grid BIC + refit | 0.000286 | 3.536 | 0.667 | 56.209 |
 | Eta centered path BIC | 0.000172 | 7.409 | 0.355 | 54.506 |
 | Eta centered path BIC + refit | 0.000075 | 1.824 | 0.183 | 55.497 |
-| Eta centered path BIC positive-support | 0.000172 | 7.409 | 0.355 | 54.506 |
-| Eta centered path BIC positive-support + refit | 0.000075 | 1.824 | 0.183 | 55.497 |
 
 해석:
 
@@ -214,12 +210,13 @@ Eta penalty + refit은 weak setting에서도 ARI를 유지하면서 true union q
 | Eta BIC selected q=0 | 0/100 |
 | Eta BIC selected q=17-27 | 97/100 |
 | Eta BIC selected q>=75 | 0/100 |
-| positive-support selected q>=75 | 0/100 |
 | Eta + refit zero-support reps | 0/100 |
 | objective n_decrease max | 0 |
 | min objective diff | -8.37e-09 |
 | max line-search halving | 19 |
 | line-search rejected candidates | 0 |
+
+Positive-support BIC는 `selected_q > 0` 후보 중에서만 BIC를 고르는 sensitivity check다. 이번 rerun에서는 standard Eta BIC가 이미 nonzero near-true support를 골라서 positive-support 결과가 동일하므로 본문 표에서는 제외했다.
 
 다만 이전 diagnostic run에서는 path construction에 따라 null/dense instability가 나타났다. 따라서 weak setting은 strong setting만큼 안정적인 main evidence라기보다, 보조 robustness evidence로 두는 것이 안전하다.
 
