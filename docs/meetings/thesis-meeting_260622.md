@@ -97,16 +97,16 @@ mu_1 = mu_2
 | Eta path BIC | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
 | Eta path BIC + refit | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
 
-모수 추정 결과는 다음과 같다. MSE 지표는 기존 simulation 문서와 같이 100배 스케일로 표시했다.
+모수 추정 결과는 다음과 같다. 3.1과 3.2의 MSE 지표는 모두 raw scale로 통일했다.
 
 | Method | MSE_mu | MSE_kappa | MSE_Delta_eta | kappa ratio | eta contrast norm |
 |:---|---:|---:|---:|---:|---:|
-| Rossi path BIC | 0.0176 | 127.629 | 24.534 | 10.062 | 181.179 |
-| Rossi path BIC + refit | 0.0061 | 140.965 | 37.797 | 9.951 | 180.821 |
-| Separate path/grid BIC | 0.0176 | 127.629 | 24.534 | 10.062 | 181.179 |
-| Separate path/grid BIC + refit | 0.0061 | 140.965 | 37.797 | 9.951 | 180.821 |
-| Eta path BIC | 0.0180 | 741.495 | 29.167 | 8.559 | 175.542 |
-| Eta path BIC + refit | 0.0041 | 118.451 | 21.585 | 9.960 | 180.630 |
+| Rossi path BIC | 0.000176 | 1.276 | 0.245 | 10.062 | 181.179 |
+| Rossi path BIC + refit | 0.000061 | 1.410 | 0.378 | 9.951 | 180.821 |
+| Separate path/grid BIC | 0.000176 | 1.276 | 0.245 | 10.062 | 181.179 |
+| Separate path/grid BIC + refit | 0.000061 | 1.410 | 0.378 | 9.951 | 180.821 |
+| Eta path BIC | 0.000180 | 7.415 | 0.292 | 8.559 | 175.542 |
+| Eta path BIC + refit | 0.000041 | 1.185 | 0.216 | 9.960 | 180.630 |
 
 K=2 기본 환경에서는 모든 방법의 ARI가 1.000이지만, Eta penalty가 selected q와 FPR을 가장 낮춘다. Refit 후 kappa ratio와 eta contrast norm도 true value에 가장 가깝다.
 
@@ -131,7 +131,7 @@ kappa = (30, 45, 65, 90)
 | Eta centered path BIC | 0.625 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
 | Eta centered path BIC + refit | 0.686 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
 
-모수 추정 결과는 다음과 같다.
+모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
 
 | Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
 |:---|---:|---:|---:|---:|
