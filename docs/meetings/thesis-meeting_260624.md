@@ -311,6 +311,25 @@ d=400에서는 모든 방법의 ARI가 낮고, Rossi와 Separate는 거의 완�
 
 d=100 strong setting의 Eta-group + refit은 ARI=0.686, selected q=24.75, FPR=0.037, F1=0.937이었다. 같은 구조에서 d=200, d=400으로 가면 Eta-group은 dense baseline보다는 낫지만 selected q와 FPR이 크게 증가한다. 즉 고차원에서는 clustering보다 sparse support recovery가 먼저 불안정해진다.
 
+### 3.7 High-dimensional tuning sensitivity
+
+고차원에서 BIC가 dense support를 고르는지 확인하기 위해, 새 simulation 없이 저장된 Eta path candidates에서 stronger tuning criteria를 재계산했다. 이는 official tuning 변경이 아니라 diagnostic-only sensitivity다.
+
+| setting | criterion | Selected q | Zero rate | Dense rate | ARI | FPR | Precision | F1 |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|
+| d=200 | BIC_current | 120.06 | 0.00 | 0.20 | 0.459 | 0.552 | 0.208 | 0.331 |
+| d=200 | EBIC_gamma_0.5 | 119.98 | 0.00 | 0.20 | 0.459 | 0.552 | 0.209 | 0.331 |
+| d=200 | EBIC_gamma_1.0 | 119.98 | 0.00 | 0.20 | 0.459 | 0.552 | 0.209 | 0.331 |
+| d=200 | RIC_like | 119.98 | 0.00 | 0.20 | 0.459 | 0.552 | 0.209 | 0.331 |
+| d=400 | BIC_current | 262.95 | 0.00 | 0.30 | 0.206 | 0.642 | 0.080 | 0.146 |
+| d=400 | EBIC_gamma_0.5 | 262.95 | 0.00 | 0.30 | 0.206 | 0.642 | 0.080 | 0.146 |
+| d=400 | EBIC_gamma_1.0 | 262.95 | 0.00 | 0.30 | 0.206 | 0.642 | 0.080 | 0.146 |
+| d=400 | RIC_like | 262.90 | 0.00 | 0.30 | 0.206 | 0.642 | 0.080 | 0.146 |
+
+해석:
+
+EBIC/RIC-like/log(d)-slope 재선택은 BIC 결과를 거의 바꾸지 못했다. d=200 path에서 q=17-27 후보가 존재한 replication은 2%뿐이고, d=400에서는 0%였다. 따라서 고차원 실패는 단순히 BIC penalty가 약해서 생긴 문제가 아니라, 현재 Eta path가 true-support-size 후보를 거의 만들지 못하는 path/update 문제로 보는 것이 더 타당하다. 다음 보강 후보는 official tuning을 바로 바꾸는 것보다 path construction, MM/coordinate update, 또는 고차원용 screening 전략이다.
+
 ## 4. Weak concentration setting
 
 ### 4.1 K=4 weak common+specific setting
