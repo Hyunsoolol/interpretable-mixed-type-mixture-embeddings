@@ -121,6 +121,8 @@ component-specific variables = 16
 true union q = 22
 mu raw loading = common coordinates 1.0 for every component; own specific coordinates w = 0.5; others 0
 mu normalization = row-normalize each mu_k
+normalized mu values = common 0.378, own specific 0.189, others 0
+mean pairwise cos(mu_k, mu_l) = 0.857
 kappa = (30, 45, 65, 90)
 ```
 
@@ -148,7 +150,80 @@ kappa = (30, 45, 65, 90)
 
 Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Refit 후 MSE_kappa도 1.901로 가장 낮다. 이 결과가 현재 본문에 가장 적합하다.
 
-### 3.3 Concentration-dominant setting
+### 3.3 Specific signal strength w setting
+
+설정:
+
+```text
+K = 4, n = 1000, d = 100, rep = 100
+common variables = 6
+component-specific variables = 16
+true union q = 22
+mu raw loading = common coordinates 1.0 for every component; own specific coordinates w; others 0
+mu normalization = row-normalize each mu_k
+w = 0.25, 0.35, 0.50
+kappa = (30, 45, 65, 90)
+```
+
+정규화 후 실제 mu 좌표값은 다음과 같다.
+
+| w | row norm | common mu_j | own-specific mu_j | other/noise mu_j | mean pairwise cos(mu_k, mu_l) |
+|---:|---:|---:|---:|---:|---:|
+| 0.25 | 2.500 | 0.400 | 0.100 | 0 | 0.960 |
+| 0.35 | 2.548 | 0.393 | 0.137 | 0 | 0.924 |
+| 0.50 | 2.646 | 0.378 | 0.189 | 0 | 0.857 |
+
+성능 결과는 다음과 같다.
+
+| w | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
+|---:|:---|---:|---:|---:|---:|---:|---:|
+| 0.25 | Rossi path BIC | 0.394 | 98.07 | 1.000 | 0.975 | 0.225 | 0.367 |
+| 0.25 | Rossi path BIC + refit | 0.368 | 98.07 | 1.000 | 0.975 | 0.225 | 0.367 |
+| 0.25 | Separate 2D path/grid BIC | 0.401 | 93.50 | 0.999 | 0.917 | 0.236 | 0.382 |
+| 0.25 | Separate 2D path/grid BIC + refit | 0.367 | 93.50 | 0.999 | 0.917 | 0.236 | 0.382 |
+| 0.25 | Eta centered path BIC | 0.358 | 32.13 | 0.813 | 0.183 | 0.621 | 0.682 |
+| 0.25 | Eta centered path BIC + refit | 0.399 | 32.13 | 0.813 | 0.183 | 0.621 | 0.682 |
+| 0.35 | Rossi path BIC | 0.514 | 98.82 | 1.000 | 0.985 | 0.223 | 0.364 |
+| 0.35 | Rossi path BIC + refit | 0.481 | 98.82 | 1.000 | 0.985 | 0.223 | 0.364 |
+| 0.35 | Separate 2D path/grid BIC | 0.528 | 90.70 | 1.000 | 0.881 | 0.247 | 0.394 |
+| 0.35 | Separate 2D path/grid BIC + refit | 0.488 | 90.70 | 1.000 | 0.881 | 0.247 | 0.394 |
+| 0.35 | Eta centered path BIC | 0.458 | 29.81 | 0.919 | 0.123 | 0.723 | 0.794 |
+| 0.35 | Eta centered path BIC + refit | 0.505 | 29.81 | 0.919 | 0.123 | 0.723 | 0.794 |
+| 0.50 | Rossi path BIC | 0.680 | 98.52 | 1.000 | 0.981 | 0.223 | 0.365 |
+| 0.50 | Rossi path BIC + refit | 0.653 | 98.52 | 1.000 | 0.981 | 0.223 | 0.365 |
+| 0.50 | Separate 2D path/grid BIC | 0.684 | 86.46 | 1.000 | 0.826 | 0.258 | 0.409 |
+| 0.50 | Separate 2D path/grid BIC + refit | 0.657 | 86.46 | 1.000 | 0.826 | 0.258 | 0.409 |
+| 0.50 | Eta centered path BIC | 0.625 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 |
+| 0.50 | Eta centered path BIC + refit | 0.686 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 |
+
+모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
+
+| w | Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
+|---:|:---|---:|---:|---:|---:|
+| 0.25 | Rossi path BIC | 0.000466 | 53.570 | 1.288 | 61.007 |
+| 0.25 | Rossi path BIC + refit | 0.000878 | 78.474 | 2.351 | 61.228 |
+| 0.25 | Separate 2D path/grid BIC | 0.000289 | 60.743 | 0.935 | 58.975 |
+| 0.25 | Separate 2D path/grid BIC + refit | 0.000731 | 66.807 | 1.967 | 60.640 |
+| 0.25 | Eta centered path BIC | 0.000543 | 4.999e9 | 3.352e7 | 5062.159 |
+| 0.25 | Eta centered path BIC + refit | 0.000682 | 4.999e9 | 3.352e7 | 5062.191 |
+| 0.35 | Rossi path BIC | 0.000285 | 16.756 | 0.656 | 59.694 |
+| 0.35 | Rossi path BIC + refit | 0.000556 | 20.778 | 1.167 | 59.713 |
+| 0.35 | Separate 2D path/grid BIC | 0.000149 | 12.341 | 0.318 | 57.198 |
+| 0.35 | Separate 2D path/grid BIC + refit | 0.000460 | 12.747 | 0.927 | 59.190 |
+| 0.35 | Eta centered path BIC | 0.000405 | 99.000 | 1.283 | 61.973 |
+| 0.35 | Eta centered path BIC + refit | 0.000359 | 43.882 | 0.969 | 60.408 |
+| 0.50 | Rossi path BIC | 0.000153 | 2.989 | 0.314 | 58.661 |
+| 0.50 | Rossi path BIC + refit | 0.000326 | 3.427 | 0.594 | 58.735 |
+| 0.50 | Separate 2D path/grid BIC | 0.000084 | 8.762 | 0.179 | 56.089 |
+| 0.50 | Separate 2D path/grid BIC + refit | 0.000302 | 3.064 | 0.552 | 58.599 |
+| 0.50 | Eta centered path BIC | 0.000291 | 14.485 | 0.424 | 58.468 |
+| 0.50 | Eta centered path BIC + refit | 0.000102 | 1.901 | 0.185 | 58.040 |
+
+해석:
+
+w가 커질수록 component-specific signal이 강해지고, 평균 방향 간 cosine은 낮아져 군집 구분이 쉬워진다. Rossi와 separate penalty는 모든 w에서 거의 모든 변수를 선택한다. Eta penalty는 w=0.25에서도 selected q와 FPR을 크게 줄이지만 specific 변수 일부를 놓친다. w=0.50에서는 true union q=22에 가장 가깝고 F1도 가장 높다. 단, w=0.25의 Eta 모수 MSE 평균은 일부 kappa outlier 때문에 보조적으로만 해석한다.
+
+### 3.4 Concentration-dominant setting
 
 설정:
 
@@ -184,6 +259,8 @@ component-specific variables = 16
 true union q = 22
 mu raw loading = common coordinates 1.0 for every component; own specific coordinates w = 0.5; others 0
 mu normalization = row-normalize each mu_k
+normalized mu values = common 0.378, own specific 0.189, others 0
+mean pairwise cos(mu_k, mu_l) = 0.857
 kappa = (40, 50, 60, 70)
 official path+BIC
 target/adaptive/stability refinement = off
@@ -212,43 +289,3 @@ target/adaptive/stability refinement = off
 해석:
 
 Eta penalty + refit은 weak setting에서도 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Rossi와 separate penalty는 거의 모든 변수를 선택하지만, Eta는 selected q=24.09와 FPR=0.027로 noise selection을 크게 줄인다. Refit 후 MSE_mu, MSE_kappa, MSE_centered_eta도 각각 0.000075, 1.824, 0.183으로 가장 낮다.
-
-### 4.2 Diagnostic note
-
-이번 official rerun에서는 Eta BIC가 null 또는 dense support로 튀지 않았다.
-
-| Diagnostic | 결과 |
-|:---|:---|
-| raw ERROR rows | 0 |
-| eta path candidates | 5508 rows, 100 reps |
-| rep with q=17-27 candidate | 99/100 |
-| Eta BIC selected q=0 | 0/100 |
-| Eta BIC selected q=17-27 | 97/100 |
-| Eta BIC selected q>=75 | 0/100 |
-| Eta + refit zero-support reps | 0/100 |
-| objective n_decrease max | 0 |
-| min objective diff | -8.37e-09 |
-| max line-search halving | 19 |
-| line-search rejected candidates | 0 |
-
-Positive-support BIC는 `selected_q > 0` 후보 중에서만 BIC를 고르는 sensitivity check다. 이번 rerun에서는 standard Eta BIC가 이미 nonzero near-true support를 골라서 positive-support 결과가 동일하므로 본문 표에서는 제외했다.
-
-다만 이전 diagnostic run에서는 path construction에 따라 null/dense instability가 나타났다. 따라서 weak setting은 strong setting만큼 안정적인 main evidence라기보다, 보조 robustness evidence로 두는 것이 안전하다.
-
-## 5. Stability selection 진단
-
-Stability selection도 바로 해결책이 되지는 않았다.
-
-| Diagnostic | 결과 | 해석 |
-|:---|:---|:---|
-| threshold 0.6 smoke5 | 5회 중 4회 zero support | 공식 tuning 후보로 보기 어려움 |
-| threshold sweep 0.2-0.6 | 모든 threshold에서 4/5 zero support | threshold만 낮춰도 해결 안 됨 |
-| subsample diagnostic | zero-support reps에서는 20개 subsample 모두 q=0 선택 | fit failure가 아니라 subsample BIC가 반복적으로 null을 선택 |
-| IC slope sensitivity | gamma를 낮추면 zero는 줄지만 dense/FPR 증가 | 단순 df 상수항 수정은 해결책 아님 |
-
-다음 보강은 stability threshold 조정보다 alternative IC, selection rule, 또는 Eta update 자체의 개선 쪽이 우선이다.
-
-## 6. 교수님께 확인할 질문
-
-1. Weak setting을 본문 보조 결과로 둘지 appendix/limitation으로 낮출지?
-2. 다음 보강은 alternative IC와 update 개선 중 어디를 우선할지?
