@@ -100,7 +100,7 @@ Eta-ANOVA는 sensitivity 후보로만 남긴다. 현재 구현은 exact penalize
 
 K=2 toy setting에서는 모든 방법의 ARI가 1.000이지만, Eta-group이 selected q와 FPR을 가장 낮춘다. Refit 후 kappa ratio와 eta contrast norm도 true value에 가장 가깝다.
 
-### 3.2 K=4 strong common+specific setting
+### 3.2 Main setting: K=4 strong common+specific
 
 설정:
 
@@ -138,7 +138,26 @@ K=2 toy setting에서는 모든 방법의 ARI가 1.000이지만, Eta-group이 se
 
 Eta-group + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Refit 후 MSE_kappa도 1.901로 가장 낮다. 이 결과가 현재 본문에 가장 적합하다.
 
-### 3.3 Specific signal strength w setting
+보조 확인: concentration-dominant setting
+
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 4, n = 1000, d = 100 |
+| 활성 변수 구조 | 모든 component가 같은 10개 좌표 사용 = true q 10 |
+| mu construction | 첫 10개 좌표만 active, 평균방향 간 pairwise cosine을 약 0.95로 설정 |
+| w 사용 여부 | component-specific weight가 없는 설계라 w는 사용하지 않음 |
+| concentration | kappa = (25, 40, 65, 100) |
+| 목적 | 평균방향이 매우 유사하고 concentration 차이가 클 때 noise selection 감소 확인 |
+
+| Method | ARI | Selected q | TPR | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|---:|
+| Rossi | 0.513 | 98.500 | 1.000 | 0.983 | 0.102 | 0.184 |
+| Separate | 0.525 | 95.600 | 1.000 | 0.951 | 0.105 | 0.190 |
+| Eta-group + refit | 0.523 | 28.800 | 1.000 | 0.209 | 0.443 | 0.586 |
+
+이 보조 setting에서도 Eta-group은 ARI를 비슷하게 유지하면서 noise selection을 줄인다.
+
+### 3.3 Signal strength sensitivity: w
 
 설정:
 
@@ -210,28 +229,44 @@ Eta-group + refit은 ARI를 유지하면서 true union q=22에 가까운 support
 
 w가 커질수록 component-specific signal이 강해지고, 평균 방향 간 cosine은 낮아져 군집 구분이 쉬워진다. Rossi와 Separate는 모든 w에서 거의 모든 변수를 선택한다. Eta-group은 w=0.25에서도 selected q와 FPR을 크게 줄이지만 specific 변수 일부를 놓친다. w=0.50에서는 true union q=22에 가장 가깝고 F1도 가장 높다. 단, w=0.25의 Eta-group 모수 MSE 평균은 일부 kappa outlier 때문에 보조적으로만 해석한다.
 
-### 3.4 Concentration-dominant setting
+### 3.4 Weak concentration setting
 
 설정:
 
 | 항목 | 값 |
 |:---|:---|
-| 데이터 크기 | K = 4, n = 1000, d = 100 |
-| 활성 변수 구조 | 모든 component가 같은 10개 좌표 사용 = true q 10 |
-| mu construction | 첫 10개 좌표만 active, 평균방향 간 pairwise cosine을 약 0.95로 설정 |
-| w 사용 여부 | component-specific weight가 없는 설계라 w는 사용하지 않음 |
-| concentration | kappa = (25, 40, 65, 100) |
-| 목적 | 평균방향이 매우 유사하고 concentration 차이가 클 때 noise selection 감소 확인 |
+| 데이터 크기 | K = 4, n = 1000, d = 100, rep = 100 |
+| 활성 변수 구조 | common 6개 + component-specific 4개씩 = true union q 22 |
+| raw mu loading | common = 1.0, own-specific = w = 0.5, 나머지 = 0 |
+| normalized mu 값 | common = 0.378, own-specific = 0.189, 나머지 = 0 |
+| 평균방향 유사도 | mean pairwise cos(mu_k, mu_l) = 0.857 |
+| concentration | kappa = (40, 50, 60, 70) |
+| tuning | official path+BIC, target/adaptive/stability refinement off |
+| 목적 | concentration 차이가 약할 때 sparse support recovery가 유지되는지 확인 |
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
-| Rossi | 0.513 | 98.500 | 1.000 | 0.983 | 0.102 | 0.184 |
-| Separate | 0.525 | 95.600 | 1.000 | 0.951 | 0.105 | 0.190 |
-| Eta-group + refit | 0.523 | 28.800 | 1.000 | 0.209 | 0.443 | 0.586 |
+| Rossi BIC | 0.542 | 99.95 | 1.000 | 0.999 | 0.220 | 0.361 |
+| Rossi BIC + refit | 0.527 | 99.95 | 1.000 | 0.999 | 0.220 | 0.361 |
+| Separate BIC | 0.543 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
+| Separate BIC + refit | 0.526 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
+| Eta-group BIC | 0.568 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
+| Eta-group BIC + refit | 0.575 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
+
+모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
+
+| Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
+|:---|---:|---:|---:|---:|
+| Rossi BIC | 0.000219 | 3.437 | 0.519 | 56.249 |
+| Rossi BIC + refit | 0.000285 | 3.623 | 0.668 | 56.247 |
+| Separate BIC | 0.000188 | 8.596 | 0.415 | 54.429 |
+| Separate BIC + refit | 0.000286 | 3.536 | 0.667 | 56.209 |
+| Eta-group BIC | 0.000172 | 7.409 | 0.355 | 54.506 |
+| Eta-group BIC + refit | 0.000075 | 1.824 | 0.183 | 55.497 |
 
 해석:
 
-Rossi와 Separate는 clustering은 어느 정도 되지만 거의 모든 변수를 선택한다. Eta-group은 ARI를 비슷하게 유지하면서 noise selection을 줄인다.
+Eta-group + refit은 weak setting에서도 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Rossi와 Separate는 거의 모든 변수를 선택하지만, Eta-group은 selected q=24.09와 FPR=0.027로 noise selection을 크게 줄인다. 다만 weak setting은 concentration 차이가 작아지는 경우의 robustness evidence로 두고, main success claim은 strong setting 중심으로 두는 편이 안전하다.
 
 ### 3.5 Moderate high-dimensional robustness: d=200
 
@@ -311,7 +346,7 @@ d=400에서는 모든 방법의 ARI가 낮고, Rossi와 Separate는 거의 완�
 
 d=100 strong setting의 Eta-group + refit은 ARI=0.686, selected q=24.75, FPR=0.037, F1=0.937이었다. 같은 구조에서 d=200, d=400으로 가면 Eta-group은 dense baseline보다는 낫지만 selected q와 FPR이 크게 증가한다. 즉 고차원에서는 clustering보다 sparse support recovery가 먼저 불안정해진다.
 
-### 3.7 High-dimensional tuning sensitivity
+### 3.7 High-dimensional tuning/path diagnostic
 
 고차원에서 BIC가 dense support를 고르는지 확인하기 위해, 새 simulation 없이 저장된 Eta path candidates에서 stronger tuning criteria를 재계산했다. 이는 official tuning 변경이 아니라 diagnostic-only sensitivity다.
 
@@ -338,44 +373,3 @@ d=200에서 Eta path를 더 길게 잡은 diagnostic도 확인했다. 이는 off
 | d=200 | long path 240 | 50 | 0.34 | 62.14 | 0.04 | 0.447 | 0.235 | 0.507 | 0.584 |
 
 long path는 ARI를 크게 올리지는 않지만 selected q와 FPR을 줄이고 Precision/F1을 개선한다. 다만 selected q=62.14는 여전히 true union q=22보다 크고, near22 후보율도 34%에 그친다. 즉 고차원에서는 path density/range가 중요한 next tuning candidate이지만, 이 결과만으로 official tuning을 바꾸기는 이르다. 다음 보강 후보는 path construction, MM/coordinate update, 또는 고차원용 screening 전략이다.
-
-## 4. Weak concentration setting
-
-### 4.1 K=4 weak common+specific setting
-
-설정:
-
-| 항목 | 값 |
-|:---|:---|
-| 데이터 크기 | K = 4, n = 1000, d = 100, rep = 100 |
-| 활성 변수 구조 | common 6개 + component-specific 4개씩 = true union q 22 |
-| raw mu loading | common = 1.0, own-specific = w = 0.5, 나머지 = 0 |
-| normalized mu 값 | common = 0.378, own-specific = 0.189, 나머지 = 0 |
-| 평균방향 유사도 | mean pairwise cos(mu_k, mu_l) = 0.857 |
-| concentration | kappa = (40, 50, 60, 70) |
-| tuning | official path+BIC, target/adaptive/stability refinement off |
-| 목적 | concentration 차이가 약할 때 sparse support recovery가 유지되는지 확인 |
-
-| Method | ARI | Selected q | TPR | FPR | Precision | F1 |
-|:---|---:|---:|---:|---:|---:|---:|
-| Rossi BIC | 0.542 | 99.95 | 1.000 | 0.999 | 0.220 | 0.361 |
-| Rossi BIC + refit | 0.527 | 99.95 | 1.000 | 0.999 | 0.220 | 0.361 |
-| Separate BIC | 0.543 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
-| Separate BIC + refit | 0.526 | 99.67 | 1.000 | 0.996 | 0.221 | 0.362 |
-| Eta-group BIC | 0.568 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
-| Eta-group BIC + refit | 0.575 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 |
-
-모수 추정 결과는 다음과 같다. MSE 지표는 raw scale이다.
-
-| Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
-|:---|---:|---:|---:|---:|
-| Rossi BIC | 0.000219 | 3.437 | 0.519 | 56.249 |
-| Rossi BIC + refit | 0.000285 | 3.623 | 0.668 | 56.247 |
-| Separate BIC | 0.000188 | 8.596 | 0.415 | 54.429 |
-| Separate BIC + refit | 0.000286 | 3.536 | 0.667 | 56.209 |
-| Eta-group BIC | 0.000172 | 7.409 | 0.355 | 54.506 |
-| Eta-group BIC + refit | 0.000075 | 1.824 | 0.183 | 55.497 |
-
-해석:
-
-Eta-group + refit은 weak setting에서도 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Rossi와 Separate는 거의 모든 변수를 선택하지만, Eta-group은 selected q=24.09와 FPR=0.027로 noise selection을 크게 줄인다. Refit 후 MSE_mu, MSE_kappa, MSE_centered_eta도 각각 0.000075, 1.824, 0.183으로 가장 낮다.
