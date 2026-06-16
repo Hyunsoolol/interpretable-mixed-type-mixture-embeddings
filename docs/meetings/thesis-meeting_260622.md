@@ -158,9 +158,45 @@ Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 suppo
 
 Rossi와 separate penalty는 clustering은 어느 정도 되지만 거의 모든 변수를 선택한다. Eta penalty는 ARI를 비슷하게 유지하면서 noise selection을 줄인다.
 
-## 4. Weak setting 진단
+## 4. Weak setting 결과와 진단
 
-Weak concentration setting에서는 처음 summary만 보면 Eta penalty가 잘 작동하는 것처럼 보였다. 하지만 line-search safeguard, zero-support 처리, path candidates 저장 후 다시 확인하니 Eta BIC가 null support 또는 dense support로 불안정하게 튀는 문제가 확인됐다.
+### 4.1 초기 weak simulation 결과
+
+설정:
+
+```text
+K = 4, n = 1000, d = 100, rep = 100
+common variables = 6
+component-specific variables = 16
+true union q = 22
+kappa = (40, 50, 60, 70)
+```
+
+초기 path/BIC summary에서는 Eta penalty가 잘 작동하는 것처럼 보였다.
+
+| Method | ARI | Selected q | TPR | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|---:|
+| Rossi | 0.570 | 94.04 | 1.000 | 0.924 | 0.235 | 0.380 |
+| Rossi + refit | 0.529 | 94.04 | 1.000 | 0.924 | 0.235 | 0.380 |
+| Separate penalty | 0.572 | 56.79 | 1.000 | 0.446 | 0.456 | 0.602 |
+| Separate penalty + refit | 0.553 | 56.79 | 1.000 | 0.446 | 0.456 | 0.602 |
+| Eta contrast | 0.564 | 23.98 | 1.000 | 0.025 | 0.921 | 0.958 |
+| Eta contrast + refit | 0.575 | 23.98 | 1.000 | 0.025 | 0.921 | 0.958 |
+
+모수 추정 결과도 초기 summary에서는 Eta contrast + refit이 좋게 보였다.
+
+| Method | MSE_mu | MSE_kappa | MSE_eta |
+|:---|---:|---:|---:|
+| Rossi | 0.00011 | 2.536 | 0.256 |
+| Rossi + refit | 0.00028 | 3.433 | 0.646 |
+| Separate penalty | 0.00006 | 12.282 | 0.150 |
+| Separate penalty + refit | 0.00018 | 2.463 | 0.431 |
+| Eta contrast | 0.00018 | 7.333 | 0.355 |
+| Eta contrast + refit | 0.00007 | 1.801 | 0.181 |
+
+하지만 line-search safeguard, zero-support 처리, path candidates 저장 후 다시 확인하니 Eta BIC가 null support 또는 dense support로 불안정하게 튀는 문제가 확인됐다. 따라서 위 결과는 본문 주력 성공 사례로 쓰기보다, “초기에는 좋아 보였지만 재검증에서 tuning instability가 드러난 setting”으로 해석하는 것이 안전하다.
+
+### 4.2 재검증 결과
 
 | path construction | scope | near22 후보율 | BIC null률 | positive dense률 | 판단 |
 |:---|:---|---:|---:|---:|:---|
@@ -170,6 +206,15 @@ Weak concentration setting에서는 처음 summary만 보면 Eta penalty가 잘 
 | adaptive v2 | smoke10 | 0.50 | 0.50 | 0.50 | midpoint refinement만으로 부족 |
 | adaptive v2.1 | smoke10 | 0.50 | 0.40 | 0.40 | duplicate endpoint를 써도 support 다양성 부족 |
 | adaptive v3 | smoke10 | 0.50 | 0.60 | 0.40 | 990개 평가에도 saved unique support 6개뿐 |
+
+zero-support 처리와 path 후보 저장 후의 weak100 summary는 다음과 같다.
+
+| Method | valid reps | ARI | Selected q | TPR | FPR | Precision | F1 | 판단 |
+|:---|---:|---:|---:|---:|---:|---:|---:|:---|
+| Eta centered path BIC | 100 | 0.131 | 5.12 | 0.200 | 0.009 | 0.724 | 0.285 | null support 쪽으로 과수축 |
+| Eta centered path BIC + refit | 27 | 0.515 | 5.12 | 0.200 | 0.009 | 0.724 | 0.285 | 73/100 zero-support refit |
+| Eta centered path BIC positive-support | 100 | 0.517 | 76.63 | 0.900 | 0.728 | 0.277 | 0.421 | dense support로 튐 |
+| Eta centered path BIC positive-support + refit | 100 | 0.522 | 76.63 | 0.900 | 0.728 | 0.277 | 0.421 | refit해도 dense support 유지 |
 
 결론:
 
