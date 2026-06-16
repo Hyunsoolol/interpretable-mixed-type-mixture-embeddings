@@ -119,6 +119,8 @@ K = 4, n = 1000, d = 100, rep = 100
 common variables = 6
 component-specific variables = 16
 true union q = 22
+mu raw loading = common coordinates 1.0 for every component; own specific coordinates w = 0.5; others 0
+mu normalization = row-normalize each mu_k
 kappa = (30, 45, 65, 90)
 ```
 
@@ -148,6 +150,17 @@ Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 suppo
 
 ### 3.3 Concentration-dominant setting
 
+설정:
+
+```text
+K = 4, n = 1000, d = 100
+shared active variables = 10
+true q = 10
+mu construction = first 10 coordinates active for all components; pairwise cosine between mu_k near 0.95
+w = not used because there are no component-specific weights
+kappa = (25, 40, 65, 100)
+```
+
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
 | Rossi | 0.513 | 98.500 | 1.000 | 0.983 | 0.102 | 0.184 |
@@ -169,6 +182,8 @@ K = 4, n = 1000, d = 100, rep = 100
 common variables = 6
 component-specific variables = 16
 true union q = 22
+mu raw loading = common coordinates 1.0 for every component; own specific coordinates w = 0.5; others 0
+mu normalization = row-normalize each mu_k
 kappa = (40, 50, 60, 70)
 official path+BIC
 target/adaptive/stability refinement = off
