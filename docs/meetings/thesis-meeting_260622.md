@@ -10,40 +10,40 @@
 
 따라서 본문 주장은 “clustering accuracy 개선”보다 “model-based sparse interpretation”에 맞추는 것이 안전하다.
 
-## 2. 현재 논문 배치안
+## 2. 모형 아이디어
 
-| 결과/setting | 현재 판단 | 이유 |
-|:---|:---|:---|
-| strong common+specific simulation | 본문 핵심 후보 | ARI는 유지되고 selected q, FPR, F1이 가장 안정적으로 개선됨 |
-| concentration-dominant simulation | 본문 보조 후보 | Rossi sparse vMF의 한계를 설명하기 좋음 |
-| weak concentration simulation | appendix/limitation | Eta BIC가 null/dense support로 불안정함 |
-| high-dimensional stress | appendix | BIC와 signal strength 문제가 섞여 본문 성공 사례로는 위험함 |
-| PBMC lymphoid3 | real-data 보조 사례 | vMF mixture 계열의 marker selection 사례로는 가능하나 baseline 최고 주장은 불가 |
-| BBC News/text | appendix 또는 삭제 후보 | 본문 핵심 claim을 강하게 지지하기에는 약함 |
-| adaptive refinement diagnostics | appendix diagnostic | grid refinement로 weak instability가 해결되지 않음을 보여주는 진단 자료 |
-
-## 3. 모형 아이디어
-
-Rossi & Barbaro (2022)는 component direction `mu_k`에 sparsity penalty를 둔다. 그러나 vMF mixture의 posterior classification에는 `mu_k` 자체보다
+vMF mixture에서 component density는 다음과 같다.
 
 ```text
-eta_k = kappa_k * mu_k
+f_k(x) = C_d(kappa_k) exp(kappa_k mu_k^T x)
 ```
 
-가 직접 들어간다. 두 component의 posterior boundary도 `eta_2 - eta_1` contrast로 표현된다. 따라서 concentration 차이가 중요한 setting에서는 `mu`가 아니라 `eta` contrast를 sparse하게 만드는 것이 더 자연스럽다.
+여기서 posterior classification에 직접 들어가는 natural parameter는
+
+```text
+eta_k = kappa_k mu_k
+```
+
+이다. 두 component의 posterior log-odds는
+
+```text
+log(tau_i2 / tau_i1) = const + (eta_2 - eta_1)^T x_i
+```
+
+로 쓸 수 있다. 따라서 변수 j가 군집 구분에 기여하는지는 `mu_kj` 자체보다 `eta_kj`의 component contrast를 보는 것이 더 직접적이다.
 
 K>2에서는 coordinate별 centered eta contrast를 사용한다.
 
 ```text
-c_kj = eta_kj - mean_k(eta_kj)
-penalty = lambda_eta * sum_j ||c_.j||_2
+c_kj = eta_kj - mean_l eta_lj
+P_eta = lambda_eta sum_j ||c_.j||_2
 ```
 
-현재 구현은 exact penalized EM이 아니라, unpenalized eta update 뒤에 centered eta contrast shrinkage를 적용하는 proximal EM-type update다. 논문에서도 이 표현을 유지해야 한다.
+현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
 
-## 4. 핵심 simulation 결과
+## 3. 핵심 simulation 결과
 
-### 4.1 Strong common+specific setting
+### 3.1 Strong common+specific setting
 
 설정:
 
@@ -65,7 +65,7 @@ kappa = (30, 45, 65, 90)
 
 Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. 이 결과가 현재 본문에 가장 적합하다.
 
-### 4.2 Concentration-dominant setting
+### 3.2 Concentration-dominant setting
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
@@ -77,7 +77,7 @@ Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 suppo
 
 Rossi와 separate penalty는 clustering은 어느 정도 되지만 거의 모든 변수를 선택한다. Eta penalty는 ARI를 비슷하게 유지하면서 noise selection을 줄인다.
 
-## 5. Weak setting 진단
+## 4. Weak setting 진단
 
 Weak concentration setting에서는 처음 summary만 보면 Eta penalty가 잘 작동하는 것처럼 보였다. 하지만 line-search safeguard, zero-support 처리, path candidates 저장 후 다시 확인하니 Eta BIC가 null support 또는 dense support로 불안정하게 튀는 문제가 확인됐다.
 
@@ -94,7 +94,7 @@ Weak concentration setting에서는 처음 summary만 보면 Eta penalty가 잘 
 
 Weak setting의 문제는 단순히 lambda grid가 성긴 문제가 아니다. Proximal path가 같은 support plateau에 머물고, BIC가 null/dense 쪽으로 불안정하게 선택하는 문제로 보는 것이 더 타당하다. 따라서 weak setting은 본문 성공 사례가 아니라 appendix diagnostic 또는 limitation으로 낮추는 것이 안전하다.
 
-## 6. Stability selection 진단
+## 5. Stability selection 진단
 
 Stability selection도 바로 해결책이 되지는 않았다.
 
@@ -107,42 +107,8 @@ Stability selection도 바로 해결책이 되지는 않았다.
 
 다음 보강은 stability threshold 조정보다 alternative IC, selection rule, 또는 Eta update 자체의 개선 쪽이 우선이다.
 
-## 7. Real data 위치
+## 6. Real data 위치
 
 PBMC lymphoid3는 real-data 보조 사례로 사용할 수 있다. 다만 sparse k-means보다 ARI가 높다는 식의 주장은 피해야 한다. Eta의 장점은 vMF mixture 안에서 marker support를 더 해석 가능하게 준다는 점으로 제한한다.
 
 BBC News/text 결과는 본문 핵심 근거로는 약하다. appendix 또는 supplementary 사례로 두는 것이 안전하다.
-
-## 8. 현재 방어 가능한 주장과 어려운 주장
-
-방어 가능한 주장:
-
-1. Eta contrast는 posterior decision parameter에 직접 연결된다.
-2. Strong/common+specific setting에서 Eta penalty + refit은 ARI를 유지하면서 selected q와 FPR을 크게 줄인다.
-3. Rossi sparse vMF는 concentration-dominant setting에서 noise variable을 과도하게 선택할 수 있다.
-4. Weak setting에서는 path/BIC instability가 존재하며, 이를 limitation으로 명확히 제시할 수 있다.
-
-아직 방어하기 어려운 주장:
-
-1. Eta penalty가 모든 setting에서 ARI를 크게 개선한다.
-2. Weak concentration setting에서도 Eta BIC가 안정적으로 true support를 회복한다.
-3. Lambda grid refinement만으로 weak instability가 해결된다.
-4. 현재 Eta update가 exact penalized EM이다.
-5. Oracle target-refine 또는 adaptive v2/v3를 공식 알고리즘으로 쓸 수 있다.
-
-## 9. 교수님께 여쭤볼 결정 사항
-
-1. 논문 주장을 “ARI 개선”이 아니라 “ARI 유지 + sparse interpretable eta contrast”로 제한해도 되는가?
-2. Strong/common+specific setting을 본문 핵심 simulation으로 두는 데 동의하시는가?
-3. Weak setting은 appendix diagnostic 또는 limitation으로 낮춰도 되는가?
-4. Official tuning은 일단 path+BIC로 유지하고, EBIC/RICc/stability selection은 sensitivity로 둘지?
-5. Eta proximal update를 MM safeguard 또는 coordinate/proximal update로 보강해야 논문 기여가 충분해지는가?
-6. 논문 타깃을 top-tier 방법론보다 중상위/응용방법론 쪽으로 조정하는 것이 현실적인가?
-
-## 10. 미팅 전 남은 작업
-
-1. Strong/common+specific 결과 표를 최종 본문 후보로 정리한다.
-2. Weak setting은 failure-mode appendix 문장으로 정리한다.
-3. PBMC 결과는 “best ARI”가 아니라 “model-based marker interpretation” 중심으로 다시 쓴다.
-4. Eta update를 proximal EM-type update로 일관되게 표현한다.
-5. 교수님 의견에 따라 다음 보강을 alternative IC로 갈지, MM/coordinate update로 갈지 결정한다.
