@@ -61,6 +61,15 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 | weak | Group lasso + refit | 0.565 | 23.90 | 0.024 | 0.924 | 0.960 |
 | weak | ANOVA L1 + refit | 0.515 | 99.50 | 0.994 | 0.221 | 0.362 |
 
+모수 추정 결과도 group lasso + refit 쪽이 더 안정적이었다.
+
+| Scenario | Penalty | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
+|:---|:---|---:|---:|---:|---:|
+| strong | Group lasso + refit | 0.000101 | 1.992 | 0.191 | 58.007 |
+| strong | ANOVA L1 + refit | 0.000329 | 3.604 | 0.581 | 58.677 |
+| weak | Group lasso + refit | 0.000073 | 1.614 | 0.172 | 55.298 |
+| weak | ANOVA L1 + refit | 0.000288 | 2.989 | 0.659 | 56.043 |
+
 따라서 현재 구현과 논문 주장은 centered eta group lasso를 주 penalty로 두고, ANOVA-type L1은 대안 또는 sensitivity 후보로만 남기는 것이 적절하다.
 
 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
