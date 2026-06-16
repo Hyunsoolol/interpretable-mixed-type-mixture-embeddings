@@ -10,56 +10,89 @@ Eta penalty는 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에
 
 ## 2. 모형 아이디어
 
-관측값은 단위구면 위의 방향자료 x<sub>i</sub> ∈ S<sup>d-1</sup>이고, K-component vMF mixture를 사용한다.
+관측값은 단위구면 위의 방향자료 $x_i \in \mathbb{S}^{d-1}$이고, $K$-component vMF mixture를 사용한다.
 
 **Mixture model**
 
-p(x<sub>i</sub>; Θ) =
-∑<sub>k=1</sub><sup>K</sup>
-α<sub>k</sub> C<sub>d</sub>(κ<sub>k</sub>)
-exp(κ<sub>k</sub> μ<sub>k</sub><sup>T</sup>x<sub>i</sub>),
-with ‖μ<sub>k</sub>‖<sub>2</sub> = 1 and κ<sub>k</sub> > 0.
+$$
+p(x_i;\Theta)
+=
+\sum_{k=1}^K
+\alpha_k C_d(\kappa_k)
+\exp(\kappa_k \mu_k^\top x_i),
+\qquad
+\|\mu_k\|_2 = 1,\quad \kappa_k > 0
+$$
 
 **Natural parameter**
 
-η<sub>k</sub> = κ<sub>k</sub> μ<sub>k</sub>
+$$
+\eta_k = \kappa_k \mu_k
+$$
 
 Posterior responsibility는 다음과 같다.
 
-τ<sub>ik</sub> =
-[α<sub>k</sub> C<sub>d</sub>(κ<sub>k</sub>) exp(η<sub>k</sub><sup>T</sup>x<sub>i</sub>)]
-/
-[∑<sub>ℓ=1</sub><sup>K</sup> α<sub>ℓ</sub> C<sub>d</sub>(κ<sub>ℓ</sub>) exp(η<sub>ℓ</sub><sup>T</sup>x<sub>i</sub>)].
+$$
+\tau_{ik}
+=
+\frac{
+\alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)
+}{
+\sum_{\ell=1}^K
+\alpha_\ell C_d(\kappa_\ell)\exp(\eta_\ell^\top x_i)
+}
+$$
 
 K=2에서 posterior decision boundary는
 
-log(τ<sub>i2</sub> / τ<sub>i1</sub>)
-= const + (η<sub>2</sub> - η<sub>1</sub>)<sup>T</sup>x<sub>i</sub>
+$$
+\log\frac{\tau_{i2}}{\tau_{i1}}
+=
+\mathrm{const}
++(\eta_2-\eta_1)^\top x_i
+$$
 
-로 정리된다. 따라서 변수 선택은 μ<sub>k</sub> 자체보다 posterior decision에 직접 들어가는 η<sub>k</sub> contrast를 기준으로 하는 것이 자연스럽다.
+로 정리된다. 따라서 변수 선택은 $\mu_k$ 자체보다 posterior decision에 직접 들어가는 $\eta_k$ contrast를 기준으로 하는 것이 자연스럽다.
 
 **Observed log-likelihood**
 
-L(Θ) =
-∑<sub>i=1</sub><sup>n</sup>
-log[
-∑<sub>k=1</sub><sup>K</sup>
-α<sub>k</sub> C<sub>d</sub>(κ<sub>k</sub>)
-exp(η<sub>k</sub><sup>T</sup>x<sub>i</sub>)
-].
+$$
+\ell(\Theta)
+=
+\sum_{i=1}^n
+\log\left[
+\sum_{k=1}^K
+\alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)
+\right]
+$$
 
 K>2에서는 coordinate별 centered eta contrast를 사용한다.
 
-c<sub>kj</sub>
-= η<sub>kj</sub>
-- K<sup>-1</sup>∑<sub>ℓ=1</sub><sup>K</sup>η<sub>ℓj</sub>.
+$$
+\bar{\eta}_j
+=
+\frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j},
+\qquad
+c_{kj}
+=
+\eta_{kj}-\bar{\eta}_j
+$$
 
 **Penalty and objective**
 
-P<sub>η</sub>(Θ)
-= λ<sub>η</sub>∑<sub>j=1</sub><sup>d</sup> ‖c<sub>·j</sub>‖<sub>2</sub>
+$$
+P_\eta(\Theta)
+=
+\lambda_\eta
+\sum_{j=1}^d
+\|c_{\cdot j}\|_2
+$$
 
-L<sub>p</sub>(Θ) = L(Θ) - P<sub>η</sub>(Θ)
+$$
+\mathcal{L}_p(\Theta)
+=
+\ell(\Theta)-P_\eta(\Theta)
+$$
 
 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
 
