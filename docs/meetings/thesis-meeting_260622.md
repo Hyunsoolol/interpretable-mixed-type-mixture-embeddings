@@ -2,9 +2,7 @@
 
 업데이트: 2026-06-16
 
-상세 구현은 `docs/methods/thesis-implementation_260622.md`, 상세 시뮬레이션은 `docs/simulations/thesis-simulation_260615.md`에 분리했다. 이 문서는 교수님께 먼저 보여드릴 미팅용 요약이다.
-
-## 1. 오늘 확인받고 싶은 결론
+## 1. 핵심 결론
 
 현재 연구의 가장 안전한 주장은 다음이다.
 
