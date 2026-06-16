@@ -14,36 +14,72 @@
 
 vMF mixture에서 component density는 다음과 같다.
 
-```text
-f_k(x) = C_d(kappa_k) exp(kappa_k mu_k^T x)
-```
+$$
+f_k(x) = C_d(\kappa_k)\exp(\kappa_k \mu_k^\top x)
+$$
 
 여기서 posterior classification에 직접 들어가는 natural parameter는
 
-```text
-eta_k = kappa_k mu_k
-```
+$$
+\eta_k = \kappa_k \mu_k
+$$
 
 이다. 두 component의 posterior log-odds는
 
-```text
-log(tau_i2 / tau_i1) = const + (eta_2 - eta_1)^T x_i
-```
+$$
+\log\frac{\tau_{i2}}{\tau_{i1}}
+= \mathrm{const} + (\eta_2-\eta_1)^\top x_i
+$$
 
 로 쓸 수 있다. 따라서 변수 j가 군집 구분에 기여하는지는 `mu_kj` 자체보다 `eta_kj`의 component contrast를 보는 것이 더 직접적이다.
 
 K>2에서는 coordinate별 centered eta contrast를 사용한다.
 
-```text
-c_kj = eta_kj - mean_l eta_lj
-P_eta = lambda_eta sum_j ||c_.j||_2
-```
+$$
+c_{kj} = \eta_{kj} - \frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j},
+\qquad
+P_\eta = \lambda_\eta \sum_{j=1}^d \|c_{\cdot j}\|_2
+$$
 
 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
 
 ## 3. 핵심 simulation 결과
 
-### 3.1 Strong common+specific setting
+### 3.1 K=2 기본 메커니즘
+
+설정:
+
+```text
+K = 2, n = 1000, d = 100, rep = 20
+shared active variables = 10
+true q = 10
+kappa = (20, 200)
+mu_1 = mu_2
+```
+
+| Method | ARI | Selected q | TPR | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|---:|
+| Rossi path BIC | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Rossi path BIC + refit | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Separate path/grid BIC | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Separate path/grid BIC + refit | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Eta path BIC | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
+| Eta path BIC + refit | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
+
+모수 추정 결과는 다음과 같다. MSE 지표는 기존 simulation 문서와 같이 100배 스케일로 표시했다.
+
+| Method | MSE_mu | MSE_kappa | MSE_Delta_eta | kappa ratio | $\lVert\eta_2-\eta_1\rVert$ |
+|:---|---:|---:|---:|---:|---:|
+| Rossi path BIC | 0.0176 | 127.629 | 24.534 | 10.062 | 181.179 |
+| Rossi path BIC + refit | 0.0061 | 140.965 | 37.797 | 9.951 | 180.821 |
+| Separate path/grid BIC | 0.0176 | 127.629 | 24.534 | 10.062 | 181.179 |
+| Separate path/grid BIC + refit | 0.0061 | 140.965 | 37.797 | 9.951 | 180.821 |
+| Eta path BIC | 0.0180 | 741.495 | 29.167 | 8.559 | 175.542 |
+| Eta path BIC + refit | 0.0041 | 118.451 | 21.585 | 9.960 | 180.630 |
+
+K=2 기본 환경에서는 모든 방법의 ARI가 1.000이지만, Eta penalty가 selected q와 FPR을 가장 낮춘다. Refit 후 kappa ratio와 eta contrast norm도 true value에 가장 가깝다.
+
+### 3.2 K=4 strong common+specific setting
 
 설정:
 
@@ -57,15 +93,29 @@ kappa = (30, 45, 65, 90)
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
-| Rossi | 0.680 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
-| Separate penalty | 0.684 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
-| Eta penalty + refit | 0.686 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
+| Rossi path BIC | 0.680 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
+| Rossi path BIC + refit | 0.653 | 98.520 | 1.000 | 0.981 | 0.223 | 0.365 |
+| Separate path/grid BIC | 0.684 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
+| Separate path/grid BIC + refit | 0.657 | 86.460 | 1.000 | 0.826 | 0.258 | 0.409 |
+| Eta centered path BIC | 0.625 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
+| Eta centered path BIC + refit | 0.686 | 24.750 | 0.994 | 0.037 | 0.890 | 0.937 |
+
+모수 추정 결과는 다음과 같다.
+
+| Method | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
+|:---|---:|---:|---:|---:|
+| Rossi path BIC | 0.00015 | 2.989 | 0.314 | 58.661 |
+| Rossi path BIC + refit | 0.00033 | 3.427 | 0.594 | 58.735 |
+| Separate path/grid BIC | 0.00008 | 8.762 | 0.179 | 56.089 |
+| Separate path/grid BIC + refit | 0.00030 | 3.064 | 0.552 | 58.599 |
+| Eta centered path BIC | 0.00029 | 14.485 | 0.424 | 58.468 |
+| Eta centered path BIC + refit | 0.00010 | 1.901 | 0.185 | 58.040 |
 
 해석:
 
-Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. 이 결과가 현재 본문에 가장 적합하다.
+Eta penalty + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택한다. Refit 후 MSE_kappa도 1.901로 가장 낮다. 이 결과가 현재 본문에 가장 적합하다.
 
-### 3.2 Concentration-dominant setting
+### 3.3 Concentration-dominant setting
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|---:|
