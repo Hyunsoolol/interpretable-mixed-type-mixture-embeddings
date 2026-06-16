@@ -76,7 +76,7 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
 ## 3. 핵심 simulation 결과
 
-### 3.1 K=2 기본 메커니즘
+### 3.1 K=2 toy setting
 
 설정:
 
@@ -108,7 +108,7 @@ mu_1 = mu_2
 | Eta path BIC | 0.000180 | 7.415 | 0.292 | 8.559 | 175.542 |
 | Eta path BIC + refit | 0.000041 | 1.185 | 0.216 | 9.960 | 180.630 |
 
-K=2 기본 환경에서는 모든 방법의 ARI가 1.000이지만, Eta penalty가 selected q와 FPR을 가장 낮춘다. Refit 후 kappa ratio와 eta contrast norm도 true value에 가장 가깝다.
+K=2 toy setting에서는 모든 방법의 ARI가 1.000이지만, Eta penalty가 selected q와 FPR을 가장 낮춘다. Refit 후 kappa ratio와 eta contrast norm도 true value에 가장 가깝다.
 
 ### 3.2 K=4 strong common+specific setting
 
