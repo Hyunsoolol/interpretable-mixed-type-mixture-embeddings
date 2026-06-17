@@ -8,8 +8,8 @@ Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture 안에서 pos
 
 현재 논리는 두 가닥이다.
 
-1. 이론적으로, 기존 sparse vMF처럼 $\mu_k$에 직접 penalty를 주면 $\|\mu_k\|_2=1$ 구면 제약 때문에 $\mu_k$와 $\kappa_k$ update가 M-step 안에서 얽힌다. 반면 $\eta_k=\kappa_k\mu_k$는 posterior decision score에 직접 들어가는 natural parameter이므로, component contrast에 penalty를 거는 것이 변수 선택 목적에 더 직접적이다.
-2. 시뮬레이션에서, Strong common+specific setting의 Eta-group + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택하고 FPR을 크게 낮춘다. K=2 toy setting에서도 clustering은 유지하면서 eta contrast support가 더 sparse하게 선택된다.
+1. 구면 제약($\|\mu_k\|_2=1$)으로 인해 $\mu_k$와 $\kappa_k$의 연산이 얽히는 기존 방식의 한계를 극복하고, 의사결정 점수에 직접 작용하는 자연 모수 $\eta_k=\kappa_k\mu_k$의 component contrast에 페널티를 부여하여 변수 선택의 직관성과 효율성을 극대화함
+2. 다중 군집 및 $K=2$ 환경 시뮬레이션 결과, ARI는 온전히 유지하면서도 정답($q=22$)에 근접한 sparse support를 정교하게 추출하여 FPR을 획기적으로 낮춤
 
 현재 한계도 명확하다.
 
@@ -37,9 +37,15 @@ Posterior decision에는 $\eta_k$가 직접 들어간다. 따라서 변수 선�
 
 $$\log\frac{\tau_{i2}}{\tau_{i1}}=\mathrm{const}+(\eta_2-\eta_1)^\top x_i$$
 
-이 점이 Rossi sparse vMF와의 핵심 차이다. Rossi류 접근은 방향 벡터 $\mu_k$에 직접 sparsity penalty를 주지만, $\mu_k$는 unit sphere 위에 있어 penalty와 $\|\mu_k\|_2=1$ 제약이 같이 작동한다. 이 때문에 M-step에서 $\mu_k$와 $\kappa_k$를 완전히 분리하기 어렵고, 라그랑주 승수 또는 fixed-point update 구조가 필요하다.
+**Rossi sparse vMF와의 핵심 차이**
 
-Eta-group은 penalty 대상을 $\mu_k$가 아니라 Euclidean natural parameter $\eta_k$의 component contrast로 옮긴다. 따라서 구면 제약이 걸린 방향 벡터 자체를 shrink하는 대신, 실제 posterior decision을 바꾸는 좌표 contrast를 직접 선택한다. 단, mixture objective 전체를 convex 문제로 바꾸거나 최적해 보장을 주는 것은 아니며, 현재 구현은 proximal EM-type update다.
+Rossi류 접근은 방향 벡터 $\mu_k$에 직접 sparsity penalty를 주어 $\|\mu_k\|_2=1$ 제약과 충돌한다. 이 때문에 M-step에서 $\mu_k$와 $\kappa_k$를 완전히 분리하기 어렵고, fixed-point update 구조가 강제된다.
+
+
+**Eta-group 접근 및 최적화**
+
+Eta-group은 penalty 대상을 $\mu_k$가 아니라 Euclidean natural parameter인 $\eta_k$의 component contrast로 옮긴다. 구면 제약이 걸린 방향 벡터를 shrink하는 대신, 실제 posterior decision을 바꾸는 좌표를 직접 선택한다. 단, mixture objective 전체가 convex 문제로 바뀌는 것은 아니며, 현재 구현은 proximal EM-type update를 따른다.
+
 
 **Likelihood and penalty**
 
@@ -53,9 +59,9 @@ $$P_{\mathrm{group}}(\Theta)=\lambda_\eta\sum_{j=1}^d \|c_{\cdot j}\|_2$$
 
 $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
-현재 주 penalty는 `Eta-group`, 즉 K>2의 centered eta group lasso다. Coordinate-level eta contrast 선택이 목표이기 때문에 component별 centered effect를 따로 줄이는 Eta-ANOVA보다 group selection 구조가 더 자연스럽다. Pilot comparison에서도 Eta-ANOVA는 strong/weak 모두 selected q가 약 100으로 dense support에 가까웠다.
+본 연구의 목적은 coordinate-level의 $\eta$ contrast를 선택하는 것이다. 따라서 component별로 중심화된 효과를 개별 축소하는 Eta-ANOVA 방식보다, 특정 coordinate 전체를 묶어서 선택하는 Eta-group 구조가 더 자연스러워 보인다. (사전 실험 결과에서도 Eta-ANOVA는 지나치게 dense한 support를 반환하는 한계가 확인함)
 
-현재 추정은 closed-form penalized M-step이 아니라 proximal EM-type update다. Tuning은 path+BIC를 공식 기준으로 두고, positive-support, adaptive refinement, stability selection, long path는 diagnostic 또는 sensitivity로만 둔다.
+현재 추정은 closed-form penalized M-step이 아니라 proximal EM-type update다. Tuning은 path+BIC를 조합을 사용한다. 그 외의 기법들(positive-support, adaptive refinement, stability selection, long path 등)은 메인 기준이 아닌 보조적인 진단 및 민감도 분석(diagnostic or sensitivity) 목적으로만 제한하여 활용한다.
 
 ## 3. 주요 simulation 결과
 
@@ -92,12 +98,6 @@ Eta-group + refit은 ARI를 유지하면서 selected q=24.75로 true union q=22�
 4. High-dimensional setting은 limitation이며, path construction, update/MM, screening 보강이 필요하다.
 5. Long path는 diagnostic 또는 next tuning candidate이지 official algorithm은 아니다.
 
-## 5. 미팅에서 결정할 것
-
-1. 본문 claim을 strong common+specific 중심으로 둘지.
-2. Weak/high-dimensional 결과를 appendix 또는 limitation으로 낮출지.
-3. Official tuning을 path+BIC + selected support fixed unpenalized refit으로 유지할지.
-4. 다음 보강을 path construction, alternative IC, update/MM, screening 중 어디로 둘지.
 
 <!-- Detailed simulation tables moved to docs/simulations/thesis-simulation_260624.md.
 
