@@ -61,7 +61,7 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
 본 연구의 목적은 coordinate-level의 $\eta$ contrast를 선택하는 것이다. 따라서 component별로 중심화된 효과를 개별 축소하는 Eta-ANOVA 방식보다, 특정 coordinate 전체를 묶어서 선택하는 Eta-group 구조가 더 자연스러워 보인다. (사전 실험 결과에서도 Eta-ANOVA는 지나치게 dense한 support를 반환하는 한계가 확인함)
 
-현재 추정은 closed-form penalized M-step이 아니라 proximal EM-type update다. Tuning은 path+BIC를 조합을 사용한다. 그 외의 기법들(positive-support, adaptive refinement, stability selection, long path 등)은 메인 기준이 아닌 보조적인 진단 및 민감도 분석(diagnostic or sensitivity) 목적으로만 제한하여 활용한다.
+현재 추정은 closed-form penalized M-step이 아니라 proximal EM-type update다. Tuning은 path+BIC를 조합을 사용한다. 
 
 ## 3. 주요 simulation 결과
 
