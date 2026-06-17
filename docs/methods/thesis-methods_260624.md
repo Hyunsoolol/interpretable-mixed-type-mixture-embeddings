@@ -59,7 +59,7 @@ Posterior classification score는 $\log \alpha_k+\log C_d(\|\eta_k\|_2)+\eta_k^\
 잠재 label indicator를 $z_{ik}=1(z_i=k)$라고 두면 complete-data log-likelihood는 다음과 같다.
 
 $$
-\ell_c(\Theta) = \sum_{i=1}^n\sum_{k=1}^K z_{ik} \left\{ \log \alpha_k+\log C_d(\kappa_k)+\kappa_k\mu_k^\top x_i \right\}
+\ell_c(\Theta) = \sum_{i=1}^n\sum_{k=1}^K z_{ik} \left\lbrace \log \alpha_k+\log C_d(\kappa_k)+\kappa_k\mu_k^\top x_i \right\rbrace
 $$
 
 현재 parameter $\Theta^{\mathrm{old}}$에서 posterior responsibility는 다음과 같다.
