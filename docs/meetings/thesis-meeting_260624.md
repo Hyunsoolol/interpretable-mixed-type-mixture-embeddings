@@ -6,10 +6,10 @@
 
 Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어 clustering을 유지하면서 coordinate support 해석성을 높이는 것이다.
 
-현재 가장 설득력 있는 증거는 두 가지다.
+현재 논리는 두 가닥이다.
 
-1. Strong common+specific setting에서 Eta-group + refit은 true union q=22에 가까운 support를 선택하고 FPR을 크게 낮춘다.
-2. K=2 toy setting에서도 clustering은 유지하면서 eta contrast support가 더 sparse하게 선택된다.
+1. 이론적으로, 기존 sparse vMF처럼 $\mu_k$에 직접 penalty를 주면 $\|\mu_k\|_2=1$ 구면 제약 때문에 $\mu_k$와 $\kappa_k$ update가 M-step 안에서 얽힌다. 반면 $\eta_k=\kappa_k\mu_k$는 posterior decision score에 직접 들어가는 natural parameter이므로, component contrast에 penalty를 거는 것이 변수 선택 목적에 더 직접적이다.
+2. 시뮬레이션에서, Strong common+specific setting의 Eta-group + refit은 ARI를 유지하면서 true union q=22에 가까운 support를 선택하고 FPR을 크게 낮춘다. K=2 toy setting에서도 clustering은 유지하면서 eta contrast support가 더 sparse하게 선택된다.
 
 현재 한계도 명확하다.
 
@@ -36,6 +36,10 @@ $$\eta_k=\kappa_k\mu_k$$
 Posterior decision에는 $\eta_k$가 직접 들어간다. 따라서 변수 선택 대상은 $\mu_k$ 자체가 아니라 component 간 eta contrast다.
 
 $$\log\frac{\tau_{i2}}{\tau_{i1}}=\mathrm{const}+(\eta_2-\eta_1)^\top x_i$$
+
+이 점이 Rossi sparse vMF와의 핵심 차이다. Rossi류 접근은 방향 벡터 $\mu_k$에 직접 sparsity penalty를 주지만, $\mu_k$는 unit sphere 위에 있어 penalty와 $\|\mu_k\|_2=1$ 제약이 같이 작동한다. 이 때문에 M-step에서 $\mu_k$와 $\kappa_k$를 완전히 분리하기 어렵고, 라그랑주 승수 또는 fixed-point update 구조가 필요하다.
+
+Eta-group은 penalty 대상을 $\mu_k$가 아니라 Euclidean natural parameter $\eta_k$의 component contrast로 옮긴다. 따라서 구면 제약이 걸린 방향 벡터 자체를 shrink하는 대신, 실제 posterior decision을 바꾸는 좌표 contrast를 직접 선택한다. 단, mixture objective 전체를 convex 문제로 바꾸거나 최적해 보장을 주는 것은 아니며, 현재 구현은 proximal EM-type update다.
 
 **Likelihood and penalty**
 
