@@ -54,13 +54,15 @@ $$\ell_c(\Theta) = \sum_{i=1}^n\sum_{k=1}^K z_{ik} \left\{ \log \alpha_k+\log C_
 
 현재 parameter $\Theta^{old}$에서 posterior responsibility는 다음과 같다.
 
-$$\tau_{ik} =
-\frac{
+
+$$
+\tau_{ik} = \frac{
 \alpha_k C_d(\kappa_k)\exp(\kappa_k\mu_k^\top x_i)
 }{
 \sum_{\ell=1}^K
 \alpha_\ell C_d(\kappa_\ell)\exp(\kappa_\ell\mu_\ell^\top x_i)
-}.$$
+}.
+$$
 
 자연모수로 쓰면 다음과 같다.
 
