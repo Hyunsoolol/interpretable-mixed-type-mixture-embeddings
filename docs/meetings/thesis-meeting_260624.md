@@ -27,6 +27,10 @@ Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture 안에서 pos
 
 ## 2. 모형 아이디어
 
+`mu` penalty와 `eta` penalty의 차이는 아래 도식처럼 정리할 수 있다.
+
+![mu penalty vs eta penalty](figures/mu_penalty_vs_eta_penalty_260624.png)
+
 **Model and decision parameter**
 
 $$p(x_i;\Theta)=\sum_{k=1}^K \alpha_k C_d(\kappa_k)\exp(\kappa_k \mu_k^\top x_i), \qquad \|\mu_k\|_2=1,\quad \kappa_k>0$$
