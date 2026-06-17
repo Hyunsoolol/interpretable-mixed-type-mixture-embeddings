@@ -67,7 +67,39 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
 상세한 6개 모형 비교, 모수 추정 결과, signal sensitivity, high-dimensional diagnostic 표는 `docs/simulations/thesis-simulation_260624.md`로 분리했다. 이 메인 자료에는 미팅에서 바로 논의할 핵심 결과만 남긴다.
 
-### 3.1 Main setting: K=4 strong common+specific
+### 3.1 Toy setting: K=2
+
+평균방향은 같고 concentration 차이만 있는 가장 단순한 setting에서 eta contrast penalty가 sparse support를 회복하는지 확인한다.
+
+| 항목 | 값 |
+|:---|:---|
+| 데이터 크기 | K = 2, n = 1000, d = 100, rep = 20 |
+| 활성 변수 구조 | 두 component가 같은 10개 active 좌표 사용 = true q 10 |
+| 평균방향 | mu_1 = mu_2 |
+| concentration | kappa = (20, 200) |
+| 목적 | 평균방향은 같고 kappa 차이만 있는 toy setting에서 eta contrast 선택 확인 |
+
+| Method | ARI | Selected q | TPR | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|---:|
+| Rossi BIC | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Rossi BIC + refit | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Separate BIC | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Separate BIC + refit | 1.000 | 23.300 | 1.000 | 0.148 | 0.443 | 0.610 |
+| Eta-group BIC | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
+| Eta-group BIC + refit | 1.000 | 13.200 | 1.000 | 0.036 | 0.792 | 0.875 |
+
+| Method | MSE_mu | MSE_kappa | MSE_Delta_eta | kappa ratio | eta contrast norm |
+|:---|---:|---:|---:|---:|---:|
+| Rossi BIC | 0.000176 | 1.276 | 0.245 | 10.062 | 181.179 |
+| Rossi BIC + refit | 0.000061 | 1.410 | 0.378 | 9.951 | 180.821 |
+| Separate BIC | 0.000176 | 1.276 | 0.245 | 10.062 | 181.179 |
+| Separate BIC + refit | 0.000061 | 1.410 | 0.378 | 9.951 | 180.821 |
+| Eta-group BIC | 0.000180 | 7.415 | 0.292 | 8.559 | 175.542 |
+| Eta-group BIC + refit | 0.000041 | 1.185 | 0.216 | 9.960 | 180.630 |
+
+모든 방법이 ARI=1.000을 달성하므로 clustering 자체는 쉬운 setting이다. 차이는 variable selection에서 나온다. Eta-group + refit은 selected q=13.20, FPR=0.036으로 가장 sparse하고 true q=10에 가장 가깝다. 모수 추정에서도 refit 후 MSE_mu와 MSE_Delta_eta가 낮고 kappa ratio가 true ratio 10에 가깝다. 이 toy setting은 eta contrast를 직접 penalize하는 이유를 보여주는 idea check로 둔다.
+
+### 3.2 Main setting: K=4 strong common+specific
 
 | Method | ARI | Selected q | FPR | Precision | F1 |
 |:---|---:|---:|---:|---:|---:|
@@ -80,7 +112,7 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
 Eta-group + refit은 ARI를 유지하면서 selected q=24.75로 true union q=22에 가깝고, FPR=0.037로 Rossi/Separate보다 훨씬 낮다. 이 setting이 현재 main evidence다.
 
-### 3.2 Robustness / limitation summary
+### 3.3 Robustness / limitation summary
 
 | Setting | Role | Key result | Interpretation |
 |:---|:---|:---|:---|
