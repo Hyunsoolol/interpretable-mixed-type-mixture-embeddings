@@ -2,7 +2,7 @@
 
 업데이트: 2026-06-17
 
-## 1. 교수님께 먼저 보여드릴 핵심 요약
+## 1. 핵심 요약
 
 Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어 clustering을 유지하면서 coordinate support 해석성을 높이는 것이다.
 
