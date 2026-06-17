@@ -59,7 +59,49 @@ $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
 현재 추정은 closed-form penalized M-step이 아니라 proximal EM-type update다. Tuning은 path+BIC를 공식 기준으로 두고, positive-support, adaptive refinement, stability selection, long path는 diagnostic 또는 sensitivity로만 둔다.
 
-## 3. 핵심 simulation 결과
+## 3. 주요 simulation 결과
+
+상세한 6개 모형 비교, 모수 추정 결과, signal sensitivity, high-dimensional diagnostic 표는 `docs/simulations/thesis-simulation_260624.md`로 분리했다. 이 메인 자료에는 미팅에서 바로 논의할 핵심 결과만 남긴다.
+
+### 3.1 Main setting: K=4 strong common+specific
+
+| Method | ARI | Selected q | FPR | Precision | F1 |
+|:---|---:|---:|---:|---:|---:|
+| Rossi BIC | 0.680 | 98.52 | 0.981 | 0.223 | 0.365 |
+| Rossi BIC + refit | 0.653 | 98.52 | 0.981 | 0.223 | 0.365 |
+| Separate BIC | 0.684 | 86.46 | 0.826 | 0.258 | 0.409 |
+| Separate BIC + refit | 0.657 | 86.46 | 0.826 | 0.258 | 0.409 |
+| Eta-group BIC | 0.625 | 24.75 | 0.037 | 0.890 | 0.937 |
+| Eta-group BIC + refit | 0.686 | 24.75 | 0.037 | 0.890 | 0.937 |
+
+Eta-group + refit은 ARI를 유지하면서 selected q=24.75로 true union q=22에 가깝고, FPR=0.037로 Rossi/Separate보다 훨씬 낮다. 이 setting이 현재 main evidence다.
+
+### 3.2 Robustness / limitation summary
+
+| Setting | Role | Key result | Interpretation |
+|:---|:---|:---|:---|
+| K=2 toy | idea check | Eta-group + refit: ARI=1.000, selected q=13.20, FPR=0.036 | eta contrast penalty가 가장 단순한 환경에서 sparse support를 만든다. |
+| Weak concentration | robustness | Eta-group + refit: ARI=0.575, selected q=24.09, FPR=0.027 | 결과는 양호하지만 main claim보다 robustness evidence로 두는 편이 안전하다. |
+| d=200 basic path | moderate high-dimensional robustness | Eta-group BIC: selected q=120.06, FPR=0.552 | dense baseline보다는 낫지만 true q=22 근처 sparse recovery는 무너진다. |
+| d=400 basic path | high-dimensional stress | Eta-group BIC: selected q=262.95, FPR=0.642 | high-dimensional limitation으로 보는 것이 적절하다. |
+| d=400 long path diagnostic | path diagnostic | selected q=68.75, FPR=0.146, TPR=0.620 | path 확장은 FPR을 줄이지만 official algorithm 변경으로 확정하기에는 부족하다. |
+
+## 4. 현재 해석
+
+1. Eta-group의 논문 claim은 ARI 향상이 아니라 posterior decision parameter 기반 sparse support recovery다.
+2. Strong common+specific setting은 본문 핵심 결과로 가장 적합하다.
+3. Weak setting은 robustness evidence로 둘 수 있지만, main success claim은 strong setting 중심이 안전하다.
+4. High-dimensional setting은 limitation이며, path construction, update/MM, screening 보강이 필요하다.
+5. Long path는 diagnostic 또는 next tuning candidate이지 official algorithm은 아니다.
+
+## 5. 미팅에서 결정할 것
+
+1. 본문 claim을 strong common+specific 중심으로 둘지.
+2. Weak/high-dimensional 결과를 appendix 또는 limitation으로 낮출지.
+3. Official tuning을 path+BIC + selected support fixed unpenalized refit으로 유지할지.
+4. 다음 보강을 path construction, alternative IC, update/MM, screening 중 어디로 둘지.
+
+<!-- Detailed simulation tables moved to docs/simulations/thesis-simulation_260624.md.
 
 ### 3.1 K=2 toy setting
 
@@ -370,3 +412,4 @@ d=200과 d=400에서 Eta path를 더 길게 잡은 diagnostic도 확인했다. �
 | d=400 | long path 240 | 20 | 0.40 | 0.55 | 68.75 | 0.00 | 0.214 | 0.620 | 0.146 | 0.491 | 0.441 |
 
 long path는 d=200과 d=400 모두에서 selected q와 FPR을 줄이고 Precision/F1을 개선한다. 특히 d=400에서는 dense 선택률이 0.30에서 0.00으로 줄고 FPR도 0.642에서 0.146으로 낮아진다. 하지만 d=400 long path의 TPR은 0.620으로 떨어지고, selected q=68.75는 여전히 true union q=22보다 크다. 모수 지표도 mixed하다: d=400 long path의 MSE_mu는 0.000485, MSE_centered_eta는 1.375로 낮아지지만 MSE_kappa는 273.021로 기본 path보다 커진다. 또한 q=0 선택이 2/20회 있어 refit valid reps는 18/20이다. 즉 고차원에서는 path density/range가 중요한 next tuning candidate이지만, path 확장만으로 충분하다고 보기는 어렵다. 다음 보강 후보는 path construction, MM/coordinate update, 또는 고차원용 screening 전략이다.
+-->

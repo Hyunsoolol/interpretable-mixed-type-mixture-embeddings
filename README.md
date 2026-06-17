@@ -23,10 +23,11 @@ This repository is currently kept as a document-first research meeting archive.
 
 ## Key Documents
 
-- `docs/meetings/thesis-meeting_260624.md`: meeting-ready summary and current decisions.
-- `docs/methods/thesis-methods_260624.md`: method definitions, objective functions, estimation, tuning, and refit notes.
+- `docs/meetings/thesis-meeting_260624.md`: concise meeting main summary.
+- `docs/methods/thesis-methods_260624.md`: methods and theory note.
 - `docs/implementation/thesis-implementation_260624.md`: implementation status and algorithm notes.
-- `docs/simulations/thesis-simulation_260615.md`: simulation design, diagnostics, and interpretation.
+- `docs/simulations/thesis-simulation_260624.md`: current simulation summary for the 260624 meeting.
+- `docs/simulations/thesis-simulation_260615.md`: earlier detailed simulation notes/archive.
 - `docs/methods/thesis-code-rossi-eta_260615.md`: Rossi/Eta code-level notes.
 
 ## Current Research Position
