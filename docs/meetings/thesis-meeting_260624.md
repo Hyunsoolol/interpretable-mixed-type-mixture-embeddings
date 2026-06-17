@@ -6,7 +6,7 @@
 
 Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어 clustering을 유지하면서 coordinate support 해석성을 높이는 것이다.
 
-현재 논리는 두 가닥이다.
+현재 논리는 아래와 같다.
 
 1. 구면 제약($\|\mu_k\|_2=1$)으로 인해 $\mu_k$와 $\kappa_k$의 연산이 얽히는 기존 방식의 한계를 극복하고, 의사결정 점수에 직접 작용하는 자연 모수 $\eta_k=\kappa_k\mu_k$의 component contrast에 페널티를 부여하여 변수 선택의 직관성과 효율성을 극대화함
 2. 다중 군집 및 $K=2$ 환경 시뮬레이션 결과, ARI는 온전히 유지하면서도 정답($q=22$)에 근접한 sparse support를 정교하게 추출하여 FPR을 획기적으로 낮춤
