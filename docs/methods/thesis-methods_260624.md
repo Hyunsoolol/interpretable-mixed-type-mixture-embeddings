@@ -283,23 +283,4 @@ $$
 | kappa approximation | 고차원 또는 weak signal에서 outlier 가능 |
 | diagnostic methods | positive-support/adaptive/stability는 appendix 후보 |
 
-다음 보강 후보는 path construction 개선, MM 또는 coordinate update 개선, high-dimensional screening이다.
-
----
-
-## 13. What Can Be Claimed in the Paper
-
-현재 결과와 구현으로 비교적 안전하게 주장할 수 있는 내용은 다음이다.
-
-* Eta-group provides sparse interpretable support inside a vMF mixture framework.
-* In the main strong common+specific setting, Eta-group preserves clustering performance while substantially reducing false positive coordinate selection.
-* Compared with dense sparse-vMF baselines, Eta-group better targets coordinate-level posterior decision contrasts.
-* Refit after selection can reduce shrinkage bias without changing the selected support.
-
-조심해야 할 내용은 다음이다.
-
-* Penalized update에 대해 closed-form EM theory를 주장하지 않는다.
-* 전역 최적해 도달을 주장하지 않는다.
-* 모든 setting에서 ARI가 더 좋다고 주장하지 않는다.
-* High-dimensional support recovery가 해결됐다고 주장하지 않는다.
-* Real data 결과를 discovery claim으로 과장하지 않는다.
+다음 보강 후보는 path construction 개선, MM 또는 coordinate update 개선, high-dimensional screening으로 생각함.
