@@ -38,7 +38,7 @@ $$
 f(x_i;\Theta)=\sum_{k=1}^K \alpha_k C_d(\kappa_k)\exp(\kappa_k\mu_k^\top x_i)
 $$
 
-여기서 $\alpha_k>0$, $\sum_{k=1}^K \alpha_k=1$, $\|\mu_k\|_2=1$, $\kappa_k \ge 0$이다. $C_d(\kappa)$는 $d$차원 vMF density의 normalizing constant다.
+여기서 $\alpha_k>0$, $\sum_{k=1}^K \alpha_k=1$, $\lVert\mu_k\rVert_2=1$, $\kappa_k \ge 0$이다. $C_d(\kappa)$는 $d$차원 vMF density의 normalizing constant다.
 
 자연모수 형태로 쓰면 다음과 같다.
 
@@ -47,10 +47,10 @@ $$
 $$
 
 $$
-f(x_i\mid \eta_k)=C_d(\|\eta_k\|_2)\exp(\eta_k^\top x_i)
+f(x_i\mid \eta_k)=C_d(\lVert\eta_k\rVert_2)\exp(\eta_k^\top x_i)
 $$
 
-Posterior classification score는 $\log \alpha_k+\log C_d(\|\eta_k\|_2)+\eta_k^\top x_i$를 포함한다. 따라서 coordinate $j$가 군집 구분에 기여하는지는 $\mu_{kj}$만이 아니라 $\kappa_k\mu_{kj}$, 즉 $\eta_{kj}$의 component 간 차이로 보는 것이 자연스럽다.
+Posterior classification score는 $\log \alpha_k+\log C_d(\lVert\eta_k\rVert_2)+\eta_k^\top x_i$를 포함한다. 따라서 coordinate $j$가 군집 구분에 기여하는지는 $\mu_{kj}$만이 아니라 $\kappa_k\mu_{kj}$, 즉 $\eta_{kj}$의 component 간 차이로 보는 것이 자연스럽다.
 
 ---
 
