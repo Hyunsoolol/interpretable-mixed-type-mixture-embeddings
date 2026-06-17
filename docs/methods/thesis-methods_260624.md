@@ -189,9 +189,9 @@ $$
 
 | 방법 | penalty target | penalty |
 | :--- | :--- | :--- |
-| Rossi sparse vMF | $\mu$ | $\beta\sum_k\|\mu_k\|_1$ |
-| Separate | $\mu, \kappa$ | $\lambda_\mu\sum_k\|\mu_k\|_1+\lambda_\kappa\sum_k\kappa_k$ |
-| Eta-group | centered $\eta$ contrast | $\lambda_\eta\sum_j\|c_{\cdot j}\|_2$ |
+| Rossi sparse vMF | $\mu$ | $\beta\sum_k\lVert\mu_k\rVert_1$ |
+| Separate | $\mu, \kappa$ | $\lambda_\mu\sum_k\lVert\mu_k\rVert_1+\lambda_\kappa\sum_k\kappa_k$ |
+| Eta-group | centered $\eta$ contrast | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ |
 
 Eta-group의 BIC 계산에는 implementation-level degrees of freedom approximation을 사용한다. 이는 model selection을 위한 계산 규칙이며, 엄밀한 effective degrees of freedom 이론으로 주장하지 않는다.
 
