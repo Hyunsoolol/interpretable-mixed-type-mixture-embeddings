@@ -16,12 +16,6 @@ Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture 안에서 pos
 1. Weak setting은 결과가 양호하지만 main success claim보다는 robustness evidence로 두는 편이 안전하다.
 2. High-dimensional setting에서는 기본 path+BIC가 dense support로 가기 쉬워 path construction 또는 update 보강이 필요하다.
 
-이번 미팅에서 결정받고 싶은 것은 다음 네 가지다.
-
-1. 본문 claim을 strong common+specific setting 중심으로 둘지.
-2. Weak/high-dimensional 결과를 appendix 또는 limitation으로 낮출지.
-3. Official tuning을 path+BIC로 유지할지.
-4. 다음 보강을 path construction, alternative IC, update/MM, screening 중 어디에 둘지.
 
 | 표기 | 의미 |
 |:---|:---|
