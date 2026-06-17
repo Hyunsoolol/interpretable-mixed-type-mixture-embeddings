@@ -50,48 +50,40 @@ Posterior classification score는 $\log \alpha_k+\log C_d(\|\eta_k\|_2)+\eta_k^\
 
 잠재 label indicator를 $z_{ik}=1(z_i=k)$라고 두면 complete-data log-likelihood는 다음과 같다.
 
-$$
-\ell_c(\Theta)
+$$\ell_c(\Theta)
 =
 \sum_{i=1}^n\sum_{k=1}^K z_{ik}
 \left\{
 \log \alpha_k+\log C_d(\kappa_k)+\kappa_k\mu_k^\top x_i
-\right\}.
-$$
+\right\}.$$
 
 현재 parameter $\Theta^{old}$에서 posterior responsibility는 다음과 같다.
 
-$$
-\tau_{ik}
+$$\tau_{ik}
 =
 \frac{
 \alpha_k C_d(\kappa_k)\exp(\kappa_k\mu_k^\top x_i)
 }{
 \sum_{\ell=1}^K
 \alpha_\ell C_d(\kappa_\ell)\exp(\kappa_\ell\mu_\ell^\top x_i)
-}.
-$$
+}.$$
 
 자연모수로 쓰면 다음과 같다.
 
-$$
-\tau_{ik}
+$$\tau_{ik}
 =
 \frac{
 \alpha_k C_d(\|\eta_k\|_2)\exp(\eta_k^\top x_i)
 }{
 \sum_{\ell=1}^K
 \alpha_\ell C_d(\|\eta_\ell\|_2)\exp(\eta_\ell^\top x_i)
-}.
-$$
+}.$$
 
 구현에서는 log-sum-exp 형태로 계산해 underflow를 줄인다. E-step 이후 필요한 sufficient statistics는 다음이다.
 
-$$
-N_k=\sum_{i=1}^n \tau_{ik},
+$$N_k=\sum_{i=1}^n \tau_{ik},
 \qquad
-r_k=\sum_{i=1}^n \tau_{ik}x_i.
-$$
+r_k=\sum_{i=1}^n \tau_{ik}x_i.$$
 
 ## 4. Unpenalized vMF M-step
 
