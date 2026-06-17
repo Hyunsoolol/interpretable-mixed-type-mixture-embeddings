@@ -90,14 +90,6 @@ Eta-group + refit은 ARI를 유지하면서 selected q=24.75로 true union q=22�
 | d=400 basic path | high-dimensional stress | Eta-group BIC: selected q=262.95, FPR=0.642 | high-dimensional limitation으로 보는 것이 적절하다. |
 | d=400 long path diagnostic | path diagnostic | selected q=68.75, FPR=0.146, TPR=0.620 | path 확장은 FPR을 줄이지만 official algorithm 변경으로 확정하기에는 부족하다. |
 
-## 4. 현재 해석
-
-1. Eta-group의 논문 claim은 ARI 향상이 아니라 posterior decision parameter 기반 sparse support recovery다.
-2. Strong common+specific setting은 본문 핵심 결과로 가장 적합하다.
-3. Weak setting은 robustness evidence로 둘 수 있지만, main success claim은 strong setting 중심이 안전하다.
-4. High-dimensional setting은 limitation이며, path construction, update/MM, screening 보강이 필요하다.
-5. Long path는 diagnostic 또는 next tuning candidate이지 official algorithm은 아니다.
-
 
 <!-- Detailed simulation tables moved to docs/simulations/thesis-simulation_260624.md.
 
