@@ -1,12 +1,27 @@
 # Thesis Meeting 260624
 
-업데이트: 2026-06-16
+업데이트: 2026-06-17
 
-## 1. 핵심 결론
+## 1. 교수님께 먼저 보여드릴 핵심 요약
 
-Eta-group은 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어, ARI를 유지하면서 해석 가능한 변수 선택을 제공하는 방법이다.
+Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture 안에서 posterior decision parameter인 `eta = kappa * mu`의 component contrast를 sparse하게 만들어 clustering을 유지하면서 coordinate support 해석성을 높이는 것이다.
 
-따라서 본문 주장은 “clustering accuracy 개선”보다 “model-based sparse interpretation”으로 정리함.
+현재 가장 설득력 있는 증거는 두 가지다.
+
+1. Strong common+specific setting에서 Eta-group + refit은 true union q=22에 가까운 support를 선택하고 FPR을 크게 낮춘다.
+2. K=2 toy setting에서도 clustering은 유지하면서 eta contrast support가 더 sparse하게 선택된다.
+
+현재 한계도 명확하다.
+
+1. Weak setting은 결과가 양호하지만 main success claim보다는 robustness evidence로 두는 편이 안전하다.
+2. High-dimensional setting에서는 기본 path+BIC가 dense support로 가기 쉬워 path construction 또는 update 보강이 필요하다.
+
+이번 미팅에서 결정받고 싶은 것은 다음 네 가지다.
+
+1. 본문 claim을 strong common+specific setting 중심으로 둘지.
+2. Weak/high-dimensional 결과를 appendix 또는 limitation으로 낮출지.
+3. Official tuning을 path+BIC로 유지할지.
+4. 다음 보강을 path construction, alternative IC, update/MM, screening 중 어디에 둘지.
 
 | 표기 | 의미 |
 |:---|:---|
@@ -14,23 +29,21 @@ Eta-group은 ARI를 크게 올리는 방법이라기보다, vMF mixture 안에�
 | Separate | separate mu/kappa penalty |
 | Eta-group | centered eta group lasso |
 | Eta-ANOVA | centered eta ANOVA-L1 |
-| + refit | selected support 고정 후 unpenalized refit |
+| + refit | selected support fixed unpenalized refit |
 
 ## 2. 모형 아이디어
 
-**Model**
+**Model and decision parameter**
 
 $$p(x_i;\Theta)=\sum_{k=1}^K \alpha_k C_d(\kappa_k)\exp(\kappa_k \mu_k^\top x_i), \qquad \|\mu_k\|_2=1,\quad \kappa_k>0$$
 
 $$\eta_k=\kappa_k\mu_k$$
 
-**Posterior decision**
+Posterior decision에는 $\eta_k$가 직접 들어간다. 따라서 변수 선택 대상은 $\mu_k$ 자체가 아니라 component 간 eta contrast다.
 
 $$\log\frac{\tau_{i2}}{\tau_{i1}}=\mathrm{const}+(\eta_2-\eta_1)^\top x_i$$
 
-변수 선택 대상은 $\mu_k$ 자체보다 posterior decision에 직접 들어가는 $\eta_k$ contrast로 둔다.
-
-**Observed log-likelihood**
+**Likelihood and penalty**
 
 $$\ell(\Theta)=\sum_{i=1}^n \log\left[\sum_{k=1}^K \alpha_k C_d(\kappa_k)\exp(\eta_k^\top x_i)\right]$$
 
@@ -38,31 +51,13 @@ K>2에서는 coordinate별 centered eta contrast를 사용한다.
 
 $$\bar{\eta}_j=\frac{1}{K}\sum_{\ell=1}^K \eta_{\ell j}, \qquad c_{kj}=\eta_{kj}-\bar{\eta}_j$$
 
-**Penalty**
-
 $$P_{\mathrm{group}}(\Theta)=\lambda_\eta\sum_{j=1}^d \|c_{\cdot j}\|_2$$
-
-$$P_{\mathrm{ANOVA}\text{-}L1}(\Theta)=\lambda_\eta\sum_{j=1}^d\sum_{k=1}^K |c_{kj}|$$
 
 $$\mathcal{L}_p(\Theta)=\ell(\Theta)-P_{\mathrm{group}}(\Theta)$$
 
-현재 주 penalty는 Eta-group이다. 이유는 coordinate-level eta contrast 선택이 목표이고, Eta-ANOVA는 pilot에서 dense support로 갔기 때문이다.
+현재 주 penalty는 `Eta-group`, 즉 K>2의 centered eta group lasso다. Coordinate-level eta contrast 선택이 목표이기 때문에 component별 centered effect를 따로 줄이는 Eta-ANOVA보다 group selection 구조가 더 자연스럽다. Pilot comparison에서도 Eta-ANOVA는 strong/weak 모두 selected q가 약 100으로 dense support에 가까웠다.
 
-| Scenario | Penalty | ARI | Selected q | FPR | Precision | F1 |
-|:---|:---|---:|---:|---:|---:|---:|
-| strong | Eta-group + refit | 0.684 | 25.45 | 0.046 | 0.867 | 0.925 |
-| strong | Eta-ANOVA + refit | 0.652 | 99.90 | 0.999 | 0.220 | 0.361 |
-| weak | Eta-group + refit | 0.565 | 23.90 | 0.024 | 0.924 | 0.960 |
-| weak | Eta-ANOVA + refit | 0.515 | 99.50 | 0.994 | 0.221 | 0.362 |
-
-| Scenario | Penalty | MSE_mu | MSE_kappa | MSE_centered_eta | kappa_hat_mean |
-|:---|:---|---:|---:|---:|---:|
-| strong | Eta-group + refit | 0.000101 | 1.992 | 0.191 | 58.007 |
-| strong | Eta-ANOVA + refit | 0.000329 | 3.604 | 0.581 | 58.677 |
-| weak | Eta-group + refit | 0.000073 | 1.614 | 0.172 | 55.298 |
-| weak | Eta-ANOVA + refit | 0.000288 | 2.989 | 0.659 | 56.043 |
-
-Eta-ANOVA는 sensitivity 후보로만 남긴다. 현재 구현은 exact penalized EM이 아니라 proximal EM-type update다.
+현재 추정은 closed-form penalized M-step이 아니라 proximal EM-type update다. Tuning은 path+BIC를 공식 기준으로 두고, positive-support, adaptive refinement, stability selection, long path는 diagnostic 또는 sensitivity로만 둔다.
 
 ## 3. 핵심 simulation 결과
 
