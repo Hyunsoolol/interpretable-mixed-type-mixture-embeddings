@@ -261,6 +261,8 @@ Refit은 variable selection 후 shrinkage bias를 줄이기 위한 단계다. Pe
 
 Refit은 support를 바꾸는 단계가 아니다. Zero support가 선택된 경우 support-constrained refit은 정의하기 어렵기 때문에 해당 row를 `zero_active_support`로 기록하고, 전체 repetition을 ERROR로 처리하지 않는다.
 
+> Reference note. 이 post-selection refit은 high-dimensional model-based clustering에서 variable selection 후 선택된 변수 subset 또는 selected model을 기준으로 clustering model을 다시 평가/추정하는 흐름과 관련이 있다. Celeux, Maugis-Rabusseau, and Sedki (2017)는 lasso-like regularization으로 변수를 먼저 ranking한 뒤, model-selection criterion으로 clustering에 관련된 변수 역할을 결정하는 절차를 제안한다. 본 연구의 refit은 그 아이디어를 그대로 복제한 것은 아니고, Eta-group penalty가 선택한 support $S$를 고정한 뒤 penalty 없이 $\alpha_k,\mu_k,\kappa_k$를 재추정하여 shrinkage bias를 줄이는 vMF mixture용 post-selection step이다. 따라서 refit은 support를 다시 선택하는 단계가 아니라 selected support fixed unpenalized refit으로 해석한다.
+
 ---
 
 ## 11. Degrees of Freedom Approximation
@@ -300,6 +302,7 @@ $$
 ## References Mentioned
 
 - Banerjee, A., Dhillon, I. S., Ghosh, J., and Sra, S. (2005). *Clustering on the Unit Hypersphere using von Mises-Fisher Distributions*. Journal of Machine Learning Research, 6(46), 1345-1382.
+- Celeux, G., Maugis-Rabusseau, C., and Sedki, M. (2017). *Variable selection in model-based clustering and discriminant analysis with a regularization approach*. arXiv:1705.00946.
 - Rossi, F. and Barbaro, F. (2022). *Mixture of von Mises-Fisher distribution with sparse prototypes*. Neurocomputing, 501, 41-74. DOI: 10.1016/j.neucom.2022.05.118.
 - Yuan, M. and Lin, Y. (2006). *Model Selection and Estimation in Regression with Grouped Variables*. Journal of the Royal Statistical Society: Series B, 68(1), 49-67. DOI: 10.1111/j.1467-9868.2005.00532.x.
 - Parikh, N. and Boyd, S. (2014). *Proximal Algorithms*. Foundations and Trends in Optimization, 1(3), 123-231.
