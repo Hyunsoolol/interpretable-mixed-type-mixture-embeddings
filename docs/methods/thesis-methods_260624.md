@@ -110,6 +110,8 @@ $$
 
 이 단계는 approximation이다. 특히 $\rho_k$가 1에 가까우면 $\kappa_k$가 커질 수 있으므로 수치 bound가 필요하다. 추정된 $\hat{\mu}_k$, $\hat{\kappa}_k$로부터 자연모수는 $\hat{\eta}_k=\hat{\kappa}_k\hat{\mu}_k$로 복원된다.
 
+> Reference note. 이 concentration update는 Banerjee et al. (2005)의 vMF mixture EM 문헌에서 쓰이는 mean resultant length 기반 approximation과 같은 계열이다. 정확한 M-step은 Bessel function ratio $A_d(\kappa)$의 inverse를 풀어야 하므로, 본 연구에서는 위 식을 closed-form MLE가 아니라 계산 효율을 위한 approximation으로 해석한다.
+
 ---
 
 ## 5. Baseline Sparse vMF Penalties
@@ -124,6 +126,8 @@ $$
 Penalized objective는 log-likelihood에서 이 penalty를 뺀 형태다. Support는 component별 nonzero $\mu_{kj}$의 union으로 정의한다.
 
 현재 비교에서는 fixed grid가 아니라 $\beta$ path를 사용한다. Dense fit에서 시작해 coordinate가 shrink될 수 있는 threshold를 따라 $\beta$ 후보를 만들고, 각 후보에서 fit을 계산한 뒤 BIC가 가장 작은 후보를 선택한다. 이 방식은 sparse prototype baseline으로 적절하지만, penalty target이 $\mu$라서 concentration 차이가 coordinate decision에 어떻게 반영되는지는 직접적으로 분리하지 못한다.
+
+> Reference note. Rossi and Barbaro (2022)는 본 연구의 sparse vMF mixture baseline이다. 해당 방법은 direction/prototype parameter에 $\ell_1$ sparsity를 부여하는 반면, Eta-group은 posterior decision score에 직접 들어가는 natural parameter $\eta_k=\kappa_k\mu_k$의 component contrast를 penalize한다.
 
 ### 5.2 Separate Mu/Kappa Penalty
 Separate penalty baseline은 $\mu_k$와 $\kappa_k$에 별도 penalty를 둔다.
@@ -150,7 +154,7 @@ $$
 \delta=\eta_2-\eta_1
 $$
 
-Coordinate $j$의 군집 구분 효과는 $\delta_j로 표현된다. 이에 대한 penalty는 다음과 같다.
+Coordinate $j$의 군집 구분 효과는 $\delta_j$로 표현된다. 이에 대한 penalty는 다음과 같다.
 
 $$
 P_{\mathrm{Eta},K=2}(\eta) = \lambda_\eta \sum_{j=1}^d |\delta_j|
@@ -176,6 +180,8 @@ P_{\mathrm{Eta-group}}(\eta) = \lambda_\eta\sum_{j=1}^d \left(\sum_{k=1}^K c_{kj
 $$
 
 이 penalty는 coordinate 단위로 component contrast 전체를 함께 선택하거나 제거한다. ANOVA-type coordinate-wise $\ell_1$ shrinkage는 component별 centered effect를 더 개별적으로 줄일 수 있지만, pilot comparison에서는 dense support로 가기 쉬웠다. 현재 연구의 목표는 coordinate-level support recovery이므로 centered eta group lasso 형태의 Eta-group을 main penalty로 둔다.
+
+> Reference note. 이 penalty는 Yuan and Lin (2006)의 group lasso 아이디어를 centered eta contrast에 적용한 것이다. 원래 group lasso는 미리 정의된 변수 group을 함께 선택하거나 제거하기 위한 penalty이며, 여기서는 coordinate $j$별 centered eta vector $c_{\cdot j}$를 하나의 group으로 본다.
 
 ---
 
@@ -222,6 +228,8 @@ $$
 \eta_{kj}^{\mathrm{new}}=\bar{\eta}_j+c_{kj}^{\mathrm{new}}
 $$
 
+> Reference note. 이 update는 group lasso penalty의 proximal operator, 즉 block soft-thresholding이다. Yuan and Lin (2006)의 group lasso penalty와 Parikh and Boyd (2014)의 proximal algorithms 문헌에서 표준적으로 쓰이는 shrinkage 형태와 같은 계열이다. 여기서 이 식은 전체 mixture objective가 convex라는 주장이 아니라, proximal EM-type update 내부에서 centered eta candidate를 shrink하는 step으로 사용된다.
+
 Line-search safeguard는 implementation-level 안정화 장치다. Objective trace smoke test에서 `n_decrease = 0`을 확인했지만, 이것이 전역 수렴이나 이론적 단조성 증명을 의미하지는 않는다.
 
 ---
@@ -267,6 +275,8 @@ $$
 
 이 $\mathrm{df}$는 BIC 계산을 위한 approximation이다. 엄밀한 effective $\mathrm{df}$ 유도는 아직 별도 과제이며, 논문에서는 sensitivity와 limitation을 함께 제시하는 편이 안전하다.
 
+> Reference note. Path+BIC는 penalized mixture model에서 tuning parameter를 고르는 실용적 기준으로 사용한다. 다만 위 $\mathrm{df}_{\eta}$는 엄밀한 effective degrees of freedom이 아니라 implementation-level approximation이다. 따라서 EBIC/RIC-like criteria와 path diagnostic은 official rule이 아니라 sensitivity로 보고하는 것이 안전하다.
+
 ---
 
 ## 12. Diagnostics and Current Limitations
@@ -284,3 +294,12 @@ $$
 | diagnostic methods | positive-support/adaptive/stability는 appendix 후보 |
 
 다음 보강 후보는 path construction 개선, MM 또는 coordinate update 개선, high-dimensional screening으로 생각함.
+
+---
+
+## References Mentioned
+
+- Banerjee, A., Dhillon, I. S., Ghosh, J., and Sra, S. (2005). *Clustering on the Unit Hypersphere using von Mises-Fisher Distributions*. Journal of Machine Learning Research, 6(46), 1345-1382.
+- Rossi, F. and Barbaro, F. (2022). *Mixture of von Mises-Fisher distribution with sparse prototypes*. Neurocomputing, 501, 41-74. DOI: 10.1016/j.neucom.2022.05.118.
+- Yuan, M. and Lin, Y. (2006). *Model Selection and Estimation in Regression with Grouped Variables*. Journal of the Royal Statistical Society: Series B, 68(1), 49-67. DOI: 10.1111/j.1467-9868.2005.00532.x.
+- Parikh, N. and Boyd, S. (2014). *Proximal Algorithms*. Foundations and Trends in Optimization, 1(3), 123-231.
