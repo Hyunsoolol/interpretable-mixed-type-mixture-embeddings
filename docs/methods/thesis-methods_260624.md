@@ -216,7 +216,7 @@ $$
 c_{\cdot j}^{\mathrm{new}} = \left(1-\frac{\lambda_\eta}{\|c_{\cdot j}^{0}\|_2}\right)_+ c_{\cdot j}^{0}
 $$
 
-Centered eta를 shrink한 뒤에는 coordinate mean $\bar{\eta}_j$를 더해 $\eta_{kj}^{\mathrm{new}}$를 구성한다.
+Centered eta를 shrink한 뒤에는 coordinate mean $\bar{\eta}_ j$를 더해 $\eta_{kj}^{\mathrm{new}}$를 구성한다.
 
 $$
 \eta_{kj}^{\mathrm{new}}=\bar{\eta}_j+c_{kj}^{\mathrm{new}}
