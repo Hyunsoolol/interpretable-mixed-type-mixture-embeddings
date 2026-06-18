@@ -124,6 +124,12 @@ estimate_kappa <- function(rho, d, kappa_cap = 1e6) {
 
 이 근사식은 vMF mixture EM에서 자주 쓰이는 Banerjee et al. (2005) 계열의 update approximation이다.
 
+> Reference note. 이 $\kappa$ update는 Banerjee et al. (2005)의 vMF mixture EM 문헌에서 사용하는 concentration approximation과 같은 계열이다. vMF M-step은 mean resultant length $\bar{\rho}$에 대해 $A_d(\kappa)=\bar{\rho}$를 풀어야 하지만, $A_d$는 modified Bessel function ratio라 inverse를 매번 닫힌형으로 계산하기 어렵다. 따라서 현재 구현의
+> $$
+> \hat{\kappa}\approx\frac{d\bar{\rho}-\bar{\rho}^3}{1-\bar{\rho}^2}
+> $$
+> 는 closed-form solution이 아니라 계산 효율을 위한 approximation으로 해석한다.
+
 ## 5. Rossi 구현
 
 ### 5.1 모형
@@ -137,6 +143,8 @@ penalized loglik = loglik - beta * sum_k ||mu_k||_1
 즉 penalty는 concentration `kappa_k`가 아니라 direction vector `mu_k`에 직접 들어간다.
 
 코드에서는 `fit_svMF_em()`의 argument `beta`가 이 penalty parameter다.
+
+> Reference note. Rossi and Barbaro (2022)는 본 연구의 sparse vMF mixture baseline이다. 해당 논문은 vMF mixture를 $L_1$-penalized likelihood로 추정해 sparse prototype/direction을 얻는 접근을 제안한다. 코드 비교에서 Rossi 방식은 direction parameter $\mu_k$에 sparsity penalty를 주는 방법으로 구현했고, 본 연구의 Eta-group은 posterior decision에 직접 들어가는 natural parameter $\eta_k=\kappa_k\mu_k$의 component contrast를 penalize한다는 점에서 구분된다.
 
 ```r
 fit_svMF_em(X, K, beta = beta, ...)
@@ -331,6 +339,8 @@ penalized loglik = loglik - lambda_eta * sum_j contrast_j
 
 이 penalty는 모든 component에 공통으로 나타나는 eta 성분은 보존하고, component 간 차이를 만드는 coordinate만 선택하도록 유도한다.
 
+> Reference note. Eta-group의 coordinate-wise group penalty는 Yuan and Lin (2006)의 group lasso 아이디어를 centered eta contrast에 맞춘 것이다. 원래 group lasso는 미리 정의된 변수 group을 함께 선택하거나 제거하기 위한 penalty이고, 여기서는 coordinate $j$마다 $K$개 component의 centered eta vector $c_{\cdot j}$를 하나의 group으로 본다.
+
 ## 9. Eta proximal M-step
 
 Eta-group의 exact M-step은 닫힌형으로 바로 풀기 어렵다. 이유는 vMF normalizing constant가 `||eta_k||_2`에 의존하고, penalty는 component 간 centered eta에 걸려 있기 때문이다.
@@ -384,6 +394,19 @@ else:
 
 eta_kj_new = eta_bar_j + c_kj_new
 ```
+
+수식으로 쓰면 다음 block soft-thresholding이다.
+
+$$
+c_{\cdot j}^{new}
+=
+\left(
+1-\frac{\lambda_\eta}{\|c_{\cdot j}^{0}\|_2}
+\right)_+
+c_{\cdot j}^{0}.
+$$
+
+> Reference note. 이 식은 group lasso penalty의 proximal operator, 즉 block/group soft-thresholding이다. Yuan and Lin (2006)의 group lasso penalty와 Parikh and Boyd (2014)의 proximal algorithms 문헌에서 표준적으로 쓰이는 shrinkage 형태와 같은 계열이다. 본 연구에서는 coordinate $j$별 centered eta vector $c_{\cdot j}$에 적용한다. 이는 전체 mixture objective의 convexity 보장이 아니라, proximal EM-type update 내부의 shrinkage step이다.
 
 여기서 중요한 해석은 다음이다.
 
@@ -620,6 +643,12 @@ Objective trace smoke test는 `results/eta_objective_trace_260615/`에 저장했
 
 BIC 자유도 역시 구현상 근사다. Eta-group에서는 `df = (K - 1) + d + (K - 1) * m`을 사용한다. 여기서 `m`은 active centered eta coordinate 수, `d`는 coordinate별 공통 eta baseline, `(K - 1) * m`은 선택된 coordinate의 centered contrast 자유도를 나타낸다.
 
+> Reference note. Path+BIC는 penalized mixture model에서 tuning parameter를 고르는 실용적 기준으로 사용한다. 다만 Eta-group의 자유도는 엄밀한 effective degrees of freedom이 아니라 구현 수준의 근사다. 현재 BIC 계산에서는
+> $$
+> df_{\eta}=(K-1)+d+(K-1)m
+> $$
+> 를 사용하며, 여기서 $m$은 선택된 centered eta coordinate 수다. 논문에서는 이 값을 implementation-level approximation으로 표기하고, EBIC/RIC-like 또는 path diagnostic을 sensitivity로 함께 제시하는 편이 안전하다.
+
 또한 tuning은 현재 공식 비교에서 path tuning + BIC로 통일했지만, 고차원에서는 BIC가 dense한 model을 선호하거나 반대로 과도하게 sparse한 선택을 할 수 있다. 따라서 본문에서는 BIC 기준 결과를 제시하고, EBIC/RICc는 sensitivity analysis 또는 appendix로 두는 것이 적절하다.
 
 ## 17. 연구미팅에서 답할 핵심 문장
@@ -629,3 +658,10 @@ Rossi 방법은 component direction mu에 L1 penalty를 둔다. 하지만 vMF po
 현재 R 구현에서는 Rossi의 beta path와 유사하게, Eta도 centered eta contrast norm을 기준으로 lambda path를 만들고 BIC로 선택한다. 선택된 변수 support에 대해서는 penalty 없이 refit하여 shrinkage bias를 줄였다.
 
 따라서 제안 방법의 장점은 ARI를 크게 올리는 것보다, ARI를 유지하면서 selected q와 FPR을 크게 줄이고 posterior decision에 직접 관련된 sparse contrast를 회복하는 데 있다.
+
+## References Mentioned
+
+- Banerjee, A., Dhillon, I. S., Ghosh, J., and Sra, S. (2005). *Clustering on the Unit Hypersphere using von Mises-Fisher Distributions*. Journal of Machine Learning Research, 6(46), 1345-1382. Used for vMF mixture EM and concentration approximation based on mean resultant length.
+- Rossi, F. and Barbaro, F. (2022). *Mixture of von Mises-Fisher distribution with sparse prototypes*. Neurocomputing, 501, 41-74. DOI: 10.1016/j.neucom.2022.05.118. Used as sparse vMF mixture baseline with $L_1$ sparsity on direction/prototype parameters.
+- Yuan, M. and Lin, Y. (2006). *Model Selection and Estimation in Regression with Grouped Variables*. Journal of the Royal Statistical Society: Series B, 68(1), 49-67. DOI: 10.1111/j.1467-9868.2005.00532.x. Used for group lasso and group-level selection.
+- Parikh, N. and Boyd, S. (2014). *Proximal Algorithms*. Foundations and Trends in Optimization, 1(3), 123-231. Used for proximal-operator interpretation of the group soft-thresholding step.
