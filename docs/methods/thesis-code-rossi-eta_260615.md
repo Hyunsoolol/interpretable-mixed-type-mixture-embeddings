@@ -397,9 +397,7 @@ eta_kj_new = eta_bar_j + c_kj_new
 
 수식으로 쓰면 다음 block soft-thresholding이다.
 
-$$
-c_{\cdot j}^{new}
-=
+$$ c_{\cdot j}^{new} =
 \left(
 1-\frac{\lambda_\eta}{\|c_{\cdot j}^{0}\|_2}
 \right)_+
