@@ -2,7 +2,7 @@
 
 업데이트: 2026-06-23
 
-## 1. 핵심 메시지
+## 1. 요약
 
 Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture에서 posterior decision parameter인 $\eta=\kappa\mu$의 component contrast를 sparse하게 만들어 clustering을 유지하면서 coordinate support 해석성을 높이는 것이다.
 
@@ -16,11 +16,6 @@ Limitations:
 1. Weak concentration 결과는 양호하지만 main success claim보다는 robustness evidence로 두는 편이 안전하다.
 2. High-dimensional d=400에서는 sparse recovery가 안정적이지 않고, adaptive penalty weighting도 dense support로 악화됐다.
 
-Meeting decision points:
-
-1. 본문 claim을 strong common+specific 중심으로 둘지
-2. weak/high-dimensional 결과를 appendix 또는 limitation으로 둘지
-3. 다음 보강을 path construction, screening, update/MM 중 어디로 둘지
 
 관련 문서:
 
@@ -107,16 +102,3 @@ Estimation은 proximal EM-type update, tuning은 path+BIC, refit은 selected sup
 | d=400 long path | path diagnostic | selected q=68.75, FPR=0.146, F1=0.441 | long path는 개선하지만 true q=22 회복은 여전히 제한적이다. |
 | d=400 long path + adaptive | failed diagnostic | selected q=308.00, FPR=0.760, F1=0.127 | adaptive penalty는 d=400에서 dense support로 악화됐다. |
 
-## 4. 현재 판단
-
-- Official algorithm은 `Eta-group path+BIC + refit`으로 유지한다.
-- Adaptive penalty는 strong/weak d=100에서는 좋지만 d=400 stress에서 실패했으므로 appendix-level diagnostic candidate로만 둔다.
-- High-dimensional d=400은 limitation이다. 현재 결과는 path construction, screening, update/MM 개선이 필요하다는 근거로 쓰는 것이 안전하다.
-- Long path는 useful diagnostic이지만 아직 official tuning 변경으로 확정하기에는 부족하다.
-
-## 5. 미팅에서 결정할 것
-
-1. 본문 claim을 strong common+specific 중심으로 둘지
-2. weak/high-dimensional 결과를 appendix/limitation으로 둘지
-3. official tuning을 path+BIC + refit으로 유지할지
-4. 다음 보강을 path construction, screening, update/MM 중 어디로 둘지
