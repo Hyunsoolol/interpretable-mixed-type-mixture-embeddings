@@ -13,9 +13,7 @@
 3. For $t=0,1,\ldots,T_{\max}-1$, repeat Steps 4-17.
 4. **E-step.** Compute the posterior responsibilities
 
-$$
-\tau_{ik}^{(t)}
-=
+$$ \tau_{ik}^{(t)} =
 \frac{
 \alpha_k^{(t)} C_d(\kappa_k^{(t)})
 \exp\{(\eta_k^{(t)})^\top x_i\}
@@ -28,8 +26,7 @@ $$
 
 5. Compute sufficient statistics
 
-$$
-N_k^{(t)}=\sum_{i=1}^n \tau_{ik}^{(t)}, 
+$$ N_k^{(t)}=\sum_{i=1}^n \tau_{ik}^{(t)}, 
 \qquad
 r_k^{(t)}=\sum_{i=1}^n \tau_{ik}^{(t)}x_i.
 $$
@@ -74,9 +71,7 @@ $$
 
 11. **Group soft-thresholding.** Apply the Eta-group proximal step coordinatewise:
 
-$$
-c_{\cdot j}^{\mathrm{prox}}
-=
+$$ c_{\cdot j}^{\mathrm{prox}} =
 \left(
 1-\frac{\lambda_\eta}{\|c_{\cdot j}^0\|_2}
 \right)_+
@@ -85,21 +80,13 @@ $$
 
 12. Reconstruct the proximal eta candidate by preserving the coordinatewise mean component:
 
-$$
-\eta_{kj}^{\mathrm{prox}}
-=
+$$ \eta_{kj}^{\mathrm{prox}} =
 \bar{\eta}_j^0+c_{kj}^{\mathrm{prox}}.
 $$
 
 13. Restore vMF parameters:
 
-$$
-\kappa_k^{\mathrm{prox}}
-=
-\|\eta_k^{\mathrm{prox}}\|_2,
-\qquad
-\mu_k^{\mathrm{prox}}
-=
+$$ \kappa_k^{\mathrm{prox}} = \|\eta_k^{\mathrm{prox}}\|_2, \qquad \mu_k^{\mathrm{prox}} =
 \frac{\eta_k^{\mathrm{prox}}}{\|\eta_k^{\mathrm{prox}}\|_2}.
 $$
 
@@ -107,9 +94,7 @@ Small-norm cases are handled by numerical safeguards in the implementation.
 
 14. **Monotone line-search safeguard.** Set $s=1$ and define
 
-$$
-\eta_k^{\mathrm{cand}}(s)
-=
+$$ \eta_k^{\mathrm{cand}}(s)=
 \eta_k^{(t)}
 +
 s\{\eta_k^{\mathrm{prox}}-\eta_k^{(t)}\}.
@@ -120,10 +105,7 @@ $$
 17. Accept the line-search candidate as $\Theta^{(t+1)}$.
 18. Stop if
 
-$$
-\left|
-\mathcal{L}_p(\Theta^{(t+1)})
--
+$$ \left| \mathcal{L}_p(\Theta^{(t+1)}) -
 \mathcal{L}_p(\Theta^{(t)})
 \right|
 <
@@ -132,9 +114,7 @@ $$
 
 19. Define the selected support as
 
-$$
-\hat{S}_{\lambda_\eta}
-=
+$$ \hat{S}_{\lambda_\eta} =
 \left\{
 j:
 \|c_{\cdot j}(\hat{\eta})\|_2>0
@@ -154,8 +134,7 @@ $$
 3. Store the fitted parameter $\hat{\Theta}_{\lambda_\ell}$ and selected support
 
 $$
-\hat{S}_{\lambda_\ell}
-=
+\hat{S}_{\lambda_\ell} =
 \left\{
 j:
 \|c_{\cdot j}(\hat{\eta}_{\lambda_\ell})\|_2>0
@@ -166,16 +145,14 @@ $$
 5. Compute the implementation-level degrees of freedom approximation
 
 $$
-df_{\lambda_\ell}
-=
+df_{\lambda_\ell} =
 (K-1)+d+(K-1)m_{\lambda_\ell}.
 $$
 
 6. Compute
 
 $$
-\mathrm{BIC}(\lambda_\ell)
-=
+\mathrm{BIC}(\lambda_\ell) =
 -2\ell(\hat{\Theta}_{\lambda_\ell})
 +
 \log(n)\,df_{\lambda_\ell}.
@@ -184,8 +161,7 @@ $$
 7. Select
 
 $$
-\hat{\lambda}_\eta
-=
+\hat{\lambda}_\eta =
 \arg\min_{\lambda_\ell\in\Lambda}
 \mathrm{BIC}(\lambda_\ell).
 $$
@@ -209,8 +185,7 @@ $$
 Then apply
 
 $$
-\delta_j^{\mathrm{prox}}
-=
+\delta_j^{\mathrm{prox}} =
 \left(
 1-\frac{\lambda_\eta}{|\delta_j^0|}
 \right)_+
@@ -224,12 +199,7 @@ $$
 $$
 
 $$
-\eta_{1j}^{\mathrm{prox}}
-=
-\bar{\eta}_j^0-\frac{1}{2}\delta_j^{\mathrm{prox}},
-\qquad
-\eta_{2j}^{\mathrm{prox}}
-=
+\eta_{1j}^{\mathrm{prox}} = \bar{\eta}_j^0-\frac{1}{2}\delta_j^{\mathrm{prox}}, \qquad \eta_{2j}^{\mathrm{prox}} =
 \bar{\eta}_j^0+\frac{1}{2}\delta_j^{\mathrm{prox}}.
 $$
 
