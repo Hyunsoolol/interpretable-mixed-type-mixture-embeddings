@@ -215,8 +215,7 @@ $$
 이에 대응하는 proximal shrinkage step은 coordinate별 threshold가 달라진다.
 
 $$
-c_{\cdot j}^{\mathrm{new}}
-=
+c_{\cdot j}^{\mathrm{new}} =
 \left(1-\frac{\lambda_\eta w_j}{\|c_{\cdot j}^{0}\|_2}\right)_+c_{\cdot j}^{0}
 $$
 
