@@ -1,5 +1,5 @@
 # Thesis Methods Note 260624
-**업데이트:** 2026-06-17
+**업데이트:** 2026-06-23
 
 **관련 문서:** `docs/implementation/thesis-implementation_260624.md`, `docs/meetings/thesis-meeting_260624.md`, `docs/methods/thesis-algorithm_260624.md`
 
@@ -183,6 +183,46 @@ $$
 
 > Reference note. 이 penalty는 Yuan and Lin (2006)의 group lasso 아이디어를 centered eta contrast에 적용한 것이다. 원래 group lasso는 미리 정의된 변수 group을 함께 선택하거나 제거하기 위한 penalty이며, 여기서는 coordinate $j$별 centered eta vector $c_{\cdot j}$를 하나의 group으로 본다.
 
+### 6.4 Adaptive Eta-group Penalty as a Diagnostic Extension
+
+Adaptive Eta-group penalty는 현재 official method가 아니라 penalty weighting sensitivity를 확인하기 위한 diagnostic extension이다. 기본 Eta-group penalty는 모든 coordinate에 같은 penalty weight를 둔다. Adaptive version은 초기 dense 또는 low-penalty fit에서 얻은 centered eta norm을 이용해 coordinate별 penalty weight를 다르게 둔다.
+
+초기 centered eta contrast norm을
+
+$$
+a_j = \|c_{\cdot j}^{\mathrm{init}}\|_2
+$$
+
+라고 두고, adaptive weight를 다음처럼 정의한다.
+
+$$
+w_j = (a_j+\epsilon)^{-\gamma}
+$$
+
+구현에서는 numerical stability를 위해 $\epsilon>0$을 두고, weight scale이 전체 penalty level과 혼동되지 않도록 median normalization을 사용했다.
+
+$$
+w_j \leftarrow \frac{w_j}{\mathrm{median}(w_1,\ldots,w_d)}
+$$
+
+Adaptive Eta-group penalty는 다음과 같다.
+
+$$
+P_{\mathrm{adaptive}}(\eta)
+=
+\lambda_\eta \sum_{j=1}^d w_j \|c_{\cdot j}\|_2
+$$
+
+이에 대응하는 proximal shrinkage step은 coordinate별 threshold가 달라진다.
+
+$$
+c_{\cdot j}^{\mathrm{new}}
+=
+\left(1-\frac{\lambda_\eta w_j}{\|c_{\cdot j}^{0}\|_2}\right)_+c_{\cdot j}^{0}
+$$
+
+진단 결과, adaptive penalty는 strong/weak $d=100$ setting에서는 selected $q$와 FPR을 낮추고 Precision/F1을 개선했다. 그러나 $d=200$에서는 adaptive penalty alone이 dense support 문제를 해결하지 못했고, long path와 결합해야 개선됐다. 더 중요하게는 $d=400$ high-dimensional stress에서 long path와 결합해도 selected $q=308.00$, FPR=0.760으로 악화되었다. 따라서 adaptive penalty는 현재 official algorithm으로 올리지 않고, appendix-level diagnostic candidate로만 둔다.
+
 ---
 
 ## 7. Penalized Objective
@@ -198,8 +238,9 @@ $$
 | Rossi sparse vMF | $\mu$ | $\beta\sum_k\lVert\mu_k\rVert_1$ |
 | Separate | $\mu, \kappa$ | $\lambda_\mu\sum_k\lVert\mu_k\rVert_1+\lambda_\kappa\sum_k\kappa_k$ |
 | Eta-group | centered $\eta$ contrast | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ |
+| Adaptive Eta-group | centered $\eta$ contrast | $\lambda_\eta\sum_j w_j\lVert c_{\cdot j}\rVert_2$ |
 
-Eta-group의 BIC 계산에는 implementation-level degrees of freedom approximation을 사용한다. 이는 model selection을 위한 계산 규칙이며, 엄밀한 effective degrees of freedom 이론으로 주장하지 않는다.
+Adaptive Eta-group row는 diagnostic extension이며 current official objective는 Eta-group이다. Eta-group의 BIC 계산에는 implementation-level degrees of freedom approximation을 사용한다. 이는 model selection을 위한 계산 규칙이며, 엄밀한 effective degrees of freedom 이론으로 주장하지 않는다.
 
 ---
 
@@ -222,6 +263,8 @@ $$
 c_{\cdot j}^{\mathrm{new}} = \left(1-\frac{\lambda_\eta}{\|c_{\cdot j}^{0}\|_2}\right)_+ c_{\cdot j}^{0}
 $$
 
+Adaptive diagnostic을 켠 경우에는 $\lambda_\eta$ 대신 coordinate별 $\lambda_\eta w_j$가 threshold로 들어간다. 이 변경은 shrinkage step만 바꾸며, official algorithm으로 확정된 것은 아니다.
+
 Centered eta를 shrink한 뒤에는 coordinate mean $\bar{\eta}_ j$를 더해 $\eta_{kj}^{\mathrm{new}}$를 구성한다.
 
 $$
@@ -242,9 +285,11 @@ $$
 \mathrm{BIC} = \log(n)\,\mathrm{df} - 2\ell(\hat{\Theta})
 $$
 
-EBIC, RIC-like criteria, positive-support BIC, adaptive refinement, stability selection은 diagnostic 또는 sensitivity로만 둔다. High-dimensional setting에서는 기본 path가 중간 support 후보를 충분히 만들지 못할 수 있다. 이 경우 penalty 기준만 바꾸어도 선택이 거의 달라지지 않는다.
+EBIC, RIC-like criteria, positive-support BIC, adaptive refinement, stability selection, adaptive penalty weighting은 diagnostic 또는 sensitivity로만 둔다. High-dimensional setting에서는 기본 path가 중간 support 후보를 충분히 만들지 못할 수 있다. 이 경우 penalty 기준만 바꾸어도 선택이 거의 달라지지 않는다.
 
 Long path 240 diagnostic은 $d=200$과 $d=400$에서 selected $q$, FPR, Precision, F1을 개선했다. 그러나 true union $q$ 근처 support를 안정적으로 회복하지는 못했으므로 official tuning change로 확정하지 않는다.
+
+Adaptive penalty diagnostic은 $d=100$ strong/weak setting에서는 유망했지만, $d=400$ stress에서 dense support로 악화되었다. 따라서 current official tuning/selection rule은 Eta-group path+BIC + refit으로 유지한다.
 
 ---
 
@@ -292,6 +337,7 @@ $$
 | weak setting | support plateau와 path/BIC instability 가능 |
 | high-dimensional setting | 기본 path가 dense support로 가기 쉬움 |
 | long path | FPR/Precision/F1 개선, true support size 회복은 제한적 |
+| adaptive penalty | strong/weak $d=100$ 개선, $d=400$ stress 실패 |
 | kappa approximation | 고차원 또는 weak signal에서 outlier 가능 |
 | diagnostic methods | positive-support/adaptive/stability는 appendix 후보 |
 
