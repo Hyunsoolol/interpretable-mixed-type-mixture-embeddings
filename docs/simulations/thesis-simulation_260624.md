@@ -225,14 +225,15 @@ Adaptive Eta-group penalty는 현재 official algorithm이 아니라 penalty wei
 |:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | official | Eta-group BIC + refit | 100 | 0.686 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 | 0.000102 | 1.901 | 0.185 |
 | adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 100 | 0.690 | 22.47 | 0.993 | 0.008 | 0.977 | 0.984 | 0.000089 | 1.710 | 0.147 |
+| adaptive diagnostic, gamma=0.5 | Eta-group adaptive BIC + refit | 100 | 0.689 | 23.62 | 0.995 | 0.022 | 0.946 | 0.967 | 0.000091 | 1.759 | 0.160 |
 
-Adaptive penalty diagnostic은 main strong setting에서 selected q와 FPR을 더 낮추고 Precision/F1을 개선했다. 다만 아직 official method 변경으로 보기는 이르다. Gamma=0.5 full run, weak setting, high-dimensional setting에서 같은 개선이 유지되는지 확인해야 한다.
+Adaptive penalty diagnostic은 main strong setting에서 selected q와 FPR을 줄이고 Precision/F1을 개선했다. Gamma=1.0이 gamma=0.5보다 selected q, FPR, Precision/F1, MSE_centered_eta 측면에서 더 안정적이다. 다만 아직 official method 변경으로 보기는 이르며, weak setting과 high-dimensional setting에서도 같은 개선이 유지되는지 확인해야 한다.
 
 ## 4. Main Takeaways
 
 1. Eta-group은 strong common+specific setting에서 support recovery가 가장 설득력 있다.
 2. Weak setting은 결과가 양호하지만 robustness evidence로 두는 편이 안전하다.
-3. High-dimensional에서는 basic path가 dense support로 가기 쉽다.
+3. High-dimensional setting에서는 basic path가 dense support로 가기 쉽다.
 4. EBIC/RIC-like criteria는 basic path 후보가 부족하면 선택을 거의 바꾸지 못한다.
 5. Long path는 FPR, Precision, F1을 개선하지만 true q=22 회복은 제한적이다.
 6. Adaptive penalty는 strong setting에서 promising diagnostic candidate지만, 아직 official method는 아니다.
