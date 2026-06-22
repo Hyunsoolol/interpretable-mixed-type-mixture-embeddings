@@ -228,8 +228,11 @@ Adaptive Eta-group penalty는 현재 official algorithm이 아니라 penalty wei
 | strong adaptive diagnostic, gamma=0.5 | Eta-group adaptive BIC + refit | 100 | 0.689 | 23.62 | 0.995 | 0.022 | 0.946 | 0.967 | 0.000091 | 1.759 | 0.160 |
 | weak official | Eta-group BIC + refit | 100 | 0.575 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 | 0.000075 | 1.824 | 0.183 |
 | weak adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 100 | 0.578 | 22.58 | 1.000 | 0.007 | 0.975 | 0.987 | 0.000065 | 1.740 | 0.153 |
+| d=200 basic path | Eta-group BIC + refit | 50 | 0.430 | 120.06 | 0.989 | 0.552 | 0.208 | 0.331 | 0.000691 | 93.797 | 1.818 |
+| d=200 long path 240 | Eta-group BIC + refit | 50 | 0.455 | 62.14 | 0.920 | 0.235 | 0.507 | 0.584 | 0.000511 | 94.248 | 1.376 |
+| d=200 adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 50 | 0.415 | 116.72 | 0.987 | 0.534 | 0.205 | 0.334 | 0.000803 | 89.761 | 1.925 |
 
-Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 FPR을 줄이고 Precision/F1을 개선했다. Strong setting에서는 gamma=1.0이 gamma=0.5보다 더 안정적이었고, weak setting에서도 gamma=1.0은 official 대비 selected q를 true q=22에 더 가깝게 만들었다. 다만 아직 official method 변경으로 보기는 이르며, high-dimensional setting에서도 같은 개선이 유지되는지 확인해야 한다.
+Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 FPR을 줄이고 Precision/F1을 개선했다. Strong setting에서는 gamma=1.0이 gamma=0.5보다 더 안정적이었고, weak setting에서도 gamma=1.0은 official 대비 selected q를 true q=22에 더 가깝게 만들었다. 그러나 d=200에서는 adaptive penalty alone이 dense support 문제를 해결하지 못했고, long path 240보다 나빴다. 따라서 아직 official method 변경으로 보기는 이르며, "d=400 check is still required before method change"라는 조건도 남아 있다. 우선은 path construction과 adaptive weighting을 어떻게 결합할지 정해야 한다.
 
 ## 4. Main Takeaways
 
@@ -238,5 +241,5 @@ Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 
 3. High-dimensional setting에서는 basic path가 dense support로 가기 쉽다.
 4. EBIC/RIC-like criteria는 basic path 후보가 부족하면 선택을 거의 바꾸지 못한다.
 5. Long path는 FPR, Precision, F1을 개선하지만 true q=22 회복은 제한적이다.
-6. Adaptive penalty는 strong/weak d=100 setting에서 promising diagnostic candidate지만, 아직 official method는 아니다.
+6. Adaptive penalty는 strong/weak d=100 setting에서는 promising diagnostic candidate지만, d=200에서는 alone으로 부족하다.
 7. 다음 보강 후보는 path construction, MM/coordinate update, screening, adaptive penalty weighting이다.
