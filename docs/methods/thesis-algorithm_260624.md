@@ -105,11 +105,8 @@ $$
 17. Accept the line-search candidate as $\Theta^{(t+1)}$.
 18. Stop if
 
-$$ \left| \mathcal{L}_p(\Theta^{(t+1)}) -
-\mathcal{L}_p(\Theta^{(t)})
-\right|
-<
-\epsilon.
+$$
+\left| \mathcal{L}_p(\Theta^{(t+1)}) - \mathcal{L}_p(\Theta^{(t)}) \right| < \epsilon.
 $$
 
 19. Define the selected support as
