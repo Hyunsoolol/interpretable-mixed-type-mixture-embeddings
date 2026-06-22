@@ -232,8 +232,9 @@ Adaptive Eta-group penalty는 현재 official algorithm이 아니라 penalty wei
 | d=200 long path 240 | Eta-group BIC + refit | 50 | 0.455 | 62.14 | 0.920 | 0.235 | 0.507 | 0.584 | 0.000511 | 94.248 | 1.376 |
 | d=200 adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 50 | 0.415 | 116.72 | 0.987 | 0.534 | 0.205 | 0.334 | 0.000803 | 89.761 | 1.925 |
 | d=200 path+adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 50 | 0.461 | 40.98 | 0.839 | 0.127 | 0.741 | 0.715 | 0.000493 | 71.609 | 1.148 |
+| d=400 path+adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 20 | 0.155 | 308.00 | 0.945 | 0.760 | 0.068 | 0.127 | 0.001212 | 390.392 | 4.518 |
 
-Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 FPR을 줄이고 Precision/F1을 개선했다. Strong setting에서는 gamma=1.0이 gamma=0.5보다 더 안정적이었고, weak setting에서도 gamma=1.0은 official 대비 selected q를 true q=22에 더 가깝게 만들었다. 그러나 d=200에서는 adaptive penalty alone이 dense support 문제를 해결하지 못했다. Long path 240과 결합하면 selected q=40.98, FPR=0.127, Precision=0.741, F1=0.715로 long path alone보다 좋아졌다. 다만 이것은 path+adaptive diagnostic이며 아직 official method가 아니다. "d=400 check is still required before method change"라는 조건도 남아 있다.
+Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 FPR을 줄이고 Precision/F1을 개선했다. Strong setting에서는 gamma=1.0이 gamma=0.5보다 더 안정적이었고, weak setting에서도 gamma=1.0은 official 대비 selected q를 true q=22에 더 가깝게 만들었다. 그러나 d=200에서는 adaptive penalty alone이 dense support 문제를 해결하지 못했다. Long path 240과 결합하면 selected q=40.98, FPR=0.127, Precision=0.741, F1=0.715로 long path alone보다 좋아졌다. 반면 d=400 stress에서는 path+adaptive diagnostic이 selected q=308.00, FPR=0.760으로 악화되어 dense support 문제를 다시 만들었다. 따라서 d=400 stress remains a limitation if true q=22 recovery is still weak이며, path+adaptive는 아직 official method가 아니다.
 
 ## 4. Main Takeaways
 
@@ -242,5 +243,5 @@ Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 
 3. High-dimensional setting에서는 basic path가 dense support로 가기 쉽다.
 4. EBIC/RIC-like criteria는 basic path 후보가 부족하면 선택을 거의 바꾸지 못한다.
 5. Long path는 FPR, Precision, F1을 개선하지만 true q=22 회복은 제한적이다.
-6. Adaptive penalty는 strong/weak d=100 setting에서는 promising diagnostic candidate이며, d=200에서는 long path와 결합할 때 의미가 있다.
+6. Adaptive penalty는 strong/weak d=100 setting에서는 promising diagnostic candidate이며, d=200에서는 long path와 결합할 때 의미가 있지만 d=400 stress에서는 악화된다.
 7. 다음 보강 후보는 path construction, MM/coordinate update, screening, adaptive penalty weighting이다.
