@@ -221,20 +221,22 @@ Long path는 official algorithm 변경이 아니라 path density/range가 성능
 
 Adaptive Eta-group penalty는 현재 official algorithm이 아니라 penalty weighting sensitivity다. Gamma=1.0에서는 initial centered eta norm으로 coordinate weight를 만들고, median weight가 1이 되도록 normalize했다.
 
-| setting | Method | reps | ARI | Selected q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
-|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| strong official | Eta-group BIC + refit | 100 | 0.686 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 | 0.000102 | 1.901 | 0.185 |
-| strong adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 100 | 0.690 | 22.47 | 0.993 | 0.008 | 0.977 | 0.984 | 0.000089 | 1.710 | 0.147 |
-| strong adaptive diagnostic, gamma=0.5 | Eta-group adaptive BIC + refit | 100 | 0.689 | 23.62 | 0.995 | 0.022 | 0.946 | 0.967 | 0.000091 | 1.759 | 0.160 |
-| weak official | Eta-group BIC + refit | 100 | 0.575 | 24.09 | 1.000 | 0.027 | 0.918 | 0.956 | 0.000075 | 1.824 | 0.183 |
-| weak adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 100 | 0.578 | 22.58 | 1.000 | 0.007 | 0.975 | 0.987 | 0.000065 | 1.740 | 0.153 |
-| d=200 basic path | Eta-group BIC + refit | 50 | 0.430 | 120.06 | 0.989 | 0.552 | 0.208 | 0.331 | 0.000691 | 93.797 | 1.818 |
-| d=200 long path 240 | Eta-group BIC + refit | 50 | 0.455 | 62.14 | 0.920 | 0.235 | 0.507 | 0.584 | 0.000511 | 94.248 | 1.376 |
-| d=200 adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 50 | 0.415 | 116.72 | 0.987 | 0.534 | 0.205 | 0.334 | 0.000803 | 89.761 | 1.925 |
-| d=200 path+adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 50 | 0.461 | 40.98 | 0.839 | 0.127 | 0.741 | 0.715 | 0.000493 | 71.609 | 1.148 |
-| d=400 path+adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 20 | 0.155 | 308.00 | 0.945 | 0.760 | 0.068 | 0.127 | 0.001212 | 390.392 | 4.518 |
+| setting | Method | reps | ARI | Selected q | FPR | Precision | F1 | MSE_centered_eta | 판단 |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|:---|
+| strong official | Eta-group BIC + refit | 100 | 0.686 | 24.75 | 0.037 | 0.890 | 0.937 | 0.185 | official baseline |
+| strong adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 100 | 0.690 | 22.47 | 0.008 | 0.977 | 0.984 | 0.147 | clear improvement |
+| strong adaptive diagnostic, gamma=0.5 | Eta-group adaptive BIC + refit | 100 | 0.689 | 23.62 | 0.022 | 0.946 | 0.967 | 0.160 | improvement, weaker than gamma=1.0 |
+| weak official | Eta-group BIC + refit | 100 | 0.575 | 24.09 | 0.027 | 0.918 | 0.956 | 0.183 | official weak baseline |
+| weak adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 100 | 0.578 | 22.58 | 0.007 | 0.975 | 0.987 | 0.153 | clear improvement |
+| d=200 basic path | Eta-group BIC + refit | 50 | 0.430 | 120.06 | 0.552 | 0.208 | 0.331 | 1.818 | dense support problem |
+| d=200 long path 240 | Eta-group BIC + refit | 50 | 0.455 | 62.14 | 0.235 | 0.507 | 0.584 | 1.376 | path improves but selected q remains high |
+| d=200 adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 50 | 0.415 | 116.72 | 0.534 | 0.205 | 0.334 | 1.925 | adaptive alone fails |
+| d=200 path+adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 50 | 0.461 | 40.98 | 0.127 | 0.741 | 0.715 | 1.148 | best d=200 diagnostic |
+| d=400 basic path | Eta-group BIC + refit | 20 | 0.182 | 262.95 | 0.642 | 0.080 | 0.146 | 4.016 | dense stress limitation |
+| d=400 long path 240 | Eta-group BIC + refit | 20 | 0.238 | 68.75 | 0.146 | 0.491 | 0.441 | 2.248 | best d=400 among tested |
+| d=400 path+adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 20 | 0.155 | 308.00 | 0.760 | 0.068 | 0.127 | 4.518 | fails; dense support returns |
 
-Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 FPR을 줄이고 Precision/F1을 개선했다. Strong setting에서는 gamma=1.0이 gamma=0.5보다 더 안정적이었고, weak setting에서도 gamma=1.0은 official 대비 selected q를 true q=22에 더 가깝게 만들었다. 그러나 d=200에서는 adaptive penalty alone이 dense support 문제를 해결하지 못했다. Long path 240과 결합하면 selected q=40.98, FPR=0.127, Precision=0.741, F1=0.715로 long path alone보다 좋아졌다. 반면 d=400 stress에서는 path+adaptive diagnostic이 selected q=308.00, FPR=0.760으로 악화되어 dense support 문제를 다시 만들었다. 따라서 d=400 stress remains a limitation if true q=22 recovery is still weak이며, path+adaptive는 아직 official method가 아니다.
+Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 FPR을 줄이고 Precision/F1을 개선했다. 그러나 d=200에서는 adaptive penalty alone이 dense support 문제를 해결하지 못했고, long path 240과 결합해야 의미 있는 개선이 나타났다. 더 중요하게는 d=400 stress에서 path+adaptive diagnostic이 selected q=308.00, FPR=0.760으로 악화되어 dense support 문제를 다시 만들었다. 따라서 adaptive penalty는 not official이며, current official은 Eta-group path+BIC + refit으로 유지하는 것이 안전하다. Adaptive penalty는 diagnostic only 또는 appendix-level candidate로 두고, d=400 stress limitation은 path construction, screening, update/MM 개선 문제로 정리한다.
 
 ## 4. Main Takeaways
 

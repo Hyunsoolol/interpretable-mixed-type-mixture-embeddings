@@ -15,6 +15,7 @@ Eta-group의 핵심 주장은 ARI 향상이 아니라, vMF mixture 안에서 pos
 
 1. Weak setting은 결과가 양호하지만 main success claim보다는 robustness evidence로 두는 편이 안전하다.
 2. High-dimensional setting에서는 기본 path+BIC가 dense support로 가기 쉬워 path construction 또는 update 보강이 필요하다.
+3. Adaptive penalty weighting은 strong/weak d=100에서는 selected q와 FPR을 개선했지만, d=400 stress에서는 long path와 결합해도 dense support로 악화됐다. 따라서 현재 official algorithm은 Eta-group path+BIC + refit으로 유지하고, adaptive penalty는 appendix-level diagnostic candidate로 두는 것이 안전하다.
 
 
 | 표기 | 의미 |
