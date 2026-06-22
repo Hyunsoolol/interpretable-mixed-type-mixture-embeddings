@@ -1,7 +1,7 @@
 # Thesis Methods Note 260624
 **업데이트:** 2026-06-17
 
-**관련 문서:** `docs/implementation/thesis-implementation_260624.md`, `docs/meetings/thesis-meeting_260624.md`
+**관련 문서:** `docs/implementation/thesis-implementation_260624.md`, `docs/meetings/thesis-meeting_260624.md`, `docs/methods/thesis-algorithm_260624.md`
 
 이 문서는 논문 Methods section의 뼈대로 사용할 수 있도록 모형, penalty, 추정량, 추정 절차, tuning, refit, 한계를 이론 중심으로 정리한 노트다.
 

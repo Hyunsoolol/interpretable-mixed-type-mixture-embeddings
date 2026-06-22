@@ -25,6 +25,7 @@ This repository is currently kept as a document-first research meeting archive.
 
 - `docs/meetings/thesis-meeting_260624.md`: concise meeting main summary.
 - `docs/methods/thesis-methods_260624.md`: methods and theory note.
+- `docs/methods/thesis-algorithm_260624.md`: Eta-group algorithm note.
 - `docs/implementation/thesis-implementation_260624.md`: implementation status and algorithm notes.
 - `docs/simulations/thesis-simulation_260624.md`: current simulation summary for the 260624 meeting.
 - `docs/simulations/thesis-simulation_260615.md`: earlier detailed simulation notes/archive.
