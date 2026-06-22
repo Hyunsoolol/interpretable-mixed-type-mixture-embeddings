@@ -208,8 +208,7 @@ $$
 Adaptive Eta-group penalty는 다음과 같다.
 
 $$
-P_{\mathrm{adaptive}}(\eta)
-=
+P_{\mathrm{adaptive}}(\eta) =
 \lambda_\eta \sum_{j=1}^d w_j \|c_{\cdot j}\|_2
 $$
 
