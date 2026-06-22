@@ -217,6 +217,17 @@ Long path는 official algorithm 변경이 아니라 path density/range가 성능
 | d=400 | basic path | 20 | 0.00 | 0.00 | 262.95 | 0.30 | 0.206 | 0.920 | 0.642 | 0.080 | 0.146 |
 | d=400 | long path 240 | 20 | 0.40 | 0.55 | 68.75 | 0.00 | 0.214 | 0.620 | 0.146 | 0.491 | 0.441 |
 
+### 3.8 Adaptive penalty diagnostic
+
+Adaptive Eta-group penalty는 현재 official algorithm이 아니라 penalty weighting sensitivity다. Gamma=1.0에서는 initial centered eta norm으로 coordinate weight를 만들고, median weight가 1이 되도록 normalize했다.
+
+| setting | Method | reps | ARI | Selected q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| official | Eta-group BIC + refit | 100 | 0.686 | 24.75 | 0.994 | 0.037 | 0.890 | 0.937 | 0.000102 | 1.901 | 0.185 |
+| adaptive diagnostic, gamma=1.0 | Eta-group adaptive BIC + refit | 100 | 0.690 | 22.47 | 0.993 | 0.008 | 0.977 | 0.984 | 0.000089 | 1.710 | 0.147 |
+
+Adaptive penalty diagnostic은 main strong setting에서 selected q와 FPR을 더 낮추고 Precision/F1을 개선했다. 다만 아직 official method 변경으로 보기는 이르다. Gamma=0.5 full run, weak setting, high-dimensional setting에서 같은 개선이 유지되는지 확인해야 한다.
+
 ## 4. Main Takeaways
 
 1. Eta-group은 strong common+specific setting에서 support recovery가 가장 설득력 있다.
@@ -224,4 +235,5 @@ Long path는 official algorithm 변경이 아니라 path density/range가 성능
 3. High-dimensional에서는 basic path가 dense support로 가기 쉽다.
 4. EBIC/RIC-like criteria는 basic path 후보가 부족하면 선택을 거의 바꾸지 못한다.
 5. Long path는 FPR, Precision, F1을 개선하지만 true q=22 회복은 제한적이다.
-6. 다음 보강 후보는 path construction, MM/coordinate update, screening이다.
+6. Adaptive penalty는 strong setting에서 promising diagnostic candidate지만, 아직 official method는 아니다.
+7. 다음 보강 후보는 path construction, MM/coordinate update, screening, adaptive penalty weighting이다.
