@@ -6,7 +6,7 @@
 
 **Input:** directional data $x_1,\ldots,x_n \in S^{d-1}$, number of components $K$, penalty parameter $\lambda_\eta$, maximum iteration $T_{\max}$, convergence tolerance $\epsilon$, minimum line-search step $s_{\min}$.
 
-**Output:** fitted parameters $\hat{\Theta}_{\lambda_\eta}=(\hat{\alpha}_k,\hat{\mu}_k,\hat{\kappa}_k)_{k=1}^K$, natural parameters $\hat{\eta}_k=\hat{\kappa}_k\hat{\mu}_k$, selected support $\hat{S}_{\lambda_\eta}$, convergence and objective-trace diagnostics.
+**Output:** fitted parameters $\hat{\Theta} _ {\lambda_\eta}=(\hat{\alpha}_k,\hat{\mu}_k,\hat{\kappa}_k)_{k=1}^K$, natural parameters $\hat{\eta}_k=\hat{\kappa}_k\hat{\mu}_k$, selected support $\hat{S}_{\lambda_\eta}$, convergence and objective-trace diagnostics.
 
 1. Initialize $\Theta^{(0)}=(\alpha_k^{(0)},\mu_k^{(0)},\kappa_k^{(0)})_{k=1}^K$.
 2. Set $\eta_k^{(0)}=\kappa_k^{(0)}\mu_k^{(0)}$.
