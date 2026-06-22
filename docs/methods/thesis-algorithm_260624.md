@@ -111,7 +111,7 @@ $$
 
 19. Define the selected support as
 $$
-\hat{S_}{\lambda_\eta}=\left{j:\|c_{\cdot j}(\hat{\eta})\|_2>0\right}.
+\hat{S}_{\lambda_\eta}=\left{j:\|c_{\cdot j}(\hat{\eta})\|_2>0\right}.
 $$
 
 **Remark.** Algorithm 1 is a proximal EM-type update. The E-step is the standard mixture E-step, but the M-step is not the exact maximizer of the penalized objective. The line-search step is an implementation-level safeguard against objective decrease, not a proof of global convergence.
