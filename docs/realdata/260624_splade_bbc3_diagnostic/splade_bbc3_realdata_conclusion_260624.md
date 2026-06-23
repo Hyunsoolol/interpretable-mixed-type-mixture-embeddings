@@ -1,16 +1,16 @@
-# SPLADE BBC3 Real-data Diagnostic 260624
+# SPLADE BBC3 실제자료 진단 결과 260624
 
-## Status
+## 1. 상태
 
-- Diagnostic only; not an official real-data result.
-- No new embedding or fit was run for this summary.
-- Token tables are computed from the stored SPLADE d=500 EBIC Eta path fit because the refit fit object is not persisted in `cstr_eta_compare_fit.rds`.
-- SPLADE coordinates are learned lexical expansion tokens, not necessarily raw observed words.
-- Dense embedding coordinates are not used for interpretation.
+- 이 결과는 real-data 본문 결과가 아니라 diagnostic 결과다.
+- 이 요약을 만들기 위해 새 embedding이나 새 Eta-group fit은 실행하지 않았다.
+- token table은 저장된 SPLADE d=500 EBIC Eta path fit에서 계산했다. `cstr_eta_compare_fit.rds`에는 refit fit object가 별도로 저장되어 있지 않기 때문이다.
+- SPLADE coordinate는 learned lexical expansion token이며, 반드시 원문에 직접 등장한 단어는 아니다.
+- dense embedding coordinate는 해석 대상으로 사용하지 않는다.
 
-## Input and Protocol
+## 2. 입력과 분석 프로토콜
 
-| Item | Value |
+| 항목 | 값 |
 |:---|:---|
 | Dataset | BBC 3-class subset |
 | Classes | `sport`, `entertainment`, `tech` |
@@ -21,9 +21,11 @@
 | Feature ranking | variance |
 | Main diagnostic criterion | EBIC |
 | Secondary diagnostic | RICc |
-| Baseline | Rossi shared-kappa path and matched TF-IDF diagnostic |
+| Baseline | Rossi shared-kappa path, matched TF-IDF diagnostic |
 
-## Rossi vs Eta-group Summary
+해석 목적은 "SPLADE sparse lexical representation + Eta-group"이 token-level support 해석에 쓸 만한지 확인하는 것이다. 이 단계에서는 official tuning 변경이나 최종 real-data claim을 하지 않는다.
+
+## 3. Rossi vs Eta-group 요약
 
 | Method | ARI | Selected q | Kappa ratio | Cluster size |
 |:---|---:|---:|---:|:---|
@@ -33,9 +35,11 @@
 | Eta-group BIC + refit | 0.919 | 500 | 1.112 | 121;119;120 |
 | Eta-group RICc + refit | 0.903 | 181 | 1.076 | 121;121;118 |
 
-BIC keeps full support for Eta-group (`selected q = 500`), so BIC is too weak for sparse real-data support in this smoke. EBIC and RICc are useful diagnostic criteria, not official tuning replacements.
+핵심은 ARI 자체의 큰 개선이 아니다. Eta-group EBIC + refit은 Rossi EBIC와 비슷하거나 약간 높은 ARI를 유지하면서 selected q를 489에서 206으로 줄였다. RICc에서도 selected q=181로 같은 방향이 확인된다.
 
-## Cluster-majority Mapping
+반대로 BIC는 Eta-group에서도 selected q=500, 즉 full support를 선택한다. 따라서 이 BBC3 smoke에서는 BIC가 real-data sparse support 해석 기준으로 너무 약하다. EBIC/RICc는 현재 diagnostic criterion이며, official tuning replacement로 확정하지 않는다.
+
+## 4. Cluster-majority mapping 결과
 
 | Cluster | Majority class | Sport | Entertainment | Tech | Cluster size | Purity |
 |---:|:---|---:|---:|---:|---:|---:|
@@ -43,7 +47,11 @@ BIC keeps full support for Eta-group (`selected q = 500`), so BIC is too weak fo
 | 2 | tech | 0 | 6 | 115 | 121 | 0.950 |
 | 3 | entertainment | 1 | 114 | 3 | 118 | 0.966 |
 
-## Class-mapped Selected Tokens
+cluster-majority mapping은 안정적으로 해석 가능하다. 세 cluster 모두 purity가 0.95 이상이며, sport/tech/entertainment class와 잘 대응된다.
+
+## 5. Class-mapped selected token 해석
+
+아래 표는 EBIC Eta-group fit의 centered eta score를 cluster-majority class 기준으로 정렬한 것이다. `+`는 해당 class 방향으로 eta contrast가 큰 token, `-`는 해당 class와 반대 방향의 token을 뜻한다.
 
 ### sport cluster
 
@@ -62,6 +70,8 @@ BIC keeps full support for Eta-group (`selected q = 500`), so BIC is too weak fo
 | 11 | `-tech` | -12.733 | 12.733 |
 | 12 | `+england` | 11.413 | 11.413 |
 
+sport cluster는 `champion`, `match`, `team`, `football`, `club`, `player` 같은 스포츠 관련 token으로 설명된다.
+
 ### tech cluster
 
 | Rank | Signed token | Centered eta score | Abs score |
@@ -78,6 +88,8 @@ BIC keeps full support for Eta-group (`selected q = 500`), so BIC is too weak fo
 | 10 | `+mobile` | 14.280 | 14.280 |
 | 11 | `-win` | -14.207 | 14.207 |
 | 12 | `+users` | 13.796 | 13.796 |
+
+tech cluster는 `tech`, `software`, `computer`, `internet`, `computers`, `mobile`, `users` 같은 기술 관련 token으로 설명된다.
 
 ### entertainment cluster
 
@@ -96,7 +108,9 @@ BIC keeps full support for Eta-group (`selected q = 500`), so BIC is too weak fo
 | 11 | `-match` | -12.512 | 12.512 |
 | 12 | `+movies` | 12.396 | 12.396 |
 
-## Overall Top Selected Tokens
+entertainment cluster는 `film`, `award`, `actor`, `awards`, `oscar`, `movie`, `singer` 같은 연예/영화 관련 token으로 설명된다.
+
+## 6. 전체 selected token 상위 목록
 
 | Rank | Token | Centered eta norm | Document frequency |
 |---:|:---|---:|---:|
@@ -121,21 +135,31 @@ BIC keeps full support for Eta-group (`selected q = 500`), so BIC is too weak fo
 | 19 | `computers` | 19.168 | 77 |
 | 20 | `singer` | 18.722 | 76 |
 
-## Interpretation
+상위 selected token은 세 class의 핵심 의미축을 비교적 잘 반영한다. sport는 경기/팀/선수, tech는 소프트웨어/컴퓨터/인터넷, entertainment는 영화/배우/시상식 관련 token이 주로 선택된다.
 
-- The sport-majority cluster is driven by tokens such as `champion`, `match`, `team`, `football`, `club`, and `player`.
-- The tech-majority cluster is driven by tokens such as `tech`, `software`, `computer`, `internet`, `computers`, `mobile`, and `users`.
-- The entertainment-majority cluster is driven by tokens such as `film`, `award`, `actor`, `awards`, `oscar`, `movie`, and `singer`.
-- Compared with Rossi EBIC, Eta-group EBIC + refit reduces selected support from 489 to 206 while keeping ARI around 0.911.
-- Compared with matched TF-IDF, SPLADE d=500 is more compatible with the current Eta-group objective in this smoke; TF-IDF Eta-group became sparse but lost clustering quality.
+## 7. TF-IDF matched baseline과의 비교
 
-## Conclusion
+같은 BBC3 subset에서 TF-IDF top500 matched baseline도 확인했다. TF-IDF에서는 Eta-group EBIC + refit이 selected q=101까지 줄어 sparse support는 만들었지만, ARI=0.344로 clustering이 크게 무너졌다.
 
-SPLADE sparse lexical representation is a plausible real-data representation candidate for Eta-group because it preserves token-level coordinate interpretability and maintains clustering under EBIC/RICc diagnostics. The current result is suitable for a meeting or appendix-level diagnostic table, but it should not be presented as final real-data validation. A fixed real-data protocol and stability checks are still needed before using it as a main-text empirical result.
+따라서 이 smoke에서는 단순히 sparse representation이면 충분한 것이 아니라, vMF mixture와 Eta-group objective에 맞는 representation 품질이 중요하다. SPLADE d=500은 TF-IDF보다 현재 Eta-group real-data diagnostic에 더 잘 맞는 후보로 보인다.
 
-## Files in This Folder
+## 8. 해석상 주의점
 
-- `splade_d500_ebic_selected_tokens_overall.csv`: EBIC selected token ranking by centered eta norm.
-- `splade_d500_ebic_selected_tokens_by_class.csv`: class-mapped signed centered eta scores.
+- 이 결과는 최종 real-data validation이 아니다.
+- EBIC/RICc는 diagnostic criterion이며, official tuning 변경으로 확정하지 않는다.
+- SPLADE token은 learned lexical expansion token이다. 원문에 실제로 등장한 단어 목록으로 과장하면 안 된다.
+- dense LLM embedding은 semantic geometry robustness check로는 쓸 수 있지만, coordinate-level selected support 해석에는 쓰지 않는다.
+- 본문 결과로 쓰기 전에는 protocol 고정, top-d sensitivity, tuning sensitivity, stability check가 추가로 필요하다.
+
+## 9. 결론
+
+SPLADE sparse lexical representation은 Eta-group real-data 분석 후보로 충분히 가능성이 있다. BBC3 d=500 diagnostic에서 Eta-group EBIC/RICc는 Rossi보다 훨씬 작은 support를 선택하면서 clustering을 유지했고, selected token도 class별 의미와 잘 맞았다.
+
+다만 현재 결과는 meeting 또는 appendix 수준의 diagnostic이다. 논문 본문 real-data 결과로 사용하려면 representation, top-d, tuning criterion, stability check를 고정한 후 재현 가능한 protocol로 다시 정리해야 한다.
+
+## 10. 이 폴더의 파일
+
+- `splade_d500_ebic_selected_tokens_overall.csv`: centered eta norm 기준 EBIC selected token ranking.
+- `splade_d500_ebic_selected_tokens_by_class.csv`: class-mapped signed centered eta score.
 - `splade_d500_ebic_cluster_class_table.csv`: cluster-majority class table.
-- `splade_bbc3_realdata_conclusion_260624.md`: this diagnostic conclusion note.
+- `splade_bbc3_realdata_conclusion_260624.md`: 이 diagnostic 결론 문서.
