@@ -106,4 +106,6 @@ Estimation은 proximal EM-type update, tuning은 path+BIC, refit은 selected sup
 
 SPLADE sparse lexical representation을 BBC3 text diagnostic에 적용했다. d=500 + EBIC 기준에서 Eta-group + refit은 ARI=0.911, selected q=206으로 Rossi EBIC(ARI=0.903, selected q=489)보다 support를 줄이면서 clustering을 유지했다. 반면 matched TF-IDF에서는 Eta-group EBIC + refit이 selected q=101로 sparse해졌지만 ARI=0.344로 clustering이 무너졌다.
 
+Eta-group의 selected token은 부호까지 해석할 수 있다. BBC3 결과에서 entertainment cluster는 `+film`, `+actor`를 갖고, sport cluster는 `-film`, tech cluster는 `-actor`를 갖는다. 이는 단순 빈도 차이가 아니라 centered eta score 기준의 soft posterior contrast이며, hard rule로 해석하면 안 된다.
+
 따라서 SPLADE BBC3 결과는 본문 핵심 결과가 아니라 appendix/diagnostic real-data 후보로 두는 것이 안전하다. SPLADE token은 learned lexical expansion token이며 반드시 원문 단어는 아니다. 자세한 표는 [`docs/realdata/260624_splade_bbc3_diagnostic/splade_bbc3_realdata_conclusion_260624.md`](../realdata/260624_splade_bbc3_diagnostic/splade_bbc3_realdata_conclusion_260624.md)에 분리했다.

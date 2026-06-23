@@ -70,15 +70,15 @@ cluster-majority mapping은 안정적으로 해석 가능하다. 세 cluster 모
 
 아래 표는 EBIC Eta-group fit의 centered eta score를 cluster-majority class 기준으로 정렬한 것이다. `+`는 해당 class 방향으로 eta contrast가 큰 token, `-`는 해당 class와 반대 방향의 token을 뜻한다.
 
-`+`와 `-` 부호는 단순한 token 빈도 차이가 아니라 posterior decision score에서 해당 coordinate가 특정 cluster를 상대적으로 더 끌어당기거나 덜 끌어당기는 방향을 나타낸다. 수식으로는 centered eta score
+`+`와 `-` 부호는 단순한 token 빈도 차이가 아니라 centered eta score
 
 $$
 c_{kj}=\eta_{kj}-\bar{\eta}_j
 $$
 
-의 부호다. 예를 들어 `+film`은 entertainment cluster에서 평균적인 eta보다 `film` coordinate의 decision weight가 크다는 뜻이고, `-film`은 sport cluster에서 `film` coordinate의 decision weight가 평균보다 작다는 뜻이다. 따라서 `football`과 `champion`이 함께 있어 sport 쪽 evidence가 있더라도, `film` coordinate가 크면 sport cluster에서는 상대적으로 불리하게 작용하고 entertainment cluster에서는 유리하게 작용할 수 있다.
+의 부호다. 예를 들어 `+film`은 entertainment cluster의 posterior decision score를 상대적으로 높이는 방향이고, `-film`은 sport cluster의 score를 상대적으로 낮추는 방향이다.
 
-다만 이것을 hard rule처럼 해석하면 안 된다. `-film`은 "film이 있으면 절대 sport가 아니다"라는 의미가 아니라, 전체 posterior score 안에서 sport 방향의 상대적 contrast를 낮추는 soft evidence다. 실제 BBC3 결과에서도 sport cluster의 `-film`, tech cluster의 `-actor`, entertainment cluster의 `-champion`처럼 다른 class의 핵심 token을 상대적으로 낮게 두는 패턴이 확인된다.
+실제 BBC3 결과에서도 entertainment cluster의 `+film`, `+actor`, sport cluster의 `-film`, tech cluster의 `-actor`, entertainment cluster의 `-champion`처럼 class를 설명하는 positive token과 다른 class와 구분하는 negative contrast token이 함께 확인된다. 다만 이는 hard rule이 아니라 posterior decision score 안의 soft contrast로 해석해야 한다.
 
 ### sport cluster
 
