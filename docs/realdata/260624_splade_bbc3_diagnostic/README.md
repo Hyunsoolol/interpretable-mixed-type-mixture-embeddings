@@ -15,6 +15,12 @@
 
 CSV 파일은 후속 분석 호환성을 위해 영문 컬럼명과 원래 token/class label을 유지했다. 해석은 `splade_bbc3_realdata_conclusion_260624.md`에 한국어로 정리했다.
 
+## 전처리 요약
+
+BBC 원자료에서 `sport`, `entertainment`, `tech` 세 class를 사용하고 class당 최대 120개 문서를 선택해 총 360개 문서를 구성했다. 각 문서는 SPLADE sparse lexical expansion으로 변환했고, `alpha_min3` token filter로 특수 토큰, subword token, 숫자/기호 token, 길이 3 미만 token을 제거했다. 이후 class label을 쓰지 않고 token weight variance 기준으로 상위 500개 coordinate를 고른 뒤, row-wise L2 normalization으로 vMF mixture 입력 행렬을 만들었다.
+
+예를 들어 sport 문서는 `team`, `football`, `match` 같은 expansion token이 커질 수 있고, entertainment 문서는 `film`, `actor`, `award`, tech 문서는 `software`, `computer`, `internet` 같은 token이 커질 수 있다. 단, SPLADE token은 learned lexical expansion token이므로 원문에 그대로 등장한 단어라고 단정하지 않는다.
+
 ## 핵심 결론
 
 SPLADE d=500에서 Eta-group EBIC/RICc는 Rossi EBIC보다 훨씬 작은 support를 선택하면서도 BBC3 clustering 성능을 유지했다. 반면 BIC는 여전히 dense support를 선택하므로 real-data sparse support 해석에는 약하다.

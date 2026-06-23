@@ -25,6 +25,23 @@
 
 해석 목적은 "SPLADE sparse lexical representation + Eta-group"이 token-level support 해석에 쓸 만한지 확인하는 것이다. 이 단계에서는 official tuning 변경이나 최종 real-data claim을 하지 않는다.
 
+### 데이터 전처리 과정
+
+BBC 원자료에서 `sport`, `entertainment`, `tech` 세 범주를 사용하고, 각 class에서 최대 120개 문서를 선택해 총 360개 문서를 구성했다. 이후 문서를 SPLADE sparse lexical expansion으로 변환한 뒤, 해석 가능한 token coordinate만 남기고 vMF mixture 입력에 맞게 row-wise L2 normalization을 적용했다.
+
+전처리 흐름은 다음과 같다.
+
+1. 원문 문서 선택: `data/bbc/raw/bbc`에서 `sport`, `entertainment`, `tech` 폴더의 문서를 읽는다.
+2. SPLADE sparse weight 계산: `naver/splade-cocondenser-ensembledistil`의 masked-LM logits에 `log(1 + ReLU(logits))`와 max-pooling을 적용해 document-token sparse weight를 만든다.
+3. token filtering: `alpha_min3` 규칙으로 특수 토큰, subword token, 숫자/기호 token, 길이 3 미만 token을 제거한다.
+4. top-d screening: class label을 쓰지 않고 token weight의 variance 기준으로 상위 500개 coordinate를 선택한다.
+5. spherical projection: 각 문서 vector를 L2 norm 1로 정규화해 vMF mixture 입력 행렬 `X`를 만든다.
+6. payload 변환: `X`, `y`, class label, vocabulary/token table, document metadata를 RDS payload로 저장한다.
+
+예를 들어 sport 문서에서 경기/팀 관련 문맥이 강하면 SPLADE는 `team`, `football`, `match`, `champion` 같은 lexical expansion token에 큰 weight를 줄 수 있다. entertainment 문서에서는 `film`, `actor`, `award`, `oscar` 같은 token이, tech 문서에서는 `software`, `computer`, `internet`, `mobile` 같은 token이 커질 수 있다. 단, 이 token들은 SPLADE가 학습한 lexical expansion feature이므로, 반드시 원문에 그대로 등장한 단어라고 해석하면 안 된다.
+
+이 전처리의 핵심은 주관적 keyword 선택을 하지 않는다는 점이다. 사람이 sport/tech/entertainment 키워드를 미리 고르는 것이 아니라, SPLADE sparse weight와 unsupervised variance screening으로 후보 coordinate를 만든 뒤 Eta-group이 posterior decision contrast 기준으로 support를 다시 선택한다.
+
 ## 3. Rossi vs Eta-group 요약
 
 | Method | ARI | Selected q | Kappa ratio | Cluster size |
