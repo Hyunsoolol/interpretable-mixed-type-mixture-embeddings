@@ -345,7 +345,9 @@ $$
 
 Real-data text analysis에서 dense LLM embedding은 semantic geometry를 잘 보존할 수 있지만, 각 coordinate가 직접 해석 가능한 token 또는 변수에 대응하지 않는다. 따라서 Eta-group의 coordinate support 해석을 주장하기에는 부적합하다.
 
-현재 real-data 후보로는 BGE-M3 lexical/sparse weights가 더 안전하다. 이 representation은 coordinate를 vocabulary/token-level feature로 볼 수 있으므로, Eta-group이 선택한 support를 token list로 다시 해석할 수 있다. Dense BGE-M3 embedding은 coordinate-level interpretation이 아니라 semantic-geometry robustness check로만 둔다.
+영어 text data에서는 SPLADE sparse representation을 우선 후보로 둔다. SPLADE coordinate는 vocabulary-level learned lexical/expansion token에 대응하므로 Eta-group이 선택한 support를 token list로 다시 해석할 수 있다. 단, SPLADE token은 raw observed word가 아니라 model-expanded lexical feature일 수 있으므로 그렇게 명시해야 한다.
+
+BGE-M3 lexical/sparse weights는 multilingual 또는 long-document comparator로 둔다. Dense BGE-M3 또는 다른 dense LLM embedding은 coordinate-level interpretation이 아니라 semantic-geometry robustness check로만 사용한다.
 
 ---
 

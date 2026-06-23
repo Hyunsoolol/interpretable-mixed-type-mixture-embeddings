@@ -247,3 +247,11 @@ Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 
 5. Long path는 FPR, Precision, F1을 개선하지만 true q=22 회복은 제한적이다.
 6. Adaptive penalty는 strong/weak d=100 setting에서는 promising diagnostic candidate이며, d=200에서는 long path와 결합할 때 의미가 있지만 d=400 stress에서는 악화된다.
 7. 다음 보강 후보는 path construction, MM/coordinate update, screening, adaptive penalty weighting이다.
+
+## 5. Real-data representation diagnostic plan
+
+Text real-data에서는 coordinate 해석 가능성이 핵심이므로 dense LLM embedding을 main representation으로 쓰지 않는다. Dense embeddings는 semantic geometry robustness check로만 둔다.
+
+영어 BBC/Reuters/20News 계열에는 SPLADE sparse representation을 우선 neural sparse 후보로 둔다. SPLADE coordinate는 vocabulary-level learned lexical/expansion token에 대응하므로 Eta-group selected support를 token list로 해석할 수 있다. 단, 이 token은 raw observed word가 아니라 model-expanded lexical feature일 수 있다.
+
+BGE-M3 lexical/sparse는 multilingual 및 long-document comparator로 둔다. TF-IDF + L2 normalization은 classical interpretable baseline으로 유지한다.
