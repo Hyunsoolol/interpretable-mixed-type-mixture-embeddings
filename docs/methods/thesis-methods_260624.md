@@ -341,6 +341,12 @@ $$
 
 다음 보강 후보는 path construction 개선, MM 또는 coordinate update 개선, high-dimensional screening으로 생각함.
 
+### 12.1 Real-data representation candidate
+
+Real-data text analysis에서 dense LLM embedding은 semantic geometry를 잘 보존할 수 있지만, 각 coordinate가 직접 해석 가능한 token 또는 변수에 대응하지 않는다. 따라서 Eta-group의 coordinate support 해석을 주장하기에는 부적합하다.
+
+현재 real-data 후보로는 BGE-M3 lexical/sparse weights가 더 안전하다. 이 representation은 coordinate를 vocabulary/token-level feature로 볼 수 있으므로, Eta-group이 선택한 support를 token list로 다시 해석할 수 있다. Dense BGE-M3 embedding은 coordinate-level interpretation이 아니라 semantic-geometry robustness check로만 둔다.
+
 ---
 
 ## References Mentioned
