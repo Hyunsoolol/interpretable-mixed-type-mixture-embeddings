@@ -252,6 +252,14 @@ Adaptive penalty diagnostic은 strong과 weak d=100 setting에서 selected q와 
 
 Text real-data에서는 coordinate 해석 가능성이 핵심이므로 dense LLM embedding을 main representation으로 쓰지 않는다. Dense embeddings는 semantic geometry robustness check로만 둔다.
 
-영어 BBC/Reuters/20News 계열에는 SPLADE sparse representation을 우선 neural sparse 후보로 둔다. SPLADE coordinate는 vocabulary-level learned lexical/expansion token에 대응하므로 Eta-group selected support를 token list로 해석할 수 있다. 단, 이 token은 raw observed word가 아니라 model-expanded lexical feature일 수 있다.
+영어 BBC/Reuters/20News 계열에는 SPLADE sparse representation을 우선 neural sparse 후보로 둔다. SPLADE coordinate는 vocabulary-level learned lexical/expansion token에 대응하므로 Eta-group selected support를 token list로 해석할 수 있다. 단, 이 token은 원문 단어가 아니라 model-expanded lexical feature일 수 있다.
 
 BGE-M3 lexical/sparse는 multilingual 및 long-document comparator로 둔다. TF-IDF + L2 normalization은 classical interpretable baseline으로 유지한다.
+
+## 6. Real-data diagnostic note
+
+SPLADE BBC3 결과는 simulation 결과가 아니라 real-data representation diagnostic이다. BBC3 subset에서 SPLADE sparse lexical expansion representation을 d=500으로 구성하고 EBIC/RICc를 diagnostic criterion으로 확인했다.
+
+EBIC 기준에서 Eta-group + refit은 ARI=0.911, selected q=206으로 Rossi EBIC(ARI=0.903, selected q=489)보다 selected support를 줄이면서 clustering을 유지했다. RICc에서도 Eta-group + refit은 ARI=0.903, selected q=181로 비슷한 방향을 보였다. 반면 matched TF-IDF top500에서는 Eta-group EBIC + refit이 selected q=101까지 줄었지만 ARI=0.344로 clustering이 무너져, sparse coordinate representation의 품질이 중요하다는 diagnostic으로 해석한다.
+
+이 결과는 final real-data result가 아니라 appendix/diagnostic 후보로 둔다. SPLADE coordinate는 learned lexical expansion token이며 반드시 원문 단어가 아니고, dense LLM embedding의 각 차원은 coordinate-level interpretation에 사용하지 않는다. 자세한 표와 selected token table은 `docs/realdata/260624_splade_bbc3_diagnostic/`에 분리했다.

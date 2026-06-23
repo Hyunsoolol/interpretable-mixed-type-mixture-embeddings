@@ -16,6 +16,7 @@ This repository is currently kept as a document-first research meeting archive.
 - `docs/methods/`: model and code-level methodology notes.
 - `docs/implementation/`: current implementation status notes.
 - `docs/simulations/`: simulation design, diagnostics, and interpretation notes.
+- `docs/realdata/`: compact real-data diagnostic summaries.
 - `docs/proposals/`: earlier proposal and research-note drafts.
 - `docs/references/`: reference notes and selected papers.
 - `legacy/python/`: old Python prototypes kept for historical context.
@@ -28,6 +29,7 @@ This repository is currently kept as a document-first research meeting archive.
 - `docs/methods/thesis-algorithm_260624.md`: Eta-group algorithm note.
 - `docs/implementation/thesis-implementation_260624.md`: implementation status and algorithm notes.
 - `docs/simulations/thesis-simulation_260624.md`: current simulation summary for the 260624 meeting.
+- `docs/realdata/260624_splade_bbc3_diagnostic/README.md`: SPLADE BBC3 real-data diagnostic summary.
 - `docs/simulations/thesis-simulation_260615.md`: earlier detailed simulation notes/archive.
 - `docs/methods/thesis-code-rossi-eta_260615.md`: Rossi/Eta code-level notes.
 

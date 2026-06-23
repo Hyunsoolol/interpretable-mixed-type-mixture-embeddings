@@ -102,3 +102,8 @@ Estimation은 proximal EM-type update, tuning은 path+BIC, refit은 selected sup
 | d=400 long path | path diagnostic | selected q=68.75, FPR=0.146, F1=0.441 | long path는 개선하지만 true q=22 회복은 여전히 제한적이다. |
 | d=400 long path + adaptive | failed diagnostic | selected q=308.00, FPR=0.760, F1=0.127 | adaptive penalty는 d=400에서 dense support로 악화됐다. |
 
+## 4. Real-data diagnostic 후보
+
+SPLADE sparse lexical representation을 BBC3 text diagnostic에 적용했다. d=500 + EBIC 기준에서 Eta-group + refit은 ARI=0.911, selected q=206으로 Rossi EBIC(ARI=0.903, selected q=489)보다 support를 줄이면서 clustering을 유지했다. 반면 matched TF-IDF에서는 Eta-group EBIC + refit이 selected q=101로 sparse해졌지만 ARI=0.344로 clustering이 무너졌다.
+
+따라서 SPLADE BBC3 결과는 본문 핵심 결과가 아니라 appendix/diagnostic real-data 후보로 두는 것이 안전하다. SPLADE token은 learned lexical expansion token이며 반드시 원문 단어는 아니다. 자세한 표는 [`docs/realdata/260624_splade_bbc3_diagnostic/splade_bbc3_realdata_conclusion_260624.md`](../realdata/260624_splade_bbc3_diagnostic/splade_bbc3_realdata_conclusion_260624.md)에 분리했다.
