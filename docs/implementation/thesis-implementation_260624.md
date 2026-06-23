@@ -95,18 +95,3 @@ Long path 240 diagnostic은 고차원에서 path density/range가 중요하다�
 | diagnostic methods | positive-support/adaptive/stability는 appendix 후보 |
 
 특히 high-dimensional setting에서는 기본 path가 sparse support 후보를 충분히 만들지 못하는 경우가 있다. 이 문제는 단순히 BIC penalty를 강하게 하는 것만으로는 해결되지 않았다.
-
-## 7. 연구미팅 260624에서 결정할 것
-
-미팅에서 결정해야 할 질문은 다음이다.
-
-1. 공식 알고리즘을 `Eta-group path+BIC + refit`으로 유지할지.
-2. positive-support/adaptive/stability 결과를 appendix diagnostic으로만 둘지.
-3. high-dimensional 보강을 path construction, update 개선, screening 중 어디부터 갈지.
-4. 논문 본문 claim을 strong common+specific setting 중심으로 둘지.
-5. high-dimensional 결과를 robustness/stress limitation으로 둘지.
-
-현재 가장 안전한 논문 주장은 다음이다.
-
-> Eta-group은 vMF mixture에서 posterior decision parameter인 eta의 component contrast를 sparse하게 만들어, clustering 성능을 유지하면서 해석 가능한 coordinate support를 제공한다.
-
