@@ -19,9 +19,9 @@ Limitations:
 
 관련 문서:
 
-- 자세한 방법론: `docs/methods/thesis-methods_260624.md`
-- 구현 상세: `docs/implementation/thesis-implementation_260624.md`
-- 전체 simulation summary: `docs/simulations/thesis-simulation_260624.md`
+- 자세한 방법론: [docs/methods/thesis-methods_260624.md](../methods/thesis-methods_260624.md)
+- 구현 상세: [docs/implementation/thesis-implementation_260624.md](../implementation/thesis-implementation_260624.md)
+- 전체 simulation summary: [docs/simulations/thesis-simulation_260624.md](../simulations/thesis-simulation_260624.md)
 
 ## 2. 방법론 요약
 
@@ -45,7 +45,7 @@ Estimation은 proximal EM-type update, tuning은 path+BIC, refit은 selected sup
 
 ## 3. 핵심 simulation 결과
 
-상세한 6개 모형 비교, 모수 추정 결과, signal sensitivity, high-dimensional diagnostic 표는 `docs/simulations/thesis-simulation_260624.md`로 분리했다.
+상세한 6개 모형 비교, 모수 추정 결과, signal sensitivity, high-dimensional diagnostic 표는 [docs/simulations/thesis-simulation_260624.md](../simulations/thesis-simulation_260624.md)로 분리했다.
 
 ### 3.1 Toy setting: K=2
 
