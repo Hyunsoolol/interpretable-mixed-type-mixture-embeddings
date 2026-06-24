@@ -13,8 +13,7 @@ Main evidence:
 
 Limitations:
 
-1. Weak concentration 결과는 양호하지만 main success claim보다는 robustness evidence로 두는 편이 안전하다.
-2. High-dimensional d=400에서는 sparse recovery가 안정적이지 않고, adaptive penalty weighting도 dense support로 악화됐다.
+1. High-dimensional d=400에서는 sparse recovery가 안정적이지 않고, adaptive penalty weighting도 dense support로 악화됨.
 
 
 관련 문서:
