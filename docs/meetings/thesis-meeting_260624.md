@@ -94,12 +94,12 @@ Estimation은 proximal EM-type update, tuning은 path+BIC, refit은 selected sup
 
 | Setting | Role | Key result | Interpretation |
 |:---|:---|:---|:---|
-| Weak concentration | robustness | Eta-group + refit: ARI=0.575, selected q=24.09, FPR=0.027 | 결과는 양호하지만 main claim보다 robustness evidence로 두는 편이 안전하다. |
-| d=200 basic path | high-dimensional robustness | Eta-group + refit: selected q=120.06, FPR=0.552 | dense baseline보다는 낫지만 true q=22 근처 sparse recovery는 무너진다. |
-| d=200 long path + adaptive | diagnostic | selected q=40.98, FPR=0.127, F1=0.715 | d=200에서는 path density와 adaptive weighting 결합이 가장 좋았다. |
-| d=400 basic path | stress limitation | Eta-group + refit: selected q=262.95, FPR=0.642 | high-dimensional success case로 보기 어렵다. |
-| d=400 long path | path diagnostic | selected q=68.75, FPR=0.146, F1=0.441 | long path는 개선하지만 true q=22 회복은 여전히 제한적이다. |
-| d=400 long path + adaptive | failed diagnostic | selected q=308.00, FPR=0.760, F1=0.127 | adaptive penalty는 d=400에서 dense support로 악화됐다. |
+| Weak concentration | robustness | Eta-group + refit: ARI=0.575, selected q=24.09, FPR=0.027 | 결과는 양호하지만 main claim보다 robustness evidence로 두는 편이 안전 |
+| d=200 basic path | high-dimensional robustness | Eta-group + refit: selected q=120.06, FPR=0.552 | dense baseline보다는 낫지만 true q=22 근처 sparse recovery는 무너짐 |
+| d=200 long path + adaptive | diagnostic | selected q=40.98, FPR=0.127, F1=0.715 | d=200에서는 path density와 adaptive weighting 결합이 가장 좋았음 |
+| d=400 basic path | stress limitation | Eta-group + refit: selected q=262.95, FPR=0.642 | high-dimensional success case로 보기 어려움 |
+| d=400 long path | path diagnostic | selected q=68.75, FPR=0.146, F1=0.441 | long path는 개선하지만 true q=22 회복은 여전히 제한적임 |
+| d=400 long path + adaptive | failed diagnostic | selected q=308.00, FPR=0.760, F1=0.127 | adaptive penalty는 d=400에서 dense support로 악화됌 |
 
 ## 4. Real-data diagnostic 후보
 
