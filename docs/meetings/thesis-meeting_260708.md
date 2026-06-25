@@ -92,8 +92,8 @@ Eta-group은 posterior decision score에 직접 들어가는 $\eta_k=\kappa_k\mu
 
 | 방법 | 주된 위험 | 관찰된 패턴 | 해석 |
 |:---|:---|:---|:---|
-| Eta-group | $\eta$ contrast 과소선택 | C2 rep50에서 평균 selected q=2.68, 50회 중 43회 q=0 | sparse하지만 decision signal까지 잃을 수 있음 |
-| Rossi / Separate | 과대선택 또는 dense support | C2 rep50에서 selected q가 약 98-100 | clustering signal은 남기지만 support 해석성이 약함 |
+| Eta-group | $\eta$ contrast 과소선택 | Weak-signal tuning diagnostic에서 평균 selected q=2.68, 50회 중 43회 q=0 | sparse하지만 decision signal까지 잃을 수 있음 |
+| Rossi / Separate | 과대선택 또는 dense support | Weak-signal tuning diagnostic에서 selected q가 약 98-100 | clustering signal은 남기지만 support 해석성이 약함 |
 
 ## 4. Feedback 2: Eta-group이 불리한 상황
 
@@ -112,45 +112,31 @@ Eta-group의 핵심 장점은 universal ARI improvement가 아니라 posterior d
 
 ## 5. Negative-control simulation 업데이트
 
-### 5.1 Setting B: dense true support
+### 5.1 Dense-support negative control
 
-Setting B는 현재까지 가장 명확한 Eta-group failure mode다. Dense true support setting에서 Eta-group + refit은 selected q=52.82로 support를 줄였지만 ARI=0.368, F1=0.726으로 Rossi/Separate보다 낮았다. Separate + refit은 ARI=0.378, F1=0.890이고 MSE_centered_eta도 더 낮았다.
+Dense-support negative control은 현재까지 가장 명확한 Eta-group limitation이다. True decision support가 dense한 setting에서 Eta-group + refit은 selected q=52.82로 support를 줄였지만 ARI=0.368, F1=0.726으로 Rossi/Separate보다 낮았다. Separate + refit은 ARI=0.378, F1=0.890이고 MSE_centered_eta도 더 낮았다.
 
 해석: 많은 coordinate가 약하게 separation에 기여하는 경우에는 Eta-group이 과도하게 shrink하여 TPR/F1, ARI, MSE_centered_eta에서 손해를 볼 수 있다.
 
-### 5.2 A2: direction-sparse / equal concentration
+### 5.2 Weak-signal tuning diagnostic
 
-A2는 equal concentration과 direction-sparse 구조로 smoke 실행했다. Rossi/Separate는 ARI=0.999로 clustering은 매우 높았지만 selected q=100, FPR=1.000으로 거의 모든 coordinate를 선택했다. Eta-group은 ARI=0.998을 유지하면서 selected q=40.60, F1=0.658로 union-support 기준에서는 더 sparse했다.
-
-다만 Rossi/Separate는 entry-level prototype support에서 entry_TPR=1.000을 보였다. 따라서 Rossi류 방법을 공정하게 평가하려면 prototype support metric과 posterior decision support metric을 분리해야 한다.
-
-### 5.3 Fragmented block-like smoke
-
-공유 좌표가 없는 fragmented block-like setting도 smoke로 확인했다.
-
-- 저차원 설정: $d=60$, true union q=40. 모든 방법의 ARI가 거의 1이었다. Eta-group은 selected q=42.80으로 더 sparse했지만, Separate는 MSE_mu와 MSE_centered_eta가 더 낮았다.
-- A4 재설계: $d=100$, true union q=80, 각 component가 서로 다른 20개 좌표를 사용한다. 모든 방법의 ARI가 0.999였고, union support에서는 Eta-group이 selected q=91.00, F1=0.936으로 더 좋았다. 반면 prototype entry support에서는 Separate BIC의 entry_F1=0.438로 Rossi보다 높아, metric 분리가 필요함을 보였다.
-- 고차원 설정: $d=400$, true union q=80. Rossi/Separate도 selected q=400으로 dense해졌고, Eta-group도 selected q=368.33으로 dense했다.
-
-따라서 현재 generator만으로는 "Rossi/Separate가 명확하게 유리한 block-diagonal setting"이 아직 만들어지지 않았다. 이 질문에 답하려면 dedicated block-diagonal 또는 binary-style generator와 prototype-support metric이 필요하다.
-
-### 5.4 C2: weak signal
-
-C2는 weak signal을 완화한 rep50 diagnostic이다. Rossi/Separate의 ARI는 약 0.13-0.14 수준이지만 support는 거의 full support로 선택된다. Eta-group BIC는 평균 selected q=2.68이고, 50회 중 43회에서 selected q=0을 선택해 BIC-selected refit valid replicate가 7회뿐이었다. Positive-support diagnostic을 쓰면 selected q=15.52, F1=0.531이지만 ARI=0.137로 낮다.
+Weak-signal tuning diagnostic은 weak signal을 완화한 rep50 diagnostic이다. Rossi/Separate의 ARI는 약 0.13-0.14 수준이지만 support는 거의 full support로 선택된다. Eta-group BIC는 평균 selected q=2.68이고, 50회 중 43회에서 selected q=0을 선택해 BIC-selected refit valid replicate가 7회뿐이었다. Positive-support diagnostic을 쓰면 selected q=15.52, F1=0.531이지만 ARI=0.137로 낮다.
 
 해석: 이 setting은 Rossi/Separate의 깨끗한 우위라기보다 Eta BIC zero-support failure와 weak-signal clustering difficulty를 보여주는 diagnostic에 가깝다.
 
+### 5.3 Support-target diagnostics
+
+이 계열은 “어떤 support를 recovery target으로 둘 것인가”를 확인하기 위한 diagnostic이다.
+
+- Direction-sparse metric diagnostic: equal concentration과 direction-sparse 구조에서 Rossi/Separate는 ARI=0.999였지만 selected q=100, FPR=1.000으로 거의 모든 coordinate를 선택했다. Eta-group은 ARI=0.998을 유지하면서 selected q=40.60, F1=0.658로 union-support 기준에서는 더 sparse했다. 다만 Rossi/Separate는 entry-level prototype support에서 entry_TPR=1.000을 보였다.
+- Entry-sparse / union-dense diagnostic: $d=100$, true union q=80, 각 component가 서로 다른 20개 좌표를 사용한다. 모든 방법의 ARI가 0.999였고, union support에서는 Eta-group이 selected q=91.00, F1=0.936으로 더 좋았다. 반면 prototype entry support에서는 Separate BIC의 entry_F1=0.438로 Rossi보다 높아, metric 분리가 필요함을 보였다.
+- Fragmented-support diagnostic: 공유 좌표가 없는 구조에서도 현재 generator만으로는 Rossi/Separate가 명확히 유리한 결과를 만들지 못했다. 저차원에서는 Eta-group이 selected q=42.80으로 더 sparse했고, 고차원에서는 Rossi/Separate도 selected q=400, Eta-group도 selected q=368.33으로 모두 dense해졌다.
+
+따라서 현재 generator만으로는 "Rossi/Separate가 명확하게 유리한 block-diagonal setting"이 아직 만들어지지 않았다. 이 질문에 답하려면 dedicated block-diagonal 또는 binary-style generator와 prototype-support metric이 필요하다.
+
 자세한 표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 정리했다.
 
-### 5.5 Negative-control 핵심 정리
-
-| 항목 | 현재 결론 | 미팅에서 확인할 점 |
-|:---|:---|:---|
-| Setting B rep50 | dense true support에서 Eta-group이 support를 과도하게 줄이며 Separate + refit보다 ARI/F1/MSE_centered_eta가 낮다. | 가장 명확한 Eta-group limitation으로 둘 수 있는가? |
-| C2 rep50 | weak signal에서 Eta BIC가 zero support를 자주 선택한다. 50회 중 43회가 selected q=0이고 BIC-selected refit valid replicate는 7회다. | tuning failure diagnostic으로 appendix에 둘 것인가? |
-| A2 / A4 / fragmented | 현재 generator만으로는 Rossi/Separate가 명확히 유리한 setting이 만들어지지 않았다. 다만 A4는 entry support와 union support가 다른 결론을 줄 수 있음을 보였다. | prototype support metric과 block-diagonal generator를 추가할 것인가? |
-
-### 5.6 Support metric 정리
+### 5.4 Support metric 정리
 
 Rossi/Separate와 Eta-group은 sparse하게 만들고자 하는 대상이 다르므로, support recovery를 하나의 지표로만 비교하면 해석이 섞일 수 있다.
 
@@ -160,13 +146,21 @@ Rossi/Separate와 Eta-group은 sparse하게 만들고자 하는 대상이 다르
 | Prototype entry support | $S_{\mathrm{entry}}=\{(k,j):\mu_{kj}\ne0\}$ | Rossi/Separate처럼 direction/prototype sparsity를 목표로 하는 방법에 자연스러움 | Eta-group은 coordinate-level centered eta group penalty라서 같은 방식의 직접 비교가 어렵다 |
 | Posterior decision support | $S_{\eta}=\{j:\|c_{\cdot j}\|_2>0\}$, $c_{kj}=\eta_{kj}-K^{-1}\sum_\ell \eta_{\ell j}$ | posterior decision boundary에 들어가는 coordinate. Eta-group의 main claim에 가장 적합 | Rossi/Separate의 prototype sparsity와는 목표가 다르다 |
 
-A4에서는 모든 방법의 ARI가 0.999로 거의 같았다. Coordinate union support 기준에서는 Eta-group이 selected q=91.00, F1=0.936으로 Rossi/Separate보다 좋았고, prototype entry support 기준에서는 Separate BIC가 entry_F1=0.438로 Rossi BIC의 0.399보다 높았다. 따라서 A4의 핵심은 특정 방법의 전체 우위가 아니라, 논문에서 어떤 support target을 main claim으로 둘 것인지의 문제다.
+Entry-sparse / union-dense diagnostic에서는 모든 방법의 ARI가 0.999로 거의 같았다. Coordinate union support 기준에서는 Eta-group이 selected q=91.00, F1=0.936으로 Rossi/Separate보다 좋았고, prototype entry support 기준에서는 Separate BIC가 entry_F1=0.438로 Rossi BIC의 0.399보다 높았다. 따라서 이 결과의 핵심은 특정 방법의 전체 우위가 아니라, 논문에서 어떤 support target을 main claim으로 둘 것인지의 문제다.
+
+### 5.5 Negative-control 핵심 정리
+
+| Diagnostic | 현재 결론 | 미팅에서 확인할 점 |
+|:---|:---|:---|
+| Dense-support negative control | dense true support에서 Eta-group이 support를 과도하게 줄이며 Separate + refit보다 ARI/F1/MSE_centered_eta가 낮다. | 가장 명확한 Eta-group limitation으로 둘 수 있는가? |
+| Weak-signal tuning diagnostic | weak signal에서 Eta BIC가 zero support를 자주 선택한다. 50회 중 43회가 selected q=0이고 BIC-selected refit valid replicate는 7회다. | tuning failure diagnostic으로 appendix에 둘 것인가? |
+| Support-target diagnostics | 현재 generator만으로는 Rossi/Separate가 명확히 유리한 setting이 만들어지지 않았다. 다만 entry support와 union support가 다른 결론을 줄 수 있음을 보였다. | prototype support metric과 block-diagonal generator를 추가할 것인가? |
 
 ## 6. 교수님께 확인할 질문
 
 1. $\eta$ 유일성 설명을 component-level parameterization result로 Methods에 넣는 것이 충분한가?
 2. 논문 main claim을 ARI 향상이 아니라 posterior decision support recovery로 제한해도 되는가?
-3. Setting B와 C2를 limitation 또는 appendix diagnostic으로 넣을지?
+3. Dense-support negative control과 Weak-signal tuning diagnostic을 limitation 또는 appendix diagnostic으로 넣을지?
 4. Rossi/Separate와 공정 비교를 위해 prototype entry support를 보조 지표로 두고, 이후 block-diagonal generator를 추가할지?
 
 ## 7. 다음 작업
@@ -177,7 +171,7 @@ A4에서는 모든 방법의 ARI가 0.999로 거의 같았다. Coordinate union 
 | 연구미팅 전 | 질문 4개 확정 | 교수님께 결정받을 지점을 명확히 함 |
 | 미팅 후 | prototype support metric 정의 | Rossi/Separate의 목표와 Eta-group의 목표를 분리 평가 |
 | 미팅 후 | block-diagonal generator 설계 | Rossi/Separate가 구조적으로 유리한 setting 확인 |
-| 미팅 후 | Setting B limitation section 정리 | 논문 simulation appendix 후보 정리 |
+| 미팅 후 | Dense-support limitation section 정리 | 논문 simulation appendix 후보 정리 |
 | 미팅 후 | methods note 업데이트 | $\eta$, $\mu$, $\kappa$ parameterization 설명 반영 |
 
 ## 8. 현재 결론
