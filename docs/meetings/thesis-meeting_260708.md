@@ -82,6 +82,19 @@ $\eta=(0,0,0)$이면 $\kappa=0$이고, 이때 $\mu$ 방향은 식별되지 않�
 
 정리하면 이 부분은 "자동 단조증가 정리"가 아니라 optimization safeguard로 설명하는 것이 안전하다.
 
+### 3.1 추정 대상에 따른 failure mode
+
+Eta-group은 posterior decision score에 직접 들어가는 $\eta_k=\kappa_k\mu_k$의 component contrast를 penalize한다. 따라서 $\eta$ contrast가 약하거나 tuning이 너무 강하면, 실제 decision에 필요한 좌표까지 shrink될 수 있다. 이 경우 복원된 $\mu$와 $\kappa$도 함께 영향을 받는다. 즉 Eta-group의 장점은 decision parameter를 직접 선택한다는 점이지만, 그만큼 $\eta$를 과소선택하면 clustering과 모수 해석이 동시에 나빠질 수 있다.
+
+반대로 Rossi / Separate는 $\mu$와 $\kappa$를 나누어 다루기 때문에 실패해도 안전한 방법이라는 뜻은 아니다. 다만 weak signal에서는 BIC가 거의 full support를 선택하면서 clustering signal을 보존하는 방향으로 실패할 수 있다. 이 경우 ARI는 Eta-group보다 덜 나빠질 수 있지만, selected q와 FPR이 매우 커져 sparse support 해석성은 약해진다.
+
+따라서 두 방법의 차이는 "어느 쪽이 항상 안정적인가"가 아니라 failure mode의 차이로 설명하는 것이 안전하다.
+
+| 방법 | 주된 위험 | 관찰된 패턴 | 해석 |
+|:---|:---|:---|:---|
+| Eta-group | $\eta$ contrast 과소선택 | C2 rep50에서 평균 selected q=2.68, 50회 중 43회 q=0 | sparse하지만 decision signal까지 잃을 수 있음 |
+| Rossi / Separate | 과대선택 또는 dense support | C2 rep50에서 selected q가 약 98-100 | clustering signal은 남기지만 support 해석성이 약함 |
+
 ## 4. Feedback 2: Eta-group이 불리한 상황
 
 Eta-group의 핵심 장점은 universal ARI improvement가 아니라 posterior decision parameter 기반의 sparse support 해석성이다. 따라서 signal이 약하거나, true support가 dense하거나, path/tuning이 부족하거나, real-data representation이 맞지 않으면 Eta-group도 불리해질 수 있다.
@@ -107,7 +120,7 @@ Setting B는 현재까지 가장 명확한 Eta-group failure mode다. Dense true
 
 ### 5.2 A2: direction-sparse / equal concentration
 
-A2는 equal concentration과 direction-sparse 구조로 smoke 실행했다. Rossi/Separate는 ARI=0.999로 clustering은 거의 완벽했지만 selected q=100, FPR=1.000으로 거의 모든 coordinate를 선택했다. Eta-group은 ARI=0.998을 유지하면서 selected q=40.60, F1=0.658로 union-support 기준에서는 더 sparse했다.
+A2는 equal concentration과 direction-sparse 구조로 smoke 실행했다. Rossi/Separate는 ARI=0.999로 clustering은 매우 높았지만 selected q=100, FPR=1.000으로 거의 모든 coordinate를 선택했다. Eta-group은 ARI=0.998을 유지하면서 selected q=40.60, F1=0.658로 union-support 기준에서는 더 sparse했다.
 
 다만 Rossi/Separate는 entry-level prototype support에서 entry_TPR=1.000을 보였다. 따라서 Rossi류 방법을 공정하게 평가하려면 prototype support metric과 posterior decision support metric을 분리해야 한다.
 
@@ -118,13 +131,13 @@ A2는 equal concentration과 direction-sparse 구조로 smoke 실행했다. Ross
 - 저차원 설정: $d=60$, true union q=40. 모든 방법의 ARI가 거의 1이었다. Eta-group은 selected q=42.80으로 더 sparse했지만, Separate는 MSE_mu와 MSE_centered_eta가 더 낮았다.
 - 고차원 설정: $d=400$, true union q=80. Rossi/Separate도 selected q=400으로 dense해졌고, Eta-group도 selected q=368.33으로 dense했다.
 
-따라서 현재 generator만으로는 "Rossi/Separate가 압도적으로 유리한 block-diagonal setting"이 아직 만들어지지 않았다. 이 질문에 답하려면 dedicated block-diagonal 또는 binary-style generator와 prototype-support metric이 필요하다.
+따라서 현재 generator만으로는 "Rossi/Separate가 명확하게 유리한 block-diagonal setting"이 아직 만들어지지 않았다. 이 질문에 답하려면 dedicated block-diagonal 또는 binary-style generator와 prototype-support metric이 필요하다.
 
 ### 5.4 C2: weak signal
 
-C2는 weak signal을 완화한 smoke다. Rossi/Separate의 ARI는 약 0.13-0.15 수준으로 살아났지만, Eta-group BIC는 selected q=0을 선택해 refit이 invalid가 되었다. Positive-support diagnostic을 쓰면 selected q=15.80, F1=0.577이지만 ARI=0.136으로 낮다.
+C2는 weak signal을 완화한 rep50 diagnostic이다. Rossi/Separate의 ARI는 약 0.13-0.14 수준이지만 support는 거의 full support로 선택된다. Eta-group BIC는 평균 selected q=2.68이고, 50회 중 43회에서 selected q=0을 선택해 BIC-selected refit valid replicate가 7회뿐이었다. Positive-support diagnostic을 쓰면 selected q=15.52, F1=0.531이지만 ARI=0.137로 낮다.
 
-해석: 이 setting은 Rossi/Separate 우위라기보다 Eta BIC zero-support failure diagnostic에 가깝다.
+해석: 이 setting은 Rossi/Separate의 깨끗한 우위라기보다 Eta BIC zero-support failure와 weak-signal clustering difficulty를 보여주는 diagnostic에 가깝다.
 
 자세한 표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 정리했다.
 

@@ -49,7 +49,7 @@
 - 이로 인해 FPR과 Precision은 좋아지지만, TPR, F1, ARI, MSE_centered_eta에서는 Separate보다 손해를 본다.
 - 따라서 이 결과는 Eta-group이 dense weak-sparsity truth에 맞는 방법이 아님을 보여주는 유용한 negative-control 결과다.
 
-## 4. Setting C2 smoke: 완화된 weak signal
+## 4. Setting C2 rep50: 완화된 weak signal
 
 설계:
 
@@ -58,7 +58,7 @@
 | K | 4 |
 | n | 1000 |
 | d | 100 |
-| rep | 5 |
+| rep | 50 |
 | common q | 6 |
 | specific q per component | 4 |
 | true union q | 22 |
@@ -70,20 +70,21 @@
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Rossi BIC | 0.148 | 100.00 | 1.000 | 1.000 | 0.220 | 0.361 | 0.001067 | 47.891 | 2.885 |
-| Rossi BIC + refit | 0.132 | 100.00 | 1.000 | 1.000 | 0.220 | 0.361 | 0.001449 | 51.147 | 3.859 |
-| Separate BIC | 0.138 | 99.40 | 1.000 | 0.992 | 0.221 | 0.362 | 0.001010 | 69.650 | 2.383 |
-| Separate BIC + refit | 0.138 | 99.40 | 1.000 | 0.992 | 0.221 | 0.362 | 0.001383 | 68.391 | 3.510 |
-| Eta-group BIC | 0.000 | 0.00 | 0.000 | 0.000 | NA | NA | 0.000356 | 128.990 | 1.988 |
-| Eta-group BIC + refit | NA | 0.00 | 0.000 | 0.000 | NA | NA | NA | NA | NA |
-| Eta-group positive-support + refit | 0.136 | 15.80 | 0.491 | 0.064 | 0.770 | 0.577 | 0.000952 | 69.789 | 2.428 |
+| Rossi BIC | 0.140 | 99.80 | 1.000 | 0.997 | 0.220 | 0.361 | 0.001168 | 88.023 | 3.275 |
+| Rossi BIC + refit | 0.131 | 99.80 | 1.000 | 0.997 | 0.220 | 0.361 | 0.001498 | 93.711 | 3.990 |
+| Separate BIC | 0.141 | 98.46 | 1.000 | 0.980 | 0.224 | 0.365 | 0.000895 | 78.332 | 2.386 |
+| Separate BIC + refit | 0.130 | 98.46 | 1.000 | 0.980 | 0.224 | 0.365 | 0.001376 | 93.758 | 3.740 |
+| Eta-group BIC | 0.012 | 2.68 | 0.058 | 0.018 | 0.706 | 0.462 | 0.000408 | 126.285 | 2.050 |
+| Eta-group BIC + refit | 0.121 | 2.68 | 0.058 | 0.018 | 0.706 | 0.462 | 0.002925 | 247.896 | 4.330 |
+| Eta-group positive-support | 0.078 | 15.52 | 0.448 | 0.073 | 0.800 | 0.531 | 0.000508 | 150.646 | 2.198 |
+| Eta-group positive-support + refit | 0.137 | 15.52 | 0.448 | 0.073 | 0.800 | 0.531 | 0.001265 | 172.028 | 3.118 |
 
 해석:
 
-- C2는 기존 weak-signal smoke보다 덜 퇴화된 setting이지만 여전히 어렵다.
-- Standard Eta BIC는 selected q=0을 선택하므로 official BIC-selected refit이 invalid가 된다.
-- Positive-support selection을 쓰면 zero support는 피하고 support F1도 Rossi/Separate보다 높지만, ARI는 여전히 낮다.
-- 따라서 C2는 Rossi/Separate가 깨끗하게 유리한 setting이라기보다, Eta BIC의 zero-support tuning failure diagnostic으로 보는 것이 맞다.
+- C2 rep50에서도 weak-signal 구조는 여전히 어렵다. Rossi/Separate는 ARI가 약 0.13-0.14 수준이고 support는 거의 full support로 선택된다.
+- Standard Eta BIC는 평균 selected q=2.68로 매우 sparse하며, 50회 중 43회에서 selected q=0을 선택했다. 따라서 BIC-selected refit의 valid replicate는 7회뿐이다.
+- Positive-support diagnostic을 쓰면 zero support는 피하고 FPR=0.073, Precision=0.800, F1=0.531로 support metric은 좋아지지만, ARI=0.137로 Rossi/Separate와 비슷하거나 낮다.
+- 따라서 C2는 Rossi/Separate가 깨끗하게 유리한 setting이라기보다, Eta BIC의 zero-support tuning failure와 weak-signal clustering difficulty를 보여주는 diagnostic으로 보는 것이 맞다.
 
 ## 5. Setting A 재설계 필요성
 
@@ -155,7 +156,7 @@ Rossi/Separate가 유리할 수 있는 setting으로, 공통 support를 0으로 
 해석:
 
 - 이 low-dimensional fragmented setting에서도 Rossi/Separate가 전체적으로 명확히 우월하다고 보기는 어렵다.
-- Rossi/Separate는 ARI가 완벽하고 Separate BIC의 raw prototype-parameter MSE는 낮지만, 여전히 dense support를 선택한다.
+- Rossi/Separate는 ARI가 1에 가깝고 Separate BIC의 raw prototype-parameter MSE는 낮지만, 여전히 dense support를 선택한다.
 - Eta-group은 ARI를 거의 유지하면서 decision support를 더 sparse하게 만든다.
 - 따라서 prototype-parameter accuracy와 decision-support sparsity는 별도 지표로 보고해야 한다.
 
@@ -187,7 +188,7 @@ d=800 fragmented smoke도 common q=0, specific q=20 per component로 시도했�
 
 Setting B는 Eta-group이 보편적으로 더 좋은 방법이 아님을 보여준다. True separation이 dense하고 많은 weak coordinate가 함께 작동하는 경우 Eta-group은 support를 과도하게 shrink하여 Rossi 또는 Separate보다 ARI/F1이 낮아질 수 있다. 이 결과는 논문에서 limitation 또는 negative-control diagnostic으로 포함할 가치가 있다.
 
-C2는 weak signal에서 Eta BIC가 zero support를 선택할 수 있음을 보여준다. 따라서 positive-support 또는 alternative tuning은 diagnostic으로는 유용하지만 official tuning으로 제시하면 안 된다.
+C2 rep50은 weak signal에서 Eta BIC가 zero support를 자주 선택할 수 있음을 보여준다. 50회 중 43회에서 selected q=0이었고, BIC-selected refit valid replicate는 7회뿐이었다. 따라서 positive-support 또는 alternative tuning은 diagnostic으로는 유용하지만 official tuning으로 제시하면 안 된다.
 
 A2는 equal-concentration direction-sparse design에서도 coordinate union support 기준으로는 Eta-group이 여전히 유리하게 보인다는 점을 보여준다. 이는 Rossi/Separate가 더 나을 수 없다는 뜻이 아니라, prototype-level target과 decision-level target을 분리해야 한다는 뜻이다.
 
@@ -198,7 +199,7 @@ Fragmented low-dimensional/high-dimensional smoke도 현재 generator에서는 c
 | 후보 | 권장 여부 | 이유 |
 |:---|:---|:---|
 | Setting B rep100 | 선택 사항, 급하지 않음 | rep50만으로도 안정적인 negative-control evidence가 있음 |
-| Setting C2 rep50 | 아직 권장하지 않음 | Rossi/Separate가 collapse하거나 fully dense해지지 않는 cleaner weak-signal setting이 필요함 |
+| Setting C2 rep50 | 완료 | Eta BIC zero-support tuning failure를 확인했지만, Rossi/Separate도 dense support이므로 cleaner weak-signal negative-control은 별도 설계가 필요함 |
 | Setting A2 rep50 | 아직 권장하지 않음 | Smoke 결과가 union support 기준에서 Rossi/Separate-favorable하지 않음. 먼저 prototype-support metric이 필요함 |
 | Prototype-support metric | 다음 우선 작업 | Rossi/Separate의 자연스러운 목표를 평가하기 위해 필요함 |
 | Dedicated block-diagonal generator | metric 정의 이후 권장 | Rossi/Separate가 구조적으로 유리한 fragmented-data scenario를 깨끗하게 테스트하기 위해 필요함 |
