@@ -128,25 +128,7 @@ C2는 weak signal을 완화한 smoke다. Rossi/Separate의 ARI는 약 0.13-0.15 
 
 자세한 표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 정리했다.
 
-## 6. 교수님께 확인할 질문
-
-1. $\eta$ 유일성 설명을 component-level parameterization result로 Methods에 넣는 것이 충분한가?
-2. Eta-group main claim을 "ARI 향상"이 아니라 sparse posterior decision support recovery로 제한해도 되는가?
-3. dense true support setting을 negative-control limitation으로 본문 또는 appendix에 넣을지?
-4. Rossi/Separate와 공정 비교를 위해 prototype support metric과 block-diagonal generator를 추가 설계할지?
-
-## 7. 다음 작업
-
-| Priority | 작업 | 목적 |
-|:---|:---|:---|
-| P0 | 260708 미팅에서 claim 범위 확인 | Eta-group의 주장 수준 확정 |
-| P0 | prototype support metric 정의 | Rossi/Separate의 자연스러운 목표를 별도 평가 |
-| P1 | block-diagonal generator 설계 | Rossi/Separate가 구조적으로 유리한 setting 확인 |
-| P1 | Setting B negative-control 정리 | dense true support에서 Eta-group 한계 명시 |
-| P2 | methods note에 parameterization 설명 반영 | 피드백 1 논문화 |
-| P2 | simulation note에 failure-mode section 추가 | 피드백 2 논문화 |
-
-## 8. 현재 결론
+## 6. 현재 결론
 
 - $\eta_k=\kappa_k\mu_k$는 $\kappa_k>0$에서 $\mu_k$와 $\kappa_k$를 복원할 수 있는 natural decision parameter다.
 - 이 유일성은 mixture 전체 식별성 증명이 아니라 component-level parameterization 설명이다.
