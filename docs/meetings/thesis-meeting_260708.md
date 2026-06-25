@@ -129,6 +129,7 @@ A2는 equal concentration과 direction-sparse 구조로 smoke 실행했다. Ross
 공유 좌표가 없는 fragmented block-like setting도 smoke로 확인했다.
 
 - 저차원 설정: $d=60$, true union q=40. 모든 방법의 ARI가 거의 1이었다. Eta-group은 selected q=42.80으로 더 sparse했지만, Separate는 MSE_mu와 MSE_centered_eta가 더 낮았다.
+- A4 재설계: $d=100$, true union q=80, 각 component가 서로 다른 20개 좌표를 사용한다. 모든 방법의 ARI가 0.999였고, union support에서는 Eta-group이 selected q=91.00, F1=0.936으로 더 좋았다. 반면 prototype entry support에서는 Separate BIC의 entry_F1=0.438로 Rossi보다 높아, metric 분리가 필요함을 보였다.
 - 고차원 설정: $d=400$, true union q=80. Rossi/Separate도 selected q=400으로 dense해졌고, Eta-group도 selected q=368.33으로 dense했다.
 
 따라서 현재 generator만으로는 "Rossi/Separate가 명확하게 유리한 block-diagonal setting"이 아직 만들어지지 않았다. 이 질문에 답하려면 dedicated block-diagonal 또는 binary-style generator와 prototype-support metric이 필요하다.
@@ -147,7 +148,7 @@ C2는 weak signal을 완화한 rep50 diagnostic이다. Rossi/Separate의 ARI는 
 |:---|:---|:---|
 | Setting B rep50 | dense true support에서 Eta-group이 support를 과도하게 줄이며 Separate + refit보다 ARI/F1/MSE_centered_eta가 낮다. | 가장 명확한 Eta-group limitation으로 둘 수 있는가? |
 | C2 rep50 | weak signal에서 Eta BIC가 zero support를 자주 선택한다. 50회 중 43회가 selected q=0이고 BIC-selected refit valid replicate는 7회다. | tuning failure diagnostic으로 appendix에 둘 것인가? |
-| A2 / fragmented | 현재 generator만으로는 Rossi/Separate가 명확히 유리한 setting이 만들어지지 않았다. | prototype support metric과 block-diagonal generator를 추가할 것인가? |
+| A2 / A4 / fragmented | 현재 generator만으로는 Rossi/Separate가 명확히 유리한 setting이 만들어지지 않았다. 다만 A4는 entry support와 union support가 다른 결론을 줄 수 있음을 보였다. | prototype support metric과 block-diagonal generator를 추가할 것인가? |
 
 ## 6. 교수님께 확인할 질문
 

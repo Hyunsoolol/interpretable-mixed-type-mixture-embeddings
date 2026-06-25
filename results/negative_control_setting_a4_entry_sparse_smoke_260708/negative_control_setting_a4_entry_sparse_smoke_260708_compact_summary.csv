@@ -1,0 +1,7 @@
+scenario,method,reps,ARI,selected_q,FPR,Precision,F1,entry_TPR,entry_FPR,entry_Precision,entry_F1,MSE_mu,MSE_kappa,MSE_centered_eta,interpretation
+negative_control_setting_a4_entry_sparse_smoke_260708,Rossi BIC,5,0.999,100.00,1.000,0.800,0.889,1.000,0.754,0.249,0.399,0.000090,1.286,0.257,dense coordinate support; entry-level TPR high but entry FPR high
+negative_control_setting_a4_entry_sparse_smoke_260708,Rossi BIC + refit,5,0.999,100.00,1.000,0.800,0.889,NA,NA,NA,NA,0.000130,1.339,0.370,refit keeps full coordinate support
+negative_control_setting_a4_entry_sparse_smoke_260708,Separate BIC,5,0.999,99.60,0.980,0.803,0.891,1.000,0.643,0.280,0.438,0.000075,1.239,0.215,best prototype entry-support metric among Rossi/Separate
+negative_control_setting_a4_entry_sparse_smoke_260708,Separate BIC + refit,5,0.999,99.60,0.980,0.803,0.891,NA,NA,NA,NA,0.000130,1.339,0.370,refit keeps near-full coordinate support
+negative_control_setting_a4_entry_sparse_smoke_260708,Eta-group BIC,5,0.999,91.00,0.550,0.881,0.936,NA,NA,NA,NA,0.000130,8.791,0.417,best coordinate union support; prototype entry metric not directly defined
+negative_control_setting_a4_entry_sparse_smoke_260708,Eta-group BIC + refit,5,0.999,91.00,0.550,0.881,0.936,NA,NA,NA,NA,0.000123,1.281,0.355,coordinate union support remains best after refit

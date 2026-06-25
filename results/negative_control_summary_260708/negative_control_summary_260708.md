@@ -138,6 +138,45 @@ A2 설계 방향:
 - 다만 Rossi/Separate는 entry-level prototype support에서 entry_TPR=1.000을 보인다. 이 부분은 Rossi류 방법의 자연스러운 목표와 관련이 있다.
 - 따라서 A2는 방법의 명확한 실패라기보다 metric mismatch를 보여준다. Rossi-style direction sparsity를 공정하게 평가하려면 prototype/entry-level support recovery와 posterior decision support를 분리해야 한다.
 
+### 6.1 Setting A4 redesign smoke: entry-sparse / union-dense
+
+A4는 기존 generator를 수정하지 않고 만들 수 있는 가장 직접적인 entry-sparse / union-dense redesign이다. 공통 좌표를 제거하고, 각 component가 서로 겹치지 않는 20개 좌표만 사용하도록 했다.
+
+설계:
+
+| 항목 | 값 |
+|:---|:---|
+| K | 4 |
+| n | 1000 |
+| d | 100 |
+| rep | 5 |
+| common q | 0 |
+| specific q per component | 20 |
+| true union q | 80 |
+| true entry q | 80 |
+| specific weight | 1.0 |
+| kappa | $(60,60,60,60)$ |
+| selection | BIC |
+
+결과:
+
+| Method | ARI | Selected q | FPR | Precision | F1 | entry_TPR | entry_FPR | entry_Precision | entry_F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Rossi BIC | 0.999 | 100.00 | 1.000 | 0.800 | 0.889 | 1.000 | 0.754 | 0.249 | 0.399 | 0.000090 | 1.286 | 0.257 |
+| Rossi BIC + refit | 0.999 | 100.00 | 1.000 | 0.800 | 0.889 | NA | NA | NA | NA | 0.000130 | 1.339 | 0.370 |
+| Separate BIC | 0.999 | 99.60 | 0.980 | 0.803 | 0.891 | 1.000 | 0.643 | 0.280 | 0.438 | 0.000075 | 1.239 | 0.215 |
+| Separate BIC + refit | 0.999 | 99.60 | 0.980 | 0.803 | 0.891 | NA | NA | NA | NA | 0.000130 | 1.339 | 0.370 |
+| Eta-group BIC | 0.999 | 91.00 | 0.550 | 0.881 | 0.936 | NA | NA | NA | NA | 0.000130 | 8.791 | 0.417 |
+| Eta-group BIC + refit | 0.999 | 91.00 | 0.550 | 0.881 | 0.936 | NA | NA | NA | NA | 0.000123 | 1.281 | 0.355 |
+
+해석:
+
+- A4에서도 ARI는 모든 방법에서 거의 동일하게 높다.
+- Coordinate union support 기준으로는 Eta-group이 여전히 selected q=91.00, F1=0.936으로 Rossi/Separate보다 낫다.
+- Prototype entry support 기준에서는 Separate BIC가 Rossi BIC보다 entry_F1이 높다. Eta-group은 coordinate-level contrast를 선택하는 방법이므로 동일한 entry-level prototype metric이 직접 정의되지 않는다.
+- 따라서 A4는 Rossi/Separate가 전체적으로 우월한 setting이라기보다, posterior decision support와 prototype entry support를 분리해서 보고해야 한다는 점을 더 분명하게 보여준다.
+- Full rep50은 가능하지만, "Eta-group의 깨끗한 실패"를 확인하기 위한 full run으로는 아직 충분히 강한 후보가 아니다. 교수님께 prototype-support metric을 먼저 확인받는 것이 더 안전하다.
+
 ## 7. Fragmented block-like smoke: 공유 좌표 없는 setting
 
 Rossi/Separate가 유리할 수 있는 setting으로, 공통 support를 0으로 두고 component-specific support만 사용하는 fragmented block-like setting을 현재 generator 안에서 확인했다. 완전한 binary block-diagonal generator는 아니지만, R core simulation code를 수정하지 않고 만들 수 있는 가장 가까운 diagnostic이다.
@@ -192,6 +231,8 @@ C2 rep50은 weak signal에서 Eta BIC가 zero support를 자주 선택할 수 �
 
 A2는 equal-concentration direction-sparse design에서도 coordinate union support 기준으로는 Eta-group이 여전히 유리하게 보인다는 점을 보여준다. 이는 Rossi/Separate가 더 나을 수 없다는 뜻이 아니라, prototype-level target과 decision-level target을 분리해야 한다는 뜻이다.
 
+새로 확인한 A4 smoke도 같은 방향이다. Union-dense / entry-sparse 구조를 만들었지만 coordinate union support 기준에서는 Eta-group이 여전히 더 좋고, prototype entry support에서는 Separate가 더 나아 보인다. 따라서 이 setting은 clean failure라기보다 metric separation diagnostic으로 보는 것이 맞다.
+
 Fragmented low-dimensional/high-dimensional smoke도 현재 generator에서는 clean Rossi/Separate-dominant result를 만들지 못했다. 모든 방법이 clustering을 잘하거나 dense support로 가며, prototype-sparsity advantage가 분리되지 않는다. Rossi/Separate가 구조적으로 유리한 setting을 보이려면 dedicated block-diagonal generator가 필요하다.
 
 ## 9. Full simulation 권장 사항
@@ -200,6 +241,6 @@ Fragmented low-dimensional/high-dimensional smoke도 현재 generator에서는 c
 |:---|:---|:---|
 | Setting B rep100 | 선택 사항, 급하지 않음 | rep50만으로도 안정적인 negative-control evidence가 있음 |
 | Setting C2 rep50 | 완료 | Eta BIC zero-support tuning failure를 확인했지만, Rossi/Separate도 dense support이므로 cleaner weak-signal negative-control은 별도 설계가 필요함 |
-| Setting A2 rep50 | 아직 권장하지 않음 | Smoke 결과가 union support 기준에서 Rossi/Separate-favorable하지 않음. 먼저 prototype-support metric이 필요함 |
+| Setting A4 rep50 | 조건부 보류 | entry-level에서는 Separate가 유리해 보이나 union support에서는 Eta-group이 여전히 유리함. 먼저 prototype-support metric 정의가 필요함 |
 | Prototype-support metric | 다음 우선 작업 | Rossi/Separate의 자연스러운 목표를 평가하기 위해 필요함 |
 | Dedicated block-diagonal generator | metric 정의 이후 권장 | Rossi/Separate가 구조적으로 유리한 fragmented-data scenario를 깨끗하게 테스트하기 위해 필요함 |
