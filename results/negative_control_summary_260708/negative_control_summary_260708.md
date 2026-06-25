@@ -95,6 +95,16 @@ Rossi와 Separate는 dense support를 선택하는 반면, Eta-group은 더 작�
 - 관심 대상이 posterior decision support이면 Eta-group이 자연스럽게 유리하다.
 - 관심 대상이 prototype 또는 direction support이면 Rossi가 더 적절한 비교 대상일 수 있다.
 
+따라서 이후 Setting A 계열은 세 가지 support target을 분리해서 해석한다.
+
+| Metric | 정의 | 사용 목적 |
+|:---|:---|:---|
+| Coordinate union support | $S_{\mathrm{union}}=\{j:\exists k,\ active_{kj}\}$ | 모든 방법의 coordinate-level variable selection 비교 |
+| Prototype entry support | $S_{\mathrm{entry}}=\{(k,j):\mu_{kj}\ne0\}$ | Rossi/Separate의 direction/prototype sparsity 평가 |
+| Posterior decision support | $S_{\eta}=\{j:\|c_{\cdot j}\|_2>0\}$ | Eta-group의 posterior decision coordinate 평가 |
+
+여기서 $c_{kj}=\eta_{kj}-K^{-1}\sum_\ell \eta_{\ell j}$이다. A4 결과는 이 세 지표가 같은 결론을 주지 않을 수 있음을 보여준다.
+
 A2 설계 방향:
 
 1. Concentration을 같거나 거의 같게 두어 $\eta$ contrast가 $\mu$ contrast와 가깝게 만든다.
