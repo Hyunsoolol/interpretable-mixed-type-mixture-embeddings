@@ -72,7 +72,7 @@ $$
 
 ### 2.4 예외
 
-$\eta=(0,0,0)$이면 $\kappa=0$이고, 이때 $\mu$ 방향은 식별되지 않는다. 또한 mixture model에서는 label switching이 항상 남아 있으므로, 본 연구에서는 유일성을 component-level parameterization 설명으로 제한한다.
+$\eta=(0,0,0)$이면 $\kappa=0$이고, 이때 $\mu$ 방향은 식별되지 않는다. 또한 mixture model에서는 label switching 문제가 별도로 남아 있으므로, 본 연구에서는 유일성을 component-level parameterization 설명으로 제한한다.
 
 ## 3. Feedback 1 추가: proximal EM-type update와 단조증가
 
@@ -86,9 +86,9 @@ $\eta=(0,0,0)$이면 $\kappa=0$이고, 이때 $\mu$ 방향은 식별되지 않�
 
 Eta-group은 posterior decision score에 직접 들어가는 $\eta_k=\kappa_k\mu_k$의 component contrast를 penalize한다. 따라서 $\eta$ contrast가 약하거나 tuning이 너무 강하면, 실제 decision에 필요한 좌표까지 shrink될 수 있다. 이 경우 복원된 $\mu$와 $\kappa$도 함께 영향을 받는다. 즉 Eta-group의 장점은 decision parameter를 직접 선택한다는 점이지만, 그만큼 $\eta$를 과소선택하면 clustering과 모수 해석이 동시에 나빠질 수 있다.
 
-반대로 Rossi / Separate는 $\mu$와 $\kappa$를 나누어 다루기 때문에 실패해도 안전한 방법이라는 뜻은 아니다. 다만 weak signal에서는 BIC가 거의 full support를 선택하면서 clustering signal을 보존하는 방향으로 실패할 수 있다. 이 경우 ARI는 Eta-group보다 덜 나빠질 수 있지만, selected q와 FPR이 매우 커져 sparse support 해석성은 약해진다.
+반대로 Rossi / Separate는 $\mu$와 $\kappa$를 나누어 다룬다고 해서 자동으로 더 안정적이라는 뜻은 아니다. 다만 weak signal에서는 BIC가 거의 full support를 선택하면서 clustering signal을 보존하는 쪽으로 움직일 수 있다. 이 경우 ARI는 Eta-group보다 덜 나빠질 수 있지만, selected q와 FPR이 매우 커져 sparse support 해석성은 약해진다.
 
-따라서 두 방법의 차이는 "어느 쪽이 항상 안정적인가"가 아니라 failure mode의 차이로 설명하는 것이 안전하다.
+따라서 두 방법의 차이는 "어느 쪽이 일괄적으로 안정적인가"가 아니라 failure mode의 차이로 설명하는 것이 안전하다.
 
 | 방법 | 주된 위험 | 관찰된 패턴 | 해석 |
 |:---|:---|:---|:---|
@@ -141,10 +141,36 @@ C2는 weak signal을 완화한 rep50 diagnostic이다. Rossi/Separate의 ARI는 
 
 자세한 표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 정리했다.
 
-## 6. 현재 결론
+### 5.5 Negative-control 핵심 정리
+
+| 항목 | 현재 결론 | 미팅에서 확인할 점 |
+|:---|:---|:---|
+| Setting B rep50 | dense true support에서 Eta-group이 support를 과도하게 줄이며 Separate + refit보다 ARI/F1/MSE_centered_eta가 낮다. | 가장 명확한 Eta-group limitation으로 둘 수 있는가? |
+| C2 rep50 | weak signal에서 Eta BIC가 zero support를 자주 선택한다. 50회 중 43회가 selected q=0이고 BIC-selected refit valid replicate는 7회다. | tuning failure diagnostic으로 appendix에 둘 것인가? |
+| A2 / fragmented | 현재 generator만으로는 Rossi/Separate가 명확히 유리한 setting이 만들어지지 않았다. | prototype support metric과 block-diagonal generator를 추가할 것인가? |
+
+## 6. 교수님께 확인할 질문
+
+1. $\eta$ 유일성 설명을 component-level parameterization result로 Methods에 넣는 것이 충분한가?
+2. 논문 main claim을 ARI 향상이 아니라 posterior decision support recovery로 제한해도 되는가?
+3. Setting B와 C2를 limitation 또는 appendix diagnostic으로 넣을지?
+4. Rossi/Separate와 공정 비교를 위해 prototype support metric과 block-diagonal generator를 추가할지?
+
+## 7. 다음 작업
+
+| 시점 | 작업 | 목적 |
+|:---|:---|:---|
+| 연구미팅 전 | 자료 최종 점검 | 피드백 1, 2에 대한 답변을 간결하게 전달 |
+| 연구미팅 전 | 질문 4개 확정 | 교수님께 결정받을 지점을 명확히 함 |
+| 미팅 후 | prototype support metric 정의 | Rossi/Separate의 목표와 Eta-group의 목표를 분리 평가 |
+| 미팅 후 | block-diagonal generator 설계 | Rossi/Separate가 구조적으로 유리한 setting 확인 |
+| 미팅 후 | Setting B limitation section 정리 | 논문 simulation appendix 후보 정리 |
+| 미팅 후 | methods note 업데이트 | $\eta$, $\mu$, $\kappa$ parameterization 설명 반영 |
+
+## 8. 현재 결론
 
 - $\eta_k=\kappa_k\mu_k$는 $\kappa_k>0$에서 $\mu_k$와 $\kappa_k$를 복원할 수 있는 natural decision parameter다.
 - 이 유일성은 mixture 전체 식별성 증명이 아니라 component-level parameterization 설명이다.
-- Eta-group은 strong sparse support setting에서는 설득력 있지만, 항상 Rossi / Separate보다 좋은 것은 아니다.
+- Eta-group은 strong sparse support setting에서는 설득력 있지만, Rossi / Separate보다 일괄적으로 좋은 방법은 아니다.
 - Dense true support setting에서는 Eta-group이 과도하게 shrink하여 ARI/F1과 MSE_centered_eta에서 손해를 볼 수 있다.
 - 다음 단계는 prototype support recovery와 posterior decision support recovery를 분리하고, 필요하면 block-diagonal generator를 별도로 설계하는 것이다.
