@@ -156,25 +156,8 @@ Entry-sparse / union-dense diagnostic에서는 모든 방법의 ARI가 0.999로 
 | Weak-signal tuning diagnostic | weak signal에서 Eta BIC가 zero support를 자주 선택한다. 50회 중 43회가 selected q=0이고 BIC-selected refit valid replicate는 7회다. | tuning failure diagnostic으로 appendix에 둘 것인가? |
 | Support-target diagnostics | 현재 generator만으로는 Rossi/Separate가 명확히 유리한 setting이 만들어지지 않았다. 다만 entry support와 union support가 다른 결론을 줄 수 있음을 보였다. | prototype support metric과 block-diagonal generator를 추가할 것인가? |
 
-## 6. 교수님께 확인할 질문
 
-1. $\eta$ 유일성 설명을 component-level parameterization result로 Methods에 넣는 것이 충분한가?
-2. 논문 main claim을 ARI 향상이 아니라 posterior decision support recovery로 제한해도 되는가?
-3. Dense-support negative control과 Weak-signal tuning diagnostic을 limitation 또는 appendix diagnostic으로 넣을지?
-4. Rossi/Separate와 공정 비교를 위해 prototype entry support를 보조 지표로 두고, 이후 block-diagonal generator를 추가할지?
-
-## 7. 다음 작업
-
-| 시점 | 작업 | 목적 |
-|:---|:---|:---|
-| 연구미팅 전 | 자료 최종 점검 | 피드백 1, 2에 대한 답변을 간결하게 전달 |
-| 연구미팅 전 | 질문 4개 확정 | 교수님께 결정받을 지점을 명확히 함 |
-| 미팅 후 | prototype support metric 정의 | Rossi/Separate의 목표와 Eta-group의 목표를 분리 평가 |
-| 미팅 후 | block-diagonal generator 설계 | Rossi/Separate가 구조적으로 유리한 setting 확인 |
-| 미팅 후 | Dense-support limitation section 정리 | 논문 simulation appendix 후보 정리 |
-| 미팅 후 | methods note 업데이트 | $\eta$, $\mu$, $\kappa$ parameterization 설명 반영 |
-
-## 8. 현재 결론
+## 6. 현재 결론
 
 - $\eta_k=\kappa_k\mu_k$는 $\kappa_k>0$에서 $\mu_k$와 $\kappa_k$를 복원할 수 있는 natural decision parameter다.
 - 이 유일성은 mixture 전체 식별성 증명이 아니라 component-level parameterization 설명이다.
