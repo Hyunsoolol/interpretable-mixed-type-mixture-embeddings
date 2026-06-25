@@ -1,24 +1,24 @@
 # Negative-control Simulation Summary 260708
 
-## 1. Purpose
+## 1. 목적
 
-This note summarizes diagnostic simulations designed to identify settings where the Eta-group penalty can be worse than Rossi or Separate penalties. These runs are negative-control diagnostics, not a change to the official algorithm.
+이 문서는 Eta-group penalty가 Rossi 또는 Separate penalty보다 불리해질 수 있는 상황을 확인하기 위한 negative-control diagnostic 결과를 정리한다. 여기서의 실행은 official algorithm 변경이 아니라, 방법의 적용 범위와 한계를 확인하기 위한 진단용 실험이다.
 
-Official method remains Eta-group path+BIC + selected support fixed unpenalized refit.
+현재 official method는 그대로 `Eta-group path+BIC + selected support fixed unpenalized refit`으로 둔다.
 
-## 2. Existing Smoke Results
+## 2. 기존 smoke 결과 요약
 
-| Setting | Main design | Main result | Interpretation |
+| Setting | 주요 설계 | 주요 결과 | 해석 |
 |:---|:---|:---|:---|
-| A: direction-sparse smoke | $K=4$, $d=100$, true union $q=20$, $\kappa=(60,60,60,60)$ | Eta + refit ARI=0.976, selected q=28.8, F1=0.676; Rossi/Separate ARI=0.975, selected q=100, F1=0.333 | Not a strong Rossi/Separate-favorable setting. Eta still gives better support, but Eta refit has large MSE_kappa. |
-| B: dense eta smoke | $K=4$, $d=100$, true union $q=80$, $\kappa=(30,45,65,90)$ | Eta + refit ARI=0.377, selected q=47.4, F1=0.702; Separate + refit ARI=0.396, selected q=100, F1=0.889 | Good negative-control candidate. Dense truth makes Eta-group over-shrink support and lose ARI/F1. |
-| C: weak signal smoke | $K=4$, $d=100$, $w=0.20$, $\kappa=(25,30,35,40)$ | Eta BIC selected q=0 and refit invalid; Rossi/Separate ARI near 0 | Too difficult. This is a low-signal stress where almost all methods fail. |
+| A: direction-sparse smoke | $K=4$, $d=100$, true union $q=20$, $\kappa=(60,60,60,60)$ | Eta + refit ARI=0.976, selected q=28.8, F1=0.676; Rossi/Separate ARI=0.975, selected q=100, F1=0.333 | Rossi/Separate가 뚜렷하게 유리한 setting은 아니었다. Eta가 support recovery는 더 좋았지만, Eta refit의 MSE_kappa가 컸다. |
+| B: dense eta smoke | $K=4$, $d=100$, true union $q=80$, $\kappa=(30,45,65,90)$ | Eta + refit ARI=0.377, selected q=47.4, F1=0.702; Separate + refit ARI=0.396, selected q=100, F1=0.889 | 좋은 negative-control 후보. True support가 dense하면 Eta-group이 과도하게 shrink하여 ARI/F1 손실이 생긴다. |
+| C: weak signal smoke | $K=4$, $d=100$, $w=0.20$, $\kappa=(25,30,35,40)$ | Eta BIC selected q=0, refit invalid; Rossi/Separate ARI near 0 | 너무 어려운 low-signal stress setting이다. 거의 모든 방법이 실패한다. |
 
-## 3. Setting B Rep50: Dense Eta / Weak Sparsity Truth
+## 3. Setting B rep50: dense eta / 약한 sparsity truth
 
-Design:
+설계:
 
-| Item | Value |
+| 항목 | 값 |
 |:---|:---|
 | K | 4 |
 | n | 1000 |
@@ -31,7 +31,7 @@ Design:
 | kappa | $(30,45,65,90)$ |
 | selection | BIC |
 
-Result:
+결과:
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -42,18 +42,18 @@ Result:
 | Eta-group BIC | 0.324 | 52.82 | 0.615 | 0.180 | 0.944 | 0.726 | 0.000557 | 186.886 | 2.895 |
 | Eta-group BIC + refit | 0.368 | 52.82 | 0.615 | 0.180 | 0.944 | 0.726 | 0.000897 | 93.913 | 2.721 |
 
-Conclusion:
+해석:
 
-- Setting B confirms a clear Eta-group failure mode.
-- When the true decision support is dense, Eta-group selects a much smaller support than the true union q=80.
-- This improves FPR and Precision but loses TPR, F1, ARI, and MSE_centered_eta relative to Separate.
-- This is a useful negative-control result for the paper because it clarifies that Eta-group is not designed for dense weak-sparsity truth.
+- Setting B는 현재까지 가장 명확한 Eta-group failure mode다.
+- True decision support가 dense한데 Eta-group은 selected q=52.82만 선택해 true union q=80보다 훨씬 작은 support를 고른다.
+- 이로 인해 FPR과 Precision은 좋아지지만, TPR, F1, ARI, MSE_centered_eta에서는 Separate보다 손해를 본다.
+- 따라서 이 결과는 Eta-group이 dense weak-sparsity truth에 맞는 방법이 아님을 보여주는 유용한 negative-control 결과다.
 
-## 4. Setting C2 Smoke: Moderated Weak Signal
+## 4. Setting C2 smoke: 완화된 weak signal
 
-Design:
+설계:
 
-| Item | Value |
+| 항목 | 값 |
 |:---|:---|
 | K | 4 |
 | n | 1000 |
@@ -66,7 +66,7 @@ Design:
 | kappa | $(35,45,55,65)$ |
 | selection | BIC |
 
-Result:
+결과:
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -78,34 +78,34 @@ Result:
 | Eta-group BIC + refit | NA | 0.00 | 0.000 | 0.000 | NA | NA | NA | NA | NA |
 | Eta-group positive-support + refit | 0.136 | 15.80 | 0.491 | 0.064 | 0.770 | 0.577 | 0.000952 | 69.789 | 2.428 |
 
-Conclusion:
+해석:
 
-- C2 is less degenerate than the first weak-signal smoke but still difficult.
-- Standard Eta BIC selects zero support, so the official BIC-selected refit is invalid.
-- Positive-support selection avoids zero support and gives sparse support with higher F1 than Rossi/Separate, but ARI remains low.
-- C2 is useful as a tuning/zero-support failure diagnostic, not as a clean Rossi/Separate-favorable simulation.
+- C2는 기존 weak-signal smoke보다 덜 퇴화된 setting이지만 여전히 어렵다.
+- Standard Eta BIC는 selected q=0을 선택하므로 official BIC-selected refit이 invalid가 된다.
+- Positive-support selection을 쓰면 zero support는 피하고 support F1도 Rossi/Separate보다 높지만, ARI는 여전히 낮다.
+- 따라서 C2는 Rossi/Separate가 깨끗하게 유리한 setting이라기보다, Eta BIC의 zero-support tuning failure diagnostic으로 보는 것이 맞다.
 
-## 5. Setting A Redesign
+## 5. Setting A 재설계 필요성
 
-The first Setting A is not a strong Rossi/Separate-favorable setting because the current support metric is coordinate union support, which favors Eta-group when it removes common non-discriminating coordinates. Rossi and Separate select dense support, while Eta-group keeps a smaller decision-contrast support.
+첫 번째 Setting A는 Rossi/Separate가 유리한 setting으로 충분하지 않았다. 이유는 현재 support metric이 coordinate union support이기 때문이다. 이 metric은 Eta-group이 공통 non-discriminating coordinate를 제거할 때 자연스럽게 유리해진다.
 
-To make a fair Rossi-favorable setting, the target should be clarified:
+Rossi와 Separate는 dense support를 선택하는 반면, Eta-group은 더 작은 decision-contrast support를 유지한다. 따라서 Rossi가 자연스럽게 유리한 상황을 평가하려면 목표를 분리해야 한다.
 
-- If the target is posterior decision support, Eta-group is naturally favored.
-- If the target is prototype or direction support, Rossi may be more appropriate.
+- 관심 대상이 posterior decision support이면 Eta-group이 자연스럽게 유리하다.
+- 관심 대상이 prototype 또는 direction support이면 Rossi가 더 적절한 비교 대상일 수 있다.
 
-Suggested A2 design:
+A2 설계 방향:
 
-1. Use equal or near-equal concentration so $\eta$ contrast is close to $\mu$ contrast.
-2. Construct component-specific direction patterns with minimal common support.
-3. Evaluate both prototype support recovery and decision support recovery separately.
-4. Report entry-level $\mu$ support metrics in addition to coordinate union support.
+1. Concentration을 같거나 거의 같게 두어 $\eta$ contrast가 $\mu$ contrast와 가깝게 만든다.
+2. Component-specific direction pattern을 명확히 만든다.
+3. Prototype support recovery와 decision support recovery를 분리해서 평가한다.
+4. Coordinate union support뿐 아니라 entry-level $\mu$ support metric도 함께 보고한다.
 
-## 6. Setting A2 Smoke: Direction-Sparse / Equal Concentration
+## 6. Setting A2 smoke: direction-sparse / equal concentration
 
-Design:
+설계:
 
-| Item | Value |
+| 항목 | 값 |
 |:---|:---|
 | K | 4 |
 | n | 1000 |
@@ -118,7 +118,7 @@ Design:
 | kappa | $(60,60,60,60)$ |
 | selection | BIC |
 
-Result:
+결과:
 
 | Method | ARI | Selected q | TPR | FPR | Precision | F1 | entry_TPR | entry_FPR | MSE_mu | MSE_kappa | MSE_centered_eta |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -129,21 +129,21 @@ Result:
 | Eta-group BIC | 0.998 | 40.60 | 0.962 | 0.258 | 0.502 | 0.658 | NA | NA | 0.000067 | 4.256 | 0.160 |
 | Eta-group BIC + refit | 0.998 | 40.60 | 0.962 | 0.258 | 0.502 | 0.658 | NA | NA | 0.001473 | 43.610 | 0.250 |
 
-Conclusion:
+해석:
 
-- A2 does not produce a clean Rossi/Separate-favorable result under the current coordinate union support metric.
-- Rossi and Separate recover all true coordinates but also select almost every noise coordinate, so selected q=100 and FPR=1.000.
-- Eta-group keeps ARI essentially unchanged while reducing selected q to 40.60 and improving union-support F1.
-- The only metric where Rossi/Separate look structurally relevant is entry-level prototype support: entry_TPR=1.000 with entry_FPR=0.813 for Rossi and 0.725 for Separate.
-- Therefore A2 shows a metric-definition issue rather than a clear method failure: to evaluate Rossi-style direction sparsity fairly, we need prototype/entry-level support recovery in addition to posterior decision support.
+- A2도 현재 coordinate union support 기준에서는 Rossi/Separate가 명확히 유리한 결과를 만들지 못했다.
+- Rossi와 Separate는 true coordinate를 모두 잡지만 noise coordinate도 거의 모두 선택해 selected q=100, FPR=1.000이 된다.
+- Eta-group은 ARI를 거의 유지하면서 selected q=40.60으로 줄이고 union-support F1도 더 높다.
+- 다만 Rossi/Separate는 entry-level prototype support에서 entry_TPR=1.000을 보인다. 이 부분은 Rossi류 방법의 자연스러운 목표와 관련이 있다.
+- 따라서 A2는 방법의 명확한 실패라기보다 metric mismatch를 보여준다. Rossi-style direction sparsity를 공정하게 평가하려면 prototype/entry-level support recovery와 posterior decision support를 분리해야 한다.
 
-## 7. Fragmented Block-like Smoke: No Shared Coordinates
+## 7. Fragmented block-like smoke: 공유 좌표 없는 setting
 
-The proposed Rossi/Separate-favorable setting was tested in the current generator by setting common support to zero and using component-specific supports only. This is not a perfect binary block-diagonal generator, but it is the closest diagnostic available without modifying the core simulation code.
+Rossi/Separate가 유리할 수 있는 setting으로, 공통 support를 0으로 두고 component-specific support만 사용하는 fragmented block-like setting을 현재 generator 안에서 확인했다. 완전한 binary block-diagonal generator는 아니지만, R core simulation code를 수정하지 않고 만들 수 있는 가장 가까운 diagnostic이다.
 
-### 7.1 Low-dimensional fragmented smoke
+### 7.1 저차원 fragmented smoke
 
-Design: $K=4$, $n=1000$, $d=60$, rep=5, common q=0, specific q=10 per component, true union q=40, $\kappa=(60,60,60,60)$.
+설계: $K=4$, $n=1000$, $d=60$, rep=5, common q=0, specific q=10 per component, true union q=40, $\kappa=(60,60,60,60)$.
 
 | Method | ARI | Selected q | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -152,16 +152,16 @@ Design: $K=4$, $n=1000$, $d=60$, rep=5, common q=0, specific q=10 per component,
 | Eta-group BIC | 0.999 | 42.80 | 0.140 | 0.936 | 0.967 | 0.000109 | 11.101 | 0.458 |
 | Eta-group BIC + refit | 0.999 | 42.80 | 0.140 | 0.936 | 0.967 | 0.000079 | 1.490 | 0.244 |
 
-Interpretation:
+해석:
 
-- This low-dimensional fragmented setting does not make Rossi/Separate clearly superior overall.
-- Rossi/Separate have perfect ARI and better raw prototype-parameter MSE for Separate BIC, but they still select dense supports.
-- Eta-group keeps ARI essentially unchanged and gives much sparser decision support.
-- This again suggests that prototype-parameter accuracy and decision-support sparsity should be reported separately.
+- 이 low-dimensional fragmented setting에서도 Rossi/Separate가 전체적으로 명확히 우월하다고 보기는 어렵다.
+- Rossi/Separate는 ARI가 완벽하고 Separate BIC의 raw prototype-parameter MSE는 낮지만, 여전히 dense support를 선택한다.
+- Eta-group은 ARI를 거의 유지하면서 decision support를 더 sparse하게 만든다.
+- 따라서 prototype-parameter accuracy와 decision-support sparsity는 별도 지표로 보고해야 한다.
 
-### 7.2 High-dimensional fragmented smoke
+### 7.2 고차원 fragmented smoke
 
-Design: $K=4$, $n=1000$, $d=400$, rep=3, common q=0, specific q=20 per component, true union q=80, $\kappa=(60,60,60,60)$.
+설계: $K=4$, $n=1000$, $d=400$, rep=3, common q=0, specific q=20 per component, true union q=80, $\kappa=(60,60,60,60)$.
 
 | Method | ARI | Selected q | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -170,35 +170,35 @@ Design: $K=4$, $n=1000$, $d=400$, rep=3, common q=0, specific q=20 per component
 | Eta-group BIC | 0.851 | 368.33 | 0.901 | 0.217 | 0.357 | 0.000310 | 4.283 | 0.736 |
 | Eta-group BIC + refit | 0.832 | 368.33 | 0.901 | 0.217 | 0.357 | 0.000419 | 46.142 | 1.408 |
 
-Interpretation:
+해석:
 
-- In this high-dimensional version, all methods become dense.
-- Rossi/Separate do not gain the expected clear advantage; Eta-group is also dense but slightly less dense.
-- Therefore the current generator does not reproduce the proposed "Rossi dominates under block-diagonal fragmented data" scenario.
-- A truly Rossi-favorable test likely needs a dedicated block-diagonal or binary-style generator and prototype-support metrics.
+- High-dimensional version에서는 모든 방법이 dense해진다.
+- Rossi/Separate가 기대했던 명확한 우위를 얻지는 못했고, Eta-group도 dense하지만 조금 덜 dense하다.
+- 따라서 현재 generator는 "block-diagonal fragmented data에서 Rossi가 지배적으로 유리하다"는 setting을 재현하지 못한다.
+- 이 질문을 제대로 보려면 dedicated block-diagonal 또는 binary-style generator와 prototype-support metric이 필요하다.
 
 ### 7.3 d=800 attempt
 
-A d=800 fragmented smoke was attempted with common q=0 and specific q=20 per component. The runs completed the repetitions but failed during summary binding with a column mismatch error. Because the R core algorithm should not be modified in this diagnostic step, this result is not used. The failure is recorded as a script robustness issue for very high-dimensional diagnostic settings.
+d=800 fragmented smoke도 common q=0, specific q=20 per component로 시도했다. Replicate 계산은 진행됐지만 summary binding 단계에서 column mismatch error가 발생했다. 이번 diagnostic에서는 R core algorithm을 수정하지 않기로 했으므로 이 결과는 해석에 사용하지 않는다. 대신 very high-dimensional diagnostic에서 script robustness issue가 있음을 기록한다.
 
-## 8. Current Conclusion
+## 8. 현재 결론
 
-The most useful negative-control result is Setting B rep50.
+현재까지 가장 유용한 negative-control 결과는 Setting B rep50이다.
 
-It shows that Eta-group is not universally better. When the true separation is dense and many weak coordinates matter, Eta-group can over-shrink the support and lose ARI/F1 relative to Rossi or Separate. This should be included as a limitation or negative-control diagnostic.
+Setting B는 Eta-group이 보편적으로 더 좋은 방법이 아님을 보여준다. True separation이 dense하고 많은 weak coordinate가 함께 작동하는 경우 Eta-group은 support를 과도하게 shrink하여 Rossi 또는 Separate보다 ARI/F1이 낮아질 수 있다. 이 결과는 논문에서 limitation 또는 negative-control diagnostic으로 포함할 가치가 있다.
 
-Setting C2 shows another limitation: BIC can select zero Eta support under weak signal, so positive-support or alternative tuning may be needed as a diagnostic. This should not be presented as official tuning.
+C2는 weak signal에서 Eta BIC가 zero support를 선택할 수 있음을 보여준다. 따라서 positive-support 또는 alternative tuning은 diagnostic으로는 유용하지만 official tuning으로 제시하면 안 된다.
 
-Setting A2 shows that even an equal-concentration direction-sparse design still favors Eta-group under coordinate union support. This does not prove that Rossi/Separate cannot be better; it shows that prototype-level and decision-level support targets must be separated before making that comparison.
+A2는 equal-concentration direction-sparse design에서도 coordinate union support 기준으로는 Eta-group이 여전히 유리하게 보인다는 점을 보여준다. 이는 Rossi/Separate가 더 나을 수 없다는 뜻이 아니라, prototype-level target과 decision-level target을 분리해야 한다는 뜻이다.
 
-The fragmented low-dimensional and high-dimensional smokes do not yet create a clean Rossi/Separate-dominant result under the current generator. They show that all methods can cluster well or become dense, but they do not isolate the prototype-sparsity advantage. A dedicated block-diagonal generator is needed if the goal is to demonstrate a setting where Rossi/Separate are structurally favored.
+Fragmented low-dimensional/high-dimensional smoke도 현재 generator에서는 clean Rossi/Separate-dominant result를 만들지 못했다. 모든 방법이 clustering을 잘하거나 dense support로 가며, prototype-sparsity advantage가 분리되지 않는다. Rossi/Separate가 구조적으로 유리한 setting을 보이려면 dedicated block-diagonal generator가 필요하다.
 
-## 9. Full Simulation Recommendation
+## 9. Full simulation 권장 사항
 
-| Candidate | Recommendation | Reason |
+| 후보 | 권장 여부 | 이유 |
 |:---|:---|:---|
-| Setting B rep100 | Optional, not urgent | rep50 already gives stable negative-control evidence. |
-| Setting C2 rep50 | Not yet | Need a cleaner weak-signal setting where Rossi/Separate do not collapse or go fully dense. |
-| Setting A2 rep50 | Not recommended yet | Smoke result is not Rossi/Separate-favorable under union support. Need a prototype-support metric first. |
-| Prototype-support metric | Recommended next | Needed to evaluate Rossi/Separate on their natural target. |
-| Dedicated block-diagonal generator | Recommended after metric definition | Needed to test the proposed Rossi-favorable fragmented-data scenario cleanly. |
+| Setting B rep100 | 선택 사항, 급하지 않음 | rep50만으로도 안정적인 negative-control evidence가 있음 |
+| Setting C2 rep50 | 아직 권장하지 않음 | Rossi/Separate가 collapse하거나 fully dense해지지 않는 cleaner weak-signal setting이 필요함 |
+| Setting A2 rep50 | 아직 권장하지 않음 | Smoke 결과가 union support 기준에서 Rossi/Separate-favorable하지 않음. 먼저 prototype-support metric이 필요함 |
+| Prototype-support metric | 다음 우선 작업 | Rossi/Separate의 자연스러운 목표를 평가하기 위해 필요함 |
+| Dedicated block-diagonal generator | metric 정의 이후 권장 | Rossi/Separate가 구조적으로 유리한 fragmented-data scenario를 깨끗하게 테스트하기 위해 필요함 |
