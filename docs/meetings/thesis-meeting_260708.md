@@ -144,7 +144,7 @@ Rossi/Separate와 Eta-group은 sparse하게 만들고자 하는 대상이 다르
 |:---|:---|:---|:---|
 | Coordinate union support | $S_{\mathrm{union}}=\{j:\exists k,\ active_{kj}\}$ | coordinate-level variable selection. 모든 방법에 공통으로 계산 가능 | Rossi/Separate의 component별 sparsity 구조를 하나로 합친다 |
 | Prototype entry support | $S_{\mathrm{entry}}=\{(k,j):\mu_{kj}\ne0\}$ | Rossi/Separate처럼 direction/prototype sparsity를 목표로 하는 방법에 자연스러움 | Eta-group은 coordinate-level centered eta group penalty라서 같은 방식의 직접 비교가 어렵다 |
-| Posterior decision support | $S_{\eta}=\{j:\|c_{\cdot j}\|_2>0\}$, $c_{kj}=\eta_{kj}-K^{-1}\sum_\ell \eta_{\ell j}$ | posterior decision boundary에 들어가는 coordinate. Eta-group의 main claim에 가장 적합 | Rossi/Separate의 prototype sparsity와는 목표가 다르다 |
+| Posterior decision support | $S_{\eta}=\{j:\|c_{\cdot j}\|_ 2>0\}$, $c_{kj}=\eta_{kj}-K^{-1}\sum_\ell \eta_{\ell j}$ | posterior decision boundary에 들어가는 coordinate. Eta-group의 main claim에 가장 적합 | Rossi/Separate의 prototype sparsity와는 목표가 다르다 |
 
 Entry-sparse / union-dense diagnostic에서는 모든 방법의 ARI가 0.999로 거의 같았다. Coordinate union support 기준에서는 Eta-group이 selected q=91.00, F1=0.936으로 Rossi/Separate보다 좋았고, prototype entry support 기준에서는 Separate BIC가 entry_F1=0.438로 Rossi BIC의 0.399보다 높았다. 따라서 이 결과의 핵심은 특정 방법의 전체 우위가 아니라, 논문에서 어떤 support target을 main claim으로 둘 것인지의 문제다.
 
