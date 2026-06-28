@@ -135,24 +135,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 이 부분은 자동 단조증가 정리나 전역 수렴 보장이 아니라 optimization safeguard로 설명하는 것이 안전하다.
 
-## 3. 교수님께 확인할 질문
-
-1. $\eta$ 유일성 설명을 component-level parameterization result로 Methods에 넣는 것이 충분한가?
-2. 논문 main claim을 ARI 향상이 아니라 posterior decision support recovery로 제한해도 되는가?
-3. 조밀 support 음성대조와 약한 신호 튜닝 실패 진단을 limitation 또는 appendix diagnostic으로 넣을지?
-4. Rossi/Separate와 공정 비교를 위해 prototype entry support와 block-diagonal generator를 추가할지?
-
-## 4. 다음 작업
-
-| 시점 | 작업 | 목적 |
-|:---|:---|:---|
-| 연구미팅 전 | 자료 최종 점검 | 피드백 1, 2에 대한 답변을 간결하게 전달 |
-| 미팅 후 | prototype support metric 정식 정의 | Rossi/Separate의 목표와 Eta-group의 목표를 분리 평가 |
-| 미팅 후 | block-diagonal generator 설계 | Rossi/Separate가 구조적으로 유리한 setting 확인 |
-| 미팅 후 | 조밀 support limitation section 논문화 | simulation appendix 또는 limitation section 후보 정리 |
-| 미팅 후 | methods note 업데이트 | $\eta$, $\mu$, $\kappa$ parameterization 설명 반영 |
-
-## 5. 현재 결론
+## 3. 현재 결론
 
 - $\eta_k=\kappa_k\mu_k$는 posterior decision score에 직접 들어가는 자연모수다.
 - $\eta_k\ne0$이고 $\kappa_k>0$이면 $\mu_k$와 $\kappa_k$는 component-level에서 유일하게 복원된다.
