@@ -8,7 +8,7 @@
 - 피드백 2: Eta-group penalty가 불리한 상황
 - 추가 정리: proximal EM-type update와 단조증가 claim의 범위
 
-전체 결과표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 따로 정리했고, 이 문서에서는 교수님께 확인받을 핵심만 남긴다.
+전체 결과표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 따로 정리하였다.
 
 ## 2. 6월 24일 피드백에 대한 답변
 
