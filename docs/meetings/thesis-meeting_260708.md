@@ -58,12 +58,29 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 #### 2.2.0 한눈에 보는 결과 요약
 
-| 진단 | 어떤 상황인가 | Eta-group 결과 | 비교 대상 결과 | 차이 | 결론 |
-|:---|:---|:---|:---|:---|:---|
-| 조밀 support 음성대조 | true union q=80으로 decision support가 조밀함 | Eta + refit: ARI=0.368, q=52.82, F1=0.726, MSE_eta=2.721 | Separate + refit: ARI=0.378, q=99.74, F1=0.890, MSE_eta=2.150 | Eta가 q를 약 47개 적게 선택하지만 F1 -0.164, MSE_eta +0.571 | support를 과도하게 줄여 손해를 보는 가장 명확한 limitation |
-| 약한 신호 튜닝 실패 | true union q=22, weak signal | Eta BIC: 평균 q=2.68, 50회 중 43회 q=0; Eta positive-support + refit: ARI=0.137, q=15.52, F1=0.531 | Rossi/Separate: ARI 약 0.13-0.14, q 약 98-100 | Eta BIC는 zero support로 무너지고, Rossi/Separate는 거의 full support로 감 | clean Rossi 우위라기보다 tuning failure diagnostic |
-| support 목표 차이 | union support와 prototype entry support가 서로 다른 목표 | union 기준: q=91.00, F1=0.936 | Separate entry_F1=0.438, Rossi entry_F1=0.399 | Eta는 decision support에서 유리하지만 prototype entry support와는 목표가 다름 | main claim은 posterior decision support recovery로 제한 |
-| 분절 support 진단 | 공유 좌표 없는 fragmented/block-like 구조 | d=60: q=42.80, F1=0.967; d=400: q=368.33, F1=0.357 | d=60 Separate: q=56.80, F1=0.827; d=400 Rossi/Separate: q=400, F1=0.333 | 현재 generator로는 Rossi/Separate가 명확히 유리한 구조가 안 나옴 | dedicated block-diagonal generator 필요 |
+| 진단 | 상황 | 방법론 | ARI | selected q | F1 | MSE_eta | entry_F1 | 추가 결과 | 해석 |
+|:---|:---|:---|---:|---:|---:|---:|---:|:---|:---|
+| 조밀 support 음성대조 | true union q=80으로 decision support가 조밀함 | Eta-group BIC + refit | 0.368 | 52.82 | 0.726 | 2.721 | NA | refit row에서 entry_F1 not reported | support를 많이 줄였지만 F1과 MSE_eta가 나빠짐 |
+| 조밀 support 음성대조 | true union q=80으로 decision support가 조밀함 | Separate BIC + refit | 0.378 | 99.74 | 0.890 | 2.150 | NA | Eta 대비 F1 +0.164, MSE_eta 0.571 낮음 | 조밀 support를 유지할 때 더 유리 |
+| 조밀 support 음성대조 | true union q=80으로 decision support가 조밀함 | Rossi BIC + refit | 0.380 | 99.90 | 0.889 | 2.544 | NA | refit row에서 entry_F1 not reported | support를 거의 full로 유지 |
+| 약한 신호 튜닝 실패 | true union q=22, weak signal | Eta-group BIC | 0.012 | 2.68 | 0.462 | 2.050 | NA | BIC-selected refit에서 50회 중 43회 q=0 | BIC가 zero support를 자주 선택 |
+| 약한 신호 튜닝 실패 | true union q=22, weak signal | Eta positive-support + refit | 0.137 | 15.52 | 0.531 | 3.118 | NA | positive-support diagnostic | support를 강제로 회복해도 clustering은 낮음 |
+| 약한 신호 튜닝 실패 | true union q=22, weak signal | Rossi BIC | 0.140 | 99.80 | 0.361 | 3.275 | 0.206 | 거의 full support | support는 조밀하지만 ARI는 낮음 |
+| 약한 신호 튜닝 실패 | true union q=22, weak signal | Separate BIC | 0.141 | 98.46 | 0.365 | 2.386 | 0.243 | 거의 full support | clean 우위라기보다 dense support 선택 |
+| 방향 희소성 지표 진단 | union support와 prototype entry support가 서로 다른 목표 | Eta-group BIC | 0.998 | 40.60 | 0.658 | 0.160 | NA | entry_F1 not reported | union support 기준에서는 Eta-group이 더 sparse |
+| 방향 희소성 지표 진단 | union support와 prototype entry support가 서로 다른 목표 | Rossi BIC | 0.999 | 100.00 | 0.347 | 0.262 | 0.136 | FPR=1.000 | prototype entry support는 낮음 |
+| 방향 희소성 지표 진단 | union support와 prototype entry support가 서로 다른 목표 | Separate BIC | 0.999 | 100.00 | 0.347 | 0.222 | 0.150 | FPR=1.000 | prototype entry support는 낮음 |
+| 성분별 희소 / 합집합 조밀 진단 | component별 active coordinate가 다름 | Eta-group BIC | 0.999 | 91.00 | 0.936 | 0.417 | NA | entry_F1 not reported | posterior decision support 기준으로는 좋게 보임 |
+| 성분별 희소 / 합집합 조밀 진단 | component별 active coordinate가 다름 | Separate BIC | 0.999 | 99.60 | 0.891 | 0.215 | 0.438 | prototype entry support 기준 | support target에 따라 더 좋아 보임 |
+| 성분별 희소 / 합집합 조밀 진단 | component별 active coordinate가 다름 | Rossi BIC | 0.999 | 100.00 | 0.889 | 0.257 | 0.399 | prototype entry support 기준 | support target에 따라 결론이 달라짐 |
+| 분절 support 진단 | 공유 좌표 없는 fragmented 구조, d=60 | Eta-group BIC | 0.999 | 42.80 | 0.967 | 0.458 | NA | entry_F1 not reported | 저차원 fragmented 구조에서는 좋음 |
+| 분절 support 진단 | 공유 좌표 없는 fragmented 구조, d=60 | Rossi BIC | 1.000 | 59.00 | 0.808 | 0.156 | 0.418 | 특이사항 없음 | Eta-group보다 F1이 낮음 |
+| 분절 support 진단 | 공유 좌표 없는 fragmented 구조, d=60 | Separate BIC | 1.000 | 56.80 | 0.827 | 0.112 | 0.526 | 특이사항 없음 | Eta-group보다 F1이 낮음 |
+| 분절 support 진단 | 공유 좌표 없는 fragmented 구조, d=400 | Eta-group BIC | 0.851 | 368.33 | 0.357 | 0.736 | NA | entry_F1 not reported | 고차원에서는 support가 커짐 |
+| 분절 support 진단 | 공유 좌표 없는 fragmented 구조, d=400 | Rossi BIC | 0.826 | 400.00 | 0.333 | 1.417 | 0.097 | full support | 명확한 Rossi/Separate 우위가 아님 |
+| 분절 support 진단 | 공유 좌표 없는 fragmented 구조, d=400 | Separate BIC | 0.827 | 400.00 | 0.333 | 1.329 | 0.096 | full support | 명확한 Rossi/Separate 우위가 아님 |
+
+표에서 MSE_eta는 summary CSV의 MSE_centered_eta를 뜻한다. NA는 해당 summary row에서 not reported인 값이다.
 
 #### 2.2.1 조밀 support 음성대조
 
