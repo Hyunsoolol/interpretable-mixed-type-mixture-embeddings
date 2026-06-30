@@ -95,6 +95,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 | 상황 | 많은 coordinate가 약하게 함께 separation에 기여함 |
 | 환경 | $K=4$, $n=1000$, $d=100$, rep=50 |
 | True support | true union q=80, common q=20, specific q/component=15 |
+| 평균방향 $\mu$ | 공통 20개 좌표는 모든 component에서 1로 두고, 각 component별 specific 15개 좌표는 해당 component에서만 0.25로 둔 뒤 $\|\mu_k\|_2=1$이 되도록 정규화 |
 | 집중도 | $\kappa=(30,45,65,90)$ |
 | 선택 기준 | BIC |
 
@@ -111,6 +112,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 | 상황 | 신호가 약해 support 선택과 clustering이 모두 어려운 경우 |
 | 환경 | $K=4$, $n=1000$, $d=100$, rep=50 |
 | True support | true union $q=22$, common $q=6$, specific $q$/component=4 |
+| 평균방향 $\mu$ | 공통 6개 좌표는 모든 component에서 1로 두고, 각 component별 specific 4개 좌표는 해당 component에서만 0.25로 둔 뒤 $\|\mu_k\|_2=1$이 되도록 정규화 |
 | 집중도 | $\kappa=(35,45,55,65)$ |
 | 선택 기준 | BIC |
 
