@@ -52,6 +52,41 @@ $$
 
 단, $\eta=0$ 또는 $\kappa=0$이면 방향 $\mu$는 식별되지 않는다. 또한 mixture model의 label switching은 별도 문제다. 따라서 여기서 말하는 유일성은 mixture 전체의 전역 식별성 증명이 아니라, component-level parameterization에 대한 설명이다.
 
+### 2.1.1 왜 Eta-group인가?
+
+vMF mixture의 posterior classification score는 $\mu$와 $\kappa$가 분리되어 작동하는 것이 아니라
+
+$$
+\eta_k^\top x_i=(\kappa_k\mu_k)^\top x_i
+$$
+
+형태로 작동한다. 따라서 실제 decision boundary에 직접 들어가는 parameter는 $\mu$ 단독이나 $\kappa$ 단독이 아니라 natural parameter
+
+$$
+\eta_k=\kappa_k\mu_k
+$$
+
+이다.
+
+Clustering에서 중요한 것은 각 component의 절대적 $\eta_k$가 아니라, component 사이에서 어떤 coordinate가 posterior score 차이를 만드는가이다. 그래서 centered eta contrast
+
+$$
+c_{kj}=\eta_{kj}-\bar{\eta}_j,\qquad
+\bar{\eta}_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}
+$$
+
+를 본다. Eta-group penalty
+
+$$
+\lambda\sum_{j=1}^d \|c_{\cdot j}\|_2
+$$
+
+는 coordinate $j$가 component 간 posterior decision boundary를 만드는지 직접 선택하는 penalty다.
+
+즉, Eta-group은 단순한 sparsity penalty가 아니라, posterior decision score에 직접 들어가는 centered natural parameter contrast를 coordinate 단위로 선택하는 penalty다. $\mu$만 penalize하면 concentration $\kappa$ 차이를 반영하지 못하고, $\kappa$만 보면 coordinate-level 해석이 불가능하다. 또한 raw eta 또는 entrywise L1 penalty는 coordinate 전체가 decision에 필요한지보다 component-entry 단위의 작은 차이를 남길 수 있어 dense support로 갈 수 있다.
+
+따라서 현재 claim은 일괄적 우월성이 아니라, posterior decision support recovery라는 목표에는 centered eta contrast와 coordinate group penalty가 가장 직접적인 구조라는 것이다.
+
 ### 2.2 Eta-group penalty가 불리한 상황
 
 Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라, posterior decision parameter에 들어가는 coordinate support를 sparse하게 해석하는 데 있다. 따라서 true decision support가 조밀하거나, 신호가 약하거나, 평가하려는 support target이 prototype sparsity인 경우에는 Eta-group이 불리하거나 해석이 섞일 수 있다.
@@ -151,7 +186,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 #### 2.2.5 Eta penalty ablation 진단
 
-제안법의 효과가 eta 자연모수, centered contrast, group penalty 중 어디서 오는지 분리하기 위해 세 가지 diagnostic을 비교했다. 모두 official method가 아니라 ablation diagnostic이며, rep 수가 다르므로 정량 비교는 확정 결론이 아니라 방향성 확인으로만 사용한다.
+위 이론적 직관을 simulation ablation으로 확인하기 위해 eta 자연모수 효과와 group penalty 효과를 분리해 보았다. 제안법의 효과가 eta 자연모수, centered contrast, group penalty 중 어디서 오는지 보기 위한 세 가지 diagnostic이며, 모두 official method가 아니라 ablation diagnostic이다. rep 수가 다르므로 정량 비교는 확정 결론이 아니라 방향성 확인으로만 사용한다.
 
 | 비교 목적 | method | reps | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|---:|---:|---:|---:|---:|---:|:---|
@@ -178,7 +213,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 - $\eta_k=\kappa_k\mu_k$는 posterior decision score에 직접 들어가는 자연모수다.
 - $\eta_k\ne0$이고 $\kappa_k>0$이면 $\mu_k$와 $\kappa_k$는 component-level에서 유일하게 복원된다.
-- Eta-group은 일괄적으로 더 좋은 방법이 아니라 posterior decision support recovery에 강점이 있는 방법이다.
+- Eta-group의 이론적 동기는 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 선택한다는 점이다.
 - ablation diagnostic에서는 centered eta contrast와 coordinate group penalty의 조합이 support recovery 안정성에 중요해 보인다.
 - 조밀 support 또는 약한 신호에서는 Eta-group이 불리하거나 BIC tuning failure가 생길 수 있다.
 - 다음 단계는 posterior decision support를 main claim으로 둘지, prototype entry support를 보조 지표로 둘지 교수님께 확인받는 것이다.
