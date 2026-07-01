@@ -123,10 +123,10 @@ Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 
 
 | 비교 목적 | method | penalty / model | reps | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|:---|
-| Proposed reference | Eta-group + refit | $\lambda\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
-| Same eta, no group | Eta ANOVA L1 + refit | $\lambda\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entrywise L1은 거의 dense support |
 | Rossi mu baseline | Rossi mu + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entrywise penalty는 거의 dense support |
 | Rossi mu group | Rossi-mu group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
+| Same eta, no group | Eta ANOVA L1 + refit | $\lambda\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entrywise L1은 거의 dense support |
+| Proposed reference | Eta-group + refit | $\lambda\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
 
 표의 차이는 각 penalty가 선택하는 target이 다르기 때문에 나온다. Posterior decision boundary는
 
