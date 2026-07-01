@@ -190,17 +190,15 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|:---|
 | Proposed reference | Eta-group + refit | $\lambda\sum_j\|c_{\cdot j}\|_2$ | 20 | 25.45 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
 | Same eta, no group | Eta ANOVA L1 + refit | $\lambda\sum_{k,j}|c_{kj}|$ | 20 | 99.90 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entrywise L1은 거의 dense support |
-| Group on natural scale | Natural-scale group + refit | $\lambda\sum_j\|(\kappa_k\mu_{kj})_{k=1}^K\|_2$ | 20 | 34.30 | 0.158 | 0.704 | 0.809 | 0.240 | natural scale group은 dense support는 피하지만 FPR이 큼 |
 | Rossi direction group | Rossi mu-group + refit | $\lambda_\mu\sum_j\|\mu_{\cdot j}\|_2$ | 20 | 29.10 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$-space group은 개선되지만 Eta-group보다 F1이 낮음 |
 | Official reference | Eta-group official + refit | $\lambda\sum_j\|c_{\cdot j}\|_2$ | 100 | 24.75 | 0.037 | 0.890 | 0.937 | 0.185 | rep100에서도 같은 방향 |
 
 - `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
-- `Natural-scale group`은 이전의 `Rossi natural-group` 표현을 정정한 것으로, $\kappa\mu$ 스케일에 group penalty를 준 diagnostic이다.
-- `Rossi mu-group`은 Rossi 계열에 더 가까운 $\mu$-space group penalty다. Natural-scale group보다 support recovery가 좋아졌지만 Eta-group보다 FPR이 크고 F1이 낮았다.
+- `Rossi mu-group`은 Rossi 계열에 더 가까운 $\mu$-space group penalty다. Dense support는 피했지만 Eta-group보다 FPR이 크고 F1이 낮았다.
 - 현재 diagnostic 기준에서는 eta 자연모수만으로 충분하지 않고, group penalty만으로도 충분하지 않으며, `centered eta contrast + coordinate group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
 - `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
 - Eta-group과 Eta ANOVA L1은 기존 strong scenario rep=20 summary 기준으로 업데이트했다.
-- `Eta ANOVA L1`, `Natural-scale group`, `Rossi mu-group`은 diagnostic variant이며 official method가 아니다. 특히 `Natural-scale group`과 `Rossi mu-group`은 not Rossi 2022 official baseline이다.
+- `Eta ANOVA L1`과 `Rossi mu-group`은 diagnostic variant이며 official method가 아니다. 특히 `Rossi mu-group`은 not Rossi 2022 official baseline이다.
 
 ## 5. proximal EM-type update와 단조증가
 
