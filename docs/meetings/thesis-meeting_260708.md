@@ -119,13 +119,13 @@ Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 
 
 ## 4. Eta penalty ablation 진단
 
-앞 절의 이론적 직관은 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 선택하는 것이 자연스럽다는 것이다. 이 직관을 확인하기 위해 Eta-group과 두 가지 진단용 변형을 rep=20 기준으로 비교했다. `Eta ANOVA L1`과 `Rossi mu-group`은 공식 방법이 아니라 ablation diagnostic이다.
+앞 절의 이론적 직관은 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 선택하는 것이 자연스럽다는 것이다. 이 직관을 확인하기 위해 Eta-group과 두 가지 진단용 변형을 rep=20 기준으로 비교했다. `Eta ANOVA L1`과 `Rossi-mu group`은 공식 방법이 아니라 ablation diagnostic이다.
 
 | 비교 목적 | method | penalty / model | reps | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|:---|
 | Proposed reference | Eta-group + refit | $\lambda\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
 | Same eta, no group | Eta ANOVA L1 + refit | $\lambda\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entrywise L1은 거의 dense support |
-| Rossi direction group | Rossi mu-group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$-space group은 개선되지만 Eta-group보다 F1이 낮음 |
+| Rossi direction group | Rossi-mu group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$-space group은 개선되지만 Eta-group보다 F1이 낮음 |
 
 표의 차이는 각 penalty가 선택하는 target이 다르기 때문에 나온다. Posterior decision boundary는
 
@@ -146,14 +146,14 @@ S_{\mathrm{ANOVA}}=\{(k,j):\lvert c_{kj}\rvert>0\},
 S_\mu=\{j:\lVert\mu_{\cdot j}\rVert_2>0\}.
 $$
 
-Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 가장 가깝다. Eta ANOVA L1은 component-entry 단위 효과가 따로 남아 coordinate support가 조밀해지기 쉽다. Rossi mu-group은 direction sparsity에는 자연스럽지만, posterior score에 들어가는 $\kappa_k\mu_{kj}$ scale과 centered contrast를 penalty 단계에서 직접 보지는 않는다.
+Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 가장 가깝다. Eta ANOVA L1은 component-entry 단위 효과가 따로 남아 coordinate support가 조밀해지기 쉽다. Rossi-mu group은 direction sparsity에는 자연스럽지만, posterior score에 들어가는 $\kappa_k\mu_{kj}$ scale과 centered contrast를 penalty 단계에서 직접 보지는 않는다.
 
 - `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
-- `Rossi mu-group`은 Rossi 계열에 더 가까운 $\mu$-space group penalty다. Dense support는 피했지만 Eta-group보다 FPR이 크고 F1이 낮았다.
+- `Rossi-mu group + refit`은 Rossi 계열에 더 가까운 $\mu$-space group penalty다. Dense support는 피했지만 Eta-group보다 FPR이 크고 F1이 낮았다.
 - 현재 diagnostic 기준에서는 eta 자연모수만으로 충분하지 않고, group penalty만으로도 충분하지 않으며, `centered eta contrast + coordinate group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
 - `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
 - 세 행 모두 기존 strong scenario rep=20 summary 기준이다.
-- `Eta ANOVA L1`과 `Rossi mu-group`은 diagnostic variant이며 official method가 아니다. 특히 `Rossi mu-group`은 not Rossi 2022 official baseline이다.
+- `Eta ANOVA L1`과 `Rossi-mu group`은 diagnostic variant이며 official method가 아니다. 특히 `Rossi-mu group`은 not Rossi 2022 official baseline이다.
 
 ## 5. proximal EM-type update와 단조증가
 
