@@ -146,6 +146,22 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 > 핵심 결론. Eta-group이 불리한 경우는 크게 두 가지다. 첫째, true decision support가 조밀하면 penalty가 필요한 좌표까지 줄여 F1과 MSE가 나빠질 수 있다. 둘째, weak signal에서는 BIC가 zero support를 선택해 tuning failure가 생길 수 있다. 따라서 논문 claim은 ARI 향상이 아니라 posterior decision support recovery로 제한하는 것이 안전하다.
 
+#### 2.2.5 Eta penalty ablation 진단
+
+같은 eta 자연모수 기반에서도 centered coordinate group penalty와 entrywise L1 penalty는 다르게 작동했다. 아래 결과는 K=4 strong/weak common+specific setting에서 rep=5로 확인한 ablation diagnostic이며, official method 변경 근거가 아니라 penalty 구조를 분해해서 보기 위한 smoke 결과이다.
+
+| scenario | method | ARI | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
+|:---|:---|---:|---:|---:|---:|---:|---:|:---|
+| strong | Eta-group + refit | 0.682 | 24.60 | 0.033 | 0.901 | 0.946 | 0.177 | true q=22 근처 support를 선택 |
+| strong | Eta ANOVA L1 + refit | 0.643 | 99.80 | 0.997 | 0.220 | 0.361 | 0.575 | 거의 dense support |
+| weak | Eta-group + refit | 0.572 | 23.40 | 0.018 | 0.943 | 0.970 | 0.172 | true q=22 근처 support를 선택 |
+| weak | Eta ANOVA L1 + refit | 0.514 | 99.00 | 0.987 | 0.222 | 0.364 | 0.703 | 거의 dense support |
+
+- `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
+- `Eta ANOVA L1`은 centered eta effect에 entrywise L1 penalty를 준 diagnostic variant이며 official method가 아니다(not official).
+- 현재 smoke에서는 eta 자연모수만이 아니라 centered coordinate group penalty가 support recovery에 중요한 역할을 한 것으로 보인다.
+- Rossi-group diagnostic은 아직 구현하지 않았다. group penalty 자체의 효과와 eta parameterization 효과를 더 분리하려면 별도 diagnostic baseline 설계가 필요하다.
+
 ### 2.3 proximal EM-type update와 단조증가
 
 본 방법의 추정은 닫힌형 M-step이 아니라 proximal EM-type update다. vMF normalizing constant와 centered eta group penalty 때문에 penalized M-step을 한 번에 닫힌형태로 풀기 어렵다.
