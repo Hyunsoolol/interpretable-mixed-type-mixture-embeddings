@@ -159,7 +159,7 @@ Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 �
 Entrywise L1은 각 component-entry를 따로 줄인다.
 
 $$
-\hat c_{kj}=\operatorname{sign}(z_{kj})(|z_{kj}|-\lambda)_+.
+\hat{c}_{kj} = \text{sign}(z_{kj})(|z_{kj}| - \lambda)_+
 $$
 
 따라서 같은 coordinate 안에서도 약한 양수 또는 음수 contrast가 개별적으로 0이 되기 쉽고, coordinate 전체의 역할을 안정적으로 판단하기 어렵다. 반면 Eta-group은 coordinate $j$의 contrast vector 전체를 한 번에 줄인다.
