@@ -128,6 +128,8 @@ Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 
 | Rossi mu baseline | Rossi mu + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.653 | 1.000 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entrywise penalty는 거의 dense support |
 | Rossi mu group | Rossi-mu group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.685 | 1.000 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
 
+
+
 표의 차이는 각 penalty가 선택하는 target이 다르기 때문에 나온다. Posterior decision boundary는
 
 $$
