@@ -148,21 +148,20 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 #### 2.2.5 Eta penalty ablation 진단
 
-같은 eta 자연모수 기반에서도 centered coordinate group penalty와 entrywise L1 penalty는 다르게 작동했다. 아래 결과는 K=4 strong/weak common+specific setting에서 확인한 ablation diagnostic이며, official method 변경 근거가 아니라 penalty 구조를 분해해서 보기 위한 smoke 결과이다.
+제안법의 효과가 eta 자연모수, centered contrast, group penalty 중 어디서 오는지 분리하기 위해 세 가지 diagnostic을 비교했다. 모두 official method가 아니라 ablation diagnostic이며, rep 수가 다르므로 정량 비교는 확정 결론이 아니라 방향성 확인으로만 사용한다.
 
-| scenario | method | reps | ARI | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
-|:---|:---|---:|---:|---:|---:|---:|---:|---:|:---|
-| strong | Eta-group + refit | 5 | 0.682 | 24.60 | 0.033 | 0.901 | 0.946 | 0.177 | true q=22 근처 support를 선택 |
-| strong | Eta ANOVA L1 + refit | 5 | 0.643 | 99.80 | 0.997 | 0.220 | 0.361 | 0.575 | 거의 dense support |
-| strong | Rossi natural-group + refit | 20 | 0.678 | 34.30 | 0.158 | 0.704 | 0.809 | 0.240 | dense는 피했지만 Eta-group보다 F1이 낮음 |
-| weak | Eta-group + refit | 5 | 0.572 | 23.40 | 0.018 | 0.943 | 0.970 | 0.172 | true q=22 근처 support를 선택 |
-| weak | Eta ANOVA L1 + refit | 5 | 0.514 | 99.00 | 0.987 | 0.222 | 0.364 | 0.703 | 거의 dense support |
+| 비교 목적 | method | reps | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
+|:---|:---|---:|---:|---:|---:|---:|---:|:---|
+| Proposed reference | Eta-group + refit | 5 | 24.60 | 0.033 | 0.901 | 0.946 | 0.177 | true q=22 근처 support를 선택 |
+| Same eta, no group | Eta ANOVA L1 + refit | 5 | 99.80 | 0.997 | 0.220 | 0.361 | 0.575 | 같은 eta라도 entrywise L1은 거의 dense support |
+| Group on natural scale | Rossi natural-group + refit | 20 | 34.30 | 0.158 | 0.704 | 0.809 | 0.240 | group penalty만으로는 Eta-group 수준까지 가지 않음 |
+| Official reference | Eta-group official + refit | 100 | 24.75 | 0.037 | 0.890 | 0.937 | 0.185 | rep100에서도 같은 방향 |
 
+- `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
+- `Rossi natural-group`은 group penalty를 주면 dense support는 피하지만, Eta-group보다 selected q/FPR이 크고 F1이 낮으므로, group penalty만으로 Eta-group을 완전히 설명하기는 어렵다.
+- 현재 diagnostic에서는 `centered eta contrast + coordinate group penalty` 조합이 가장 안정적이다.
 - `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
-- `Eta ANOVA L1`은 centered eta effect에 entrywise L1 penalty를 준 diagnostic variant이며 official method가 아니다(not official).
-- 현재 smoke에서는 eta 자연모수만이 아니라 centered coordinate group penalty가 support recovery에 중요한 역할을 한 것으로 보인다.
-- `Rossi natural-group`은 raw natural-scale $g_{kj}=\kappa_k\mu_{kj}$에 coordinate-wise group penalty를 준 Rossi-group diagnostic variant이며, Rossi 2022 official baseline이 아니다(not Rossi 2022 official baseline).
-- rep=20 strong diagnostic에서도 Rossi natural-group은 dense support를 피했지만, Eta-group보다 selected q와 FPR이 크고 F1이 낮았다. 따라서 현재 diagnostic에서는 centered eta contrast까지 포함한 Eta-group 구조가 더 안정적으로 보인다.
+- `Eta ANOVA L1`과 `Rossi natural-group`은 diagnostic variant이며 official method가 아니다. 특히 `Rossi natural-group`은 not Rossi 2022 official baseline이다.
 
 ### 2.3 proximal EM-type update와 단조증가
 
@@ -177,5 +176,6 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 - $\eta_k=\kappa_k\mu_k$는 posterior decision score에 직접 들어가는 자연모수다.
 - $\eta_k\ne0$이고 $\kappa_k>0$이면 $\mu_k$와 $\kappa_k$는 component-level에서 유일하게 복원된다.
 - Eta-group은 일괄적으로 더 좋은 방법이 아니라 posterior decision support recovery에 강점이 있는 방법이다.
+- ablation diagnostic에서는 centered eta contrast와 coordinate group penalty의 조합이 support recovery 안정성에 중요해 보인다.
 - 조밀 support 또는 약한 신호에서는 Eta-group이 불리하거나 BIC tuning failure가 생길 수 있다.
 - 다음 단계는 support target을 분리하고, 필요하면 block-diagonal negative-control generator를 별도로 설계하는 것이다.
