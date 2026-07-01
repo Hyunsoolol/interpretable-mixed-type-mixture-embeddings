@@ -128,8 +128,7 @@ Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 
 표의 차이는 각 penalty가 선택하는 target이 다르기 때문에 나온다. Posterior decision boundary는
 
 $$
-\log \frac{P(z=k\mid x)}{P(z=\ell\mid x)}
-=
+\log \frac{P(z=k\mid x)}{P(z=\ell\mid x)}=
 \log\frac{\alpha_k}{\alpha_\ell}
 +\log\frac{C_d(\kappa_k)}{C_d(\kappa_\ell)}
 +(\eta_k-\eta_\ell)^\top x
