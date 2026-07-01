@@ -165,8 +165,7 @@ $$
 따라서 같은 coordinate 안에서도 약한 양수 또는 음수 contrast가 개별적으로 0이 되기 쉽고, coordinate 전체의 역할을 안정적으로 판단하기 어렵다. 반면 Eta-group은 coordinate $j$의 contrast vector 전체를 한 번에 줄인다.
 
 $$
-\hat c_{\cdot j}
-=
+\hat c_{\cdot j} =
 \left(1-\frac{\lambda}{\|z_{\cdot j}\|_2}\right)_+z_{\cdot j}.
 $$
 
