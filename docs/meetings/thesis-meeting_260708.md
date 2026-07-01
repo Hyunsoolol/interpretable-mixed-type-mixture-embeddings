@@ -154,13 +154,15 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 |:---|:---|---:|---:|---:|---:|---:|---:|:---|
 | strong | Eta-group + refit | 0.682 | 24.60 | 0.033 | 0.901 | 0.946 | 0.177 | true q=22 근처 support를 선택 |
 | strong | Eta ANOVA L1 + refit | 0.643 | 99.80 | 0.997 | 0.220 | 0.361 | 0.575 | 거의 dense support |
+| strong | Rossi natural-group + refit | 0.684 | 33.00 | 0.141 | 0.732 | 0.828 | 0.210 | dense는 피했지만 Eta-group보다 F1이 낮음 |
 | weak | Eta-group + refit | 0.572 | 23.40 | 0.018 | 0.943 | 0.970 | 0.172 | true q=22 근처 support를 선택 |
 | weak | Eta ANOVA L1 + refit | 0.514 | 99.00 | 0.987 | 0.222 | 0.364 | 0.703 | 거의 dense support |
 
 - `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
 - `Eta ANOVA L1`은 centered eta effect에 entrywise L1 penalty를 준 diagnostic variant이며 official method가 아니다(not official).
 - 현재 smoke에서는 eta 자연모수만이 아니라 centered coordinate group penalty가 support recovery에 중요한 역할을 한 것으로 보인다.
-- Rossi-group diagnostic은 아직 구현하지 않았다. group penalty 자체의 효과와 eta parameterization 효과를 더 분리하려면 별도 diagnostic baseline 설계가 필요하다.
+- `Rossi natural-group`은 raw natural-scale $g_{kj}=\kappa_k\mu_{kj}$에 coordinate-wise group penalty를 준 Rossi-group diagnostic variant이며, Rossi 2022 official baseline이 아니다(not Rossi 2022 official baseline).
+- strong smoke에서는 Rossi natural-group도 dense support는 피했지만, Eta-group보다 selected q와 FPR이 크고 F1이 낮았다. 따라서 현재 diagnostic에서는 centered eta contrast까지 포함한 Eta-group 구조가 더 안정적으로 보인다.
 
 ### 2.3 proximal EM-type update와 단조증가
 
