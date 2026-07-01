@@ -81,18 +81,21 @@ $$
 
 앞 절의 이론적 직관은 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 선택하는 것이 자연스럽다는 것이다. 이 직관을 확인하기 위해 Eta-group, 같은 eta에 entry-wise L1을 둔 진단 변형, 기존 Rossi $\mu$ baseline, 그리고 Rossi $\mu$-group 진단 변형을 비교했다.
 
+핵심은 eta 자연모수만으로 충분한지가 아니라, centered eta contrast를 어떤 단위로 줄일 것인가이다. Entry-wise L1은 $c_{kj}$를 개별 성분별로 줄이므로 coordinate $j$ 전체가 posterior decision boundary에 필요한지 판단하지 못한다. 반면 Eta-group은 $c_{\cdot j}$를 하나의 축으로 보고 선택하므로, 해당 coordinate가 component 간 posterior decision score 차이를 만드는지를 직접 평가한다.
+
 | 비교 목적 | method | penalty / model | reps | selected q | ARI | TPR | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|:---|
 | Proposed reference | Eta-group + refit | $\lambda\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.684 | 0.995 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
-| Same eta, no group | Eta ANOVA L1 + refit | $\lambda\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.652 | 1.000 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entry-wise L1은 거의 dense support |
+| Same eta, no group | Eta entry-wise L1 + refit | $\lambda\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.652 | 1.000 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entry-wise L1은 거의 dense support |
 | Rossi $\mu$ baseline | Rossi $\mu$ + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.653 | 1.000 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entry-wise penalty는 거의 dense support |
 | Rossi $\mu$-group | Rossi $\mu$-group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.685 | 1.000 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
 
-`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다.
+`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. `Eta entry-wise L1`은 centered eta contrast에 entry-wise L1 penalty를 둔 diagnostic variant다.
 
-- `Eta ANOVA L1`은 같은 eta 자연모수라도 entry-wise L1이면 거의 dense support로 가므로, coordinate-wise group penalty가 중요하다.
+- `Eta entry-wise L1`은 같은 eta 자연모수라도 entry-wise L1이면 거의 dense support로 가므로, eta 자연모수만으로는 충분하지 않다.
 - `Rossi $\mu$ + refit`은 기존 Rossi baseline에 해당하는 $\mu$ entry-wise penalty다. 같은 strong setting에서 거의 dense support를 선택했고, Eta-group보다 FPR이 크고 F1이 낮았다.
 - `Rossi $\mu$-group + refit`은 $\mu$-space에 group penalty를 둔 진단 변형이다. 기존 Rossi $\mu$보다는 support recovery가 개선되지만, Eta-group보다 FPR이 크고 F1이 낮았다.
+- Eta-group은 음수 contrast를 새로 만드는 방법이 아니다. 선택된 coordinate 안에서 원래 추정된 centered eta contrast의 상대적 양수/음수 방향을 보존하면서 축 단위로 shrink한다.
 - centered eta contrast에서 $c_{kj}>0$은 component $k$의 posterior decision score를 상대적으로 높이는 방향, $c_{kj}<0$은 상대적으로 낮추는 방향이다.
 - 현재 diagnostic 기준에서는 eta 자연모수만으로도, group penalty만으로도 충분하지 않으며 `centered eta contrast + coordinate-wise group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
 
