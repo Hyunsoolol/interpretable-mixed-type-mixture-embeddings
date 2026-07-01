@@ -6,7 +6,7 @@
 
 - 피드백 1: $\eta$, $\mu$, $\kappa$의 의존성과 유일성
 - 피드백 2: Eta-group penalty가 불리한 상황
-- 추가 정리: Eta penalty ablation과 optimization safeguard
+- 추가 정리: Eta penalty ablation 결과와 optimization safeguard 설명
 
 전체 결과표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 따로 정리하였다.
 
@@ -52,13 +52,13 @@ $$
 
 ### 2.1 왜 Eta-group인가?
 
-vMF mixture의 posterior classification score는 $\mu$와 $\kappa$가 분리되어 작동하는 것이 아니라
+vMF mixture의 posterior classification score는 $\mu$와 $\kappa$가 따로 작동하는 구조가 아니다. 실제 score에는
 
 $$
 \eta_k^\top x_i=(\kappa_k\mu_k)^\top x_i
 $$
 
-형태로 작동한다. 따라서 실제 decision boundary에 직접 들어가는 parameter는 $\mu$ 단독이나 $\kappa$ 단독이 아니라 natural parameter
+형태의 내적이 들어간다. 따라서 decision boundary에 직접 들어가는 parameter는 $\mu$ 단독이나 $\kappa$ 단독이 아니라 자연모수(natural parameter)
 
 $$
 \eta_k=\kappa_k\mu_k
@@ -81,20 +81,22 @@ $$
 
 는 coordinate $j$가 component 간 posterior decision boundary를 만드는지 직접 선택하는 penalty다.
 
-즉, Eta-group은 단순한 sparsity penalty가 아니라, posterior decision score에 직접 들어가는 centered natural parameter contrast를 coordinate 단위로 선택하는 penalty다. $\mu$만 penalize하면 concentration $\kappa$ 차이를 반영하지 못하고, $\kappa$만 보면 coordinate-level 해석이 불가능하다. 또한 raw eta 또는 entrywise L1 penalty는 coordinate 전체가 decision에 필요한지보다 component-entry 단위의 작은 차이를 남길 수 있어 dense support로 갈 수 있다.
+즉, Eta-group은 단순한 sparsity penalty가 아니라 posterior decision score에 들어가는 centered natural parameter contrast를 coordinate 단위로 선택하는 penalty다.
+
+$\mu$만 penalize하면 concentration $\kappa$ 차이를 반영하지 못한다. 반대로 $\kappa$만 보면 coordinate-level 해석이 불가능하다. 또한 raw eta 또는 entrywise L1 penalty는 coordinate 전체가 decision에 필요한지보다 component-entry 단위의 작은 차이를 남기기 쉬워 dense support로 갈 수 있다.
 
 따라서 현재 claim은 일괄적 우월성이 아니라, posterior decision support recovery라는 목표에는 centered eta contrast와 coordinate group penalty가 가장 직접적인 구조라는 것이다.
 
 ## 3. Eta-group penalty가 불리한 상황
 
-Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 sparsity 구조에서 유리한 것은 아니다. Negative-control diagnostic에서는 아래 세 가지 한계를 확인했다. 세부 수치와 전체 표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 남긴다.
+Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 sparsity 구조에서 유리한 것은 아니다. 음성대조 진단에서는 아래 세 가지 한계를 확인했다. 세부 수치와 전체 표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 남긴다.
 
 ### 3.1 핵심 결과
 
 | 상황 | Eta-group에서 나타난 문제 | 비교 기준 | 핵심 차이 | 해석 |
 |:---|:---|:---|:---|:---|
-| 조밀 support | 필요한 좌표까지 shrink | Separate + refit | Eta F1=0.726, MSE_eta=2.721 vs Separate F1=0.890, MSE_eta=2.150 | true decision support가 조밀하면 Eta-group이 과소선택할 수 있음 |
-| 약한 신호 | BIC가 zero support를 자주 선택 | Rossi/Separate | Eta BIC 평균 selected q=2.68, q=0이 43/50회 | weak signal에서는 BIC tuning failure 가능 |
+| 조밀 support | 필요한 좌표까지 축소 | Separate + refit | Eta F1=0.726, MSE_eta=2.721 vs Separate F1=0.890, MSE_eta=2.150 | true decision support가 조밀하면 Eta-group이 과소선택할 수 있음 |
+| 약한 신호 | BIC가 zero support를 반복 선택 | Rossi/Separate | Eta BIC 평균 selected q=2.68, q=0이 43/50회 | weak signal에서는 BIC tuning failure 가능 |
 | support 목표 차이 | union support와 entry support의 결론이 다름 | Rossi/Separate | Eta union F1=0.936, Separate entry_F1=0.438, Rossi entry_F1=0.399 | 어떤 support를 목표로 둘지 분리해야 함 |
 
 ### 3.2 해석
@@ -111,13 +113,13 @@ Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 
 |:---|:---|:---|:---|
 | Coordinate union support | $S_{\mathrm{union}}=\{j:\exists k,\ active_{kj}\}$ | coordinate-level variable selection. 모든 방법에 공통으로 계산 가능 | Rossi/Separate의 component별 sparsity 구조를 하나로 합친다 |
 | Prototype entry support | $S_{\mathrm{entry}}=\{(k,j):\mu_{kj}\ne0\}$ | Rossi/Separate처럼 direction/prototype sparsity를 목표로 하는 방법에 자연스러움 | Eta-group은 coordinate-level centered eta group penalty라서 같은 방식의 직접 비교가 어렵다 |
-| Posterior decision support | $S_{\eta}=\{j:\|c_{\cdot j}\| _ 2>0\}$, $c_{kj}=\eta_{kj}-K^{-1}\sum_\ell \eta_{\ell j}$ | posterior decision boundary에 들어가는 coordinate. Eta-group의 main claim에 가장 적합 | Rossi/Separate의 prototype sparsity와는 목표가 다르다 |
+| Posterior decision support | $S_{\eta}=\{j:\|c_{\cdot j}\|_2>0\}$, $c_{kj}=\eta_{kj}-K^{-1}\sum_\ell \eta_{\ell j}$ | posterior decision boundary에 들어가는 coordinate. Eta-group의 main claim에 가장 적합 | Rossi/Separate의 prototype sparsity와는 목표가 다르다 |
 
 논문 main claim은 prototype sparsity가 아니라 posterior decision support recovery로 두는 것이 안전하다. Rossi/Separate와의 공정 비교에는 prototype entry support를 보조 지표로 추가하는 것이 필요하다.
 
 ## 4. Eta penalty ablation 진단
 
-여기서 이론적 직관은 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 선택하는 것이 자연스럽다는 것이다. 이를 simulation ablation으로 확인하기 위해 proposed Eta-group reference와 두 diagnostic variant를 rep=20 기준으로 비교했다. `Eta ANOVA L1`과 `Rossi mu-group`은 official method가 아니라 ablation diagnostic이다.
+앞 절의 이론적 직관은 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 선택하는 것이 자연스럽다는 것이다. 이 직관을 확인하기 위해 Eta-group과 두 가지 진단용 변형을 rep=20 기준으로 비교했다. `Eta ANOVA L1`과 `Rossi mu-group`은 공식 방법이 아니라 ablation diagnostic이다.
 
 | 비교 목적 | method | penalty / model | reps | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|:---|
@@ -134,7 +136,7 @@ $$
 +(\eta_k-\eta_\ell)^\top x
 $$
 
-로 결정되므로, 실제 boundary에 들어가는 coordinate는 $\mu$ 자체보다 $\eta_k-\eta_\ell$ 또는 centered eta contrast에 더 직접적으로 연결된다. 따라서 세 diagnostic이 겨냥하는 support target은 다음처럼 다르다.
+로 결정된다. 따라서 실제 boundary에 들어가는 coordinate는 $\mu$ 자체보다 $\eta_k-\eta_\ell$ 또는 centered eta contrast에 더 직접적으로 연결된다. 세 진단이 겨냥하는 support target은 다음처럼 다르다.
 
 $$
 S_\eta=\{j:\lVert c_{\cdot j}\rVert_2>0\},
@@ -144,7 +146,7 @@ S_{\mathrm{ANOVA}}=\{(k,j):\lvert c_{kj}\rvert>0\},
 S_\mu=\{j:\lVert\mu_{\cdot j}\rVert_2>0\}.
 $$
 
-Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 가장 맞고, Eta ANOVA L1은 component-entry 단위 효과가 따로 남아 coordinate support가 조밀해지기 쉽다. Rossi mu-group은 direction sparsity에는 자연스럽지만, posterior score에 들어가는 $\kappa_k\mu_{kj}$ scale과 centered contrast를 penalty 단계에서 직접 보지는 않는다.
+Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 가장 가깝다. Eta ANOVA L1은 component-entry 단위 효과가 따로 남아 coordinate support가 조밀해지기 쉽다. Rossi mu-group은 direction sparsity에는 자연스럽지만, posterior score에 들어가는 $\kappa_k\mu_{kj}$ scale과 centered contrast를 penalty 단계에서 직접 보지는 않는다.
 
 - `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
 - `Rossi mu-group`은 Rossi 계열에 더 가까운 $\mu$-space group penalty다. Dense support는 피했지만 Eta-group보다 FPR이 크고 F1이 낮았다.
@@ -155,7 +157,7 @@ Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 �
 
 ## 5. proximal EM-type update와 단조증가
 
-본 방법의 추정은 닫힌형 M-step이 아니라 proximal EM-type update다. vMF normalizing constant와 centered eta group penalty 때문에 penalized M-step을 한 번에 닫힌형태로 풀기 어렵다.
+본 방법의 추정은 닫힌형 M-step이 아니라 proximal EM-type update다. vMF normalizing constant와 centered eta group penalty 때문에 penalized M-step을 한 번에 닫힌 형태로 풀기 어렵다.
 
 따라서 각 iteration에서는 현재 위치에서 proximal shrinkage candidate를 만들고 objective를 확인한다. 보폭이 너무 크면 objective가 감소할 수 있으므로, 구현에서는 objective decrease가 생길 때 step size를 줄이는 step-halving line search를 사용한다.
 
