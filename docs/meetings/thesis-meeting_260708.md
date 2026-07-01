@@ -158,9 +158,6 @@ Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 �
 - `Rossi mu + refit`은 기존 Rossi baseline에 해당하는 $\mu$ entrywise penalty다. 같은 strong setting에서 거의 dense support를 선택했고, Eta-group보다 FPR이 크고 F1이 낮았다.
 - `Rossi-mu group + refit`은 $\mu$-space에 group penalty를 둔 진단 변형이다. 기존 Rossi mu보다는 support recovery가 개선되지만, Eta-group보다 FPR이 크고 F1이 낮았다.
 - 현재 diagnostic 기준에서는 eta 자연모수만으로 충분하지 않고, group penalty만으로도 충분하지 않으며, `centered eta contrast + coordinate group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
-- `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
-- Eta 계열 두 행은 기존 strong scenario rep=20 summary 기준이다. Rossi mu 행은 기존 official strong rep100 raw에서 rep 1-20만 재요약했고, Rossi-mu group 행은 기존 rep=20 diagnostic summary 기준이다. 새 simulation은 실행하지 않았다.
-- `Eta ANOVA L1`과 `Rossi-mu group`은 diagnostic variant이며 official method가 아니다. `Rossi mu + refit`은 기존 Rossi baseline이다.
 
 ## 5. proximal EM-type update와 단조증가
 
