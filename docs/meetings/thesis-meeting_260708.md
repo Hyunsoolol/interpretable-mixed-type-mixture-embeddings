@@ -188,9 +188,9 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 | 비교 목적 | method | penalty / model | reps | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|:---|
-| Proposed reference | Eta-group + refit | `lambda sum_j norm2(c_.j)` | 20 | 25.45 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
-| Same eta, no group | Eta ANOVA L1 + refit | `lambda sum_kj abs(c_kj)` | 20 | 99.90 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entrywise L1은 거의 dense support |
-| Rossi direction group | Rossi mu-group + refit | `lambda_mu sum_j norm2(mu_.j)` | 20 | 29.10 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$-space group은 개선되지만 Eta-group보다 F1이 낮음 |
+| Proposed reference | Eta-group + refit | $\lambda\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
+| Same eta, no group | Eta ANOVA L1 + refit | $\lambda\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entrywise L1은 거의 dense support |
+| Rossi direction group | Rossi mu-group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$-space group은 개선되지만 Eta-group보다 F1이 낮음 |
 
 - `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
 - `Rossi mu-group`은 Rossi 계열에 더 가까운 $\mu$-space group penalty다. Dense support는 피했지만 Eta-group보다 FPR이 크고 F1이 낮았다.
