@@ -85,6 +85,9 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 - MSE_eta는 summary CSV의 MSE_centered_eta를 뜻한다.
 - FNR은 $1-\mathrm{TPR}$로 계산되는 중복 지표이므로 메인 표에는 따로 넣지 않았다.
 - 성분별 희소 / 합집합 조밀 진단은 같은 결과 폴더의 full summary CSV 기준이다.
+- 이 표는 ARI 우열보다 support recovery와 모수 추정 손실을 보기 위한 요약이다.
+- F1/FPR/MSE_eta가 Eta-group의 limitation을 보는 핵심 지표다.
+- Rossi/Separate가 dense support를 선택해 ARI를 유지하는 경우, sparse support 해석성은 약해질 수 있다.
 
 #### 2.2.1 조밀 support 음성대조
 
@@ -159,7 +162,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 - `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
 - `Rossi natural-group`은 group penalty를 주면 dense support는 피하지만, Eta-group보다 selected q/FPR이 크고 F1이 낮으므로, group penalty만으로 Eta-group을 완전히 설명하기는 어렵다.
-- 현재 diagnostic에서는 `centered eta contrast + coordinate group penalty` 조합이 가장 안정적이다.
+- 현재 diagnostic 기준에서는 eta 자연모수만으로 충분하지 않고, group penalty만으로도 충분하지 않으며, `centered eta contrast + coordinate group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
 - `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
 - `Eta ANOVA L1`과 `Rossi natural-group`은 diagnostic variant이며 official method가 아니다. 특히 `Rossi natural-group`은 not Rossi 2022 official baseline이다.
 
@@ -178,4 +181,4 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 - Eta-group은 일괄적으로 더 좋은 방법이 아니라 posterior decision support recovery에 강점이 있는 방법이다.
 - ablation diagnostic에서는 centered eta contrast와 coordinate group penalty의 조합이 support recovery 안정성에 중요해 보인다.
 - 조밀 support 또는 약한 신호에서는 Eta-group이 불리하거나 BIC tuning failure가 생길 수 있다.
-- 다음 단계는 support target을 분리하고, 필요하면 block-diagonal negative-control generator를 별도로 설계하는 것이다.
+- 다음 단계는 posterior decision support를 main claim으로 둘지, prototype entry support를 보조 지표로 둘지 교수님께 확인받는 것이다.
