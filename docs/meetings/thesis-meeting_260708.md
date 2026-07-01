@@ -87,90 +87,25 @@ $$
 
 ## 3. Eta-group penalty가 불리한 상황
 
-Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라, posterior decision parameter에 들어가는 coordinate support를 sparse하게 해석하는 데 있다. 따라서 true decision support가 조밀하거나, 신호가 약하거나, 평가하려는 support target이 prototype sparsity인 경우에는 Eta-group이 불리하거나 해석이 섞일 수 있다.
+Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 sparsity 구조에서 유리한 것은 아니다. Negative-control diagnostic에서는 아래 세 가지 한계를 확인했다. 세부 수치와 전체 표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 남긴다.
 
-### 3.1 한눈에 보는 결과 요약
+### 3.1 핵심 결과
 
-| 진단 | 방법론 | true q | ARI | selected q | TPR | FPR | F1 | MSE_mu | MSE_kappa | MSE_eta | 해석 |
-|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| 조밀 support 음성대조 | Eta-group BIC + refit | 80 | 0.368 | 52.82 | 0.615 | 0.180 | 0.726 | 0.001 | 93.913 | 2.721 | support를 많이 줄였지만 F1과 MSE_eta가 나빠짐 |
-| 조밀 support 음성대조 | Separate BIC + refit | 80 | 0.378 | 99.74 | 1.000 | 0.988 | 0.890 | 0.001 | 50.549 | 2.150 | 조밀 support를 유지할 때 더 유리 |
-| 조밀 support 음성대조 | Rossi BIC + refit | 80 | 0.380 | 99.90 | 1.000 | 0.996 | 0.889 | 0.001 | 78.229 | 2.544 | support를 거의 full로 유지 |
-| 약한 신호 튜닝 실패 | Eta-group BIC | 22 | 0.012 | 2.68 | 0.058 | 0.018 | 0.462 | 0.000 | 126.285 | 2.050 | BIC가 zero support를 자주 선택 |
-| 약한 신호 튜닝 실패 | Eta positive-support + refit | 22 | 0.137 | 15.52 | 0.448 | 0.073 | 0.531 | 0.001 | 172.028 | 3.118 | support를 강제로 회복해도 clustering은 낮음 |
-| 약한 신호 튜닝 실패 | Rossi BIC | 22 | 0.140 | 99.80 | 1.000 | 0.997 | 0.361 | 0.001 | 88.023 | 3.275 | support는 조밀하지만 ARI는 낮음 |
-| 약한 신호 튜닝 실패 | Separate BIC | 22 | 0.141 | 98.46 | 1.000 | 0.980 | 0.365 | 0.001 | 78.332 | 2.386 | 명확한 우위라기보다 dense support 선택 |
-| 방향 희소성 지표 진단 | Eta-group BIC | 21 | 0.998 | 40.60 | 0.962 | 0.258 | 0.658 | 0.000 | 4.256 | 0.160 | union support 기준에서는 Eta-group이 더 sparse |
-| 방향 희소성 지표 진단 | Rossi BIC | 21 | 0.999 | 100.00 | 1.000 | 1.000 | 0.347 | 0.000 | 1.344 | 0.262 | union support 기준에서는 dense하게 선택 |
-| 방향 희소성 지표 진단 | Separate BIC | 21 | 0.999 | 100.00 | 1.000 | 1.000 | 0.347 | 0.000 | 1.306 | 0.222 | union support 기준에서는 dense하게 선택 |
-| 성분별 희소 / 합집합 조밀 진단 | Eta-group BIC | 80 | 0.999 | 91.00 | 1.000 | 0.550 | 0.936 | 0.000 | 8.791 | 0.417 | posterior decision support 기준으로는 좋게 보임 |
-| 성분별 희소 / 합집합 조밀 진단 | Separate BIC | 80 | 0.999 | 99.60 | 1.000 | 0.980 | 0.891 | 0.000 | 1.239 | 0.215 | prototype entry support는 보조 지표로 따로 확인 필요 |
-| 성분별 희소 / 합집합 조밀 진단 | Rossi BIC | 80 | 0.999 | 100.00 | 1.000 | 1.000 | 0.889 | 0.000 | 1.286 | 0.257 | support target에 따라 결론이 달라짐 |
-| 분절 support 진단, d=60 | Eta-group BIC | 40 | 0.999 | 42.80 | 1.000 | 0.140 | 0.967 | 0.000 | 11.101 | 0.458 | 저차원 fragmented 구조에서는 좋음 |
-| 분절 support 진단, d=60 | Rossi BIC | 40 | 1.000 | 59.00 | 1.000 | 0.950 | 0.808 | 0.000 | 1.481 | 0.156 | Eta-group보다 F1이 낮음 |
-| 분절 support 진단, d=60 | Separate BIC | 40 | 1.000 | 56.80 | 1.000 | 0.840 | 0.827 | 0.000 | 1.394 | 0.112 | Eta-group보다 F1이 낮음 |
-| 분절 support 진단, d=400 | Eta-group BIC | 80 | 0.851 | 368.33 | 1.000 | 0.901 | 0.357 | 0.000 | 4.283 | 0.736 | 고차원에서는 support가 커짐 |
-| 분절 support 진단, d=400 | Rossi BIC | 80 | 0.826 | 400.00 | 1.000 | 1.000 | 0.333 | 0.000 | 48.931 | 1.417 | full support, 명확한 우위 아님 |
-| 분절 support 진단, d=400 | Separate BIC | 80 | 0.827 | 400.00 | 1.000 | 1.000 | 0.333 | 0.000 | 25.462 | 1.329 | full support, 명확한 우위 아님 |
+| 상황 | Eta-group에서 나타난 문제 | 비교 기준 | 핵심 차이 | 해석 |
+|:---|:---|:---|:---|:---|
+| 조밀 support | 필요한 좌표까지 shrink | Separate + refit | Eta F1=0.726, MSE_eta=2.721 vs Separate F1=0.890, MSE_eta=2.150 | true decision support가 조밀하면 Eta-group이 과소선택할 수 있음 |
+| 약한 신호 | BIC가 zero support를 자주 선택 | Rossi/Separate | Eta BIC 평균 selected q=2.68, q=0이 43/50회 | weak signal에서는 BIC tuning failure 가능 |
+| support 목표 차이 | union support와 entry support의 결론이 다름 | Rossi/Separate | Eta union F1=0.936, Separate entry_F1=0.438, Rossi entry_F1=0.399 | 어떤 support를 목표로 둘지 분리해야 함 |
 
-- 약한 신호 튜닝 실패에서 Eta BIC + refit은 50회 중 43회 zero-support refit이어서 valid replicate가 7회뿐이다.
-- true q는 simulation에서 정해진 실제 유의 coordinate 수, 즉 true_union_q를 뜻한다.
-- MSE_eta는 summary CSV의 MSE_centered_eta를 뜻한다.
-- FNR은 $1-\mathrm{TPR}$로 계산되는 중복 지표이므로 메인 표에는 따로 넣지 않았다.
-- 성분별 희소 / 합집합 조밀 진단은 같은 결과 폴더의 full summary CSV 기준이다.
-- 이 표는 ARI 우열보다 support recovery와 모수 추정 손실을 보기 위한 요약이다.
-- F1/FPR/MSE_eta가 Eta-group의 limitation을 보는 핵심 지표다.
-- Rossi/Separate가 dense support를 선택해 ARI를 유지하는 경우, sparse support 해석성은 약해질 수 있다.
+### 3.2 해석
 
-### 3.2 조밀 support 음성대조
+- Eta-group의 claim은 ARI의 일괄적 향상이 아니라 posterior decision support recovery다.
+- true decision support가 조밀하면 group penalty가 필요한 좌표까지 줄일 수 있다.
+- weak signal에서는 BIC가 너무 강하게 작동해 zero support를 선택할 수 있다.
+- Rossi/Separate는 dense support를 선택해 ARI를 유지할 수 있지만, sparse support 해석성은 약해질 수 있다.
+- 따라서 main result는 positive setting 중심으로 두고, 위 결과는 limitation 또는 appendix diagnostic으로 정리하는 것이 안전하다.
 
-이 설정은 “진짜 필요한 decision coordinate가 많은 경우”를 보는 음성대조다.
-
-| 항목 | 내용 |
-|:---|:---|
-| 상황 | 많은 coordinate가 약하게 함께 separation에 기여함 |
-| 환경 | $K=4$, $n=1000$, $d=100$, rep=50 |
-| True support | true union q=80, common q=20, specific q/component=15 |
-| 평균방향 $\mu$ | 공통 20개 좌표는 모든 component에서 1로 두고, 각 component별 specific 15개 좌표는 해당 component에서만 0.25로 둔 뒤 $\|\mu_k\|_2=1$이 되도록 정규화 |
-| 집중도 | $\kappa=(30,45,65,90)$ |
-| 선택 기준 | BIC |
-
-- Eta-group은 selected q=52.82로 support를 강하게 줄였지만, F1과 MSE_eta에서 Separate + refit보다 나빠졌다.
-- 해석: 필요한 좌표가 많이 있는 상황에서는 group penalty가 필요한 coordinate까지 줄일 수 있다.
-- 용도: Eta-group의 가장 명확한 limitation / negative-control 결과.
-
-### 3.3 약한 신호 튜닝 실패 진단
-
-이 설정은 weak signal에서 BIC가 Eta-group support를 너무 강하게 줄일 수 있음을 보여준다.
-
-| 항목 | 내용 |
-|:---|:---|
-| 상황 | 신호가 약해 support 선택과 clustering이 모두 어려운 경우 |
-| 환경 | $K=4$, $n=1000$, $d=100$, rep=50 |
-| True support | true union $q=22$, common $q=6$, specific $q$/component=4 |
-| 평균방향 $\mu$ | 공통 6개 좌표는 모든 component에서 1로 두고, 각 component별 specific 4개 좌표는 해당 component에서만 0.25로 둔 뒤 $\|\mu_k\|_2=1$이 되도록 정규화 |
-| 집중도 | $\kappa=(35,45,55,65)$ |
-| 선택 기준 | BIC |
-
-- Eta BIC는 평균 q=2.68만 선택했고, 50회 중 43회에서 q=0을 선택했다.
-- Positive-support diagnostic은 q=15.52까지 회복하지만 ARI=0.137로 낮다.
-- 해석: Rossi/Separate가 좋은 결과를 낸다기보다, Eta BIC의 zero-support tuning failure를 보여주는 결과다.
-
-### 3.4 support 목표 차이 진단
-
-이 설정들은 “어떤 support를 맞히는 것이 목표인가”에 따라 결론이 달라질 수 있음을 보여준다.
-
-| 진단 | 상황 | 결과 | 해석 |
-|:---|:---|:---|:---|
-| 방향 희소성 지표 진단 | equal concentration과 direction-sparse 구조 | Rossi/Separate ARI=0.999, selected q=100, FPR=1.000; Eta-group ARI=0.998, selected q=40.60, F1=0.658 | coordinate union support 기준과 prototype entry support 기준의 결론이 다를 수 있음 |
-| 성분별 희소 / 합집합 조밀 진단 | 각 component가 서로 다른 active coordinate를 갖는 구조 | 모든 방법 ARI=0.999; Eta-group selected q=91.00, F1=0.936 | union support와 prototype entry support 기준의 결론이 다를 수 있음 |
-| 분절 support 진단 | 공유 좌표가 없는 fragmented 구조 | 현재 generator로는 Rossi/Separate가 명확히 유리한 block-diagonal setting을 만들지 못함 | dedicated block-diagonal 또는 binary-style generator가 필요 |
-
-- Eta-group은 coordinate-level posterior decision support를 직접 선택한다.
-- Rossi/Separate는 prototype 또는 component-entry sparsity 관점에서 따로 평가할 필요가 있다.
-- 따라서 본문 claim은 posterior decision support recovery로 제한하는 것이 안전하다.
-
-### 3.5 support metric 정리
+### 3.3 support metric 정리
 
 | Metric | 정의 | 주된 의미 | 한계 |
 |:---|:---|:---|:---|
@@ -179,8 +114,6 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 | Posterior decision support | $S_{\eta}=\{j:\|c_{\cdot j}\| _ 2>0\}$, $c_{kj}=\eta_{kj}-K^{-1}\sum_\ell \eta_{\ell j}$ | posterior decision boundary에 들어가는 coordinate. Eta-group의 main claim에 가장 적합 | Rossi/Separate의 prototype sparsity와는 목표가 다르다 |
 
 논문 main claim은 prototype sparsity가 아니라 posterior decision support recovery로 두는 것이 안전하다. Rossi/Separate와의 공정 비교에는 prototype entry support를 보조 지표로 추가하는 것이 필요하다.
-
-> 핵심 결론. Eta-group이 불리한 경우는 크게 두 가지다. 첫째, true decision support가 조밀하면 penalty가 필요한 좌표까지 줄여 F1과 MSE가 나빠질 수 있다. 둘째, weak signal에서는 BIC가 zero support를 선택해 tuning failure가 생길 수 있다. 따라서 논문 claim은 ARI 향상이 아니라 posterior decision support recovery로 제한하는 것이 안전하다.
 
 ## 4. Eta penalty ablation 진단
 
