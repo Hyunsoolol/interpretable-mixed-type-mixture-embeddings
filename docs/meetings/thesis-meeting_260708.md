@@ -52,40 +52,30 @@ $$
 
 ### 2.1 왜 Eta-group인가?
 
-vMF mixture의 posterior classification score는 $\mu$와 $\kappa$가 따로 작동하는 구조가 아니다. 실제 score에는
+vMF mixture의 posterior score에는
 
 $$
 \eta_k^\top x_i=(\kappa_k\mu_k)^\top x_i
 $$
 
-형태의 내적이 들어간다. 따라서 decision boundary에 직접 들어가는 parameter는 $\mu$ 단독이나 $\kappa$ 단독이 아니라 자연모수(natural parameter)
+가 직접 들어간다. 따라서 decision boundary에 작동하는 parameter는 $\mu$ 단독이나 $\kappa$ 단독이 아니라 자연모수 $\eta_k=\kappa_k\mu_k$다.
 
-$$
-\eta_k=\kappa_k\mu_k
-$$
-
-이다.
-
-Clustering에서 중요한 것은 각 component의 절대적 $\eta_k$가 아니라, component 사이에서 어떤 coordinate가 posterior score 차이를 만드는가이다. 그래서 centered eta contrast
+Clustering에서 중요한 것은 각 component의 개별 $\eta_k$가 아니라, component 사이에서 어떤 coordinate가 posterior score 차이를 만드는가이다. 그래서 centered eta contrast
 
 $$
 c_{kj}=\eta_{kj}-\bar{\eta}_j,\qquad
 \bar{\eta}_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}
 $$
 
-를 본다. Eta-group penalty
+를 본다. Eta-group penalty는
 
 $$
 \lambda\sum_{j=1}^d \|c_{\cdot j}\|_2
 $$
 
-는 coordinate $j$가 component 간 posterior decision boundary를 만드는지 직접 선택하는 penalty다.
+로 두어, coordinate $j$가 component 간 posterior decision boundary를 만드는지 직접 선택한다.
 
-즉, Eta-group은 단순한 sparsity penalty가 아니라 posterior decision score에 들어가는 centered natural parameter contrast를 coordinate 단위로 선택하는 penalty다.
-
-$\mu$만 penalize하면 concentration $\kappa$ 차이를 반영하지 못한다. 반대로 $\kappa$만 보면 coordinate-level 해석이 불가능하다. 또한 raw eta 또는 entrywise L1 penalty는 coordinate 전체가 decision에 필요한지보다 component-entry 단위의 작은 차이를 남기기 쉬워 dense support로 갈 수 있다.
-
-따라서 현재 claim은 일괄적 우월성이 아니라, posterior decision support recovery라는 목표에는 centered eta contrast와 coordinate group penalty가 가장 직접적인 구조라는 것이다.
+요약하면 Eta-group은 posterior decision score에 들어가는 centered natural parameter contrast를 coordinate 단위로 선택하는 구조다. 현재 claim은 일괄적 우월성이 아니라 posterior decision support recovery에 둔다.
 
 ## 3. Eta-group penalty가 불리한 상황
 
@@ -125,56 +115,14 @@ Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|:---|
 | Proposed reference | Eta-group + refit | $\lambda\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.684 | 0.995 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
 | Same eta, no group | Eta ANOVA L1 + refit | $\lambda\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.652 | 1.000 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entrywise L1은 거의 dense support |
-| Rossi mu group | Rossi-mu group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.685 | 1.000 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
 | Rossi mu baseline | Rossi mu + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.653 | 1.000 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entrywise penalty는 거의 dense support |
-
-
-
-
-표의 차이는 각 penalty가 선택하는 target이 다르기 때문에 나온다. Posterior decision boundary는
-
-$$
-\log \frac{P(z=k\mid x)}{P(z=\ell\mid x)}=
-\log\frac{\alpha_k}{\alpha_\ell}
-+\log\frac{C_d(\kappa_k)}{C_d(\kappa_\ell)}
-+(\eta_k-\eta_\ell)^\top x
-$$
-
-로 결정된다. 따라서 실제 boundary에 들어가는 coordinate는 $\mu$ 자체보다 $\eta_k-\eta_\ell$ 또는 centered eta contrast에 더 직접적으로 연결된다. 세 진단이 겨냥하는 support target은 다음처럼 다르다.
-
-$$
-S_\eta=\{j:\lVert c_{\cdot j}\rVert_2>0\},
-\qquad
-S_{\mathrm{ANOVA}}=\{(k,j):\lvert c_{kj}\rvert>0\},
-\qquad
-S_{\mu,\mathrm{entry}}=\{(k,j):\lvert\mu_{kj}\rvert>0\},
-\qquad
-S_{\mu,\mathrm{group}}=\{j:\lVert\mu_{\cdot j}\rVert_2>0\}.
-$$
-
-Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 가장 가깝다. Eta ANOVA L1과 Rossi mu는 entry 단위 효과가 따로 남아 coordinate support가 조밀해지기 쉽다. Rossi-mu group은 $\mu$-space에서 coordinate group support를 선택하므로 dense support는 줄이지만, posterior score에 들어가는 $\kappa_k\mu_{kj}$ scale과 centered contrast를 penalty 단계에서 직접 보지는 않는다.
-
-부호 해석도 이 관점에서 보는 것이 안전하다. centered eta contrast에서 $c_{kj}>0$이면 coordinate $j$가 component $k$의 posterior score를 상대적으로 높이는 방향이고, $c_{kj}<0$이면 그 component의 score를 상대적으로 낮추는 방향이다. 이는 해당 coordinate를 완전히 배제한다는 뜻이 아니라, 다른 component와 비교했을 때 decision boundary에서 밀어내는 방향으로 작동한다는 뜻이다.
-
-Entrywise L1은 각 component-entry를 따로 줄인다.
-
-$$
-\hat{c}_{kj} = \text{sign}(z_{kj})(|z_{kj}| - \lambda)_+
-$$
-
-따라서 같은 coordinate 안에서도 약한 양수 또는 음수 contrast가 개별적으로 0이 되기 쉽고, coordinate 전체의 역할을 안정적으로 판단하기 어렵다. 반면 Eta-group은 coordinate $j$의 contrast vector 전체를 한 번에 줄인다.
-
-$$
-\hat c_{\cdot j} =
-\left(1-\frac{\lambda}{\|z_{\cdot j}\|_2}\right)_+z_{\cdot j}.
-$$
-
-이 경우 coordinate가 선택되면 $c_{\cdot j}$의 상대적 부호 패턴은 같은 비율로 축소된다. 따라서 한 component에서 강한 양의 contrast가 있는 coordinate를 살릴 때, 다른 component의 약한 음의 contrast도 개별적으로 지워지기보다 같은 coordinate 안에서 함께 해석될 수 있다. 이 점이 Eta-group이 단순 eta entrywise penalty보다 posterior decision boundary의 축 단위 해석에 더 맞는 이유다.
+| Rossi mu group | Rossi-mu group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.685 | 1.000 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
 
 - `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
 - `Rossi mu + refit`은 기존 Rossi baseline에 해당하는 $\mu$ entrywise penalty다. 같은 strong setting에서 거의 dense support를 선택했고, Eta-group보다 FPR이 크고 F1이 낮았다.
 - `Rossi-mu group + refit`은 $\mu$-space에 group penalty를 둔 진단 변형이다. 기존 Rossi mu보다는 support recovery가 개선되지만, Eta-group보다 FPR이 크고 F1이 낮았다.
-- 현재 diagnostic 기준에서는 eta 자연모수만으로 충분하지 않고, group penalty만으로도 충분하지 않으며, `centered eta contrast + coordinate group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
+- centered eta contrast에서 $c_{kj}>0$은 component $k$의 posterior score를 상대적으로 높이는 방향, $c_{kj}<0$은 상대적으로 낮추는 방향이다.
+- 현재 diagnostic 기준에서는 eta 자연모수만으로도, group penalty만으로도 충분하지 않으며 `centered eta contrast + coordinate group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
 
 ## 5. proximal EM-type update와 단조증가
 
