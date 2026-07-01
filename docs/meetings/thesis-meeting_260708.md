@@ -154,6 +154,24 @@ $$
 
 Eta-group은 $S_\eta$를 직접 선택하므로 posterior decision support에 가장 가깝다. Eta ANOVA L1과 Rossi mu는 entry 단위 효과가 따로 남아 coordinate support가 조밀해지기 쉽다. Rossi-mu group은 $\mu$-space에서 coordinate group support를 선택하므로 dense support는 줄이지만, posterior score에 들어가는 $\kappa_k\mu_{kj}$ scale과 centered contrast를 penalty 단계에서 직접 보지는 않는다.
 
+부호 해석도 이 관점에서 보는 것이 안전하다. centered eta contrast에서 $c_{kj}>0$이면 coordinate $j$가 component $k$의 posterior score를 상대적으로 높이는 방향이고, $c_{kj}<0$이면 그 component의 score를 상대적으로 낮추는 방향이다. 이는 해당 coordinate를 완전히 배제한다는 뜻이 아니라, 다른 component와 비교했을 때 decision boundary에서 밀어내는 방향으로 작동한다는 뜻이다.
+
+Entrywise L1은 각 component-entry를 따로 줄인다.
+
+$$
+\hat c_{kj}=\operatorname{sign}(z_{kj})(|z_{kj}|-\lambda)_+.
+$$
+
+따라서 같은 coordinate 안에서도 약한 양수 또는 음수 contrast가 개별적으로 0이 되기 쉽고, coordinate 전체의 역할을 안정적으로 판단하기 어렵다. 반면 Eta-group은 coordinate $j$의 contrast vector 전체를 한 번에 줄인다.
+
+$$
+\hat c_{\cdot j}
+=
+\left(1-\frac{\lambda}{\|z_{\cdot j}\|_2}\right)_+z_{\cdot j}.
+$$
+
+이 경우 coordinate가 선택되면 $c_{\cdot j}$의 상대적 부호 패턴은 같은 비율로 축소된다. 따라서 한 component에서 강한 양의 contrast가 있는 coordinate를 살릴 때, 다른 component의 약한 음의 contrast도 개별적으로 지워지기보다 같은 coordinate 안에서 함께 해석될 수 있다. 이 점이 Eta-group이 단순 eta entrywise penalty보다 posterior decision boundary의 축 단위 해석에 더 맞는 이유다.
+
 - `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
 - `Rossi mu + refit`은 기존 Rossi baseline에 해당하는 $\mu$ entrywise penalty다. 같은 strong setting에서 거의 dense support를 선택했고, Eta-group보다 FPR이 크고 F1이 낮았다.
 - `Rossi-mu group + refit`은 $\mu$-space에 group penalty를 둔 진단 변형이다. 기존 Rossi mu보다는 support recovery가 개선되지만, Eta-group보다 FPR이 크고 F1이 낮았다.
