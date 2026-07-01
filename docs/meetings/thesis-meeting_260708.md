@@ -6,13 +6,11 @@
 
 - 피드백 1: $\eta$, $\mu$, $\kappa$의 의존성과 유일성
 - 피드백 2: Eta-group penalty가 불리한 상황
-- 추가 정리: proximal EM-type update와 단조증가 claim의 범위
+- 추가 정리: Eta penalty ablation과 optimization safeguard
 
 전체 결과표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 따로 정리하였다.
 
-## 2. 6월 24일 피드백에 대한 답변
-
-### 2.1 의존성과 유일성
+## 2. 의존성과 유일성
 
 vMF mixture에서 posterior decision score에 직접 들어가는 자연모수는
 
@@ -52,7 +50,7 @@ $$
 
 단, $\eta=0$ 또는 $\kappa=0$이면 방향 $\mu$는 식별되지 않는다. 또한 mixture model의 label switching은 별도 문제다. 따라서 여기서 말하는 유일성은 mixture 전체의 전역 식별성 증명이 아니라, component-level parameterization에 대한 설명이다.
 
-### 2.1.1 왜 Eta-group인가?
+### 2.1 왜 Eta-group인가?
 
 vMF mixture의 posterior classification score는 $\mu$와 $\kappa$가 분리되어 작동하는 것이 아니라
 
@@ -87,11 +85,11 @@ $$
 
 따라서 현재 claim은 일괄적 우월성이 아니라, posterior decision support recovery라는 목표에는 centered eta contrast와 coordinate group penalty가 가장 직접적인 구조라는 것이다.
 
-### 2.2 Eta-group penalty가 불리한 상황
+## 3. Eta-group penalty가 불리한 상황
 
 Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라, posterior decision parameter에 들어가는 coordinate support를 sparse하게 해석하는 데 있다. 따라서 true decision support가 조밀하거나, 신호가 약하거나, 평가하려는 support target이 prototype sparsity인 경우에는 Eta-group이 불리하거나 해석이 섞일 수 있다.
 
-#### 2.2.0 한눈에 보는 결과 요약
+### 3.1 한눈에 보는 결과 요약
 
 | 진단 | 방법론 | true q | ARI | selected q | TPR | FPR | F1 | MSE_mu | MSE_kappa | MSE_eta | 해석 |
 |:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|
@@ -101,7 +99,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 | 약한 신호 튜닝 실패 | Eta-group BIC | 22 | 0.012 | 2.68 | 0.058 | 0.018 | 0.462 | 0.000 | 126.285 | 2.050 | BIC가 zero support를 자주 선택 |
 | 약한 신호 튜닝 실패 | Eta positive-support + refit | 22 | 0.137 | 15.52 | 0.448 | 0.073 | 0.531 | 0.001 | 172.028 | 3.118 | support를 강제로 회복해도 clustering은 낮음 |
 | 약한 신호 튜닝 실패 | Rossi BIC | 22 | 0.140 | 99.80 | 1.000 | 0.997 | 0.361 | 0.001 | 88.023 | 3.275 | support는 조밀하지만 ARI는 낮음 |
-| 약한 신호 튜닝 실패 | Separate BIC | 22 | 0.141 | 98.46 | 1.000 | 0.980 | 0.365 | 0.001 | 78.332 | 2.386 | clean 우위라기보다 dense support 선택 |
+| 약한 신호 튜닝 실패 | Separate BIC | 22 | 0.141 | 98.46 | 1.000 | 0.980 | 0.365 | 0.001 | 78.332 | 2.386 | 명확한 우위라기보다 dense support 선택 |
 | 방향 희소성 지표 진단 | Eta-group BIC | 21 | 0.998 | 40.60 | 0.962 | 0.258 | 0.658 | 0.000 | 4.256 | 0.160 | union support 기준에서는 Eta-group이 더 sparse |
 | 방향 희소성 지표 진단 | Rossi BIC | 21 | 0.999 | 100.00 | 1.000 | 1.000 | 0.347 | 0.000 | 1.344 | 0.262 | union support 기준에서는 dense하게 선택 |
 | 방향 희소성 지표 진단 | Separate BIC | 21 | 0.999 | 100.00 | 1.000 | 1.000 | 0.347 | 0.000 | 1.306 | 0.222 | union support 기준에서는 dense하게 선택 |
@@ -124,7 +122,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 - F1/FPR/MSE_eta가 Eta-group의 limitation을 보는 핵심 지표다.
 - Rossi/Separate가 dense support를 선택해 ARI를 유지하는 경우, sparse support 해석성은 약해질 수 있다.
 
-#### 2.2.1 조밀 support 음성대조
+### 3.2 조밀 support 음성대조
 
 이 설정은 “진짜 필요한 decision coordinate가 많은 경우”를 보는 음성대조다.
 
@@ -141,7 +139,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 - 해석: 필요한 좌표가 많이 있는 상황에서는 group penalty가 필요한 coordinate까지 줄일 수 있다.
 - 용도: Eta-group의 가장 명확한 limitation / negative-control 결과.
 
-#### 2.2.2 약한 신호 튜닝 실패 진단
+### 3.3 약한 신호 튜닝 실패 진단
 
 이 설정은 weak signal에서 BIC가 Eta-group support를 너무 강하게 줄일 수 있음을 보여준다.
 
@@ -158,7 +156,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 - Positive-support diagnostic은 q=15.52까지 회복하지만 ARI=0.137로 낮다.
 - 해석: Rossi/Separate가 좋은 결과를 낸다기보다, Eta BIC의 zero-support tuning failure를 보여주는 결과다.
 
-#### 2.2.3 support 목표 차이 진단
+### 3.4 support 목표 차이 진단
 
 이 설정들은 “어떤 support를 맞히는 것이 목표인가”에 따라 결론이 달라질 수 있음을 보여준다.
 
@@ -172,7 +170,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 - Rossi/Separate는 prototype 또는 component-entry sparsity 관점에서 따로 평가할 필요가 있다.
 - 따라서 본문 claim은 posterior decision support recovery로 제한하는 것이 안전하다.
 
-#### 2.2.4 support metric 정리
+### 3.5 support metric 정리
 
 | Metric | 정의 | 주된 의미 | 한계 |
 |:---|:---|:---|:---|
@@ -184,24 +182,25 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 > 핵심 결론. Eta-group이 불리한 경우는 크게 두 가지다. 첫째, true decision support가 조밀하면 penalty가 필요한 좌표까지 줄여 F1과 MSE가 나빠질 수 있다. 둘째, weak signal에서는 BIC가 zero support를 선택해 tuning failure가 생길 수 있다. 따라서 논문 claim은 ARI 향상이 아니라 posterior decision support recovery로 제한하는 것이 안전하다.
 
-#### 2.2.5 Eta penalty ablation 진단
+## 4. Eta penalty ablation 진단
 
-위 이론적 직관을 simulation ablation으로 확인하기 위해 eta 자연모수 효과와 group penalty 효과를 분리해 보았다. 제안법의 효과가 eta 자연모수, centered contrast, group penalty 중 어디서 오는지 보기 위한 세 가지 diagnostic이며, 모두 official method가 아니라 ablation diagnostic이다. rep 수가 다르므로 정량 비교는 확정 결론이 아니라 방향성 확인으로만 사용한다.
+여기서 이론적 직관은 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 선택하는 것이 자연스럽다는 것이다. 이를 simulation ablation으로 확인하기 위해 eta 자연모수 효과와 group penalty 효과를 분리해 보았다. 제안법의 효과가 eta 자연모수, centered contrast, group penalty 중 어디서 오는지 보기 위한 세 가지 diagnostic이며, 모두 official method가 아니라 ablation diagnostic이다. Official reference는 rep=100이므로 정량 비교는 확정 결론이 아니라 방향성 확인으로 사용한다.
 
-| 비교 목적 | method | reps | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
-|:---|:---|---:|---:|---:|---:|---:|---:|:---|
-| Proposed reference | Eta-group + refit | 5 | 24.60 | 0.033 | 0.901 | 0.946 | 0.177 | true q=22 근처 support를 선택 |
-| Same eta, no group | Eta ANOVA L1 + refit | 5 | 99.80 | 0.997 | 0.220 | 0.361 | 0.575 | 같은 eta라도 entrywise L1은 거의 dense support |
-| Group on natural scale | Rossi natural-group + refit | 20 | 34.30 | 0.158 | 0.704 | 0.809 | 0.240 | group penalty만으로는 Eta-group 수준까지 가지 않음 |
-| Official reference | Eta-group official + refit | 100 | 24.75 | 0.037 | 0.890 | 0.937 | 0.185 | rep100에서도 같은 방향 |
+| 비교 목적 | method | penalty / model | reps | selected q | FPR | Precision | F1 | MSE_eta | 해석 |
+|:---|:---|:---|---:|---:|---:|---:|---:|---:|:---|
+| Proposed reference | Eta-group + refit | $\lambda\sum_j\|c_{\cdot j}\|_2$ | 20 | 25.45 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
+| Same eta, no group | Eta ANOVA L1 + refit | $\lambda\sum_{k,j}|c_{kj}|$ | 20 | 99.90 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entrywise L1은 거의 dense support |
+| Group on natural scale | Rossi natural-group + refit | $\lambda\sum_j\|(\kappa_k\mu_{kj})_{k=1}^K\|_2$ | 20 | 34.30 | 0.158 | 0.704 | 0.809 | 0.240 | group penalty만으로는 Eta-group 수준까지 가지 않음 |
+| Official reference | Eta-group official + refit | $\lambda\sum_j\|c_{\cdot j}\|_2$ | 100 | 24.75 | 0.037 | 0.890 | 0.937 | 0.185 | rep100에서도 같은 방향 |
 
 - `Eta ANOVA L1`은 같은 eta 자연모수라도 entrywise L1이면 거의 dense support로 가므로, coordinate group penalty가 중요하다.
 - `Rossi natural-group`은 group penalty를 주면 dense support는 피하지만, Eta-group보다 selected q/FPR이 크고 F1이 낮으므로, group penalty만으로 Eta-group을 완전히 설명하기는 어렵다.
 - 현재 diagnostic 기준에서는 eta 자연모수만으로 충분하지 않고, group penalty만으로도 충분하지 않으며, `centered eta contrast + coordinate group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
 - `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
+- Eta-group과 Eta ANOVA L1은 기존 strong scenario rep=20 summary 기준으로 업데이트했다.
 - `Eta ANOVA L1`과 `Rossi natural-group`은 diagnostic variant이며 official method가 아니다. 특히 `Rossi natural-group`은 not Rossi 2022 official baseline이다.
 
-### 2.3 proximal EM-type update와 단조증가
+## 5. proximal EM-type update와 단조증가
 
 본 방법의 추정은 닫힌형 M-step이 아니라 proximal EM-type update다. vMF normalizing constant와 centered eta group penalty 때문에 penalized M-step을 한 번에 닫힌형태로 풀기 어렵다.
 
@@ -209,7 +208,7 @@ Eta-group의 핵심 장점은 ARI를 일괄적으로 높이는 것이 아니라,
 
 이 부분은 자동 단조증가 정리나 전역 수렴 보장이 아니라 optimization safeguard로 설명하는 것이 안전하다.
 
-## 3. 현재 결론
+## 6. 현재 결론
 
 - $\eta_k=\kappa_k\mu_k$는 posterior decision score에 직접 들어가는 자연모수다.
 - $\eta_k\ne0$이고 $\kappa_k>0$이면 $\mu_k$와 $\kappa_k$는 component-level에서 유일하게 복원된다.
