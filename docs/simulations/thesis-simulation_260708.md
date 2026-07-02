@@ -52,6 +52,19 @@ $$
 | E-GL | 중심화 eta 좌표 $c_{\cdot j}$ | 있음 | 없음 |
 | E-AGL | 중심화 eta 좌표 $c_{\cdot j}$ | 있음 | 있음 |
 
+모형별 패널티와 매개변수:
+
+| 모형 | 패널티 형태 | adaptive weight 설정 |
+|---|---|---|
+| D-L | $\lambda_\mu \sum_{k,j}|\mu_{kj}|$ | 없음 |
+| D-GL | $\lambda_\mu \sum_j \|\mu_{\cdot j}\|_2$ | 없음 |
+| D-AGL | $\lambda_\mu \sum_j w_j^{(D)}\|\mu_{\cdot j}\|_2$ | $w_j^{(D)}=(\|\mu_{\cdot j}^{init}\|_2+\epsilon)^{-\gamma}$ |
+| E-L | $\lambda_\eta \sum_{k,j}|c_{kj}|$ | 없음 |
+| E-GL | $\lambda_\eta \sum_j \|c_{\cdot j}\|_2$ | 없음 |
+| E-AGL | $\lambda_\eta \sum_j w_j^{(E)}\|c_{\cdot j}\|_2$ | $w_j^{(E)}=(\|c_{\cdot j}^{init}\|_2+\epsilon)^{-\gamma}$ |
+
+여기서 $c_{kj}=\eta_{kj}-\bar{\eta}_j$이다. Adaptive 모형에서는 $\gamma=1$, $\epsilon=10^{-6}$을 사용했고, 계산된 weight는 median이 1이 되도록 정규화했다. 모든 모형은 BIC로 tuning parameter를 선택한 뒤 선택된 support에서 재적합했다.
+
 평가 지표:
 
 - `selected q`: 선택된 좌표 총수.
