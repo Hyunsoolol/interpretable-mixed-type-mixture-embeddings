@@ -87,8 +87,8 @@ $$
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|:---|
 | Proposed reference | Eta-group + refit | $\lambda\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.684 | 0.995 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
 | Same eta, no group | Eta entry-wise L1 + refit | $\lambda\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.652 | 1.000 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entry-wise L1은 거의 dense support |
-| Rossi $\mu$ baseline | Rossi $\mu$ + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.653 | 1.000 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entry-wise penalty는 거의 dense support |
 | Rossi $\mu$-group | Rossi $\mu$-group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.685 | 1.000 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
+| Rossi $\mu$ baseline | Rossi $\mu$ + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.653 | 1.000 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entry-wise penalty는 거의 dense support |
 
 `MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. `Eta entry-wise L1`은 centered eta contrast에 entry-wise L1 penalty를 둔 diagnostic variant다.
 
