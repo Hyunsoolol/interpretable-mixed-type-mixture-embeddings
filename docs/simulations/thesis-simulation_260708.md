@@ -56,10 +56,10 @@ $$
 
 | 모형 | 패널티 형태 | adaptive weight 설정 |
 |---|---|---|
-| D-L | $\lambda_\mu \sum_{k,j}|\mu_{kj}|$ | 없음 |
+| D-L | $\lambda_\mu \sum_{k,j}\lvert \mu_{kj}\rvert$ | 없음 |
 | D-GL | $\lambda_\mu \sum_j \|\mu_{\cdot j}\|_2$ | 없음 |
 | D-AGL | $\lambda_\mu \sum_j w_j^{(D)}\|\mu_{\cdot j}\|_2$ | $w_j^{(D)}=(\|\mu_{\cdot j}^{init}\|_2+\epsilon)^{-\gamma}$ |
-| E-L | $\lambda_\eta \sum_{k,j}|c_{kj}|$ | 없음 |
+| E-L | $\lambda_\eta \sum_{k,j}\lvert c_{kj}\rvert$ | 없음 |
 | E-GL | $\lambda_\eta \sum_j \|c_{\cdot j}\|_2$ | 없음 |
 | E-AGL | $\lambda_\eta \sum_j w_j^{(E)}\|c_{\cdot j}\|_2$ | $w_j^{(E)}=(\|c_{\cdot j}^{init}\|_2+\epsilon)^{-\gamma}$ |
 
