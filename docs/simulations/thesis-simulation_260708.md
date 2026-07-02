@@ -180,7 +180,7 @@ $$
 
 기본 시뮬레이션 S1-S4는 true decision support가 16개인 sparse decision-support setting이다. Negative-control 시뮬레이션에서는 평균 방향 차이와 집중도 차이의 두 축은 유지하되, decision variable 수를 80개로 늘려 Eta-group 계열이 항상 유리한 sparse setting만 다루는 것이 아님을 확인한다.
 
-이번 결과는 논문용 최종 결론이 아니라 `pilot rep=5 diagnostic`이다. 전체 6개 모형 결과는 `results/paper_eta_negative_control_s1n_s4n_pilot5_260702/paper_eta_negative_control_s1n_s4n_pilot5_summary.csv`에 따로 저장했다.
+이번 결과는 dense decision support에 대한 `rep=50 diagnostic`이다. 전체 6개 모형 결과는 `results/paper_eta_negative_control_s1n_s4n_rep50_260702/paper_eta_negative_control_s1n_s4n_rep50_summary.csv`에 따로 저장했다.
 
 ### 3.2 설정
 
@@ -193,28 +193,28 @@ $$
 | S3-N | 작음 | 있음 | 60도 | (30, 40, 50, 60) | 4 | 80 | 116 | 80 |
 | S4-N | 작음 | 없음 | 60도 | (45, 45, 45, 45) | 4 | 80 | 116 | 80 |
 
-### 3.3 Pilot rep=5 결과 요약
+### 3.3 rep=50 결과 요약
 
 아래 표는 방향 adaptive group baseline인 D-AGL과 제안 계열 E-AGL을 중심으로 정리한 것이다. `decision q`와 `noise q`는 평균 선택 개수이다.
 
-| Scenario | Method | ARI | selected q | decision q | noise q | TPR | FPR | F1 | MSE_eta | 해석 |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| S1-N | D-AGL | 0.863 | 85.8 | 80.0 | 1.8 | 1.000 | 0.048 | 0.965 | 0.331 | dense support에서도 안정적 |
-| S1-N | E-AGL | 0.866 | 82.2 | 80.0 | 1.8 | 1.000 | 0.018 | 0.987 | 0.312 | true q=80 근처로 선택 |
-| S2-N | D-AGL | 0.893 | 85.2 | 80.0 | 1.2 | 1.000 | 0.043 | 0.969 | 0.306 | dense support에서도 안정적 |
-| S2-N | E-AGL | 0.895 | 81.8 | 80.0 | 1.8 | 1.000 | 0.015 | 0.989 | 0.290 | true q=80 근처로 선택 |
-| S3-N | D-AGL | 0.583 | 91.6 | 75.0 | 12.6 | 0.938 | 0.138 | 0.875 | 1.831 | decision 변수 일부 누락 |
-| S3-N | E-AGL | 0.584 | 77.0 | 66.6 | 10.2 | 0.833 | 0.087 | 0.848 | 1.215 | dense support를 과소선택 |
-| S4-N | D-AGL | 0.001 | 4.2 | 0.2 | 0.0 | 0.003 | 0.033 | 0.024 | 4.078 | decision signal 거의 상실 |
-| S4-N | E-AGL | NA | 0.0 | 0.0 | 0.0 | 0.000 | 0.000 | NA | NA | BIC가 zero support 선택 |
+| Scenario | Method | valid reps | ARI | selected q | decision q | noise q | TPR | FPR | F1 | MSE_eta | 해석 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| S1-N | D-AGL | 50 | 0.857 | 85.48 | 79.96 | 1.52 | 1.000 | 0.046 | 0.966 | 0.326 | dense support에서도 안정적 |
+| S1-N | E-AGL | 50 | 0.857 | 82.40 | 79.98 | 2.28 | 1.000 | 0.020 | 0.985 | 0.318 | true q=80 근처로 선택 |
+| S2-N | D-AGL | 50 | 0.898 | 84.58 | 80.00 | 0.58 | 1.000 | 0.038 | 0.972 | 0.295 | dense support에서도 안정적 |
+| S2-N | E-AGL | 50 | 0.897 | 81.82 | 80.00 | 1.82 | 1.000 | 0.015 | 0.989 | 0.292 | true q=80 근처로 선택 |
+| S3-N | D-AGL | 50 | 0.568 | 85.84 | 72.62 | 9.22 | 0.908 | 0.110 | 0.877 | 2.113 | support F1 우위 |
+| S3-N | E-AGL | 50 | 0.565 | 76.06 | 65.44 | 10.24 | 0.818 | 0.089 | 0.840 | 1.603 | dense support를 과소선택 |
+| S4-N | D-AGL | 50 | 0.000 | 4.02 | 0.02 | 0.00 | 0.000 | 0.033 | 0.024 | 3.945 | decision signal 거의 상실 |
+| S4-N | E-AGL | 10 | 0.629 | 16.70 | 16.00 | 0.70 | 0.200 | 0.006 | 0.979 | 0.388 | 40회 zero-support, refit valid 10회 |
 
 ### 3.4 핵심 해석
 
-- S1-N과 S2-N에서는 decision q가 80으로 조밀해져도 E-AGL이 TPR=1을 유지했고, selected q도 80에 가깝다. 이 두 경우는 Eta-group이 dense support에서 바로 무너진다는 증거는 아니다.
-- S3-N에서는 평균 방향 차이가 작고 집중도 차이가 있는 상황에서 E-AGL이 decision variable을 과소선택했다. D-AGL의 F1은 0.875, E-AGL의 F1은 0.848로 D-AGL이 support F1에서는 더 좋았다.
-- S4-N에서는 E-GL/E-AGL이 BIC에서 zero support를 선택해 refit이 유효하지 않았다. 이는 clean한 D-계열 우위라기보다, 약한 평균 차이와 조밀 support가 결합될 때 Eta-group tuning이 실패할 수 있음을 보여주는 진단이다.
+- S1-N과 S2-N에서는 decision q가 80으로 조밀해져도 E-AGL이 TPR=1에 가깝고 selected q도 80에 가깝다. 이 두 경우는 Eta-group이 dense support에서 바로 무너진다는 증거는 아니다.
+- S3-N에서는 평균 방향 차이가 작고 집중도 차이가 있는 상황에서 E-AGL이 decision variable을 과소선택했다. D-AGL의 F1은 0.877, E-AGL의 F1은 0.840으로 D-AGL이 support F1에서는 더 좋았다.
+- S4-N에서는 E-GL이 BIC에서 zero support를 선택했고, E-AGL도 50회 중 10회만 refit이 유효했다. 이는 clean한 D-계열 우위라기보다, 약한 평균 차이와 조밀 support가 결합될 때 Eta-group tuning이 실패할 수 있음을 보여주는 진단이다.
 - 따라서 dense decision support negative-control은 Eta-group이 항상 유리하다는 주장을 피하고, posterior decision support recovery가 어떤 조건에서 약해지는지 보여주는 appendix/limitation 후보로 두는 것이 안전하다.
 
-### 3.5 rep=50 실행 판단
+### 3.5 현재 결론
 
-S1-N~S4-N pilot은 모두 summary를 생성했고, S3-N과 S4-N에서 limitation 패턴이 확인됐다. 다음 단계로는 S1-N~S4-N을 같은 설정으로 rep=50까지 확장해 pilot 패턴이 반복되는지 확인하는 것을 추천한다. 단, S4-N처럼 zero-support가 자주 나오는 경우에는 BIC tuning failure로 별도 표시해야 한다.
+S1-N~S4-N rep=50 결과는 Eta-group 계열의 장점과 한계를 동시에 보여준다. 평균 방향 차이가 충분하면 dense decision support에서도 E-AGL은 안정적이지만, 평균 방향 차이가 작아지면 support를 과소선택하거나 zero-support tuning failure가 나타날 수 있다. 논문에서는 이를 main result가 아니라 negative-control diagnostic으로 제시하는 것이 적절하다.
