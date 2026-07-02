@@ -1,19 +1,19 @@
-# Thesis Simulation 260708
+# 논문용 시뮬레이션 요약 260708
 
 ## 1. 목적
 
-7월 8일 연구미팅 공유용으로, 논문용 후보 simulation S1-S4 결과를 정리한다.
-이번 simulation의 핵심 질문은 clustering accuracy 자체보다 posterior decision support recovery이다.
+7월 8일 연구미팅 공유용으로, 논문용 후보 시뮬레이션 S1-S4 결과를 정리한다.
+이번 시뮬레이션의 핵심 질문은 군집 정확도 자체보다 사후 군집 결정에 쓰이는 support를 얼마나 잘 복원하는가이다.
 
-제안 모형의 목표 support는 centered eta contrast
+제안 모형의 목표 support는 중심화 eta 대비(centered eta contrast)
 
 $$
 c_{kj}=\eta_{kj}-\bar{\eta}_j,\qquad \eta_k=\kappa_k\mu_k
 $$
 
-에서 0이 아닌 coordinate이다. 따라서 공통 변수는 $\mu$에는 존재할 수 있지만 모든 component에 같은 방향으로 들어가므로 decision support에는 포함하지 않는다.
+에서 0이 아닌 좌표이다. 따라서 공통 변수는 $\mu$에는 존재할 수 있지만 모든 성분에 같은 방향으로 들어가므로 decision support에는 포함하지 않는다.
 
-## 2. Simulation Setting
+## 2. 시뮬레이션 설정
 
 공통 설정:
 
@@ -24,47 +24,47 @@ $$
 | $d$ | 200 |
 | 공통 변수 | 4 |
 | 군집특성 변수 | 16 |
-| Noise 변수 | 180 |
-| True decision $q$ | 16 |
-| Initialization | nstart = 10 |
-| Path length | 240 |
-| Selection criterion | BIC |
-| Refit | yes, all methods |
-| Repetitions | 50 |
+| 노이즈 변수 | 180 |
+| 참 decision $q$ | 16 |
+| 초기값 반복 | nstart = 10 |
+| 경로 길이 | 240 |
+| 선택 기준 | BIC |
+| 재적합 | 모든 모형 적용 |
+| 반복 수 | 50 |
 
-Scenario design:
+시나리오 설계:
 
-| Scenario | 평균 방향 차이 | 집중도 차이 | Target angle | Kappa |
+| 시나리오 | 평균 방향 차이 | 집중도 차이 | 목표 각도 | 집중도 |
 |---|---|---|---:|---|
-| S1 | 보통 | 있음 | 90 deg | (30, 40, 50, 60) |
-| S2 | 보통 | 없음 | 90 deg | (45, 45, 45, 45) |
-| S3 | 작음 | 있음 | 60 deg | (30, 40, 50, 60) |
-| S4 | 작음 | 없음 | 60 deg | (45, 45, 45, 45) |
+| S1 | 보통 | 있음 | 90도 | (30, 40, 50, 60) |
+| S2 | 보통 | 없음 | 90도 | (45, 45, 45, 45) |
+| S3 | 작음 | 있음 | 60도 | (30, 40, 50, 60) |
+| S4 | 작음 | 없음 | 60도 | (45, 45, 45, 45) |
 
-Methods:
+비교 모형:
 
-| Method | Penalty target | Group penalty | Adaptive |
+| 모형 | 패널티 대상 | 그룹 패널티 | 적응형 적용 |
 |---|---|---:|---:|
-| D-L | direction $\mu_{kj}$ | no | no |
-| D-GL | direction $\mu_{\cdot j}$ | yes | no |
-| D-AGL | direction $\mu_{\cdot j}$ | yes | yes |
-| E-L | centered eta entry $c_{kj}$ | no | no |
-| E-GL | centered eta coordinate $c_{\cdot j}$ | yes | no |
-| E-AGL | centered eta coordinate $c_{\cdot j}$ | yes | yes |
+| D-L | 방향 $\mu_{kj}$ | 없음 | 없음 |
+| D-GL | 방향 $\mu_{\cdot j}$ | 있음 | 없음 |
+| D-AGL | 방향 $\mu_{\cdot j}$ | 있음 | 있음 |
+| E-L | 중심화 eta 개별 entry $c_{kj}$ | 없음 | 없음 |
+| E-GL | 중심화 eta 좌표 $c_{\cdot j}$ | 있음 | 없음 |
+| E-AGL | 중심화 eta 좌표 $c_{\cdot j}$ | 있음 | 있음 |
 
 평가 지표:
 
-- `selected q`: total selected coordinates.
+- `selected q`: 선택된 좌표 총수.
 - `공통 선택`: 선택된 공통 변수 수. 이상적인 값은 0.
 - `군집특성 선택`: 선택된 군집특성 변수 수. 이상적인 값은 16.
-- `noise 선택`: 선택된 noise 변수 수. 이상적인 값은 0.
-- `MSE_eta`: MSE for centered eta contrast.
+- `노이즈 선택`: 선택된 노이즈 변수 수. 이상적인 값은 0.
+- `MSE_eta`: 중심화 eta 대비 기준 MSE.
 
-## 3. S1: Moderate Mean Difference + Heterogeneous Concentration
+## 3. S1: 평균 차이 보통 + 집중도 이분산
 
-Setting: target angle 90 deg, $\kappa=(30,40,50,60)$.
+설정: 목표 각도 90도, $\kappa=(30,40,50,60)$.
 
-| Method | ARI | selected q | 공통 선택 | 군집특성 선택 | noise 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
+| 모형 | ARI | selected q | 공통 선택 | 군집특성 선택 | 노이즈 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | D-L | 0.837 | 199.80 | 4.00 | 16.00 | 179.80 | 1.000 | 0.999 | 0.080 | 0.148 | 0.000526 | 6.230 | 0.738 |
 | D-GL | 0.863 | 20.00 | 4.00 | 16.00 | 0.00 | 1.000 | 0.022 | 0.800 | 0.889 | 0.000052 | 1.039 | 0.069 |
@@ -75,15 +75,15 @@ Setting: target angle 90 deg, $\kappa=(30,40,50,60)$.
 
 해석:
 
-- D-L and E-L select almost all variables.
-- D-GL and D-AGL remove noise, but keep all 4 common variables.
-- E-AGL is closest to the true decision support: selected q = 16.06, common selected = 0.00, noise selected = 0.06.
+- D-L과 E-L은 거의 모든 변수를 선택한다.
+- D-GL과 D-AGL은 노이즈는 제거하지만 공통 변수 4개를 모두 유지한다.
+- E-AGL은 참 decision support에 가장 가깝다: selected q = 16.06, 공통 선택 = 0.00, 노이즈 선택 = 0.06.
 
-## 4. S2: Moderate Mean Difference + Equal Concentration
+## 4. S2: 평균 차이 보통 + 집중도 등분산
 
-Setting: target angle 90 deg, $\kappa=(45,45,45,45)$.
+설정: 목표 각도 90도, $\kappa=(45,45,45,45)$.
 
-| Method | ARI | selected q | 공통 선택 | 군집특성 선택 | noise 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
+| 모형 | ARI | selected q | 공통 선택 | 군집특성 선택 | 노이즈 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | D-L | 0.881 | 199.68 | 4.00 | 16.00 | 179.68 | 1.000 | 0.998 | 0.080 | 0.148 | 0.000425 | 5.326 | 0.708 |
 | D-GL | 0.903 | 20.00 | 4.00 | 16.00 | 0.00 | 1.000 | 0.022 | 0.800 | 0.889 | 0.000042 | 1.204 | 0.070 |
@@ -94,16 +94,16 @@ Setting: target angle 90 deg, $\kappa=(45,45,45,45)$.
 
 해석:
 
-- Equal concentration does not remove the pattern seen in S1.
-- Direction group methods still keep the 4 common variables.
-- E-AGL again recovers the decision support almost exactly.
+- 집중도가 같아져도 S1에서 보인 패턴은 유지된다.
+- 방향 기반 그룹 패널티 모형은 여전히 공통 변수 4개를 유지한다.
+- E-AGL은 이 경우에도 decision support를 거의 정확하게 복원한다.
 
-## 5. S3: Small Mean Difference + Heterogeneous Concentration
+## 5. S3: 평균 차이 작음 + 집중도 이분산
 
-Setting: target angle 60 deg, $\kappa=(30,40,50,60)$.
-The actual pairwise direction angle mean/min/max is 66.02/42.07/86.06 deg, so this is the hardest setting among S1-S4.
+설정: 목표 각도 60도, $\kappa=(30,40,50,60)$.
+실제 쌍별 방향 각도의 평균/최소/최대는 66.02/42.07/86.06도이므로, S1-S4 중 가장 어려운 설정이다.
 
-| Method | ARI | selected q | 공통 선택 | 군집특성 선택 | noise 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
+| 모형 | ARI | selected q | 공통 선택 | 군집특성 선택 | 노이즈 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | D-L | 0.546 | 199.94 | 4.00 | 16.00 | 179.94 | 1.000 | 1.000 | 0.080 | 0.148 | 0.001309 | 120.607 | 2.377 |
 | D-GL | 0.613 | 37.24 | 4.00 | 16.00 | 17.24 | 1.000 | 0.115 | 0.549 | 0.677 | 0.000506 | 143.148 | 1.308 |
@@ -114,15 +114,15 @@ The actual pairwise direction angle mean/min/max is 66.02/42.07/86.06 deg, so th
 
 해석:
 
-- S3 is a stress-test setting; all methods lose clustering and support quality.
-- E-AGL does not perfectly recover all decision variables, but it is much less dense than the alternatives.
-- E-AGL gives the best ARI, F1, FPR, and MSE_eta in this setting.
+- S3는 스트레스 테스트 설정으로, 모든 모형에서 군집 성능과 support 복원이 약해진다.
+- E-AGL도 모든 decision 변수를 완벽하게 복원하지는 못하지만, 다른 모형보다 훨씬 덜 조밀하다.
+- 이 설정에서 E-AGL은 ARI, F1, FPR, MSE_eta 기준으로 가장 좋은 결과를 보인다.
 
-## 6. S4: Small Mean Difference + Equal Concentration
+## 6. S4: 평균 차이 작음 + 집중도 등분산
 
-Setting: target angle 60 deg, $\kappa=(45,45,45,45)$.
+설정: 목표 각도 60도, $\kappa=(45,45,45,45)$.
 
-| Method | ARI | selected q | 공통 선택 | 군집특성 선택 | noise 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
+| 모형 | ARI | selected q | 공통 선택 | 군집특성 선택 | 노이즈 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | D-L | 0.564 | 199.80 | 4.00 | 16.00 | 179.80 | 1.000 | 0.999 | 0.080 | 0.148 | 0.000555 | 8.878 | 1.011 |
 | D-GL | 0.647 | 20.24 | 4.00 | 16.00 | 0.24 | 1.000 | 0.023 | 0.791 | 0.883 | 0.000056 | 1.602 | 0.097 |
@@ -133,39 +133,39 @@ Setting: target angle 60 deg, $\kappa=(45,45,45,45)$.
 
 해석:
 
-- Even under small mean separation, equal concentration gives a cleaner pattern than S3.
-- D-GL/D-AGL again retain all common variables.
-- E-AGL is closest to the target decision support.
+- 평균 방향 차이가 작은 경우에도, 집중도가 같으면 S3보다 더 깔끔한 패턴이 나타난다.
+- D-GL/D-AGL은 이 경우에도 공통 변수를 모두 유지한다.
+- E-AGL은 목표 decision support에 가장 가깝다.
 
-## 7. Overall Summary
+## 7. 전체 요약
 
-| Scenario | Best decision-support method | Main pattern |
+| 시나리오 | Decision support 기준 최선 모형 | 주요 패턴 |
 |---|---|---|
-| S1 | E-AGL | Nearly exact recovery of decision support. |
-| S2 | E-AGL | Same pattern as S1 under equal concentration. |
-| S3 | E-AGL | Hard stress setting; E-AGL remains least dense and best in F1/MSE_eta. |
-| S4 | E-AGL | Small mean difference but equal concentration; E-AGL remains closest to true q. |
+| S1 | E-AGL | Decision support를 거의 정확하게 복원한다. |
+| S2 | E-AGL | 집중도가 같아도 S1과 같은 패턴이 유지된다. |
+| S3 | E-AGL | 어려운 스트레스 설정이지만 E-AGL이 가장 덜 조밀하고 F1/MSE_eta가 가장 좋다. |
+| S4 | E-AGL | 평균 차이가 작아도 집중도가 같으면 E-AGL이 참 q에 가장 가깝다. |
 
 핵심 해석:
 
-- Entry-wise penalties, D-L and E-L, tend to keep almost all coordinates.
-- Direction group penalties, D-GL and D-AGL, remove most noise but keep common coordinates.
-- Eta group penalties, E-GL and E-AGL, directly target posterior decision support and therefore remove common coordinates.
-- E-AGL is the most stable method across S1-S4 for decision-support recovery.
+- 개별 entry 패널티인 D-L과 E-L은 거의 모든 좌표를 유지하는 경향이 있다.
+- 방향 그룹 패널티인 D-GL과 D-AGL은 대부분의 노이즈를 제거하지만 공통 좌표도 함께 유지한다.
+- Eta-group 패널티인 E-GL과 E-AGL은 posterior decision support를 직접 목표로 하므로 공통 좌표를 제거한다.
+- S1-S4 전체에서 decision-support recovery 기준으로는 E-AGL이 가장 안정적이다.
 
 주의할 점:
 
-- E-GL and E-AGL have larger MSE_kappa because they shrink the full eta norm when common coordinates are removed.
-- This is expected under a centered eta contrast target.
-- For this paper, MSE_eta and decision support recovery are the primary estimation targets; MSE_kappa is reported as a secondary diagnostic.
+- E-GL과 E-AGL은 공통 좌표를 제거하면서 전체 eta norm도 함께 줄이므로 MSE_kappa가 크게 나타난다.
+- 이는 중심화 eta 대비를 목표로 할 때 예상 가능한 패턴이다.
+- 본 논문에서는 MSE_eta와 decision support recovery를 주요 추정 목표로 보고, MSE_kappa는 보조 진단 지표로 제시하는 것이 적절하다.
 
-## 8. Result Files
+## 8. 결과 파일
 
-The summary values above are taken from:
+위 요약값은 아래 summary 파일에서 가져왔다.
 
 - `results/paper_eta_first_s1_angle90_kappa30_60_rep50_260702/paper_eta_first_s1_angle90_kappa30_60_rep50_260702_summary.csv`
 - `results/paper_eta_first_s2_angle90_kappa45_equal_rep50_260702/paper_eta_first_s2_angle90_kappa45_equal_rep50_260702_summary.csv`
 - `results/paper_eta_first_s3_angle60_kappa30_60_rep50_260702/paper_eta_first_s3_angle60_kappa30_60_rep50_260702_summary.csv`
 - `results/paper_eta_first_s4_angle60_kappa45_equal_rep50_260702/paper_eta_first_s4_angle60_kappa45_equal_rep50_260702_summary.csv`
 
-Raw result files와 run log는 연구미팅 문서 commit 대상이 아니다.
+원자료 결과 파일과 실행 로그는 연구미팅 문서 커밋 대상이 아니다.
