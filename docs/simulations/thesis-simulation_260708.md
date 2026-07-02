@@ -9,7 +9,7 @@
 $$
 \[c_{kj}=\eta_{kj}-\bar{\eta}_j,\qquad \eta_k=\kappa_k\mu_k\]
 $$
-에서 0이 아닌 coordinate이다. 따라서 공통 변수는 \(\mu\)에는 존재할 수 있지만 모든 component에 같은 방향으로 들어가므로 decision support에는 포함하지 않는다.
+에서 0이 아닌 coordinate이다. 따라서 공통 변수는 $\mu$에는 존재할 수 있지만 모든 component에 같은 방향으로 들어가므로 decision support에는 포함하지 않는다.
 
 ## 2. Simulation Setting
 
