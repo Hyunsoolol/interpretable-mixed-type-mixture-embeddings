@@ -6,9 +6,11 @@
 이번 simulation의 핵심 질문은 clustering accuracy 자체보다 posterior decision support recovery이다.
 
 제안 모형의 목표 support는 centered eta contrast
+
 $$
 c_{kj}=\eta_{kj}-\bar{\eta}_j,\qquad \eta_k=\kappa_k\mu_k
 $$
+
 에서 0이 아닌 coordinate이다. 따라서 공통 변수는 $\mu$에는 존재할 수 있지만 모든 component에 같은 방향으로 들어가므로 decision support에는 포함하지 않는다.
 
 ## 2. Simulation Setting
@@ -17,13 +19,13 @@ $$
 
 | 항목 | 값 |
 |---|---:|
-| \(K\) | 4 |
-| \(n\) | 1000 |
-| \(d\) | 200 |
+| $K$ | 4 |
+| $n$ | 1000 |
+| $d$ | 200 |
 | 공통 변수 | 4 |
 | 군집특성 변수 | 16 |
 | Noise 변수 | 180 |
-| True decision \(q\) | 16 |
+| True decision $q$ | 16 |
 | Initialization | nstart = 10 |
 | Path length | 240 |
 | Selection criterion | BIC |
@@ -43,12 +45,12 @@ Methods:
 
 | Method | Penalty target | Group penalty | Adaptive |
 |---|---|---:|---:|
-| D-L | direction \(\mu_{kj}\) | no | no |
-| D-GL | direction \(\mu_{\cdot j}\) | yes | no |
-| D-AGL | direction \(\mu_{\cdot j}\) | yes | yes |
-| E-L | centered eta entry \(c_{kj}\) | no | no |
-| E-GL | centered eta coordinate \(c_{\cdot j}\) | yes | no |
-| E-AGL | centered eta coordinate \(c_{\cdot j}\) | yes | yes |
+| D-L | direction $\mu_{kj}$ | no | no |
+| D-GL | direction $\mu_{\cdot j}$ | yes | no |
+| D-AGL | direction $\mu_{\cdot j}$ | yes | yes |
+| E-L | centered eta entry $c_{kj}$ | no | no |
+| E-GL | centered eta coordinate $c_{\cdot j}$ | yes | no |
+| E-AGL | centered eta coordinate $c_{\cdot j}$ | yes | yes |
 
 평가 지표:
 
@@ -60,7 +62,7 @@ Methods:
 
 ## 3. S1: Moderate Mean Difference + Heterogeneous Concentration
 
-Setting: target angle 90 deg, \(\kappa=(30,40,50,60)\).
+Setting: target angle 90 deg, $\kappa=(30,40,50,60)$.
 
 | Method | ARI | selected q | 공통 선택 | 군집특성 선택 | noise 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -79,7 +81,7 @@ Setting: target angle 90 deg, \(\kappa=(30,40,50,60)\).
 
 ## 4. S2: Moderate Mean Difference + Equal Concentration
 
-Setting: target angle 90 deg, \(\kappa=(45,45,45,45)\).
+Setting: target angle 90 deg, $\kappa=(45,45,45,45)$.
 
 | Method | ARI | selected q | 공통 선택 | 군집특성 선택 | noise 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -98,7 +100,7 @@ Setting: target angle 90 deg, \(\kappa=(45,45,45,45)\).
 
 ## 5. S3: Small Mean Difference + Heterogeneous Concentration
 
-Setting: target angle 60 deg, \(\kappa=(30,40,50,60)\).
+Setting: target angle 60 deg, $\kappa=(30,40,50,60)$.
 The actual pairwise direction angle mean/min/max is 66.02/42.07/86.06 deg, so this is the hardest setting among S1-S4.
 
 | Method | ARI | selected q | 공통 선택 | 군집특성 선택 | noise 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
@@ -118,7 +120,7 @@ The actual pairwise direction angle mean/min/max is 66.02/42.07/86.06 deg, so th
 
 ## 6. S4: Small Mean Difference + Equal Concentration
 
-Setting: target angle 60 deg, \(\kappa=(45,45,45,45)\).
+Setting: target angle 60 deg, $\kappa=(45,45,45,45)$.
 
 | Method | ARI | selected q | 공통 선택 | 군집특성 선택 | noise 선택 | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
