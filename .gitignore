@@ -2,6 +2,19 @@
 results/**/cells/
 results/**/*raw.csv
 
+# Rcpp benchmark/generated build artifacts
+results/rcpp_*/repeat_*/
+results/rcpp_*/*/repeat_*/
+results/rcpp_*/sourcecpp_cache/
+results/rcpp_*/*/sourcecpp_cache/
+results/rcpp_*/temp_methods/
+results/rcpp_*/*/temp_methods/
+r/rcpp/**/cache/
+*.o
+*.so
+*.dll
+*.log
+
 # Local R code kept on disk, not tracked
 r/*.r
 r/*.R
