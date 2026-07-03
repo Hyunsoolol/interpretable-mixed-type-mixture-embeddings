@@ -6,9 +6,10 @@
 
 - 피드백 1: $\eta$, $\mu$, $\kappa$의 의존성과 유일성
 - 피드백 2: Eta-group penalty가 불리한 상황
+- 추가 정리: 논문용 S1-S6 simulation, dense-support negative-control, 외부 baseline 결과
 - 추가 정리: Eta penalty ablation 진단과 optimization safeguard 설명
 
-전체 결과표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 따로 정리하였다.
+전체 simulation 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 정리했고, 이전 negative-control 세부 진단은 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 따로 남겼다.
 
 ## 2. 의존성과 유일성
 
@@ -99,35 +100,57 @@ $$
 - centered eta contrast에서 $c_{kj}>0$은 component $k$의 posterior decision score를 상대적으로 높이는 방향, $c_{kj}<0$은 상대적으로 낮추는 방향이다.
 - 현재 diagnostic 기준에서는 eta 자연모수만으로도, group penalty만으로도 충분하지 않으며 `centered eta contrast + coordinate-wise group penalty` 조합이 support recovery에서 가장 안정적으로 보인다.
 
-## 3. Eta-group penalty가 불리한 상황
+## 3. 논문용 simulation 업데이트
 
-Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 sparsity 구조에서 유리한 것은 아니다. 음성대조 진단에서는 아래 세 가지 한계를 확인했다. 세부 수치와 전체 표는 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 남긴다.
+이번에 논문용 simulation을 S1-S6 기본 시뮬레이션과 S1-N~S6-N dense-support negative-control로 정리했다. 목적은 clustering accuracy 자체가 아니라, posterior decision support recovery가 언제 잘 되고 언제 약해지는지 확인하는 것이다. 전체 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 둔다.
 
-### 3.1 핵심 결과
+### 3.1 기본 시뮬레이션 S1-S6
 
-| 상황 | Eta-group에서 나타난 문제 | 비교 기준 | 핵심 차이 | 해석 |
+기본 시뮬레이션은 true decision support가 16개인 sparse decision-support setting이다. common q=4는 모든 component에 공통으로 들어가므로 decision support에는 포함하지 않는다.
+
+| Scenario | 설정 | E-AGL 핵심 결과 | 외부 baseline 결과 | 해석 |
 |:---|:---|:---|:---|:---|
-| 조밀 support | 필요한 좌표까지 축소 | Separate + refit | Eta-group F1=0.726, MSE_eta=2.721 vs Separate F1=0.890, MSE_eta=2.150 | true decision support가 조밀하면 Eta-group이 과소선택할 수 있음 |
-| 약한 신호 | BIC가 zero support를 반복 선택 | Rossi/Separate | Eta-group BIC 평균 selected q=2.68, q=0이 43/50회 | weak signal에서는 BIC tuning failure 가능 |
-| support 목표 차이 | union support와 entry support의 결론이 다름 | Rossi/Separate | Eta-group union F1=0.936, Separate entry_F1=0.438, Rossi entry_F1=0.399 | 어떤 support를 목표로 둘지 분리해야 함 |
+| S1 | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.865, selected q=16.06, F1=0.998, MSE_eta=0.057 | Dense vMF ARI=0.836 | E-AGL이 true q=16을 가장 정확히 복원 |
+| S2 | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.904, selected q=16.12, F1=0.996, MSE_eta=0.057 | Dense vMF ARI=0.880 | 집중도 차이가 없어도 support recovery 안정적 |
+| S3 | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.631, selected q=21.22, F1=0.881, MSE_eta=0.250 | Dense vMF ARI=0.539 | 가장 중요한 중간 난도 setting. E-AGL 장점이 남음 |
+| S4 | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.651, selected q=16.32, F1=0.990, MSE_eta=0.079 | Dense vMF ARI=0.561 | 평균 차이만 있어도 decision support 복원 가능 |
+| S5 | 평균 차이 작음(30도), 약한 집중도 이분산 | ARI=0.015, selected q=0.02, F1=0.118, MSE_eta=1.040 | Dense vMF ARI=0.029 | weak-signal stress-test. zero-support 쪽으로 수축 |
+| S6 | 평균 차이 작음(30도), 집중도 등분산 | ARI=0.012, selected q=0.56, F1=0.105, MSE_eta=2.354 | Dense vMF ARI=0.011 | 가장 어려운 setting. 모든 방법이 거의 실패 |
 
-### 3.2 해석
+핵심은 S1-S4에서는 E-AGL이 clustering 성능을 유지하면서 selected q를 true q=16 근처로 맞춘다는 점이다. D-L과 E-L은 ARI는 어느 정도 유지하지만 selected q가 거의 전체 차원에 가까워 support recovery에는 부적합하다. S5-S6은 main result가 아니라 weak-signal limitation으로 두는 것이 안전하다.
 
-- Eta-group의 claim은 ARI의 일괄적 향상이 아니라 posterior decision support recovery다.
-- true decision support가 조밀하면 group penalty가 필요한 좌표까지 줄일 수 있다.
-- weak signal에서는 BIC가 너무 강하게 작동해 zero support를 선택할 수 있다.
-- Rossi/Separate는 dense support를 선택해 ARI를 유지할 수 있지만, sparse support 해석성은 약해질 수 있다.
-- 따라서 main result는 positive setting 중심으로 두고, 위 결과는 limitation 또는 appendix diagnostic으로 정리하는 것이 안전하다.
+### 3.2 Dense-support negative-control S1-N~S6-N
 
-### 3.3 support metric 정리
+Negative-control은 평균 방향 차이와 집중도 차이의 축은 유지하되, decision q를 16에서 80으로 늘린 dense decision-support setting이다. 이 설정은 Eta-group이 sparse support setting에서만 유리한지 확인하기 위한 진단이다.
 
-| Metric | 정의 | 주된 의미 | 한계 |
-|:---|:---|:---|:---|
-| Coordinate union support | $S_{\mathrm{union}}=\{j:\exists k,\ active_{kj}\}$ | coordinate-level variable selection. 모든 방법에 공통으로 계산 가능 | Rossi/Separate의 component별 sparsity 구조를 하나로 합친다 |
-| Prototype entry support | $S_{\mathrm{entry}}=\{(k,j):\mu_{kj}\ne0\}$ | Rossi/Separate처럼 direction/prototype sparsity를 목표로 하는 방법에 자연스러움 | Eta-group은 coordinate-level centered eta group penalty라서 같은 방식의 직접 비교가 어렵다 |
-| Posterior decision support | $S_{\eta}=\{j:\|c_{\cdot j}\| _ 2>0\}$, $c_{kj}=\eta_{kj}-K^{-1}\sum_\ell \eta_{\ell j}$ | posterior decision boundary에 들어가는 coordinate. Eta-group의 main claim에 가장 적합 | Rossi/Separate의 prototype sparsity와는 목표가 다르다 |
+| Scenario | 설정 | E-AGL 핵심 결과 | 외부 baseline 결과 | 해석 |
+|:---|:---|:---|:---|:---|
+| S1-N | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.857, selected q=82.40, F1=0.985 | Dense vMF ARI=0.835 | dense support에서도 안정적 |
+| S2-N | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.897, selected q=81.82, F1=0.989 | Dense vMF ARI=0.886 | dense support에서도 true q=80 근처 선택 |
+| S3-N | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.565, selected q=76.06, F1=0.840 | Dense vMF ARI=0.545 | D-AGL보다 support F1이 낮아지는 limitation |
+| S4-N | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.629, selected q=16.70, F1=0.979 | Dense vMF ARI=0.562 | E-AGL이 decision q=80 중 일부만 선택. tuning failure 후보 |
+| S5-N | 평균 차이 작음(30도), 약한 집중도 이분산 | ARI=0.001, selected q=0.06, F1=0.025 | Dense vMF ARI=0.024 | weak signal에서 전체적으로 실패 |
+| S6-N | 평균 차이 작음(30도), 집중도 등분산 | ARI=0.005, selected q=2.04, F1=0.172 | Dense vMF ARI=0.012 | dense/sparse 여부와 무관하게 signal이 너무 약함 |
 
-논문 main claim은 prototype sparsity가 아니라 posterior decision support recovery로 두는 것이 안전하다. Rossi/Separate와의 공정 비교에는 prototype entry support를 보조 지표로 추가하는 것이 필요하다.
+S1-N과 S2-N은 dense support에서도 E-AGL이 바로 무너지지 않음을 보여준다. 반면 S3-N과 S4-N은 평균 방향 차이가 보통 수준일 때 Eta-group 계열이 support를 과소선택하거나 tuning failure를 보일 수 있음을 보여준다. S5-N/S6-N은 signal 자체가 너무 약한 stress-test다.
+
+### 3.3 외부 baseline 해석
+
+외부 baseline은 내부 ablation 모형과 목적이 다르다. Spherical k-means와 Dense vMF free kappa는 support recovery 모형이 아니므로 ARI/NMI/purity 중심으로만 비교한다. Sparse k-means는 feature support를 선택하지만, posterior decision support와 같은 목표가 아니므로 보조 지표로만 해석한다.
+
+- Dense vMF free kappa는 S1-S4와 S1-N~S4-N에서 강한 clustering-only baseline이다.
+- 그러나 Dense vMF는 sparse support를 제공하지 않으므로, posterior decision support recovery claim과 직접 경쟁하지 않는다.
+- Sparse k-means는 support를 제공하지만 S1-S6 및 S1-N~S6-N에서 selected q가 과도하거나 ARI가 낮은 경우가 많다.
+- dbmovMFs는 현재 로컬 R 환경에 패키지가 없어 이번 결과에서는 실행하지 못했다.
+
+### 3.4 Simulation claim 정리
+
+논문에서 안전한 simulation claim은 다음과 같다.
+
+- E-AGL은 sparse posterior decision-support setting(S1-S4)에서 true decision support를 가장 안정적으로 복원한다.
+- 제안법의 강점은 universal ARI improvement가 아니라 clustering을 유지하면서 posterior decision support를 복원하는 데 있다.
+- true decision support가 조밀하거나 signal이 약하면 E-AGL도 과소선택 또는 zero-support tuning failure를 보일 수 있다.
+- 따라서 S1-S4는 main simulation, S5-S6과 S1-N~S6-N은 stress-test/limitation 또는 appendix diagnostic으로 두는 것이 안전하다.
 
 ## 4. proximal EM-type update와 단조증가
 
@@ -143,5 +166,5 @@ Eta-group은 posterior decision support recovery에 강점이 있지만, 모든 
 - $\eta_k\ne0$이고 $\kappa_k>0$이면 $\mu_k$와 $\kappa_k$는 component-level에서 유일하게 복원된다.
 - Eta-group의 이론적 동기는 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 선택한다는 점이다.
 - ablation diagnostic에서는 centered eta contrast와 coordinate-wise group penalty의 조합이 support recovery 안정성에 중요해 보인다.
-- 조밀 support 또는 약한 신호에서는 Eta-group이 불리하거나 BIC tuning failure가 생길 수 있다.
-- 다음 단계는 posterior decision support를 main claim으로 둘지, prototype entry support를 보조 지표로 둘지 교수님께 확인받는 것이다.
+- 조밀 support 또는 약한 신호에서는 Eta-group이 과소선택하거나 BIC tuning failure를 보일 수 있다.
+- 다음 단계는 S1-S4를 main simulation으로 두고, S5-S6 및 S1-N~S6-N을 limitation/appendix diagnostic으로 배치해도 되는지 교수님께 확인받는 것이다.
