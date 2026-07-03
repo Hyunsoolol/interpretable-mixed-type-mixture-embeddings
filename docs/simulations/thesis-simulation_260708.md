@@ -287,7 +287,7 @@ $$
 
 ### 3.1 목적
 
-외부 baseline은 현재 기본 시뮬레이션 S1-S6에 대해서만 계산했다. Dense-support negative-control S1-N~S6-N에 대해서는 필요 시 동일 protocol로 추가 실행한다.
+외부 baseline도 기본 시뮬레이션과 같은 protocol로 S1-N~S6-N에 대해 계산했다. Spherical k-means와 Dense vMF free kappa는 clustering baseline이며, Sparse k-means support는 posterior decision support가 아니라 feature support로 해석한다.
 
 기본 시뮬레이션은 true decision support가 16개인 sparse decision-support setting이다. Negative-control 시뮬레이션에서는 평균 방향 차이와 집중도 차이의 두 축은 유지하되, decision variable 수를 80개로 늘려 Eta-group 계열이 항상 유리한 sparse setting만 다루는 것이 아님을 확인한다.
 
@@ -321,6 +321,15 @@ $$
 | E-GL | 0.855 | 88.34 | 0.22 | 79.98 | 8.14 | 1.000 | 0.070 | 0.907 | 0.951 | 0.001711 | 23.315 | 0.374 |
 | E-AGL | 0.857 | 82.40 | 0.14 | 79.98 | 2.28 | 1.000 | 0.020 | 0.971 | 0.985 | 0.001704 | 25.910 | 0.318 |
 
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.770 | 0.740 | 0.904 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.835 | 0.802 | 0.934 | NA | NA | support 없음 |
+| Sparse k-means | 0.133 | 0.155 | 0.437 | 82.16 | 0.574 | feature support, posterior decision support 아님 |
+
 #### S2-N: 평균 차이 큼 (90도) + 집중도 등분산
 
 | 모형 | ARI | selected q | common q | specific q | noise q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
@@ -331,6 +340,15 @@ $$
 | E-L | 0.886 | 192.18 | 3.72 | 80.00 | 108.46 | 1.000 | 0.935 | 0.416 | 0.588 | 0.000510 | 4.473 | 0.698 |
 | E-GL | 0.897 | 87.36 | 0.36 | 80.00 | 7.00 | 1.000 | 0.061 | 0.917 | 0.956 | 0.001451 | 25.334 | 0.345 |
 | E-AGL | 0.897 | 81.82 | 0.04 | 80.00 | 1.78 | 1.000 | 0.015 | 0.978 | 0.989 | 0.001535 | 31.435 | 0.292 |
+
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.880 | 0.833 | 0.954 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.886 | 0.839 | 0.956 | NA | NA | support 없음 |
+| Sparse k-means | 0.058 | 0.068 | 0.397 | 128.32 | 0.520 | feature support, posterior decision support 아님 |
 
 #### S3-N: 평균 차이 보통 (60도) + 집중도 이분산
 
@@ -343,6 +361,15 @@ $$
 | E-GL | 0.558 | 97.02 | 1.06 | 69.44 | 26.52 | 0.868 | 0.230 | 0.731 | 0.788 | 0.003628 | 194.378 | 2.309 |
 | E-AGL | 0.565 | 76.06 | 0.38 | 65.44 | 10.24 | 0.818 | 0.089 | 0.870 | 0.840 | 0.004275 | 187.581 | 1.603 |
 
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.488 | 0.492 | 0.711 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.545 | 0.559 | 0.741 | NA | NA | support 없음 |
+| Sparse k-means | 0.063 | 0.075 | 0.388 | 91.56 | 0.380 | feature support, posterior decision support 아님 |
+
 #### S4-N: 평균 차이 보통 (60도) + 집중도 등분산
 
 | 모형 | ARI | selected q | common q | specific q | noise q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
@@ -353,6 +380,15 @@ $$
 | E-L | 0.564 | 196.04 | 3.80 | 80.00 | 112.24 | 1.000 | 0.967 | 0.408 | 0.580 | 0.000726 | 9.981 | 0.996 |
 | E-GL | NA | 0.00 | 0.00 | 0.00 | 0.00 | 0.000 | 0.000 | NA | NA | NA | NA | NA |
 | E-AGL | 0.629 | 16.70 | 0.00 | 16.00 | 0.70 | 0.200 | 0.006 | 0.959 | 0.979 | 0.004234 | 258.843 | 0.388 |
+
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.507 | 0.459 | 0.783 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.562 | 0.510 | 0.812 | NA | NA | support 없음 |
+| Sparse k-means | 0.026 | 0.033 | 0.352 | 114.00 | 0.445 | feature support, posterior decision support 아님 |
 
 #### S5-N: 평균 차이 작음 (30도) + 집중도 이분산
 
@@ -367,6 +403,15 @@ $$
 | E-GL | NA | 0.00 | 0.00 | 0.00 | 0.00 | 0.000 | 0.000 | NA | NA | NA | NA | NA |
 | E-AGL | 0.001 | 0.06 | 0.00 | 0.02 | 0.04 | 0.000 | 0.000 | 0.333 | 0.025 | 0.010 | 1642.263 | 1.127 |
 
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.013 | 0.017 | 0.322 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.024 | 0.032 | 0.343 | NA | NA | support 없음 |
+| Sparse k-means | 0.003 | 0.007 | 0.295 | 95.44 | 0.342 | feature support, posterior decision support 아님 |
+
 #### S6-N: 평균 차이 작음 (30도) + 집중도 등분산
 
 설정: 목표 각도 30도, kappa=(45,45,45,45). 실제 쌍별 방향 각도의 평균/최소/최대는 30.00/30.00/30.00도이다.
@@ -380,6 +425,15 @@ $$
 | E-GL | NA | 0.00 | 0.00 | 0.00 | 0.00 | 0.000 | 0.000 | NA | NA | NA | NA | NA |
 | E-AGL | 0.005 | 2.04 | 0.02 | 0.88 | 1.14 | 0.011 | 0.010 | 0.807 | 0.172 | 0.009 | 1155.244 | 1.986 |
 
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.008 | 0.011 | 0.306 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.012 | 0.018 | 0.318 | NA | NA | support 없음 |
+| Sparse k-means | 0.003 | 0.006 | 0.293 | 88.20 | 0.335 | feature support, posterior decision support 아님 |
+
 ### 3.4 핵심 해석
 
 - S1-N과 S2-N에서는 decision q가 80으로 조밀해져도 E-AGL이 TPR=1에 가깝고 selected q도 80에 가깝다. 이 두 경우는 Eta-group이 dense support에서 바로 무너진다는 증거는 아니다.
@@ -387,6 +441,7 @@ $$
 - S4-N에서는 E-GL이 BIC에서 zero support를 선택했고, E-AGL도 50회 중 10회만 refit이 유효했다. 이는 clean한 D-계열 우위라기보다, 보통 수준의 평균 차이(60도)와 조밀 support가 결합될 때 Eta-group tuning이 실패할 수 있음을 보여주는 진단이다.
 - S5-N과 S6-N에서는 평균 방향 차이가 30도 수준으로 작아지면서 모든 모형의 ARI가 거의 0에 가까워졌다. D-L/E-L은 거의 dense support를 선택하고, E-GL/E-AGL은 zero-support 또는 극단적 과소선택으로 간다.
 - 따라서 dense decision support negative-control은 Eta-group이 항상 유리하다는 주장을 피하고, posterior decision support recovery가 어떤 조건에서 약해지는지 보여주는 appendix/limitation 후보로 두는 것이 안전하다.
+- 외부 baseline에서는 Dense vMF free kappa와 Spherical k-means가 clustering-only 기준으로 S1-N~S4-N에서 비교적 강하게 작동하지만, sparse support를 제공하지 않는다. Sparse k-means는 feature support를 선택하지만 ARI가 낮고 posterior decision support와 목표가 다르다.
 
 ### 3.5 현재 결론
 
