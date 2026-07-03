@@ -56,6 +56,17 @@ $$
 | E-GL | 중심화 eta 좌표 $c_{\cdot j}$ | 있음 | 없음 |
 | E-AGL | 중심화 eta 좌표 $c_{\cdot j}$ | 있음 | 있음 |
 
+외부 비교 모형 후보:
+
+| 외부 모형 | 역할 | S1-S6에서의 사용 목적 | support 지표 | 비고 |
+|---|---|---|---|---|
+| Spherical k-means | 표준 방향 clustering baseline | cosine 기반 hard clustering 성능 비교 | 없음 | ARI/NMI/purity 중심으로 비교 |
+| Dense vMF mixture, free kappa | penalty 없는 확률모형 baseline | sparse penalty 없이 vMF likelihood만 쓸 때의 기준 | 없음 | cluster별 $\kappa_k$를 추정하므로 spherical k-means보다 일반적 |
+| Sparse k-means | 일반 feature-selection clustering baseline | likelihood 모형이 아닌 sparse clustering과 비교 | feature support | posterior decision support와 목표가 다르므로 보조 지표로 해석 |
+| dbmovMFs | 구조적 sparse vMF baseline | vMF co-clustering 구조와 비교 | 구조적 feature/block support | 구현 가능하면 appendix 비교 후보 |
+
+외부 모형은 내부 ablation 모형과 목적이 다르다. Spherical k-means와 dense vMF는 support recovery 모형이 아니므로 clustering 성능만 비교하고, Sparse k-means와 dbmovMFs의 support는 posterior decision support가 아니라 feature/prototype 또는 block support로 해석한다.
+
 모형별 패널티와 매개변수:
 
 | 모형 | 패널티 형태 | adaptive weight 설정 |
@@ -90,6 +101,15 @@ $$
 | E-GL | 0.865 | 17.44 | 0.02 | 16.00 | 1.42 | 1.000 | 0.008 | 0.924 | 0.959 | 0.001528 | 39.821 | 0.078 |
 | E-AGL | 0.865 | 16.06 | 0.00 | 16.00 | 0.06 | 1.000 | 0.000 | 0.996 | 0.998 | 0.001520 | 41.107 | 0.057 |
 
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.768 | 0.740 | 0.903 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.836 | 0.801 | 0.934 | NA | NA | support 없음 |
+| Sparse k-means | 0.669 | 0.669 | 0.826 | 52.36 | 0.674 | feature support, posterior decision support 아님 |
+
 해석:
 
 - D-L과 E-L은 거의 모든 변수를 선택한다.
@@ -108,6 +128,15 @@ $$
 | E-L | 0.881 | 197.50 | 3.92 | 16.00 | 177.58 | 1.000 | 0.986 | 0.081 | 0.150 | 0.000450 | 5.039 | 0.707 |
 | E-GL | 0.904 | 17.06 | 0.00 | 16.00 | 1.06 | 1.000 | 0.006 | 0.941 | 0.969 | 0.001387 | 41.603 | 0.072 |
 | E-AGL | 0.904 | 16.12 | 0.00 | 16.00 | 0.12 | 1.000 | 0.001 | 0.993 | 0.996 | 0.001378 | 42.199 | 0.057 |
+
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.877 | 0.829 | 0.952 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.880 | 0.833 | 0.954 | NA | NA | support 없음 |
+| Sparse k-means | 0.815 | 0.772 | 0.915 | 132.78 | 0.413 | feature support, posterior decision support 아님 |
 
 해석:
 
@@ -129,6 +158,15 @@ $$
 | E-GL | 0.609 | 44.70 | 0.60 | 15.94 | 28.16 | 0.996 | 0.156 | 0.495 | 0.618 | 0.003631 | 157.113 | 0.755 |
 | E-AGL | 0.631 | 21.22 | 0.12 | 15.02 | 6.08 | 0.939 | 0.034 | 0.877 | 0.881 | 0.004147 | 234.696 | 0.250 |
 
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.492 | 0.498 | 0.713 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.539 | 0.552 | 0.732 | NA | NA | support 없음 |
+| Sparse k-means | 0.488 | 0.505 | 0.702 | 162.48 | 0.205 | feature support, posterior decision support 아님 |
+
 해석:
 
 - S3는 스트레스 테스트 설정으로, 모든 모형에서 군집 성능과 support 복원이 약해진다.
@@ -147,6 +185,15 @@ $$
 | E-L | 0.563 | 198.88 | 4.00 | 16.00 | 178.88 | 1.000 | 0.994 | 0.080 | 0.149 | 0.000555 | 8.833 | 1.010 |
 | E-GL | 0.648 | 17.76 | 0.06 | 16.00 | 1.70 | 1.000 | 0.010 | 0.908 | 0.950 | 0.003898 | 314.002 | 0.103 |
 | E-AGL | 0.651 | 16.32 | 0.02 | 16.00 | 0.30 | 1.000 | 0.002 | 0.982 | 0.990 | 0.003924 | 323.765 | 0.079 |
+
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.508 | 0.461 | 0.783 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.561 | 0.508 | 0.812 | NA | NA | support 없음 |
+| Sparse k-means | 0.129 | 0.139 | 0.470 | 73.10 | 0.367 | feature support, posterior decision support 아님 |
 
 해석:
 
@@ -168,6 +215,15 @@ $$
 | E-GL | NA | 0.00 | 0.00 | 0.00 | 0.00 | 0.000 | 0.000 | NA | NA | NA | NA | NA |
 | E-AGL | 0.015 | 0.02 | 0.00 | 0.02 | 0.00 | 0.001 | 0.000 | 1.000 | 0.118 | 0.009 | 1539.065 | 1.040 |
 
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.015 | 0.019 | 0.324 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.029 | 0.036 | 0.348 | NA | NA | support 없음 |
+| Sparse k-means | 0.023 | 0.031 | 0.337 | 99.40 | 0.173 | feature support, posterior decision support 아님 |
+
 해석:
 
 - S5는 실제 30도 근처의 평균 방향 차이를 갖는 이분산 stress setting이다.
@@ -187,6 +243,15 @@ $$
 | E-L | 0.012 | 191.94 | 3.82 | 15.60 | 172.52 | 0.975 | 0.958 | 0.081 | 0.150 | 0.002198 | 101.513 | 4.729 |
 | E-GL | 0.017 | 0.02 | 0.00 | 0.02 | 0.00 | 0.001 | 0.000 | 1.000 | 0.118 | 0.009542 | 1662.998 | 1.020 |
 | E-AGL | 0.012 | 0.56 | 0.02 | 0.06 | 0.48 | 0.004 | 0.003 | 0.537 | 0.105 | 0.007952 | 946.052 | 2.354 |
+
+
+외부 clustering baseline:
+
+| 외부 모형 | ARI | NMI | purity | selected q | F1 | support 해석 |
+|---|---:|---:|---:|---:|---:|---|
+| Spherical k-means | 0.009 | 0.013 | 0.311 | NA | NA | support 없음 |
+| Dense vMF free kappa | 0.011 | 0.018 | 0.317 | NA | NA | support 없음 |
+| Sparse k-means | 0.010 | 0.016 | 0.312 | 105.30 | 0.142 | feature support, posterior decision support 아님 |
 
 해석:
 
@@ -221,6 +286,8 @@ $$
 ## 3. Negative-control 시뮬레이션
 
 ### 3.1 목적
+
+외부 baseline은 현재 기본 시뮬레이션 S1-S6에 대해서만 계산했다. Dense-support negative-control S1-N~S6-N에 대해서는 필요 시 동일 protocol로 추가 실행한다.
 
 기본 시뮬레이션은 true decision support가 16개인 sparse decision-support setting이다. Negative-control 시뮬레이션에서는 평균 방향 차이와 집중도 차이의 두 축은 유지하되, decision variable 수를 80개로 늘려 Eta-group 계열이 항상 유리한 sparse setting만 다루는 것이 아님을 확인한다.
 
