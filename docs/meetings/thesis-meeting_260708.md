@@ -170,3 +170,25 @@ S1-N과 S2-N은 dense support에서도 E-AGL이 바로 무너지지 않음을 �
 - ablation diagnostic에서는 centered eta contrast와 coordinate-wise group penalty의 조합이 support recovery 안정성에 중요해 보인다.
 - 조밀 support 또는 약한 신호에서는 Eta-group이 과소선택하거나 BIC tuning failure를 보일 수 있다.
 - 다음 단계는 S1-S4를 main simulation으로 두고, S5-S6 및 S1-N~S6-N을 limitation/appendix diagnostic으로 배치해도 되는지 교수님께 확인받는 것이다.
+
+## 6. 제안 모형의 비용과 불리한 조건
+
+제안 모형 E-AGL의 비용은 계산 시간 하나보다, tuning과 해석 구조가 더 복잡하다는 점에 있다. S1 1회 runtime benchmark 기준(`K=4`, `n=1000`, `d=200`, `nstart=10`, path=240, Rcpp helper ON)에서 E-AGL은 D-L보다 느렸지만 D-GL/D-AGL보다는 빠르게 나왔다.
+
+| 비교 | 1회 시간 | 해석 |
+|:---|---:|:---|
+| D-L | 3.75 sec | 가장 빠르지만 selected q=200으로 support recovery에는 부적합 |
+| D-GL / D-AGL | 8.82 / 8.53 sec | group/adaptive group penalty 때문에 더 무거움 |
+| E-GL / E-AGL | 5.62 / 5.53 sec | D-L보다 약 1.5배 느리지만, true q=16을 정확히 복원 |
+
+따라서 E-AGL의 주요 비용은 다음처럼 정리한다.
+
+| 비용 또는 불리한 조건 | 내용 | 논문에서의 처리 |
+|:---|:---|:---|
+| 계산 비용 | D-L보다 약 1.47배 느림 | runtime diagnostic으로만 보고 |
+| tuning 비용 | eta path, adaptive weight, BIC 선택에 민감 | path/tuning rule 명확화 필요 |
+| weak signal | S5/S6처럼 signal이 약하면 zero-support 또는 과소선택 가능 | limitation/stress-test |
+| dense decision support | S3-N/S4-N처럼 decision q가 크면 필요한 좌표까지 줄일 수 있음 | negative-control diagnostic |
+| prototype sparsity target | Rossi-style setting은 posterior decision support가 아니라 prototype sparsity가 목표 | 별도 comparability experiment로 분리 |
+
+즉, E-AGL은 모든 상황에서 가장 빠르거나 항상 ARI가 높은 방법이 아니라, sparse posterior decision support recovery가 목표일 때 계산/튜닝 비용을 감수할 가치가 있는 방법으로 설명하는 것이 안전하다.
