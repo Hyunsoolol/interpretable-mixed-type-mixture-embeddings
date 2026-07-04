@@ -141,6 +141,8 @@ S1-N과 S2-N은 dense support에서도 E-AGL이 바로 무너지지 않음을 �
 - Dense vMF free kappa는 S1-S4와 S1-N~S4-N에서 강한 clustering-only baseline이다.
 - 그러나 Dense vMF는 sparse support를 제공하지 않으므로, posterior decision support recovery claim과 직접 경쟁하지 않는다.
 - Sparse k-means는 support를 제공하지만 S1-S6 및 S1-N~S6-N에서 selected q가 과도하거나 ARI가 낮은 경우가 많다.
+- Rossi 2022 simulation은 `mu_k` prototype sparsity setting이다. `d=100`에서 directional mean sparsity가 5%, 10%, 15%이면 모든 군집에서 nonzero인 common-like coordinate의 기대값이 약 81개, 66개, 52개라서 공통/공유 변수가 많은 구조다.
+- 따라서 Rossi-style setting은 특정 군집 변수와 noise q를 고정한 posterior decision-support setting이 아니라, prototype sparsity 비교용 setting으로 분리해서 해석한다.
 - dbmovMFs는 현재 로컬 R 환경에 패키지가 없어 이번 결과에서는 실행하지 못했다.
 
 ### 3.4 Simulation claim 정리
