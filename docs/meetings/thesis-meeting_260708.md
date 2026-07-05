@@ -209,12 +209,12 @@ S1-N과 S2-N에서는 dense support에서도 E-AGL의 성능 저하가 크지 �
 
 E-AGL의 주요 비용과 제약은 다음과 같다.
 
-| 비용 또는 불리한 조건 | 내용 | 논문에서의 처리 |
-|:---|:---|:---|
-| 계산 비용 | D-L보다 약 1.47배 느림 | 실행 시간 diagnostic으로만 보고 |
-| 튜닝 비용 | eta path, adaptive weight, BIC 선택에 민감 | path와 튜닝 규칙 명확화 필요 |
-| weak signal | S5/S6처럼 signal이 약하면 zero-support 또는 과소선택 가능 | limitation/stress-test |
-| dense decision support | S3-N/S4-N처럼 decision q가 크면 필요한 좌표까지 줄일 수 있음 | negative-control diagnostic |
-| prototype sparsity target | Rossi-style setting은 posterior decision support가 아니라 prototype sparsity가 목표 | 별도 comparability experiment로 분리 |
+| 비용 또는 불리한 조건 | 내용 |
+|:---|:---|
+| 계산 비용 | D-L보다 약 1.47배 느림 |
+| 튜닝 비용 | eta path, adaptive weight, BIC 선택에 민감 |
+| weak signal | S5/S6처럼 signal이 약하면 zero-support 또는 과소선택 가능 |
+| dense decision support | S3-N/S4-N처럼 decision q가 크면 필요한 좌표까지 줄일 수 있음 |
+| prototype sparsity target | Rossi-style setting은 posterior decision support가 아니라 prototype sparsity가 목표 |
 
 정리하면 E-AGL은 모든 상황에서 가장 빠르거나 ARI가 가장 높은 방법은 아니다. 계산/튜닝 비용을 수반하지만, sparse posterior decision support recovery를 목표로 할 때 사용하는 방법으로 정리한다.
