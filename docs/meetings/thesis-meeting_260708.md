@@ -7,11 +7,13 @@
 - 피드백 1: $\eta$, $\mu$, $\kappa$의 의존성과 유일성
 - 피드백 2: Eta-group penalty가 불리한 상황
 - 추가 정리: 논문용 S1-S6 시뮬레이션, dense-support negative-control, 외부 baseline 결과
-- 추가 정리: Eta penalty ablation 진단
+- 추가 정리: 공통 변수와 decision support 구분, Eta penalty ablation 진단
 
 전체 시뮬레이션 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 정리했고, 이전 negative-control 세부 진단은 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 별도 문서로 남겼다.
 
-## 2. 의존성과 유일성
+## 2. Eta-group 방법론 근거와 변수 선택 기준
+
+### 2.1 $\eta$, $\mu$, $\kappa$ 관계와 유일성
 
 vMF mixture에서 posterior decision score에 직접 들어가는 자연모수는
 
@@ -51,34 +53,81 @@ $$
 
 단, $\eta=0$ 또는 $\kappa=0$이면 방향 $\mu$는 식별되지 않는다. 또한 mixture model의 label switching은 별도 문제다. 따라서 여기서 말하는 유일성은 mixture 전체의 전역 식별성 증명이 아니라, component-level parameterization에 대한 설명이다.
 
-### 2.1 왜 Eta-group인가?
+### 2.2 왜 Eta-group인가?
 
-vMF mixture의 posterior decision score에는
-
-$$
-\eta_k^\top x_i=(\kappa_k\mu_k)^\top x_i
-$$
-
-가 직접 들어간다. 따라서 posterior decision boundary에 작동하는 parameter는 $\mu$ 단독이나 $\kappa$ 단독이 아니라 자연모수 $\eta_k=\kappa_k\mu_k$다.
-
-군집 판별에서 중요한 것은 각 component의 개별 $\eta_k$보다, component 사이에서 어떤 coordinate가 posterior decision score 차이를 만드는지이다. 이를 보기 위해 centered eta contrast
+vMF mixture의 posterior score는 자연모수 $\eta_k=\kappa_k\mu_k$를 통해 결정된다.
 
 $$
-c_{kj}=\eta_{kj}-\bar{\eta}_j,\qquad
-\bar{\eta}_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}
+s_k(x)=\log\pi_k+\log C_d(\kappa_k)+\eta_k^\top x.
 $$
 
-를 본다. Eta-group penalty는
+두 component의 decision score 차이는
 
 $$
-\lambda_\eta\sum_{j=1}^d \|c_{\cdot j}\|_2
+s_k(x)-s_\ell(x)
+=
+\mathrm{const}_{k\ell}
++
+(\eta_k-\eta_\ell)^\top x.
 $$
 
-로 두어, coordinate $j$가 component 간 posterior decision boundary를 만드는지 직접 선택한다.
+따라서 변수 선택 대상은 $\mu$나 $\kappa$ 단독이 아니라, component 간 $\eta$ 차이를 만드는 coordinate다. 이를 centered contrast로 쓰면
 
-Eta-group은 posterior decision score에 들어가는 centered eta contrast를 coordinate 단위로 선택하는 구조다. 본 연구의 주장은 일괄적 성능 우위가 아니라 posterior decision support recovery에 둔다.
+$$
+c_{kj}=\eta_{kj}-\bar\eta_j,\qquad
+\bar\eta_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}.
+$$
 
-### 2.2 Eta penalty ablation 진단
+제안 penalty는
+
+$$
+\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2.
+$$
+
+즉, coordinate $j$가 posterior decision boundary에 필요한지를 직접 선택한다.
+
+### 2.3 공통 변수가 선택되지 않는 이유
+
+제안 모형의 support target은 $\mu$에 존재하는 좌표가 아니라 posterior decision score 차이를 만드는 좌표다. 두 component $k,\ell$에 대해
+
+$$
+s_k(x)-s_\ell(x)
+=
+\log\frac{\pi_k}{\pi_\ell}
++
+\log\frac{C_d(\kappa_k)}{C_d(\kappa_\ell)}
++
+(\eta_k-\eta_\ell)^\top x.
+$$
+
+따라서 좌표 $j$가 공통 변수이면
+
+$$
+\eta_{1j}=\cdots=\eta_{Kj}
+\quad\Rightarrow\quad
+\eta_{kj}-\eta_{\ell j}=0.
+$$
+
+즉, 해당 좌표는 각 component score에는 들어가지만 posterior decision boundary에는 기여하지 않는다. Centered eta contrast로 쓰면
+
+$$
+c_{kj}=\eta_{kj}-\bar\eta_j,\qquad
+\eta_{\cdot j}=a_j\mathbf{1}
+\Rightarrow
+c_{\cdot j}=0.
+$$
+
+따라서 Eta-group penalty
+
+$$
+\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2
+$$
+
+에서는 공통 좌표가 선택되지 않는다. 반면 Rossi 계열의 $\mu$-support는 각 군집 중심을 설명하는 좌표를 보기 때문에 공통 좌표도 선택될 수 있다.
+
+예외적으로 $\mu$가 공통이어도 $\kappa_k$가 다르면 $\eta_{kj}=\kappa_k\mu_{kj}$가 달라져 $c_{\cdot j}\ne0$이 될 수 있다. 이 경우 해당 좌표는 decision support에 포함될 수 있다.
+
+### 2.4 Eta penalty ablation 진단
 
 이 절은 S1-S6 성능 결과가 아니라, 제안 모형의 구조를 분해한 ablation 진단이다. eta 자연모수, group penalty, centered contrast의 역할을 분리해 확인한다.
 
@@ -144,14 +193,11 @@ S1-N과 S2-N에서는 dense support에서도 E-AGL의 성능 저하가 크지 �
 
 ### 3.3 외부 baseline 해석
 
-외부 baseline은 내부 ablation 모형과 목적이 다르다. Spherical k-means와 Dense vMF free kappa는 support recovery 모형이 아니므로 ARI/NMI/purity 중심으로만 비교한다. Sparse k-means는 feature support를 선택하지만, posterior decision support와 같은 목표가 아니므로 보조 지표로만 해석한다.
+외부 baseline은 제안 모형과 목표가 다르므로 ARI/NMI/purity 중심으로만 비교한다.
 
-- Dense vMF free kappa는 S1-S4와 S1-N~S4-N에서 경쟁력 있는 clustering-only baseline이다.
-- 다만 Dense vMF는 sparse support를 제공하지 않으므로, posterior decision support recovery 주장과는 평가 목표가 다르다.
-- Sparse k-means는 support를 제공하지만 S1-S6 및 S1-N~S6-N에서 selected q가 과도하거나 ARI가 낮은 경우가 많다.
-- Rossi 2022 시뮬레이션은 `mu_k` prototype sparsity setting이다. `d=100`에서 directional mean sparsity가 5%, 10%, 15%이면 모든 군집에서 nonzero인 common-like coordinate의 기대값이 약 81개, 66개, 52개라서 공통/공유 변수가 많은 구조다.
-- 따라서 Rossi-style setting은 특정 군집 변수와 noise q를 고정한 posterior decision-support setting이 아니라, prototype sparsity 비교용 setting으로 분리해서 해석한다.
-- dbmovMFs는 현재 로컬 R 환경에 패키지가 없어 이번 결과에서는 실행하지 못했다.
+- Spherical k-means와 Dense vMF free kappa는 clustering-only baseline이며 sparse support를 제공하지 않는다.
+- Sparse k-means는 feature support를 선택하지만 posterior decision support와는 목표가 다르다.
+- Rossi 2022 setting은 $\mu_k$ prototype sparsity 비교용이다. `d=100`에서 sparsity 5%, 10%, 15%이면 common-like coordinate 기대값이 약 81개, 66개, 52개로, 공통/공유 변수가 많은 구조다. dbmovMFs는 현재 로컬 R 환경에 없어 제외했다.
 
 ## 4. 제안 모형의 비용과 불리한 조건
 
