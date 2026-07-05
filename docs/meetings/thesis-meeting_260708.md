@@ -95,7 +95,7 @@ $$
 - $\mu$-space에 group penalty를 둔 Rossi $\mu$-group은 기존 Rossi $\mu$보다 개선되지만, Eta-group보다 FPR이 크고 F1이 낮았다. 따라서 group penalty만으로도 충분하지 않다.
 - 현재 ablation 기준에서는 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 묶어 선택하는 Eta-group 구조가 가장 직접적이다.
 
-## 3. 논문용 시뮬레이션 업데이트
+## 3. 시뮬레이션 결과 요약
 
 이번에 논문용 시뮬레이션을 S1-S6 기본 시뮬레이션과 S1-N~S6-N dense-support negative-control로 정리했다. 목적은 clustering accuracy 자체가 아니라, posterior decision support recovery가 언제 잘 되고 언제 약해지는지 확인하는 것이다. 전체 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 둔다.
 
