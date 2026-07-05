@@ -64,8 +64,7 @@ $$
 두 component의 decision score 차이는
 
 $$
-s_k(x)-s_\ell(x)
-=
+s_k(x)-s_\ell(x) =
 \mathrm{const}_{k\ell}
 +
 (\eta_k-\eta_\ell)^\top x.
@@ -91,8 +90,7 @@ $$
 제안 모형의 support target은 $\mu$에 존재하는 좌표가 아니라 posterior decision score 차이를 만드는 좌표다. 두 component $k,\ell$에 대해
 
 $$
-s_k(x)-s_\ell(x)
-=
+s_k(x)-s_\ell(x) =
 \log\frac{\pi_k}{\pi_\ell}
 +
 \log\frac{C_d(\kappa_k)}{C_d(\kappa_\ell)}
