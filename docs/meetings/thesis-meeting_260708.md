@@ -99,6 +99,19 @@ $$
 
 이번에 논문용 시뮬레이션을 S1-S6 기본 시뮬레이션과 S1-N~S6-N dense-support negative-control로 정리했다. 목적은 clustering accuracy 자체가 아니라, posterior decision support recovery가 언제 잘 되고 언제 약해지는지 확인하는 것이다. 전체 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 둔다.
 
+비교 모형은 penalty를 거는 공간과 group/adaptive 여부로 구분한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$는 centered eta contrast다.
+
+| Model | penalty |
+|:---|:---|
+| D-L | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ |
+| D-GL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ |
+| D-AGL | $\lambda_\mu\sum_j w_j^{(D)}\lVert\mu_{\cdot j}\rVert_2$ |
+| E-L | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ |
+| E-GL | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ |
+| E-AGL | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ |
+
+Adaptive weight는 $w_j^{(D)}\propto(\lVert\mu_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$, $w_j^{(E)}\propto(\lVert c_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$로 두고, 이번 시뮬레이션에서는 $\gamma=1$, $\epsilon=10^{-6}$을 사용했다.
+
 ### 3.1 기본 시뮬레이션 S1-S6
 
 기본 시뮬레이션은 true decision support가 16개인 sparse decision-support setting이다. common q=4는 모든 component에 공통으로 들어가므로 decision support에는 포함하지 않는다.
