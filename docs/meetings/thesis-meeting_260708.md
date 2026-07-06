@@ -131,23 +131,22 @@ $$
 
 | 비교 목적 | method | penalty / model | reps | selected q | ARI | TPR | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| Proposed reference | E-GL + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.684 | 0.995 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
-| Same eta, no group | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.652 | 1.000 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entry-wise L1은 거의 dense support |
-| Direction group | D-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.685 | 1.000 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
-| Direction baseline | D-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.653 | 1.000 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entry-wise penalty는 거의 dense support |
+| $\mu$ entry-wise | M-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 25.90 | 0.687 | 1.000 | 0.050 | 0.855 | 0.920 | 0.162 | baseline |
+| $\mu$ group | M-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 23.95 | 0.687 | 1.000 | 0.025 | 0.921 | 0.958 | 0.146 | group penalty 효과 |
+| adaptive $\mu$ group | M-AGL + refit | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | 20 | 22.55 | 0.689 | 1.000 | 0.007 | 0.977 | 0.988 | 0.131 | true q=22 근처 |
+| centered $\mu$ group | M-CGL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | 20 | 38.75 | 0.657 | 0.998 | 0.215 | 0.643 | 0.761 | 1.359 | noise 선택 증가 |
+| raw $\eta$ entry-wise | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert\eta_{kj}\rvert$ | 20 | 30.85 | 0.680 | 1.000 | 0.113 | 0.722 | 0.836 | 0.226 | raw eta L1은 noise 선택 증가 |
+| raw $\eta$ group | E-GL + refit | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 20 | 23.20 | 0.687 | 1.000 | 0.015 | 0.950 | 0.974 | 0.141 | eta group만의 효과 |
+| centered $\eta$ entry-wise | E-CL + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 24.40 | 0.688 | 0.991 | 0.033 | 0.898 | 0.941 | 0.177 | centering + entry-wise |
+| centered $\eta$ group | E-CGL + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 24.00 | 0.689 | 0.995 | 0.027 | 0.918 | 0.954 | 0.166 | centered eta group |
+| adaptive centered $\eta$ group | E-CAGL + refit | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 20 | 22.05 | 0.687 | 0.991 | 0.003 | 0.989 | 0.990 | 0.139 | adaptive 제안형 |
 
-`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. `E-L`과 `D-GL`은 정식 제안 모형이 아니라 구조 분해를 위한 진단용 비교 모형이다.
+`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. 이 표는 rep=20 diagnostic 결과이며, S1-S6 본 결과가 아니라 구조 분해 결과로 해석한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$이고, true decision q는 22다.
 
-- Eta 자연모수를 사용해도 entry-wise L1에서는 support가 거의 dense해졌다. eta parameterization만으로는 support recovery가 충분하지 않았다.
-- $\mu$-space에 group penalty를 둔 D-GL은 D-L보다 개선됐지만, E-GL보다 FPR이 크고 F1이 낮았다. group penalty만으로는 Eta-group 결과를 설명하기 어렵다.
-- 현재 ablation 결과에서는 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 묶어 선택하는 구조가 상대적으로 안정적이었다.
-
-추가로 확인할 ablation 후보는 $\boxed{D\text{-CGL},\ E\text{-RGL}}$ 두 가지다. 두 모형은 기존 결과표에 포함된 실행 결과가 아니라, centering 효과와 raw eta 효과를 분리하기 위한 후속 진단 후보다.
-
-| method | full name | penalty / model | 확인할 역할 |
-|:---|:---|:---|:---|
-| D-CGL | Direction-centered group lasso | $\lambda_\mu\sum_j\lVert \mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | $\mu$에서도 평균을 뺐을 때 common coordinate가 제거되는지 확인 |
-| E-RGL | Eta-raw group lasso | $\lambda_\eta\sum_j\lVert \eta_{\cdot j}\rVert_2$ | eta를 쓰되 centering하지 않으면 common coordinate가 선택되는지 확인 |
+- M-GL과 E-GL은 entry-wise L1보다 FPR을 낮췄다. 즉 group penalty 자체의 효과가 있다.
+- M-CGL은 noise 선택과 MSE_eta가 커졌다. 따라서 $\mu$에서 평균을 빼는 centering만으로 centered eta 구조를 대체한다고 보기 어렵다.
+- E-L은 raw eta를 쓰지만 entry-wise penalty라 noise 선택이 늘었다. eta parameterization만으로는 충분하지 않고 group 구조가 필요하다.
+- E-CGL/E-CAGL은 centered eta contrast를 사용하므로 posterior decision support를 직접 겨냥한다. 특히 E-CAGL은 selected q가 true q=22에 가장 가까웠고 FPR이 가장 낮았다.
 
 ## 3. 시뮬레이션 결과 요약
 
@@ -157,44 +156,44 @@ $$
 
 | Model | penalty |
 |:---|:---|
-| D-L | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ |
-| D-GL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ |
-| D-AGL | $\lambda_\mu\sum_j w_j^{(D)}\lVert\mu_{\cdot j}\rVert_2$ |
-| E-L | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ |
-| E-GL | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ |
-| E-AGL | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ |
+| M-L | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ |
+| M-GL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ |
+| M-AGL | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ |
+| E-CL | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ |
+| E-CGL | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ |
+| E-CAGL | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ |
 
-Adaptive weight는 $w_j^{(D)}\propto(\lVert\mu_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$, $w_j^{(E)}\propto(\lVert c_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$로 두고, 이번 시뮬레이션에서는 $\gamma=1$, $\epsilon=10^{-6}$을 사용했다.
+Adaptive weight는 $w_j^{(M)}\propto(\lVert\mu_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$, $w_j^{(E)}\propto(\lVert c_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$로 두고, 이번 시뮬레이션에서는 $\gamma=1$, $\epsilon=10^{-6}$을 사용했다.
 
 ### 3.1 기본 시뮬레이션 S1-S6
 
 기본 시뮬레이션은 true decision support가 16개인 sparse decision-support setting이다. common q=4는 모든 component에 공통으로 들어가므로 decision support에는 포함하지 않는다.
 
-| Scenario | 설정 | E-AGL 핵심 결과 | 외부 baseline 결과 | 해석 |
+| Scenario | 설정 | E-CAGL 핵심 결과 | 외부 baseline 결과 | 해석 |
 |:---|:---|:---|:---|:---|
-| S1 | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.865, selected q=16.06, F1=0.998, MSE_eta=0.057 | Dense vMF ARI=0.836 | E-AGL selected q가 true q=16에 가까움 |
+| S1 | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.865, selected q=16.06, F1=0.998, MSE_eta=0.057 | Dense vMF ARI=0.836 | E-CAGL selected q가 true q=16에 가까움 |
 | S2 | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.904, selected q=16.12, F1=0.996, MSE_eta=0.057 | Dense vMF ARI=0.880 | 집중도 차이가 없어도 support recovery 안정적 |
-| S3 | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.631, selected q=21.22, F1=0.881, MSE_eta=0.250 | Dense vMF ARI=0.539 | 중간 난도 setting. E-AGL 장점이 유지됨 |
+| S3 | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.631, selected q=21.22, F1=0.881, MSE_eta=0.250 | Dense vMF ARI=0.539 | 중간 난도 setting. E-CAGL 장점이 유지됨 |
 | S4 | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.651, selected q=16.32, F1=0.990, MSE_eta=0.079 | Dense vMF ARI=0.561 | 평균 차이만 있어도 decision support 복원 가능 |
 | S5 | 평균 차이 작음(30도), 약한 집중도 이분산 | ARI=0.015, selected q=0.02, F1=0.118, MSE_eta=1.040 | Dense vMF ARI=0.029 | weak-signal stress-test. zero-support 쪽으로 수축 |
 | S6 | 평균 차이 작음(30도), 집중도 등분산 | ARI=0.012, selected q=0.56, F1=0.105, MSE_eta=2.354 | Dense vMF ARI=0.011 | weak-signal setting. 모든 방법의 성능이 낮음 |
 
-S1-S4에서는 E-AGL이 clustering 성능을 유지하면서 selected q를 true q=16 근처로 맞췄다. D-L과 E-L은 ARI는 유지했지만 selected q가 거의 전체 차원에 가까워 support recovery 관점에서는 한계가 있었다. S5-S6은 주요 결과가 아니라 weak-signal limitation으로 분리해 해석한다.
+S1-S4에서는 E-CAGL이 clustering 성능을 유지하면서 selected q를 true q=16 근처로 맞췄다. M-L과 E-CL은 ARI는 유지했지만 selected q가 거의 전체 차원에 가까워 support recovery 관점에서는 한계가 있었다. S5-S6은 주요 결과가 아니라 weak-signal limitation으로 분리해 해석한다.
 
 ### 3.2 Dense-support negative-control S1-N~S6-N
 
 Negative-control은 평균 방향 차이와 집중도 차이의 축은 유지하되, decision q를 16에서 80으로 늘린 dense decision-support setting이다. sparse support 가정 밖에서 Eta-group의 동작을 확인하기 위한 설정이다.
 
-| Scenario | 설정 | E-AGL 핵심 결과 | 외부 baseline 결과 | 해석 |
+| Scenario | 설정 | E-CAGL 핵심 결과 | 외부 baseline 결과 | 해석 |
 |:---|:---|:---|:---|:---|
 | S1-N | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.857, selected q=82.40, F1=0.985 | Dense vMF ARI=0.835 | dense support에서도 안정적 |
 | S2-N | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.897, selected q=81.82, F1=0.989 | Dense vMF ARI=0.886 | dense support에서도 true q=80 근처 선택 |
-| S3-N | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.565, selected q=76.06, F1=0.840 | Dense vMF ARI=0.545 | D-AGL보다 support F1이 낮아지는 limitation |
-| S4-N | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.629, selected q=16.70, F1=0.979 | Dense vMF ARI=0.562 | E-AGL이 decision q=80 중 일부만 선택. BIC 튜닝 실패 가능성 |
+| S3-N | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.565, selected q=76.06, F1=0.840 | Dense vMF ARI=0.545 | M-AGL보다 support F1이 낮아지는 limitation |
+| S4-N | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.629, selected q=16.70, F1=0.979 | Dense vMF ARI=0.562 | E-CAGL이 decision q=80 중 일부만 선택. BIC 튜닝 실패 가능성 |
 | S5-N | 평균 차이 작음(30도), 약한 집중도 이분산 | ARI=0.001, selected q=0.06, F1=0.025 | Dense vMF ARI=0.024 | weak signal에서 전체적으로 성능 저하 |
 | S6-N | 평균 차이 작음(30도), 집중도 등분산 | ARI=0.005, selected q=2.04, F1=0.172 | Dense vMF ARI=0.012 | dense/sparse 여부와 무관하게 signal 자체가 약함 |
 
-S1-N과 S2-N에서는 dense support에서도 E-AGL의 성능 저하가 크지 않았다. 반면 S3-N과 S4-N에서는 평균 방향 차이가 보통 수준일 때 Eta-group 계열의 과소선택 또는 BIC 튜닝 실패 가능성이 확인됐다. S5-N/S6-N은 signal 자체가 약한 stress-test로 해석한다.
+S1-N과 S2-N에서는 dense support에서도 E-CAGL의 성능 저하가 크지 않았다. 반면 S3-N과 S4-N에서는 평균 방향 차이가 보통 수준일 때 Eta-group 계열의 과소선택 또는 BIC 튜닝 실패 가능성이 확인됐다. S5-N/S6-N은 signal 자체가 약한 stress-test로 해석한다.
 
 ### 3.3 외부 baseline 해석
 
@@ -206,22 +205,22 @@ S1-N과 S2-N에서는 dense support에서도 E-AGL의 성능 저하가 크지 �
 
 ## 4. 제안 모형의 비용과 불리한 조건
 
-제안 모형 E-AGL의 비용은 계산 시간뿐 아니라 튜닝과 해석 구조가 더 복잡하다는 점에 있다. S1 1회 실행 시간 benchmark 기준(`K=4`, `n=1000`, `d=200`, `nstart=10`, path=240, Rcpp helper ON)에서 E-AGL은 D-L보다 느렸지만 D-GL/D-AGL보다는 빠르게 나왔다.
+제안 모형 E-CAGL의 비용은 계산 시간뿐 아니라 튜닝과 해석 구조가 더 복잡하다는 점에 있다. S1 1회 실행 시간 benchmark 기준(`K=4`, `n=1000`, `d=200`, `nstart=10`, path=240, Rcpp helper ON)에서 E-CAGL은 M-L보다 느렸지만 M-GL/M-AGL보다는 빠르게 나왔다.
 
 | 비교 | 1회 시간 | 해석 |
 |:---|---:|:---|
-| D-L | 3.75 sec | 계산 시간은 가장 짧지만 selected q=200으로 support recovery에는 한계 |
-| D-GL / D-AGL | 8.82 / 8.53 sec | group/adaptive group penalty로 계산량 증가 |
-| E-GL / E-AGL | 5.62 / 5.53 sec | D-L보다 약 1.5배 느리지만, true q=16에 가깝게 복원 |
+| M-L | 3.75 sec | 계산 시간은 가장 짧지만 selected q=200으로 support recovery에는 한계 |
+| M-GL / M-AGL | 8.82 / 8.53 sec | group/adaptive group penalty로 계산량 증가 |
+| E-CGL / E-CAGL | 5.62 / 5.53 sec | M-L보다 약 1.5배 느리지만, true q=16에 가깝게 복원 |
 
-E-AGL의 주요 비용과 제약은 다음과 같다.
+E-CAGL의 주요 비용과 제약은 다음과 같다.
 
 | 비용 또는 불리한 조건 | 내용 |
 |:---|:---|
-| 계산 비용 | D-L보다 약 1.47배 느림 |
+| 계산 비용 | M-L보다 약 1.47배 느림 |
 | 튜닝 비용 | eta path, adaptive weight, BIC 선택에 민감 |
 | weak signal | S5/S6처럼 signal이 약하면 zero-support 또는 과소선택 가능 |
 | dense decision support | S3-N/S4-N처럼 decision q가 크면 필요한 좌표까지 줄일 수 있음 |
 | prototype sparsity target | Rossi-style setting은 posterior decision support가 아니라 prototype sparsity가 목표 |
 
-정리하면 E-AGL은 모든 상황에서 가장 빠르거나 ARI가 가장 높은 방법은 아니다. 계산/튜닝 비용을 수반하지만, sparse posterior decision support recovery를 목표로 할 때 사용하는 방법으로 정리한다.
+정리하면 E-CAGL은 모든 상황에서 가장 빠르거나 ARI가 가장 높은 방법은 아니다. 계산/튜닝 비용을 수반하지만, sparse posterior decision support recovery를 목표로 할 때 사용하는 방법으로 정리한다.
