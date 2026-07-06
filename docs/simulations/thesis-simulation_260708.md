@@ -3,7 +3,7 @@
 ## 1. 목적
 
 7월 8일 연구미팅 공유용으로, 논문용 후보 시뮬레이션 S1-S6 결과를 정리한다.
-이번 시뮬레이션의 핵심 질문은 군집 정확도 자체보다 사후 군집 결정에 쓰이는 support를 얼마나 잘 복원하는가이다.
+이번 시뮬레이션의 주요 평가 기준은 군집 정확도 자체보다 사후 군집 결정에 쓰이는 support를 얼마나 잘 복원하는가이다.
 
 제안 모형의 목표 support는 중심화 eta 대비(centered eta contrast)
 
@@ -257,7 +257,7 @@ $$
 
 - S6는 실제 30도 평균 방향 차이를 갖는 가장 강한 stress setting이다.
 - 모든 모형에서 ARI가 거의 0에 가깝고, E-GL/E-AGL은 대부분 zero-support에 가까운 선택을 한다.
-- 이 결과는 평균 방향 차이가 지나치게 작으면 posterior decision support recovery 자체가 어려워진다는 한계 진단으로 해석하는 것이 안전하다.
+- 이 결과는 평균 방향 차이가 지나치게 작을 때 posterior decision support recovery 자체가 어려워지는 한계 진단으로 해석한다.
 
 ### 2.8 기본 시뮬레이션 결론
 
@@ -281,7 +281,7 @@ $$
 
 - E-GL과 E-AGL은 공통 좌표를 제거하면서 전체 eta norm도 함께 줄이므로 MSE_kappa가 크게 나타난다.
 - 이는 중심화 eta 대비를 목표로 할 때 예상 가능한 패턴이다.
-- 본 논문에서는 MSE_eta와 decision support recovery를 주요 추정 목표로 보고, MSE_kappa는 보조 진단 지표로 제시하는 것이 적절하다.
+- 본 논문에서는 MSE_eta와 decision support recovery를 주요 추정 목표로 보고, MSE_kappa는 보조 진단 지표로 제시한다.
 
 ## 3. Negative-control 시뮬레이션
 
@@ -438,26 +438,26 @@ $$
 
 - S1-N과 S2-N에서는 decision q가 80으로 조밀해져도 E-AGL이 TPR=1에 가깝고 selected q도 80에 가깝다. 이 두 경우는 Eta-group이 dense support에서 바로 무너진다는 증거는 아니다.
 - S3-N에서는 평균 방향 차이가 보통(60도)이고 집중도 차이가 있는 상황에서 E-AGL이 decision variable을 과소선택했다. D-AGL의 F1은 0.877, E-AGL의 F1은 0.840으로 D-AGL이 support F1에서는 더 좋았다.
-- S4-N에서는 E-GL이 BIC에서 zero support를 선택했고, E-AGL도 50회 중 10회만 refit이 유효했다. 이는 clean한 D-계열 우위라기보다, 보통 수준의 평균 차이(60도)와 조밀 support가 결합될 때 Eta-group tuning이 실패할 수 있음을 보여주는 진단이다.
+- S4-N에서는 E-GL이 BIC에서 zero support를 선택했고, E-AGL도 50회 중 10회만 refit이 유효했다. 이는 clean한 D-계열 우위라기보다, 보통 수준의 평균 차이(60도)와 조밀 support가 결합될 때 Eta-group tuning failure가 발생할 수 있음을 나타내는 진단이다.
 - S5-N과 S6-N에서는 평균 방향 차이가 30도 수준으로 작아지면서 모든 모형의 ARI가 거의 0에 가까워졌다. D-L/E-L은 거의 dense support를 선택하고, E-GL/E-AGL은 zero-support 또는 극단적 과소선택으로 간다.
-- 따라서 dense decision support negative-control은 Eta-group이 항상 유리하다는 주장을 피하고, posterior decision support recovery가 어떤 조건에서 약해지는지 보여주는 appendix/limitation 후보로 두는 것이 안전하다.
+- 따라서 dense decision support negative-control은 Eta-group이 항상 유리하다는 주장을 피하고, posterior decision support recovery가 약해지는 조건을 정리하는 appendix/limitation 결과로 둔다.
 - 외부 baseline에서는 Dense vMF free kappa와 Spherical k-means가 clustering-only 기준으로 S1-N~S4-N에서 비교적 강하게 작동하지만, sparse support를 제공하지 않는다. Sparse k-means는 feature support를 선택하지만 ARI가 낮고 posterior decision support와 목표가 다르다.
 
 ### 3.5 현재 결론
 
-S1-N~S6-N rep=50 결과는 Eta-group 계열의 장점과 한계를 동시에 보여준다. 평균 방향 차이가 큰 경우(90도)에는 dense decision support에서도 E-AGL은 안정적이지만, 평균 방향 차이가 보통 수준(60도)이면 support를 과소선택하거나 zero-support tuning failure가 나타날 수 있다. 평균 방향 차이가 작은 30도 설정에서는 dense/sparse 여부와 관계없이 전체 clustering과 support recovery가 모두 약해진다. 논문에서는 이를 main result가 아니라 negative-control diagnostic으로 제시하는 것이 적절하다.
+S1-N~S6-N rep=50 결과에서는 Eta-group 계열의 장점과 한계가 함께 관찰된다. 평균 방향 차이가 큰 경우(90도)에는 dense decision support에서도 E-AGL은 안정적이지만, 평균 방향 차이가 보통 수준(60도)이면 support를 과소선택하거나 zero-support tuning failure가 나타날 수 있다. 평균 방향 차이가 작은 30도 설정에서는 dense/sparse 여부와 관계없이 전체 clustering과 support recovery가 모두 약해진다. 논문에서는 이를 main result가 아니라 negative-control diagnostic으로 제시한다.
 
 ## 4. Shared-background eta-contrast 시뮬레이션
 
 ### 4.1 목적
 
-이 시뮬레이션은 공통 배경 신호가 많은 상황에서 제안 모형이 posterior decision support만 선택하는지 확인하기 위한 추가 진단이다. 전체 prototype 관점에서는 common q와 specific q가 모두 nonzero이지만, posterior decision boundary를 실제로 바꾸는 변수는 specific q뿐이다.
+이 시뮬레이션은 공통 배경 신호가 많은 상황에서 제안 모형이 posterior decision support만 선택하는지 평가하는 추가 진단이다. 전체 prototype 관점에서는 common q와 specific q가 모두 nonzero이지만, posterior decision boundary를 실제로 바꾸는 변수는 specific q뿐이다.
 
-즉, 이 설정의 핵심 질문은 다음과 같다.
+평가 항목은 다음과 같다.
 
-- D 계열은 common q까지 prototype support로 선택하는가?
-- E 계열은 common q를 제외하고 specific q 중심으로 선택하는가?
-- Eta-group 계열이 단순히 sparse setting에서만 유리한 것이 아니라, 공통 배경 신호가 큰 경우에도 decision contrast를 분리하는가?
+- D 계열의 common q 포함 prototype support 선택 정도
+- E 계열의 common q 제외 및 specific q 중심 선택 정도
+- 공통 배경 신호가 큰 경우의 decision contrast 분리 성능
 
 ### 4.2 시뮬레이션 설정
 
@@ -479,7 +479,7 @@ S1-N~S6-N rep=50 결과는 Eta-group 계열의 장점과 한계를 동시에 보
 | path length | 240 |
 | 선택 기준 | BIC |
 
-common q는 모든 component에 같은 방향으로 들어가는 공통 배경 변수다. 따라서 mu/prototype에는 존재하지만 centered eta contrast에서는 거의 0이므로, posterior decision support에는 포함되지 않는 것이 목표다.
+common q는 모든 component에 같은 방향으로 들어가는 공통 배경 변수다. 따라서 mu/prototype에는 존재하지만 centered eta contrast에서는 거의 0이므로, posterior decision support에는 포함되지 않는 변수로 정의한다.
 
 ### 4.3 rep=50 결과 요약
 
@@ -499,17 +499,17 @@ common q는 모든 component에 같은 방향으로 들어가는 공통 배경 �
 | 모형 | prototype TPR | prototype Precision | prototype F1 | 해석 |
 |---|---:|---:|---:|---|
 | D-L | 1.000 | 0.502 | 0.669 | common과 specific은 잡지만 noise도 많이 선택 |
-| D-GL | 1.000 | 0.972 | 0.986 | prototype support 기준으로 매우 양호 |
-| D-AGL | 1.000 | 0.976 | 0.988 | prototype support 기준으로 매우 양호 |
+| D-GL | 1.000 | 0.972 | 0.986 | prototype support 기준 복원 성능이 높음 |
+| D-AGL | 1.000 | 0.976 | 0.988 | prototype support 기준 복원 성능이 높음 |
 | E-L | 0.995 | 0.500 | 0.666 | dense하게 선택 |
 | E-GL | 0.209 | 0.947 | 0.342 | common을 제외하므로 prototype 기준 TPR은 낮음 |
 | E-AGL | 0.203 | 0.991 | 0.337 | common을 제외하므로 prototype 기준 TPR은 낮음 |
 
-### 4.5 핵심 해석
+### 4.5 결과 해석
 
-- D-GL/D-AGL은 prototype support 관점에서는 common q와 specific q를 모두 잘 선택한다. 그러나 posterior decision support 관점에서는 common q까지 선택하므로 selected q가 약 102개로 커진다.
-- E-GL/E-AGL은 common q를 거의 선택하지 않고 specific q 20개를 중심으로 선택한다. 특히 E-AGL은 selected q=20.48, common q=0.30, noise q=0.18로 true decision q=20에 가장 가깝다.
-- 이 결과는 제안 모형의 목표가 prototype sparsity가 아니라 centered eta contrast 기반 posterior decision support recovery임을 보여준다.
-- 반대로 MSE_kappa는 E-GL/E-AGL에서 크게 나타난다. 이는 common background coordinate를 제거하면서 kappa 복원 오차가 커지는 현상으로, 이 설정에서는 MSE_eta와 decision support 지표를 주 지표로 보는 것이 더 적절하다.
+- D-GL/D-AGL은 prototype support 관점에서 common q와 specific q를 함께 선택한다. posterior decision support 관점에서는 common q까지 선택하므로 selected q가 약 102개로 커진다.
+- E-GL/E-AGL은 common q를 거의 선택하지 않고 specific q 20개를 중심으로 선택한다. 특히 E-AGL은 selected q=20.48, common q=0.30, noise q=0.18로 true decision q=20에 근접한다.
+- 이 결과는 제안 모형의 목표가 prototype sparsity가 아니라 centered eta contrast 기반 posterior decision support recovery임을 나타낸다.
+- MSE_kappa는 E-GL/E-AGL에서 크게 나타난다. 이는 common background coordinate를 제거하면서 kappa 복원 오차가 커지는 현상으로, 이 설정에서는 MSE_eta와 decision support 지표를 중심 지표로 보고한다.
 
-결론적으로 shared-background 설정에서는 D 계열과 E 계열의 목표 차이가 가장 분명하게 드러난다. D 계열은 prototype support를 잘 복원하고, E 계열은 posterior decision support를 더 직접적으로 복원한다.
+요약하면 shared-background 설정에서는 D 계열과 E 계열의 목표 차이가 뚜렷하게 나타난다. D 계열은 prototype support를 복원하고, E 계열은 posterior decision support를 더 직접적으로 복원한다.
