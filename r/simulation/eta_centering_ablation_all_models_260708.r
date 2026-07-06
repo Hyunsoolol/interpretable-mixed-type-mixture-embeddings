@@ -54,6 +54,8 @@ cfg <- list(
   base_seed = as.integer(Sys.getenv("ETA_CENTER_ABL_BASE_SEED", "20260708")),
   adaptive_gamma = as.numeric(Sys.getenv("ETA_CENTER_ABL_ADAPTIVE_GAMMA", "1")),
   adaptive_eps = as.numeric(Sys.getenv("ETA_CENTER_ABL_ADAPTIVE_EPS", "1e-6")),
+  generator = tolower(Sys.getenv("ETA_CENTER_ABL_GENERATOR", "specific_weight")),
+  target_angle_deg = as.numeric(Sys.getenv("ETA_CENTER_ABL_TARGET_ANGLE_DEG", "90")),
   out_dir = Sys.getenv(
     "ETA_CENTER_ABL_OUT_DIR",
     "results/eta_centering_ablation_all_models_pilot5_260708"
@@ -62,6 +64,9 @@ cfg <- list(
 
 if (!cfg$select_ic %in% c("BIC", "EBIC")) {
   stop("ETA_CENTER_ABL_SELECT_IC must be BIC or EBIC.")
+}
+if (!cfg$generator %in% c("specific_weight", "s1")) {
+  stop("ETA_CENTER_ABL_GENERATOR must be specific_weight or s1.")
 }
 
 common_q <- as.integer(Sys.getenv("ETA_CENTER_ABL_COMMON_Q", "6"))
@@ -101,6 +106,90 @@ make_specific_effect_params_diag <- function(d, K, common_q, specific_q,
     common_idx = common_idx,
     specific_idx = unlist(specific_index, use.names = FALSE),
     noise_idx = seq.int(common_q + K * specific_q + 1L, d)
+  )
+}
+
+mean_pairwise_cos_for_H2_diag <- function(H2, kappa, v_norm2, v_dot) {
+  t <- sqrt(pmax(kappa^2 - H2, 0) / v_norm2)
+  K <- length(kappa)
+  vals <- c()
+  for (i in seq_len(K - 1L)) {
+    for (j in (i + 1L):K) {
+      vals <- c(vals, (H2 + t[i] * t[j] * v_dot) / (kappa[i] * kappa[j]))
+    }
+  }
+  mean(vals)
+}
+
+calibrate_common_norm2_diag <- function(kappa, target_angle_deg, v_norm2, v_dot) {
+  target <- cos(target_angle_deg * pi / 180)
+  upper <- min(kappa)^2 * 0.999
+  f <- function(H2) mean_pairwise_cos_for_H2_diag(H2, kappa, v_norm2, v_dot) - target
+  f0 <- f(0)
+  f1 <- f(upper)
+  if (f0 * f1 > 0) {
+    return(if (abs(f0) < abs(f1)) 0 else upper)
+  }
+  uniroot(f, lower = 0, upper = upper)$root
+}
+
+make_eta_first_s1_params_diag <- function(d, K, common_q, specific_q,
+                                          target_angle_deg, kappa) {
+  if (length(kappa) != K) stop("length(kappa) must match K.")
+  decision_q <- K * specific_q
+  if (common_q + decision_q > d) {
+    stop("common_q + K * specific_q must be <= d.")
+  }
+
+  common_idx <- seq_len(common_q)
+  decision_idx <- common_q + seq_len(decision_q)
+  noise_idx <- if (common_q + decision_q < d) {
+    seq.int(common_q + decision_q + 1L, d)
+  } else {
+    integer(0)
+  }
+
+  contrast <- matrix(0, nrow = K, ncol = decision_q)
+  for (g in seq_len(K)) {
+    idx <- ((g - 1L) * specific_q) + seq_len(specific_q)
+    contrast[, idx] <- -1 / (K - 1)
+    contrast[g, idx] <- 1
+  }
+  v_norm2 <- sum(contrast[1, ]^2)
+  v_dot <- sum(contrast[1, ] * contrast[2, ])
+  H2 <- calibrate_common_norm2_diag(kappa, target_angle_deg, v_norm2, v_dot)
+  common_value <- sqrt(H2 / common_q)
+  scale_by_k <- sqrt(pmax(kappa^2 - H2, 0) / v_norm2)
+
+  eta <- matrix(0, nrow = K, ncol = d)
+  eta[, common_idx] <- common_value
+  for (k in seq_len(K)) {
+    eta[k, decision_idx] <- scale_by_k[k] * contrast[k, ]
+  }
+
+  mu <- sweep(eta, 1, sqrt(rowSums(eta^2)), "/")
+  kappa_actual <- sqrt(rowSums(eta^2))
+  support <- matrix(FALSE, nrow = K, ncol = d)
+  support[, decision_idx] <- TRUE
+
+  pair_cos <- tcrossprod(mu)
+  pair_angle <- acos(pmin(pmax(pair_cos[upper.tri(pair_cos)], -1), 1)) * 180 / pi
+
+  list(
+    alpha = rep(1 / K, K),
+    mu = mu,
+    kappa = kappa_actual,
+    support = support,
+    common_idx = common_idx,
+    specific_idx = decision_idx,
+    noise_idx = noise_idx,
+    scenario = "S1_eta_first_ablation",
+    generator = "s1",
+    common_value = common_value,
+    target_angle_deg = target_angle_deg,
+    mu_pairwise_angle_mean = mean(pair_angle),
+    mu_pairwise_angle_min = min(pair_angle),
+    mu_pairwise_angle_max = max(pair_angle)
   )
 }
 
@@ -559,15 +648,24 @@ fit_variant_path_pair <- function(X, z, params, cfg, spec) {
 
 run_one <- function(rep_id, cfg) {
   set.seed(cfg$base_seed + rep_id)
-  params <- make_specific_effect_params_diag(
-    d = cfg$d, K = cfg$K, common_q = common_q,
-    specific_q = specific_q, specific_weight = specific_weight,
-    kappa = kappa_vec
-  )
+  params <- if (cfg$generator == "s1") {
+    make_eta_first_s1_params_diag(
+      d = cfg$d, K = cfg$K, common_q = common_q,
+      specific_q = specific_q, target_angle_deg = cfg$target_angle_deg,
+      kappa = kappa_vec
+    )
+  } else {
+    make_specific_effect_params_diag(
+      d = cfg$d, K = cfg$K, common_q = common_q,
+      specific_q = specific_q, specific_weight = specific_weight,
+      kappa = kappa_vec
+    )
+  }
   dat <- simulate_from_params_diag(cfg$n, params)
   cat(sprintf(
-    "[ablation] rep %d/%d: true_union_q=%d, K=%d, n=%d, d=%d\n",
-    rep_id, cfg$n_rep, sum(colSums(params$support) > 0), cfg$K, cfg$n, cfg$d
+    "[ablation:%s] rep %d/%d: true_union_q=%d, K=%d, n=%d, d=%d\n",
+    cfg$generator, rep_id, cfg$n_rep, sum(colSums(params$support) > 0),
+    cfg$K, cfg$n, cfg$d
   ))
 
   rows <- list()
@@ -583,19 +681,24 @@ run_one <- function(rep_id, cfg) {
   path <- do.call(rbind, paths)
   for (obj_name in c("out", "path")) {
     obj <- get(obj_name)
-    obj$scenario <- "strong_common_specific"
+    obj$scenario <- if (!is.null(params$scenario)) params$scenario else "strong_common_specific"
     obj$rep <- rep_id
     obj$n <- cfg$n
     obj$d <- cfg$d
     obj$K_true <- cfg$K
     obj$common_q <- common_q
     obj$specific_q_per_component <- specific_q
-    obj$specific_weight <- specific_weight
+    obj$specific_weight <- if (cfg$generator == "s1") NA_real_ else specific_weight
     obj$true_entry_q <- sum(dat$params$support)
     obj$true_union_q <- sum(colSums(dat$params$support) > 0)
     obj$kappa_true_min <- min(kappa_vec)
     obj$kappa_true_max <- max(kappa_vec)
     obj$kappa_true_ratio <- max(kappa_vec) / min(kappa_vec)
+    obj$generator <- cfg$generator
+    obj$target_angle_deg <- if (cfg$generator == "s1") cfg$target_angle_deg else NA_real_
+    obj$mu_pairwise_angle_mean <- if (!is.null(params$mu_pairwise_angle_mean)) params$mu_pairwise_angle_mean else NA_real_
+    obj$mu_pairwise_angle_min <- if (!is.null(params$mu_pairwise_angle_min)) params$mu_pairwise_angle_min else NA_real_
+    obj$mu_pairwise_angle_max <- if (!is.null(params$mu_pairwise_angle_max)) params$mu_pairwise_angle_max else NA_real_
     assign(obj_name, obj)
   }
   list(rows = out, path = path)
@@ -684,15 +787,22 @@ fmt <- function(x, digits = 3) {
   ifelse(is.na(x), "NA", formatC(x, format = "f", digits = digits))
 }
 
+true_union_q_report <- if (cfg$generator == "s1") cfg$K * specific_q else common_q + cfg$K * specific_q
 report <- c(
   "# Eta centering ablation all-model diagnostic",
   "",
   "Diagnostic-only run. These rows separate mu/eta parameterization, raw/centered contrast, and entry-wise/group penalties.",
   "",
+  sprintf("- generator: %s", cfg$generator),
   sprintf("- reps: %d", cfg$n_rep),
   sprintf("- K=%d, n=%d, d=%d", cfg$K, cfg$n, cfg$d),
   sprintf("- common q=%d, specific q/component=%d, true union q=%d",
-          common_q, specific_q, common_q + cfg$K * specific_q),
+          common_q, specific_q, true_union_q_report),
+  if (cfg$generator == "s1") {
+    sprintf("- target pairwise direction angle: %.1f degrees", cfg$target_angle_deg)
+  } else {
+    sprintf("- specific weight=%s", specific_weight)
+  },
   sprintf("- kappa=(%s)", paste(kappa_vec, collapse = ",")),
   "",
   "| method | reps | valid | selected q | ARI | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta | common q rate | specific q rate | noise q rate |",

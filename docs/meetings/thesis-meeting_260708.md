@@ -135,35 +135,37 @@ $$
 |:---|:---|
 | 목적 | penalty target, centering, group/adaptive 효과 분해 |
 | 반복 수 | rep=20 |
-| 차원/표본/군집 수 | $d=100$, $n=1000$, $K=4$ |
-| 변수 구성 | common q=6, component-specific q=4 per component, true union q=22 |
-| specific weight | 0.5 |
-| 집중도 | $\kappa=(30,45,65,90)$ |
+| 기준 환경 | S1 data-generating setting |
+| 차원/표본/군집 수 | $d=200$, $n=1000$, $K=4$ |
+| 변수 구성 | common q=4, decision/specific q=16, noise q=180, true decision q=16 |
+| 평균 방향 차이 | target angle 90도 |
+| 집중도 | $\kappa=(30,40,50,60)$ |
 | 선택 기준 | BIC |
 | 재적합 | 선택된 support에서 refit |
 
 | 비교 목적 | method | penalty / model | selected q | common q | specific q | noise q | ARI | TPR | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| $\mu$ entry-wise | M-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 25.90 | 6.00 | 16.00 | 3.90 | 0.687 | 1.000 | 0.050 | 0.855 | 0.920 | 0.162 | baseline |
-| $\mu$ group | M-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 23.95 | 6.00 | 16.00 | 1.95 | 0.687 | 1.000 | 0.025 | 0.921 | 0.958 | 0.146 | group penalty 효과 |
-| adaptive $\mu$ group | M-AGL + refit | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | 22.55 | 6.00 | 16.00 | 0.55 | 0.689 | 1.000 | 0.007 | 0.977 | 0.988 | 0.131 | true q=22 근처 |
-| raw $\eta$ entry-wise | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert\eta_{kj}\rvert$ | 30.85 | 6.00 | 16.00 | 8.85 | 0.680 | 1.000 | 0.113 | 0.722 | 0.836 | 0.226 | raw eta L1은 noise 선택 증가 |
-| raw $\eta$ group | E-GL + refit | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 23.20 | 6.00 | 16.00 | 1.20 | 0.687 | 1.000 | 0.015 | 0.950 | 0.974 | 0.141 | eta group만의 효과 |
-| centered $\eta$ entry-wise | E-CL + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 24.40 | 6.00 | 15.80 | 2.60 | 0.688 | 0.991 | 0.033 | 0.898 | 0.941 | 0.177 | centering + entry-wise |
-| centered $\eta$ group | E-CGL + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 24.00 | 6.00 | 15.90 | 2.10 | 0.689 | 0.995 | 0.027 | 0.918 | 0.954 | 0.166 | centered eta group |
-| adaptive centered $\eta$ group | E-CAGL + refit | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 22.05 | 6.00 | 15.80 | 0.25 | 0.687 | 0.991 | 0.003 | 0.989 | 0.990 | 0.139 | adaptive 제안형 |
+| $\mu$ entry-wise | M-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 40.65 | 4.00 | 16.00 | 20.65 | 0.853 | 1.000 | 0.134 | 0.399 | 0.568 | 0.232 | common/noise 좌표 선택 큼 |
+| $\mu$ group | M-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20.00 | 4.00 | 16.00 | 0.00 | 0.859 | 1.000 | 0.022 | 0.800 | 0.889 | 0.072 | noise는 줄지만 common 좌표 유지 |
+| adaptive $\mu$ group | M-AGL + refit | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | 20.00 | 4.00 | 16.00 | 0.00 | 0.859 | 1.000 | 0.022 | 0.800 | 0.889 | 0.072 | $\mu$-support 기준의 한계 |
+| raw $\eta$ entry-wise | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert\eta_{kj}\rvert$ | 43.65 | 4.00 | 16.00 | 23.65 | 0.853 | 1.000 | 0.150 | 0.378 | 0.545 | 0.254 | raw eta L1은 noise 선택 증가 |
+| raw $\eta$ group | E-GL + refit | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 21.15 | 4.00 | 16.00 | 1.15 | 0.858 | 1.000 | 0.028 | 0.759 | 0.862 | 0.089 | group만으로는 common 제거 어려움 |
+| centered $\eta$ entry-wise | E-CL + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 19.05 | 0.05 | 16.00 | 3.00 | 0.860 | 1.000 | 0.017 | 0.846 | 0.915 | 0.098 | centering은 common 선택을 크게 줄임 |
+| centered $\eta$ group | E-CGL + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 17.50 | 0.00 | 16.00 | 1.50 | 0.861 | 1.000 | 0.008 | 0.922 | 0.958 | 0.079 | centered eta group |
+| adaptive centered $\eta$ group | E-CAGL + refit | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 16.05 | 0.00 | 16.00 | 0.05 | 0.860 | 1.000 | 0.000 | 0.997 | 0.998 | 0.057 | true decision q=16에 가장 가까움 |
 
-`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. 이 표는 rep=20 diagnostic 결과이며, S1-S6 본 결과가 아니라 구조 분해 결과로 해석한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$이고, true decision q는 22다. `common q`, `specific q`, `noise q`는 각각 common 좌표 6개, specific 좌표 16개, noise 좌표 78개 중 선택된 평균 개수다.
+`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. 이 표는 S1 환경에서 실행한 rep=20 diagnostic 결과이며, S1-S6 본 결과가 아니라 구조 분해 결과로 해석한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$이고, true decision q는 16이다. `common q`, `specific q`, `noise q`는 각각 common 좌표 4개, decision/specific 좌표 16개, noise 좌표 180개 중 선택된 평균 개수다.
 
-- M-GL과 E-GL은 entry-wise L1보다 FPR을 낮췄다. 즉 group penalty 자체의 효과가 있다.
-- E-L은 raw eta를 쓰지만 entry-wise penalty라 noise 선택이 늘었다. eta parameterization만으로는 충분하지 않고 group 구조가 필요하다.
-- E-CGL/E-CAGL은 centered eta contrast를 사용하므로 posterior decision support를 직접 겨냥한다. 특히 E-CAGL은 selected q가 true q=22에 가장 가까웠고 FPR이 가장 낮았다.
+- M-GL/M-AGL은 noise를 제거하지만 $\mu$-support 기준이므로 S1의 common q=4를 그대로 선택한다.
+- raw eta 계열 E-L/E-GL도 common 좌표를 유지한다. eta 자연모수만으로는 posterior decision support를 분리하기 어렵다.
+- E-CL은 common q를 거의 제거하지만 entry-wise penalty라 noise q가 남는다.
+- E-CGL/E-CAGL은 centered eta contrast를 group 단위로 선택한다. 특히 E-CAGL은 selected q=16.05, common q=0.00, noise q=0.05로 S1의 decision support에 가장 가깝다.
 
 표에서 제외한 진단 후보:
 
 | 제외 후보 | 형식 | 제외 사유 |
 |:---|:---|:---|
-| M-CGL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | $\mu$는 단위 구면 제약을 갖는 방향 모수이고 posterior score에는 $\eta_k=\kappa_k\mu_k$가 들어간다. 따라서 $\mu$만 중심화하면 $\kappa$ 차이를 반영하지 못하고, posterior decision support 목표와 직접 맞지 않는다. 보조 diagnostic에서는 selected q=38.75, FPR=0.215, MSE_eta=1.359로 noise 선택도 컸다. |
+| M-CGL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | $\mu$는 단위 구면 제약을 갖는 방향 모수이고 posterior score에는 $\eta_k=\kappa_k\mu_k$가 들어간다. 따라서 $\mu$만 중심화하면 $\kappa$ 차이를 반영하지 못하고 posterior decision support 목표와 직접 맞지 않는다. S1 보조 diagnostic에서도 selected q=21.00, common q=4.00, noise q=1.00으로 common 좌표를 그대로 유지했다. |
 
 ## 3. 시뮬레이션 결과 요약
 
