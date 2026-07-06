@@ -3,14 +3,14 @@ library(ggplot2)
 fig_dir <- file.path("docs", "simulations", "figures")
 dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
-method_order <- c("D-L", "D-GL", "D-AGL", "E-L", "E-GL", "E-AGL")
+method_order <- c("M-L", "M-GL", "M-AGL", "E-CL", "E-CGL", "E-CAGL")
 method_colors <- c(
-  "D-L" = "#A6C8E5",
-  "D-GL" = "#4E79A7",
-  "D-AGL" = "#0B3C68",
-  "E-L" = "#F7C59F",
-  "E-GL" = "#F28E2B",
-  "E-AGL" = "#B13A16"
+  "M-L" = "#A6C8E5",
+  "M-GL" = "#4E79A7",
+  "M-AGL" = "#0B3C68",
+  "E-CL" = "#F7C59F",
+  "E-CGL" = "#F28E2B",
+  "E-CAGL" = "#B13A16"
 )
 support_colors <- c(
   "common q" = "#A0CBE8",
@@ -19,6 +19,17 @@ support_colors <- c(
 )
 
 num <- function(x) suppressWarnings(as.numeric(x))
+
+recode_method_names <- function(method) {
+  method <- as.character(method)
+  method[method == "D-L"] <- "M-L"
+  method[method == "D-GL"] <- "M-GL"
+  method[method == "D-AGL"] <- "M-AGL"
+  method[method == "E-L"] <- "E-CL"
+  method[method == "E-GL"] <- "E-CGL"
+  method[method == "E-AGL"] <- "E-CAGL"
+  method
+}
 
 bind_rows_base <- function(rows) {
   all_names <- unique(unlist(lapply(rows, names), use.names = FALSE))
@@ -33,6 +44,9 @@ bind_rows_base <- function(rows) {
 read_one <- function(path, scenario_label) {
   x <- read.csv(path, stringsAsFactors = FALSE, check.names = FALSE)
   x$scenario_label <- scenario_label
+  if ("method" %in% names(x)) {
+    x$method <- recode_method_names(x$method)
+  }
   if (!("MSE_eta" %in% names(x)) && "MSE_centered_eta" %in% names(x)) {
     x$MSE_eta <- x$MSE_centered_eta
   }
@@ -142,6 +156,7 @@ negative <- read.csv(
   check.names = FALSE
 )
 negative$scenario_label <- negative$scenario
+negative$method <- recode_method_names(negative$method)
 negative$MSE_eta <- negative$MSE_eta
 negative$common_selected_q <- num(negative$common_selected_q)
 negative$decision_selected_q <- num(negative$decision_selected_q)

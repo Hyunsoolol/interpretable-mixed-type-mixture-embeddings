@@ -129,6 +129,19 @@ $$
 
 이 절은 S1-S6 성능 결과가 아니라, 제안 모형의 구조를 분해한 ablation 진단이다. eta 자연모수, group penalty, centered contrast의 역할을 분리해 확인한다.
 
+진단 시뮬레이션 환경:
+
+| 항목 | 설정 |
+|:---|:---|
+| 목적 | penalty target, centering, group/adaptive 효과 분해 |
+| 반복 수 | rep=20 |
+| 차원/표본/군집 수 | $d=100$, $n=1000$, $K=4$ |
+| 변수 구성 | common q=6, component-specific q=4 per component, true union q=22 |
+| specific weight | 0.5 |
+| 집중도 | $\kappa=(30,45,65,90)$ |
+| 선택 기준 | BIC |
+| 재적합 | 선택된 support에서 refit |
+
 | 비교 목적 | method | penalty / model | reps | selected q | ARI | TPR | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|:---|
 | $\mu$ entry-wise | M-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 25.90 | 0.687 | 1.000 | 0.050 | 0.855 | 0.920 | 0.162 | baseline |
