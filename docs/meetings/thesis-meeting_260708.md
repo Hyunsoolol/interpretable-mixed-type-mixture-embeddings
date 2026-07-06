@@ -53,37 +53,75 @@ $$
 
 단, $\eta=0$ 또는 $\kappa=0$이면 방향 $\mu$는 식별되지 않는다. 또한 mixture model의 label switching은 별도 문제다. 따라서 여기서 말하는 유일성은 mixture 전체의 전역 식별성 증명이 아니라, component-level parameterization에 대한 설명이다.
 
-### 2.2 왜 Eta-group인가?
+### 2.2 Posterior decision contrast와 centered Eta-group penalty
 
-vMF mixture의 posterior score는 자연모수 $\eta_k=\kappa_k\mu_k$를 통해 결정된다.
-
-$$
-s_k(x)=\log\pi_k+\log C_d(\kappa_k)+\eta_k^\top x.
-$$
-
-두 component의 decision score 차이는
+Eta에 group penalty를 둔다고 자동으로 centered penalty가 되는 것은 아니다.
 
 $$
-s_k(x)-s_\ell(x) =
+\text{raw eta group:}\quad
+\lambda_\eta\sum_{j=1}^d\|\eta_{\cdot j}\|_2
+$$
+
+$$
+\text{centered eta group:}\quad
+\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2,
+\qquad
+c_{kj}=\eta_{kj}-\bar\eta_j.
+$$
+
+vMF mixture의 posterior score는
+
+$$
+s_k(x)=\log\pi_k+\log C_d(\kappa_k)+\eta_k^\top x,
+\qquad
+\eta_k=\kappa_k\mu_k.
+$$
+
+Decision은 절대 score가 아니라 component 간 score 차이로 결정된다.
+
+$$
+s_k(x)-s_\ell(x)
+=
 \mathrm{const}_{k\ell}
 +
 (\eta_k-\eta_\ell)^\top x.
 $$
 
-따라서 변수 선택 대상은 $\mu$나 $\kappa$ 단독이 아니라, component 간 $\eta$ 차이를 만드는 coordinate다. 이를 centered contrast로 쓰면
+좌표 $j$에 대해
 
 $$
-c_{kj}=\eta_{kj}-\bar\eta_j,\qquad
-\bar\eta_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}.
+\eta_{\cdot j}
+=
+\bar\eta_j\mathbf 1+c_{\cdot j},
+\qquad
+\bar\eta_j=K^{-1}\sum_{k=1}^K\eta_{kj},
+\qquad
+\mathbf 1^\top c_{\cdot j}=0.
 $$
 
-제안 penalty는
+공통 성분은 decision 차이에서 사라진다.
 
 $$
-\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2.
+(\bar\eta_j\mathbf 1)_k-(\bar\eta_j\mathbf 1)_\ell=0,
+\qquad
+\eta_{kj}-\eta_{\ell j}=c_{kj}-c_{\ell j}.
 $$
 
-즉, coordinate $j$가 posterior decision boundary에 필요한지를 직접 선택한다.
+따라서 posterior decision support는
+
+$$
+S_\eta
+=
+\{j:\|c_{\cdot j}\|_2>0\}
+$$
+
+로 두는 것이 직접적이다. 제안 penalty는 이 support를 좌표 단위로 선택한다.
+
+$$
+\boxed{
+\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2
+}
+$$
 
 ### 2.3 공통 변수가 선택되지 않는 이유
 
