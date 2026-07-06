@@ -446,3 +446,70 @@ $$
 ### 3.5 현재 결론
 
 S1-N~S6-N rep=50 결과는 Eta-group 계열의 장점과 한계를 동시에 보여준다. 평균 방향 차이가 큰 경우(90도)에는 dense decision support에서도 E-AGL은 안정적이지만, 평균 방향 차이가 보통 수준(60도)이면 support를 과소선택하거나 zero-support tuning failure가 나타날 수 있다. 평균 방향 차이가 작은 30도 설정에서는 dense/sparse 여부와 관계없이 전체 clustering과 support recovery가 모두 약해진다. 논문에서는 이를 main result가 아니라 negative-control diagnostic으로 제시하는 것이 적절하다.
+
+## 4. Shared-background eta-contrast 시뮬레이션
+
+### 4.1 목적
+
+이 시뮬레이션은 공통 배경 신호가 많은 상황에서 제안 모형이 posterior decision support만 선택하는지 확인하기 위한 추가 진단이다. 전체 prototype 관점에서는 common q와 specific q가 모두 nonzero이지만, posterior decision boundary를 실제로 바꾸는 변수는 specific q뿐이다.
+
+즉, 이 설정의 핵심 질문은 다음과 같다.
+
+- D 계열은 common q까지 prototype support로 선택하는가?
+- E 계열은 common q를 제외하고 specific q 중심으로 선택하는가?
+- Eta-group 계열이 단순히 sparse setting에서만 유리한 것이 아니라, 공통 배경 신호가 큰 경우에도 decision contrast를 분리하는가?
+
+### 4.2 시뮬레이션 설정
+
+| 항목 | 값 |
+|---|---:|
+| K | 4 |
+| n | 1000 |
+| d | 200 |
+| common q | 80 |
+| specific q | 20 |
+| noise q | 100 |
+| true decision q | 20 |
+| common eta value | 3 |
+| decision delta | (8, 10, 12, 14) |
+| 평균 방향 각도 | 평균 72.88도, 최소 62.19도, 최대 81.98도 |
+| kappa 범위 | 35.839 - 43.256 |
+| 반복 수 | 50 |
+| 초기값 탐색 | nstart=10 |
+| path length | 240 |
+| 선택 기준 | BIC |
+
+common q는 모든 component에 같은 방향으로 들어가는 공통 배경 변수다. 따라서 mu/prototype에는 존재하지만 centered eta contrast에서는 거의 0이므로, posterior decision support에는 포함되지 않는 것이 목표다.
+
+### 4.3 rep=50 결과 요약
+
+| 모형 | ARI | selected q | common q | specific q | noise q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| D-L | 0.591 | 199.02 | 80.00 | 20.00 | 99.02 | 1.000 | 0.995 | 0.100 | 0.183 | 0.000711 | 11.973 | 0.993 |
+| D-GL | 0.638 | 102.92 | 80.00 | 20.00 | 2.92 | 1.000 | 0.461 | 0.194 | 0.325 | 0.000378 | 4.618 | 0.495 |
+| D-AGL | 0.638 | 102.40 | 79.96 | 20.00 | 2.44 | 1.000 | 0.458 | 0.195 | 0.327 | 0.000375 | 4.558 | 0.492 |
+| E-L | 0.594 | 199.00 | 79.54 | 20.00 | 99.46 | 1.000 | 0.994 | 0.101 | 0.183 | 0.000722 | 11.389 | 0.987 |
+| E-GL | 0.674 | 22.04 | 0.88 | 20.00 | 1.16 | 1.000 | 0.011 | 0.912 | 0.953 | 0.002830 | 113.780 | 0.122 |
+| E-AGL | 0.676 | 20.48 | 0.30 | 20.00 | 0.18 | 1.000 | 0.003 | 0.977 | 0.988 | 0.002830 | 117.748 | 0.096 |
+
+### 4.4 보조 해석: prototype support 기준
+
+위 표는 posterior decision support 기준이다. 같은 결과를 prototype support 기준으로 보면 해석이 달라진다. 여기서 prototype support의 true q는 common q + specific q = 100이다.
+
+| 모형 | prototype TPR | prototype Precision | prototype F1 | 해석 |
+|---|---:|---:|---:|---|
+| D-L | 1.000 | 0.502 | 0.669 | common과 specific은 잡지만 noise도 많이 선택 |
+| D-GL | 1.000 | 0.972 | 0.986 | prototype support 기준으로 매우 양호 |
+| D-AGL | 1.000 | 0.976 | 0.988 | prototype support 기준으로 매우 양호 |
+| E-L | 0.995 | 0.500 | 0.666 | dense하게 선택 |
+| E-GL | 0.209 | 0.947 | 0.342 | common을 제외하므로 prototype 기준 TPR은 낮음 |
+| E-AGL | 0.203 | 0.991 | 0.337 | common을 제외하므로 prototype 기준 TPR은 낮음 |
+
+### 4.5 핵심 해석
+
+- D-GL/D-AGL은 prototype support 관점에서는 common q와 specific q를 모두 잘 선택한다. 그러나 posterior decision support 관점에서는 common q까지 선택하므로 selected q가 약 102개로 커진다.
+- E-GL/E-AGL은 common q를 거의 선택하지 않고 specific q 20개를 중심으로 선택한다. 특히 E-AGL은 selected q=20.48, common q=0.30, noise q=0.18로 true decision q=20에 가장 가깝다.
+- 이 결과는 제안 모형의 목표가 prototype sparsity가 아니라 centered eta contrast 기반 posterior decision support recovery임을 보여준다.
+- 반대로 MSE_kappa는 E-GL/E-AGL에서 크게 나타난다. 이는 common background coordinate를 제거하면서 kappa 복원 오차가 커지는 현상으로, 이 설정에서는 MSE_eta와 decision support 지표를 주 지표로 보는 것이 더 적절하다.
+
+결론적으로 shared-background 설정에서는 D 계열과 E 계열의 목표 차이가 가장 분명하게 드러난다. D 계열은 prototype support를 잘 복원하고, E 계열은 posterior decision support를 더 직접적으로 복원한다.
