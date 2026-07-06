@@ -142,16 +142,16 @@ $$
 | 선택 기준 | BIC |
 | 재적합 | 선택된 support에서 refit |
 
-| 비교 목적 | method | penalty / model | reps | selected q | specific q | noise q | ARI | TPR | FPR | Precision | F1 | MSE_eta | 해석 |
-|:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| $\mu$ entry-wise | M-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 25.90 | 16.00 | 3.90 | 0.687 | 1.000 | 0.050 | 0.855 | 0.920 | 0.162 | baseline |
-| $\mu$ group | M-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 23.95 | 16.00 | 1.95 | 0.687 | 1.000 | 0.025 | 0.921 | 0.958 | 0.146 | group penalty 효과 |
-| adaptive $\mu$ group | M-AGL + refit | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | 20 | 22.55 | 16.00 | 0.55 | 0.689 | 1.000 | 0.007 | 0.977 | 0.988 | 0.131 | true q=22 근처 |
-| raw $\eta$ entry-wise | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert\eta_{kj}\rvert$ | 20 | 30.85 | 16.00 | 8.85 | 0.680 | 1.000 | 0.113 | 0.722 | 0.836 | 0.226 | raw eta L1은 noise 선택 증가 |
-| raw $\eta$ group | E-GL + refit | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 20 | 23.20 | 16.00 | 1.20 | 0.687 | 1.000 | 0.015 | 0.950 | 0.974 | 0.141 | eta group만의 효과 |
-| centered $\eta$ entry-wise | E-CL + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 24.40 | 15.80 | 2.60 | 0.688 | 0.991 | 0.033 | 0.898 | 0.941 | 0.177 | centering + entry-wise |
-| centered $\eta$ group | E-CGL + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 24.00 | 15.90 | 2.10 | 0.689 | 0.995 | 0.027 | 0.918 | 0.954 | 0.166 | centered eta group |
-| adaptive centered $\eta$ group | E-CAGL + refit | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 20 | 22.05 | 15.80 | 0.25 | 0.687 | 0.991 | 0.003 | 0.989 | 0.990 | 0.139 | adaptive 제안형 |
+| 비교 목적 | method | penalty / model | selected q | specific q | noise q | ARI | TPR | FPR | Precision | F1 | MSE_eta | 해석 |
+|:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|
+| $\mu$ entry-wise | M-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 25.90 | 16.00 | 3.90 | 0.687 | 1.000 | 0.050 | 0.855 | 0.920 | 0.162 | baseline |
+| $\mu$ group | M-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 23.95 | 16.00 | 1.95 | 0.687 | 1.000 | 0.025 | 0.921 | 0.958 | 0.146 | group penalty 효과 |
+| adaptive $\mu$ group | M-AGL + refit | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | 22.55 | 16.00 | 0.55 | 0.689 | 1.000 | 0.007 | 0.977 | 0.988 | 0.131 | true q=22 근처 |
+| raw $\eta$ entry-wise | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert\eta_{kj}\rvert$ | 30.85 | 16.00 | 8.85 | 0.680 | 1.000 | 0.113 | 0.722 | 0.836 | 0.226 | raw eta L1은 noise 선택 증가 |
+| raw $\eta$ group | E-GL + refit | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 23.20 | 16.00 | 1.20 | 0.687 | 1.000 | 0.015 | 0.950 | 0.974 | 0.141 | eta group만의 효과 |
+| centered $\eta$ entry-wise | E-CL + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 24.40 | 15.80 | 2.60 | 0.688 | 0.991 | 0.033 | 0.898 | 0.941 | 0.177 | centering + entry-wise |
+| centered $\eta$ group | E-CGL + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 24.00 | 15.90 | 2.10 | 0.689 | 0.995 | 0.027 | 0.918 | 0.954 | 0.166 | centered eta group |
+| adaptive centered $\eta$ group | E-CAGL + refit | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 22.05 | 15.80 | 0.25 | 0.687 | 0.991 | 0.003 | 0.989 | 0.990 | 0.139 | adaptive 제안형 |
 
 `MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. 이 표는 rep=20 diagnostic 결과이며, S1-S6 본 결과가 아니라 구조 분해 결과로 해석한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$이고, true decision q는 22다. `specific q`와 `noise q`는 각각 specific 좌표 16개, noise 좌표 78개 중 선택된 평균 개수다.
 
