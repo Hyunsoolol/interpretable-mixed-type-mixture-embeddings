@@ -131,16 +131,23 @@ $$
 
 | 비교 목적 | method | penalty / model | reps | selected q | ARI | TPR | FPR | Precision | F1 | MSE_eta | 해석 |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| Proposed reference | Eta-group + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.684 | 0.995 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
-| Same eta, no group | Eta entry-wise L1 + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.652 | 1.000 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entry-wise L1은 거의 dense support |
-| Rossi $\mu$-group | Rossi $\mu$-group + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.685 | 1.000 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
-| Rossi $\mu$ baseline | Rossi $\mu$ + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.653 | 1.000 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entry-wise penalty는 거의 dense support |
+| Proposed reference | E-GL + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 20 | 25.45 | 0.684 | 0.995 | 0.046 | 0.867 | 0.925 | 0.191 | true q=22 근처 support를 선택 |
+| Same eta, no group | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 99.90 | 0.652 | 1.000 | 0.999 | 0.220 | 0.361 | 0.581 | 같은 eta라도 entry-wise L1은 거의 dense support |
+| Direction group | D-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 29.10 | 0.685 | 1.000 | 0.091 | 0.813 | 0.883 | 0.192 | $\mu$ group penalty는 dense support를 줄임 |
+| Direction baseline | D-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 98.80 | 0.653 | 1.000 | 0.985 | 0.223 | 0.364 | 0.581 | $\mu$ entry-wise penalty는 거의 dense support |
 
-`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. `Eta entry-wise L1`과 `Rossi $\mu$-group`은 정식 제안 모형이 아니라 진단용 변형이다.
+`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. `E-L`과 `D-GL`은 정식 제안 모형이 아니라 구조 분해를 위한 진단용 비교 모형이다.
 
 - Eta 자연모수를 사용해도 entry-wise L1에서는 support가 거의 dense해졌다. eta parameterization만으로는 support recovery가 충분하지 않았다.
-- $\mu$-space에 group penalty를 둔 Rossi $\mu$-group은 기존 Rossi $\mu$보다 개선됐지만, Eta-group보다 FPR이 크고 F1이 낮았다. group penalty만으로는 Eta-group 결과를 설명하기 어렵다.
+- $\mu$-space에 group penalty를 둔 D-GL은 D-L보다 개선됐지만, E-GL보다 FPR이 크고 F1이 낮았다. group penalty만으로는 Eta-group 결과를 설명하기 어렵다.
 - 현재 ablation 결과에서는 posterior decision score에 직접 들어가는 centered eta contrast를 coordinate 단위로 묶어 선택하는 구조가 상대적으로 안정적이었다.
+
+추가로 확인할 ablation 후보는 $\boxed{D\text{-CGL},\ E\text{-RGL}}$ 두 가지다. 두 모형은 기존 결과표에 포함된 실행 결과가 아니라, centering 효과와 raw eta 효과를 분리하기 위한 후속 진단 후보다.
+
+| method | full name | penalty / model | 확인할 역할 |
+|:---|:---|:---|:---|
+| D-CGL | Direction-centered group lasso | $\lambda_\mu\sum_j\lVert \mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | $\mu$에서도 평균을 뺐을 때 common coordinate가 제거되는지 확인 |
+| E-RGL | Eta-raw group lasso | $\lambda_\eta\sum_j\lVert \eta_{\cdot j}\rVert_2$ | eta를 쓰되 centering하지 않으면 common coordinate가 선택되는지 확인 |
 
 ## 3. 시뮬레이션 결과 요약
 
