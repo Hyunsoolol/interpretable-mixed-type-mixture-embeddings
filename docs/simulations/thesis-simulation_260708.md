@@ -88,6 +88,14 @@ $$
 - `noise q`: 선택된 noise variable 수. 이상적인 값은 0.
 - `MSE_eta`: 중심화 eta 대비 기준 MSE.
 
+### 2.1.1 시각화 요약
+
+아래 그림은 S1-S6의 내부 6개 모형 결과를 같은 축에서 비교한 것이다. 첫 번째 그림은 ARI, selected q, F1, MSE_eta를 요약하고, 두 번째 그림은 선택된 좌표가 common q, specific q, noise q 중 어디에 해당하는지 나타낸다.
+
+![Basic simulation metrics](figures/simulation_basic_metrics_260708.png)
+
+![Basic simulation support composition](figures/simulation_basic_support_260708.png)
+
 ### 2.2 S1: 평균 차이 큼 (90도) + 집중도 이분산
 
 설정: 목표 각도 90도, $\kappa=(30,40,50,60)$.
@@ -310,6 +318,12 @@ $$
 
 아래 표는 2장의 기본 시뮬레이션 결과표와 같은 양식으로 정리했다. 여기서 specific q는 negative-control에서 dense decision variable 선택 수를 뜻한다.
 
+아래 그림은 S1-N~S6-N의 내부 6개 모형 결과를 요약한다. Negative-control에서는 selected q와 support 구성의 변화가 Eta-group 계열의 과소선택 또는 zero-support tuning failure를 확인하는 주요 지표다.
+
+![Negative-control simulation metrics](figures/simulation_negative_metrics_260708.png)
+
+![Negative-control simulation support composition](figures/simulation_negative_support_260708.png)
+
 #### S1-N: 평균 차이 큼 (90도) + 집중도 이분산
 
 | 모형 | ARI | selected q | common q | specific q | noise q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
@@ -491,6 +505,12 @@ common q는 모든 component에 같은 방향으로 들어가는 공통 배경 �
 | E-L | 0.594 | 199.00 | 79.54 | 20.00 | 99.46 | 1.000 | 0.994 | 0.101 | 0.183 | 0.000722 | 11.389 | 0.987 |
 | E-GL | 0.674 | 22.04 | 0.88 | 20.00 | 1.16 | 1.000 | 0.011 | 0.912 | 0.953 | 0.002830 | 113.780 | 0.122 |
 | E-AGL | 0.676 | 20.48 | 0.30 | 20.00 | 0.18 | 1.000 | 0.003 | 0.977 | 0.988 | 0.002830 | 117.748 | 0.096 |
+
+아래 그림은 shared-background 설정의 지표와 support 구성을 모형별로 정리한 것이다.
+
+![Shared-background simulation metrics](figures/simulation_shared_metrics_260708.png)
+
+![Shared-background simulation support composition](figures/simulation_shared_support_260708.png)
 
 ### 4.4 보조 해석: prototype support 기준
 
