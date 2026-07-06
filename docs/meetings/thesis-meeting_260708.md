@@ -134,7 +134,6 @@ $$
 | $\mu$ entry-wise | M-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 20 | 25.90 | 0.687 | 1.000 | 0.050 | 0.855 | 0.920 | 0.162 | baseline |
 | $\mu$ group | M-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20 | 23.95 | 0.687 | 1.000 | 0.025 | 0.921 | 0.958 | 0.146 | group penalty 효과 |
 | adaptive $\mu$ group | M-AGL + refit | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | 20 | 22.55 | 0.689 | 1.000 | 0.007 | 0.977 | 0.988 | 0.131 | true q=22 근처 |
-| centered $\mu$ group | M-CGL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | 20 | 38.75 | 0.657 | 0.998 | 0.215 | 0.643 | 0.761 | 1.359 | noise 선택 증가 |
 | raw $\eta$ entry-wise | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert\eta_{kj}\rvert$ | 20 | 30.85 | 0.680 | 1.000 | 0.113 | 0.722 | 0.836 | 0.226 | raw eta L1은 noise 선택 증가 |
 | raw $\eta$ group | E-GL + refit | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 20 | 23.20 | 0.687 | 1.000 | 0.015 | 0.950 | 0.974 | 0.141 | eta group만의 효과 |
 | centered $\eta$ entry-wise | E-CL + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 20 | 24.40 | 0.688 | 0.991 | 0.033 | 0.898 | 0.941 | 0.177 | centering + entry-wise |
@@ -144,9 +143,14 @@ $$
 `MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. 이 표는 rep=20 diagnostic 결과이며, S1-S6 본 결과가 아니라 구조 분해 결과로 해석한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$이고, true decision q는 22다.
 
 - M-GL과 E-GL은 entry-wise L1보다 FPR을 낮췄다. 즉 group penalty 자체의 효과가 있다.
-- M-CGL은 noise 선택과 MSE_eta가 커졌다. 따라서 $\mu$에서 평균을 빼는 centering만으로 centered eta 구조를 대체한다고 보기 어렵다.
 - E-L은 raw eta를 쓰지만 entry-wise penalty라 noise 선택이 늘었다. eta parameterization만으로는 충분하지 않고 group 구조가 필요하다.
 - E-CGL/E-CAGL은 centered eta contrast를 사용하므로 posterior decision support를 직접 겨냥한다. 특히 E-CAGL은 selected q가 true q=22에 가장 가까웠고 FPR이 가장 낮았다.
+
+표에서 제외한 진단 후보:
+
+| 제외 후보 | 형식 | 제외 사유 |
+|:---|:---|:---|
+| M-CGL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | $\mu$는 단위 구면 제약을 갖는 방향 모수이고 posterior score에는 $\eta_k=\kappa_k\mu_k$가 들어간다. 따라서 $\mu$만 중심화하면 $\kappa$ 차이를 반영하지 못하고, posterior decision support 목표와 직접 맞지 않는다. 보조 diagnostic에서는 selected q=38.75, FPR=0.215, MSE_eta=1.359로 noise 선택도 컸다. |
 
 ## 3. 시뮬레이션 결과 요약
 

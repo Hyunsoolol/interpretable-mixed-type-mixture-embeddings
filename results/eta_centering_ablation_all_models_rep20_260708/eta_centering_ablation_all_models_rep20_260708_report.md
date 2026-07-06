@@ -15,8 +15,6 @@ Diagnostic-only run. These rows separate mu/eta parameterization, raw/centered c
 | M-GL BIC + refit | 20 | 20 | 23.95 | 0.687 | 1.000 | 0.025 | 0.921 | 0.958 | 0.000 | 1.855 | 0.146 | 1.000 | 1.000 | 0.025 |
 | M-AGL BIC | 20 | 20 | 22.55 | 0.683 | 1.000 | 0.007 | 0.977 | 0.988 | 0.000 | 3.552 | 0.153 | 1.000 | 1.000 | 0.007 |
 | M-AGL BIC + refit | 20 | 20 | 22.55 | 0.689 | 1.000 | 0.007 | 0.977 | 0.988 | 0.000 | 1.770 | 0.131 | 1.000 | 1.000 | 0.007 |
-| M-CGL BIC | 20 | 20 | 38.75 | 0.457 | 0.998 | 0.215 | 0.643 | 0.761 | 0.000 | 191.635 | 1.345 | 1.000 | 0.997 | 0.215 |
-| M-CGL BIC + refit | 20 | 20 | 38.75 | 0.657 | 0.998 | 0.215 | 0.643 | 0.761 | 0.000 | 109.671 | 1.359 | 1.000 | 0.997 | 0.215 |
 | E-L BIC | 20 | 20 | 30.85 | 0.651 | 1.000 | 0.113 | 0.722 | 0.836 | 0.000 | 36.547 | 0.172 | 1.000 | 1.000 | 0.113 |
 | E-L BIC + refit | 20 | 20 | 30.85 | 0.680 | 1.000 | 0.113 | 0.722 | 0.836 | 0.000 | 1.923 | 0.226 | 1.000 | 1.000 | 0.113 |
 | E-GL BIC | 20 | 20 | 23.20 | 0.650 | 1.000 | 0.015 | 0.950 | 0.974 | 0.000 | 30.810 | 0.332 | 1.000 | 1.000 | 0.015 |
@@ -27,3 +25,9 @@ Diagnostic-only run. These rows separate mu/eta parameterization, raw/centered c
 | E-CGL BIC + refit | 20 | 20 | 24.00 | 0.689 | 0.995 | 0.027 | 0.918 | 0.954 | 0.000 | 1.825 | 0.166 | 1.000 | 0.994 | 0.027 |
 | E-CAGL BIC | 20 | 20 | 22.05 | 0.680 | 0.991 | 0.003 | 0.989 | 0.990 | 0.000 | 1.945 | 0.170 | 1.000 | 0.988 | 0.003 |
 | E-CAGL BIC + refit | 20 | 20 | 22.05 | 0.687 | 0.991 | 0.003 | 0.989 | 0.990 | 0.000 | 1.792 | 0.139 | 1.000 | 0.988 | 0.003 |
+
+Excluded from the main comparison table:
+
+| excluded candidate | form | reason |
+|:---|:---|:---|
+| M-CGL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | The direction parameter $\mu$ is constrained to the unit sphere, while the posterior score uses $\eta_k=\kappa_k\mu_k$. Centering $\mu$ alone does not reflect concentration heterogeneity and is not aligned with posterior decision support. In this diagnostic, M-CGL + refit selected q=38.75 with FPR=0.215 and MSE_eta=1.359. |
