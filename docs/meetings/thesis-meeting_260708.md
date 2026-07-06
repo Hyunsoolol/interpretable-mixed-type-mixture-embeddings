@@ -80,8 +80,7 @@ $$
 Decision은 절대 score가 아니라 component 간 score 차이로 결정된다.
 
 $$
-s_k(x)-s_\ell(x)
-=
+s_k(x)-s_\ell(x) =
 \mathrm{const}_{k\ell}
 +
 (\eta_k-\eta_\ell)^\top x.
@@ -90,8 +89,7 @@ $$
 좌표 $j$에 대해
 
 $$
-\eta_{\cdot j}
-=
+\eta_{\cdot j} =
 \bar\eta_j\mathbf 1+c_{\cdot j},
 \qquad
 \bar\eta_j=K^{-1}\sum_{k=1}^K\eta_{kj},
@@ -110,8 +108,7 @@ $$
 따라서 posterior decision support는
 
 $$
-S_\eta
-=
+S_\eta =
 \{j:\|c_{\cdot j}\|_2>0\}
 $$
 
