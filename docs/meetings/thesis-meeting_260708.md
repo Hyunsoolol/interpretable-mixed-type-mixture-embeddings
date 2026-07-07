@@ -213,12 +213,7 @@ $$
 Bondell and Reich (2009)는 ANOVA에서 level effect의 pairwise difference를 shrink하여 level collapsing과 factor selection을 동시에 다루었다.
 
 $$
-\sum_j
-\sum_{k<m}
-w_j^{(km)}
-|\beta_{jk}-\beta_{jm}|,
-\qquad
-\sum_k\beta_{jk}=0.
+\sum_{j} \sum_{k \lt m} w_{j}^{(km)} |\beta_{jk} - \beta_{jm}|, \qquad \sum_{k} \beta_{jk} = 0
 $$
 
 Li et al. (2020)은 finite mixture regression에서 predictor effect를 common effect와 cluster-specific effect로 분해하여, relevant variable과 source of heterogeneity를 동시에 선택했다.
