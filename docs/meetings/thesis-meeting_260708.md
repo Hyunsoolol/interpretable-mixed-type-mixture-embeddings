@@ -83,8 +83,7 @@ $$
 좌표 $j$에 대해
 
 $$
-\eta_{\cdot j}
-=
+\eta_{\cdot j} =
 \bar\eta_j\mathbf 1+c_{\cdot j},
 \qquad
 \mathbf 1^\top c_{\cdot j}=0.
