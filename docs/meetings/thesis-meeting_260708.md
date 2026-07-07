@@ -204,14 +204,7 @@ $$
 
 Bondell and Reich (2009)는 ANOVA에서 level effect의 pairwise difference를 shrink하여 level collapsing과 factor selection을 동시에 다루었다.
 
-$$
-\sum_j
-\sum_{k<m}
-w_j^{(km)}
-|\beta_{jk}-\beta_{jm}|,
-\qquad
-\sum_k\beta_{jk}=0.
-$$
+$$ \sum_{j} \sum_{k<m} w_{j}^{(km)} |\beta_{jk} - \beta_{jm}|, \qquad \sum_{k} \beta_{jk} = 0 $$
 
 두 문헌은 절대 크기보다 집단 간 차이를 기준으로 변수 선택을 구성한다는 점에서 본 연구의 centered contrast penalty와 연결된다. 본 연구에서는 이 아이디어를 vMF mixture의 posterior decision score에 맞추어, $\eta=\kappa\mu$의 centered contrast $c_{kj}$에 coordinate-wise group penalty를 둔다.
 
