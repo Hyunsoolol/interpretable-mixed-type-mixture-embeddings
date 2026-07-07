@@ -213,10 +213,41 @@ $$
 Bondell and Reich (2009)는 ANOVA에서 level effect의 pairwise difference를 shrink하여 level collapsing과 factor selection을 동시에 다루었다.
 
 $$
-\sum_{j} \sum_{k \lt m} w_{j}^{(km)} |\beta_{jk} - \beta_{jm}|, \qquad \sum_{k} \beta_{jk} = 0
+\sum_j
+\sum_{k<m}
+w_j^{(km)}
+|\beta_{jk}-\beta_{jm}|,
+\qquad
+\sum_k\beta_{jk}=0.
 $$
 
-두 문헌은 절대 크기보다 집단 간 차이를 기준으로 변수 선택을 구성한다는 점에서 본 연구의 centered contrast penalty와 연결된다. 본 연구에서는 이 아이디어를 vMF mixture의 posterior decision score에 맞추어, $\eta=\kappa\mu$의 centered contrast $c_{kj}$에 coordinate-wise group penalty를 둔다.
+Li et al. (2020)은 finite mixture regression에서 predictor effect를 common effect와 cluster-specific effect로 분해하여, relevant variable과 source of heterogeneity를 동시에 선택했다.
+
+$$
+x^\top\beta_0+x^\top\beta_k,
+\qquad
+\sum_{k=1}^K \beta_{kj}=0.
+$$
+
+여기서 $\beta_{0j}$는 common effect이고, $\beta_{kj}$는 component-specific deviation이다. 본 연구의 centered eta contrast도 같은 분해 구조를 갖는다.
+
+$$
+\eta_{\cdot j}
+=
+\bar\eta_j\mathbf 1+c_{\cdot j},
+\qquad
+\sum_{k=1}^K c_{kj}=0.
+$$
+
+$\bar\eta_j$는 coordinate $j$의 common natural-parameter baseline이고, $c_{kj}$는 posterior decision score에서 component 간 차이를 만드는 부분이다. 따라서 본 연구의 penalty
+
+$$
+\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2
+$$
+
+는 common/heterogeneous effect 분해를 vMF mixture의 natural parameter $\eta=\kappa\mu$와 posterior decision support 문제로 옮긴 형태로 해석된다.
+
+정리하면, 위 문헌들은 절대 크기보다 집단 간 차이를 기준으로 변수 선택을 구성한다. 본 연구에서는 이 아이디어를 vMF mixture의 posterior decision score에 맞추어, $\eta=\kappa\mu$의 centered contrast $c_{kj}$에 coordinate-wise group penalty를 둔다.
 
 ### 2.6 Eta penalty ablation 진단
 
