@@ -120,6 +120,57 @@ $$
 }
 $$
 
+#### 관련 penalty 문헌과 본 연구의 위치
+
+Guo et al. (2010)은 Gaussian model-based clustering에서 변수 $j$가 어떤 cluster pair를 구분하는지 보기 위해 cluster center 차이에 pairwise fusion penalty를 사용했다.
+
+$$
+\lambda
+\sum_{j=1}^p
+\sum_{k<\ell}
+w_{k\ell j}
+|\mu_{kj}-\mu_{\ell j}|.
+$$
+
+이 penalty에서는 $\mu_{kj}=\mu_{\ell j}$이면 변수 $j$가 cluster $k,\ell$을 구분하지 않는다고 해석한다. 모든 cluster center가 같은 값으로 fusion되면 해당 변수는 clustering에 비정보적 변수로 제거된다.
+
+Bondell and Reich (2009)는 ANOVA에서 factor level 간 차이를 동시에 shrink/collapse하기 위해 pairwise difference penalty를 사용했다.
+
+$$
+\sum_j
+\sum_{k<m}
+w_j^{(km)}
+|\beta_{jk}-\beta_{jm}|,
+\qquad
+\sum_k \beta_{jk}=0.
+$$
+
+이 구조에서는 factor level effect들이 서로 같아지면 level이 collapse되고, sum-to-zero 제약 아래 모든 level effect가 같아지면 해당 factor는 선택되지 않는다.
+
+본 연구의 Eta-group penalty는 이러한 "집단 간 차이" 기반 변수 선택 아이디어를 vMF mixture의 posterior decision score에 맞게 옮긴 것이다. Guo et al. (2010)은 cluster center의 pairwise difference를, Bondell and Reich (2009)는 ANOVA level effect의 pairwise difference를 penalize한다. 본 연구는 vMF 자연모수
+
+$$
+\eta_k=\kappa_k\mu_k
+$$
+
+의 centered contrast
+
+$$
+c_{kj}=\eta_{kj}-\bar\eta_j
+$$
+
+에 대해 coordinate-wise group penalty를 둔다.
+
+$$
+\lambda_\eta
+\sum_{j=1}^d
+\|c_{\cdot j}\|_2.
+$$
+
+따라서 $\|c_{\cdot j}\|_2=0$이면 coordinate $j$는 모든 component에서 같은 posterior score contribution을 가지므로 decision support에서 제외된다. 반대로 하나 이상의 component에서 centered eta contrast가 남으면 coordinate $j$는 posterior decision boundary에 기여하는 변수로 선택된다.
+
+이 두 문헌은 절대 크기보다 집단 간 차이를 penalize하는 변수 선택의 근거를 제공한다. 본 연구는 이를 vMF mixture의 자연모수 $\eta=\kappa\mu$와 centered eta contrast $c_{kj}$에 적용하여, prototype sparsity가 아니라 posterior decision support recovery를 목표로 한다.
+
 ### 2.3 공통 변수가 선택되지 않는 이유
 
 제안 모형의 support target은 $\mu$에 존재하는 좌표가 아니라 posterior decision score 차이를 만드는 좌표다. 두 component $k,\ell$에 대해
