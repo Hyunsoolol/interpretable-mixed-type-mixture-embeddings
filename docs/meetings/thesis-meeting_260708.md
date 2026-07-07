@@ -153,9 +153,17 @@ $$
 
 은 하나의 decision coordinate가 만드는 contrast pattern이다. Group $L_2$ penalty는 이 좌표 전체를 선택 또는 제외한다.
 
-### 2.4 adaptive weight를 사용한다
+### 2.4 adaptive weight는 선택적으로 사용한다
 
-Adaptive Eta-group penalty는
+기본 centered Eta-group penalty는
+
+$$
+\lambda_\eta
+\sum_{j=1}^d
+\|c_{\cdot j}\|_2
+$$
+
+이다. Adaptive 확장에서는 coordinate별 weight를 추가하여
 
 $$
 \lambda_\eta
@@ -163,14 +171,14 @@ $$
 w_j\|c_{\cdot j}\|_2
 $$
 
-로 둔다. 초기 추정값 $c_{\cdot j}^{init}$에 대해
+로 둔다. 따라서 $w_j=1$이면 E-CGL이고, 초기 추정값 $c_{\cdot j}^{init}$에 대해
 
 $$
 w_j =
 \left(\|c_{\cdot j}^{init}\|_2+\epsilon\right)^{-\gamma}
 $$
 
-를 사용한다. 이번 시뮬레이션에서는
+를 사용하면 E-CAGL이다. 이번 시뮬레이션에서는
 
 $$
 \gamma=1,\qquad \epsilon=10^{-6}
@@ -178,7 +186,7 @@ $$
 
 로 두고, weight는 median-normalization을 적용했다.
 
-초기 contrast가 큰 좌표는 작은 weight를 받아 상대적으로 약하게 축소되고, 초기 contrast가 작은 좌표는 큰 weight를 받아 더 강하게 축소된다. 예를 들어
+Adaptive weight는 기본 centered Eta-group penalty의 선택적 확장이다. 초기 contrast가 큰 좌표는 작은 weight를 받아 상대적으로 약하게 축소되고, 초기 contrast가 작은 좌표는 큰 weight를 받아 더 강하게 축소된다. 예를 들어
 
 $$
 \|c_{\cdot j}^{init}\|_2=10
