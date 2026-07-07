@@ -227,8 +227,7 @@ $$
 여기서 $\beta_{0j}$는 common effect이고, $\beta_{kj}$는 component-specific deviation이다. 본 연구의 centered eta contrast도 같은 분해 구조를 갖는다.
 
 $$
-\eta_{\cdot j}
-=
+\eta_{\cdot j} =
 \bar\eta_j\mathbf 1+c_{\cdot j},
 \qquad
 \sum_{k=1}^K c_{kj}=0.
