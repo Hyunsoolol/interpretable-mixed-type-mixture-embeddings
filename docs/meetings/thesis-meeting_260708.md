@@ -11,93 +11,88 @@
 
 전체 시뮬레이션 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 정리했고, 이전 negative-control 세부 진단은 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 별도 문서로 남겼다.
 
-## 2. Eta-group 방법론 근거와 변수 선택 기준
+## 2. Eta-group penalty 구성과 변수 선택 기준
 
-### 2.1 $\eta$, $\mu$, $\kappa$ 관계와 유일성
-
-vMF mixture에서 posterior decision score에 직접 들어가는 자연모수는
+제안 모형의 penalty는 다음 네 요소로 구성된다.
 
 $$
-\eta_k=\kappa_k\mu_k
+\eta_k=\kappa_k\mu_k,\qquad
+c_{kj}=\eta_{kj}-\bar\eta_j,\qquad
+\bar\eta_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}.
 $$
 
-이다. 여기서 $\mu_k$는 평균 방향, $\kappa_k$는 그 방향의 집중도 또는 decision strength를 나타낸다. posterior decision score에는 다음 항이 들어간다.
+최종적으로 사용하는 adaptive centered Eta-group penalty는
 
 $$
-\log \alpha_k+\log C_d(\|\eta_k\|_2)+\eta_k^\top x_i.
+\boxed{
+\lambda_\eta
+\sum_{j=1}^d
+w_j\|c_{\cdot j}\|_2
+}
 $$
 
-$\eta_k\ne0$, $\kappa_k>0$, $\|\mu_k\|_2=1$이면 단위 구면 제약 때문에
+이다. 여기서 선택되는 support는
+
+$$
+\widehat S_\eta=\{j:\|c_{\cdot j}\|_2>0\}
+$$
+
+로 정의한다.
+
+### 2.1 $\mu$가 아니라 $\eta$를 기준으로 둔다
+
+vMF mixture의 posterior score는
+
+$$
+s_k(x)
+=
+\log \pi_k+\log C_d(\kappa_k)+\eta_k^\top x,
+\qquad
+\eta_k=\kappa_k\mu_k.
+$$
+
+두 component $k,\ell$의 decision 차이는
+
+$$
+s_k(x)-s_\ell(x)
+=
+\mathrm{const}_{k\ell}
++
+(\eta_k-\eta_\ell)^\top x
+$$
+
+이다. 따라서 posterior decision에 직접 들어가는 모수는 $\mu_k$ 단독이 아니라 $\eta_k=\kappa_k\mu_k$이다.
+
+간단한 예로 $\mu_{1j}=\mu_{2j}=0.1$이어도 $\kappa_1=20$, $\kappa_2=80$이면
+
+$$
+\eta_{1j}=2,\qquad \eta_{2j}=8.
+$$
+
+$\mu$ 기준으로는 같은 좌표처럼 보이지만, posterior score에서는 component 간 차이를 만든다.
+
+또한 $\eta_k\ne0$, $\kappa_k>0$, $\|\mu_k\|_2=1$이면
 
 $$
 \kappa_k=\|\eta_k\|_2,\qquad
 \mu_k=\eta_k/\|\eta_k\|_2
 $$
 
-로 복원된다. 따라서 component-level parameterization에서는 $\eta_k$가 주어졌을 때 $\mu_k$와 $\kappa_k$가 유일하게 정해진다.
+로 복원된다. 다만 $\eta_k=0$ 또는 $\kappa_k=0$이면 방향 $\mu_k$는 식별되지 않고, mixture label switching은 별도 문제다.
 
-예를 들어
-
-$$
-\eta=(3,4,0)
-$$
-
-이면
-
-$$
-\kappa=\|\eta\|_2=5,\qquad
-\mu=(3/5,4/5,0)=(0.6,0.8,0)
-$$
-
-이다. 이때 $\|\mu\|_2=1$이므로 구면 제약을 만족하는 분해가 하나로 정해진다.
-
-단, $\eta=0$ 또는 $\kappa=0$이면 방향 $\mu$는 식별되지 않는다. 또한 mixture model의 label switching은 별도 문제다. 따라서 여기서 말하는 유일성은 mixture 전체의 전역 식별성 증명이 아니라, component-level parameterization에 대한 설명이다.
-
-### 2.2 Posterior decision contrast와 centered Eta-group penalty
-
-Eta에 group penalty를 둔다고 자동으로 centered penalty가 되는 것은 아니다.
-
-$$
-\text{raw eta group:}\quad
-\lambda_\eta\sum_{j=1}^d\|\eta_{\cdot j}\|_2
-$$
-
-$$
-\text{centered eta group:}\quad
-\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2,
-\qquad
-c_{kj}=\eta_{kj}-\bar\eta_j.
-$$
-
-vMF mixture의 posterior score는
-
-$$
-s_k(x)=\log\pi_k+\log C_d(\kappa_k)+\eta_k^\top x,
-\qquad
-\eta_k=\kappa_k\mu_k.
-$$
-
-Decision은 절대 score가 아니라 component 간 score 차이로 결정된다.
-
-$$
-s_k(x)-s_\ell(x) =
-\mathrm{const}_{k\ell}
-+
-(\eta_k-\eta_\ell)^\top x.
-$$
+### 2.2 raw $\eta$가 아니라 centered contrast를 사용한다
 
 좌표 $j$에 대해
 
 $$
-\eta_{\cdot j} =
+\eta_{\cdot j}
+=
 \bar\eta_j\mathbf 1+c_{\cdot j},
-\qquad
-\bar\eta_j=K^{-1}\sum_{k=1}^K\eta_{kj},
 \qquad
 \mathbf 1^\top c_{\cdot j}=0.
 $$
 
-공통 성분은 decision 차이에서 사라진다.
+공통 성분 $\bar\eta_j\mathbf 1$은 모든 component score에 동일하게 더해지므로 decision 차이에서는 사라진다.
 
 $$
 (\bar\eta_j\mathbf 1)_k-(\bar\eta_j\mathbf 1)_\ell=0,
@@ -105,24 +100,103 @@ $$
 \eta_{kj}-\eta_{\ell j}=c_{kj}-c_{\ell j}.
 $$
 
-따라서 posterior decision support는
+따라서 coordinate $j$가 posterior decision boundary에 기여하는지는 $\eta_{\cdot j}$의 절대 크기가 아니라 $c_{\cdot j}$의 존재 여부로 판단한다.
+
+예를 들어
 
 $$
-S_\eta =
-\{j:\|c_{\cdot j}\|_2>0\}
+\eta_{\cdot j}=(5,5,5,5)
+\quad\Rightarrow\quad
+c_{\cdot j}=(0,0,0,0)
 $$
 
-로 정의한다. 제안 penalty는 이 support를 좌표 단위로 선택한다.
+이므로 이 좌표는 공통 효과다. 반면
 
 $$
-\boxed{
-\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2
-}
+\eta_{\cdot j}=(8,4,4,4)
+\quad\Rightarrow\quad
+c_{\cdot j}=(3,-1,-1,-1)
 $$
 
-#### 관련 penalty 문헌과 본 연구의 위치
+이므로 component 간 posterior score 차이를 만든다.
 
-Guo et al. (2010)은 Gaussian model-based clustering에서 변수 $j$가 어떤 cluster pair를 구분하는지 보기 위해 cluster center 차이에 pairwise fusion penalty를 사용했다.
+### 2.3 entry-wise가 아니라 coordinate-wise group $L_2$ penalty를 사용한다
+
+제안 penalty는 coordinate $j$의 centered contrast vector 전체를 하나의 단위로 선택한다.
+
+$$
+\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2.
+$$
+
+이는
+
+$$
+\|c_{\cdot j}\|_2=0
+$$
+
+이면 coordinate $j$ 전체를 decision support에서 제외하고,
+
+$$
+\|c_{\cdot j}\|_2>0
+$$
+
+이면 해당 coordinate를 posterior decision에 사용하는 구조다.
+
+대비되는 entry-wise penalty는
+
+$$
+\lambda_\eta\sum_{k,j}|c_{kj}|
+$$
+
+이다. 이 경우 같은 coordinate 안에서 일부 component contrast만 남거나 사라질 수 있다. 예를 들어
+
+$$
+c_{\cdot j}=(3,-1,-1,-1)
+$$
+
+은 하나의 decision coordinate가 만드는 contrast pattern이다. Group $L_2$ penalty는 이 좌표 전체를 선택 또는 제외한다.
+
+### 2.4 adaptive weight를 사용한다
+
+Adaptive Eta-group penalty는
+
+$$
+\lambda_\eta
+\sum_{j=1}^d
+w_j\|c_{\cdot j}\|_2
+$$
+
+로 둔다. 초기 추정값 $c_{\cdot j}^{init}$에 대해
+
+$$
+w_j
+=
+\left(\|c_{\cdot j}^{init}\|_2+\epsilon\right)^{-\gamma}
+$$
+
+를 사용한다. 이번 시뮬레이션에서는
+
+$$
+\gamma=1,\qquad \epsilon=10^{-6}
+$$
+
+로 두고, weight는 median-normalization을 적용했다.
+
+초기 contrast가 큰 좌표는 작은 weight를 받아 상대적으로 약하게 축소되고, 초기 contrast가 작은 좌표는 큰 weight를 받아 더 강하게 축소된다. 예를 들어
+
+$$
+\|c_{\cdot j}^{init}\|_2=10
+\Rightarrow
+w_j\approx0.1,
+\qquad
+\|c_{\cdot j'}^{init}\|_2=0.5
+\Rightarrow
+w_{j'}\approx2.
+$$
+
+### 2.5 관련 penalty 문헌과 본 연구의 위치
+
+Guo et al. (2010)은 model-based clustering에서 cluster center의 pairwise difference에 fusion penalty를 두어 cluster pair별 변수 선택을 다루었다.
 
 $$
 \lambda
@@ -132,9 +206,7 @@ w_{k\ell j}
 |\mu_{kj}-\mu_{\ell j}|.
 $$
 
-이 penalty에서는 $\mu_{kj}=\mu_{\ell j}$이면 변수 $j$가 cluster $k,\ell$을 구분하지 않는다고 해석한다. 모든 cluster center가 같은 값으로 fusion되면 해당 변수는 clustering에 비정보적 변수로 제거된다.
-
-Bondell and Reich (2009)는 ANOVA에서 factor level 간 차이를 동시에 shrink/collapse하기 위해 pairwise difference penalty를 사용했다.
+Bondell and Reich (2009)는 ANOVA에서 level effect의 pairwise difference를 shrink하여 level collapsing과 factor selection을 동시에 다루었다.
 
 $$
 \sum_j
@@ -142,76 +214,12 @@ $$
 w_j^{(km)}
 |\beta_{jk}-\beta_{jm}|,
 \qquad
-\sum_k \beta_{jk}=0.
+\sum_k\beta_{jk}=0.
 $$
 
-이 구조에서는 factor level effect들이 서로 같아지면 level이 collapse되고, sum-to-zero 제약 아래 모든 level effect가 같아지면 해당 factor는 선택되지 않는다.
+두 문헌은 절대 크기보다 집단 간 차이를 기준으로 변수 선택을 구성한다는 점에서 본 연구의 centered contrast penalty와 연결된다. 본 연구에서는 이 아이디어를 vMF mixture의 posterior decision score에 맞추어, $\eta=\kappa\mu$의 centered contrast $c_{kj}$에 coordinate-wise group penalty를 둔다.
 
-본 연구의 Eta-group penalty는 이러한 "집단 간 차이" 기반 변수 선택 아이디어를 vMF mixture의 posterior decision score에 맞게 옮긴 것이다. Guo et al. (2010)은 cluster center의 pairwise difference를, Bondell and Reich (2009)는 ANOVA level effect의 pairwise difference를 penalize한다. 본 연구는 vMF 자연모수
-
-$$
-\eta_k=\kappa_k\mu_k
-$$
-
-의 centered contrast
-
-$$
-c_{kj}=\eta_{kj}-\bar\eta_j
-$$
-
-에 대해 coordinate-wise group penalty를 둔다.
-
-$$
-\lambda_\eta
-\sum_{j=1}^d
-\|c_{\cdot j}\|_2.
-$$
-
-따라서 $\|c_{\cdot j}\|_2=0$이면 coordinate $j$는 모든 component에서 같은 posterior score contribution을 가지므로 decision support에서 제외된다. 반대로 하나 이상의 component에서 centered eta contrast가 남으면 coordinate $j$는 posterior decision boundary에 기여하는 변수로 선택된다.
-
-이 두 문헌은 절대 크기보다 집단 간 차이를 penalize하는 변수 선택의 근거를 제공한다. 본 연구는 이를 vMF mixture의 자연모수 $\eta=\kappa\mu$와 centered eta contrast $c_{kj}$에 적용하여, prototype sparsity가 아니라 posterior decision support recovery를 목표로 한다.
-
-### 2.3 공통 변수가 선택되지 않는 이유
-
-제안 모형의 support target은 $\mu$에 존재하는 좌표가 아니라 posterior decision score 차이를 만드는 좌표다. 두 component $k,\ell$에 대해
-
-$$
-s_k(x)-s_\ell(x) =
-\log\frac{\pi_k}{\pi_\ell}
-+
-\log\frac{C_d(\kappa_k)}{C_d(\kappa_\ell)}
-+
-(\eta_k-\eta_\ell)^\top x.
-$$
-
-따라서 좌표 $j$가 공통 변수이면
-
-$$
-\eta_{1j}=\cdots=\eta_{Kj}
-\quad\Rightarrow\quad
-\eta_{kj}-\eta_{\ell j}=0.
-$$
-
-즉, 해당 좌표는 각 component score에는 들어가지만 posterior decision boundary에는 기여하지 않는다. Centered eta contrast로 쓰면
-
-$$
-c_{kj}=\eta_{kj}-\bar\eta_j,\qquad
-\eta_{\cdot j}=a_j\mathbf{1}
-\Rightarrow
-c_{\cdot j}=0.
-$$
-
-따라서 Eta-group penalty
-
-$$
-\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2
-$$
-
-에서는 공통 좌표가 선택되지 않는다. 반면 Rossi 계열의 $\mu$-support는 각 군집 중심을 설명하는 좌표를 보기 때문에 공통 좌표도 선택될 수 있다.
-
-예외적으로 $\mu$가 공통이어도 $\kappa_k$가 다르면 $\eta_{kj}=\kappa_k\mu_{kj}$가 달라져 $c_{\cdot j}\ne0$이 될 수 있다. 이 경우 해당 좌표는 decision support에 포함될 수 있다.
-
-### 2.4 Eta penalty ablation 진단
+### 2.6 Eta penalty ablation 진단
 
 이 절은 S1-S6 성능 결과가 아니라, 제안 모형의 구조를 분해한 ablation 진단이다. eta 자연모수, group penalty, centered contrast의 역할을 분리해 확인한다.
 
