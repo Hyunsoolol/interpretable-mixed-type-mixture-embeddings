@@ -44,8 +44,7 @@ $$
 vMF mixture의 posterior score는
 
 $$
-s_k(x)
-=
+s_k(x) =
 \log \pi_k+\log C_d(\kappa_k)+\eta_k^\top x,
 \qquad
 \eta_k=\kappa_k\mu_k.
@@ -54,8 +53,7 @@ $$
 두 component $k,\ell$의 decision 차이는
 
 $$
-s_k(x)-s_\ell(x)
-=
+s_k(x)-s_\ell(x)=
 \mathrm{const}_{k\ell}
 +
 (\eta_k-\eta_\ell)^\top x
