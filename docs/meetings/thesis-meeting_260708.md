@@ -166,8 +166,7 @@ $$
 로 둔다. 초기 추정값 $c_{\cdot j}^{init}$에 대해
 
 $$
-w_j
-=
+w_j =
 \left(\|c_{\cdot j}^{init}\|_2+\epsilon\right)^{-\gamma}
 $$
 
