@@ -694,3 +694,19 @@ Calibration은 equal kappa에서 11.24%, heterogeneous kappa에서 10.52%로 맞
 - D-GL/D-AGL은 같은 결과 파일에서 common q=4를 주로 선택했다. 이는 M 계열이 prototype/direction support를 목표로 하고, E 계열이 posterior decision support를 목표로 한다는 차이를 다시 확인시킨다.
 
 현재 결과는 rep=50 중간 진단이다. 최종 논문용 full simulation에서는 \(e_B=2.5\%,5\%,10\%\)를 모두 포함하되, hard heterogeneous setting은 별도 난이도 진단으로 해석한다.
+
+## 6. Study B 주요 지표 boxplot
+
+아래 그림은 Study B rep=50 raw 결과를 사용한 boxplot이다. 열은 target \(e_B\)로 정의한 noise/difficulty 수준, 행은 sample size \(n\)을 나타낸다. 각 panel에는 equal kappa와 heterogeneous kappa 결과를 함께 포함하였다. D 계열은 파랑, E 계열은 주황으로 표시하였다.
+
+Selected q 그림의 점선은 true decision q=16이고, selected noise q 그림의 점선은 0이다.
+
+![Study B ARI boxplot](figures/studyb_boxplot_ari_by_eb_n_260714.png)
+
+![Study B F1 boxplot](figures/studyb_boxplot_f1_by_eb_n_260714.png)
+
+![Study B selected q boxplot](figures/studyb_boxplot_selectedq_by_eb_n_260714.png)
+
+![Study B selected noise q boxplot](figures/studyb_boxplot_noiseq_by_eb_n_260714.png)
+
+![Study B log MSE eta boxplot](figures/studyb_boxplot_logmse_eta_by_eb_n_260714.png)
