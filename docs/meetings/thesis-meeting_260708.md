@@ -13,7 +13,7 @@
 
 ## 2. Eta-group penalty 구성과 변수 선택 기준
 
-제안 모형의 penalty는 다음 네 요소로 구성된다.
+제안 모형의 penalty는 네 가지 선택으로 구성된다. 핵심은 posterior decision score에 직접 들어가는 $\eta$를 기준으로, component 간 차이를 만드는 centered contrast만 coordinate 단위로 선택하는 것이다.
 
 $$
 \eta_k=\kappa_k\mu_k,\qquad
@@ -21,7 +21,7 @@ c_{kj}=\eta_{kj}-\bar\eta_j,\qquad
 \bar\eta_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}.
 $$
 
-최종적으로 사용하는 adaptive centered Eta-group penalty는
+최종 후보는 adaptive centered Eta-group penalty다.
 
 $$
 \boxed{
@@ -31,17 +31,17 @@ w_j\|c_{\cdot j}\|_2
 }
 $$
 
-이다. 여기서 선택되는 support는
+여기서 선택되는 support는
 
 $$
 \widehat S_\eta=\{j:\|c_{\cdot j}\|_2>0\}
 $$
 
-로 정의한다.
+로 정의한다. 즉, common effect가 아니라 component 간 posterior decision 차이를 만드는 coordinate를 선택한다.
 
 ### 2.1 $\mu$가 아니라 $\eta$를 기준으로 둔다
 
-vMF mixture의 posterior score는
+vMF mixture의 posterior score에서 component $k$를 구분하는 선형항은
 
 $$
 s_k(x) =
@@ -50,7 +50,7 @@ s_k(x) =
 \eta_k=\kappa_k\mu_k.
 $$
 
-두 component $k,\ell$의 decision 차이는
+이다. 두 component $k,\ell$의 score 차이는
 
 $$
 s_k(x)-s_\ell(x)=
@@ -59,17 +59,13 @@ s_k(x)-s_\ell(x)=
 (\eta_k-\eta_\ell)^\top x
 $$
 
-이다. 따라서 posterior decision에 직접 들어가는 모수는 $\mu_k$ 단독이 아니라 $\eta_k=\kappa_k\mu_k$이다.
-
-간단한 예로 $\mu_{1j}=\mu_{2j}=0.1$이어도 $\kappa_1=20$, $\kappa_2=80$이면
+이므로 posterior decision에는 $\mu_k$ 단독이 아니라 $\eta_k=\kappa_k\mu_k$가 직접 들어간다. 예를 들어 $\mu_{1j}=\mu_{2j}=0.1$이어도 $\kappa_1=20$, $\kappa_2=80$이면
 
 $$
 \eta_{1j}=2,\qquad \eta_{2j}=8.
 $$
 
-$\mu$ 기준으로는 같은 좌표처럼 보이지만, posterior score에서는 component 간 차이를 만든다.
-
-또한 $\eta_k\ne0$, $\kappa_k>0$, $\|\mu_k\|_2=1$이면
+이다. $\mu$ 기준으로는 같은 좌표처럼 보이지만, posterior score에서는 다른 크기의 효과를 갖는다. 또한 $\eta_k\ne0$, $\kappa_k>0$, $\|\mu_k\|_2=1$이면
 
 $$
 \kappa_k=\|\eta_k\|_2,\qquad
@@ -89,7 +85,7 @@ $$
 \mathbf 1^\top c_{\cdot j}=0.
 $$
 
-공통 성분 $\bar\eta_j\mathbf 1$은 모든 component score에 동일하게 더해지므로 decision 차이에서는 사라진다.
+공통 성분 $\bar\eta_j\mathbf 1$은 모든 component score에 동일하게 더해지므로 decision 차이에서 사라진다.
 
 $$
 (\bar\eta_j\mathbf 1)_k-(\bar\eta_j\mathbf 1)_\ell=0,
@@ -97,9 +93,7 @@ $$
 \eta_{kj}-\eta_{\ell j}=c_{kj}-c_{\ell j}.
 $$
 
-따라서 coordinate $j$가 posterior decision boundary에 기여하는지는 $\eta_{\cdot j}$의 절대 크기가 아니라 $c_{\cdot j}$의 존재 여부로 판단한다.
-
-예를 들어
+따라서 coordinate $j$가 posterior decision boundary에 기여하는지는 raw $\eta_{\cdot j}$의 절대 크기가 아니라 $c_{\cdot j}$의 존재 여부로 판단한다. 예를 들어
 
 $$
 \eta_{\cdot j}=(5,5,5,5)
@@ -107,7 +101,7 @@ $$
 c_{\cdot j}=(0,0,0,0)
 $$
 
-이므로 이 좌표는 공통 효과다. 반면
+이면 공통 효과이므로 decision support에는 들어가지 않는다. 반면
 
 $$
 \eta_{\cdot j}=(8,4,4,4)
@@ -115,7 +109,7 @@ $$
 c_{\cdot j}=(3,-1,-1,-1)
 $$
 
-이므로 component 간 posterior score 차이를 만든다.
+이면 component 간 posterior score 차이를 만든다.
 
 ### 2.3 entry-wise가 아니라 coordinate-wise group $L_2$ penalty를 사용한다
 
@@ -151,7 +145,7 @@ $$
 c_{\cdot j}=(3,-1,-1,-1)
 $$
 
-은 하나의 decision coordinate가 만드는 contrast pattern이다. Group $L_2$ penalty는 이 좌표 전체를 선택 또는 제외한다.
+은 하나의 decision coordinate가 만드는 contrast pattern이다. Group $L_2$ penalty는 이 좌표 전체를 선택하거나 제외한다.
 
 ### 2.4 adaptive weight는 선택적으로 사용한다
 
@@ -171,7 +165,7 @@ $$
 w_j\|c_{\cdot j}\|_2
 $$
 
-로 둔다. 따라서 $w_j=1$이면 E-CGL이고, 초기 추정값 $c_{\cdot j}^{init}$에 대해
+로 둔다. $w_j=1$이면 E-CGL이고, 초기 추정값 $c_{\cdot j}^{init}$에 대해
 
 $$
 w_j =
@@ -184,19 +178,7 @@ $$
 \gamma=1,\qquad \epsilon=10^{-6}
 $$
 
-로 두고, weight는 median-normalization을 적용했다.
-
-Adaptive weight는 기본 centered Eta-group penalty의 선택적 확장이다. 초기 contrast가 큰 좌표는 작은 weight를 받아 상대적으로 약하게 축소되고, 초기 contrast가 작은 좌표는 큰 weight를 받아 더 강하게 축소된다. 예를 들어
-
-$$
-\|c_{\cdot j}^{init}\|_2=10
-\Rightarrow
-w_j\approx0.1,
-\qquad
-\|c_{\cdot j'}^{init}\|_2=0.5
-\Rightarrow
-w_{j'}\approx2.
-$$
+로 두고, weight는 median-normalization을 적용했다. Adaptive weight는 기본 centered Eta-group penalty의 선택적 확장으로, 초기 contrast가 큰 좌표는 상대적으로 약하게, 초기 contrast가 작은 좌표는 더 강하게 축소한다.
 
 ### 2.5 관련 penalty 문헌과 본 연구의 위치
 
@@ -245,45 +227,17 @@ $$
 
 ### 2.6 Eta penalty ablation 진단
 
-이 절은 S1-S6 성능 결과가 아니라, 제안 모형의 구조를 분해한 ablation 진단이다. eta 자연모수, group penalty, centered contrast의 역할을 분리해 확인한다.
+이 절은 S1-S6 성능표가 아니라 penalty 구조를 분해한 진단이다. 기준 환경은 S1 setting(`K=4`, `n=1000`, `d=200`, common q=4, decision q=16, noise q=180, rep=20)이다.
 
-진단 시뮬레이션 환경:
+| 확인 항목 | 비교 모형 | 핵심 penalty | selected q | common q | noise q | F1 | MSE_eta | 해석 |
+|:---|:---|:---|---:|---:|---:|---:|---:|:---|
+| $\mu$ target | M-GL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20.00 | 4.00 | 0.00 | 0.889 | 0.072 | common 좌표가 남음 |
+| raw $\eta$ target | E-GL | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 21.15 | 4.00 | 1.15 | 0.862 | 0.089 | common 좌표가 남음 |
+| centered entry-wise L1 | E-CL | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 19.05 | 0.05 | 3.00 | 0.915 | 0.098 | common은 줄지만 noise가 남음 |
+| centered group | E-CGL | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 17.50 | 0.00 | 1.50 | 0.958 | 0.079 | decision 좌표 중심 선택 |
+| adaptive centered group | E-CAGL | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 16.05 | 0.00 | 0.05 | 0.998 | 0.057 | true decision q=16 근처 |
 
-| 항목 | 설정 |
-|:---|:---|
-| 목적 | penalty target, centering, group/adaptive 효과 분해 |
-| 반복 수 | rep=20 |
-| 기준 환경 | S1 data-generating setting |
-| 차원/표본/군집 수 | $d=200$, $n=1000$, $K=4$ |
-| 변수 구성 | common q=4, decision/specific q=16, noise q=180, true decision q=16 |
-| 평균 방향 차이 | target angle 90도 |
-| 집중도 | $\kappa=(30,40,50,60)$ |
-| 선택 기준 | BIC |
-| 재적합 | 선택된 support에서 refit |
-
-| 비교 목적 | method | penalty / model | selected q | common q | specific q | noise q | ARI | TPR | FPR | Precision | F1 | MSE_eta | 해석 |
-|:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| $\mu$ entry-wise | M-L + refit | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ | 40.65 | 4.00 | 16.00 | 20.65 | 0.853 | 1.000 | 0.134 | 0.399 | 0.568 | 0.232 | common/noise 좌표 선택 많음 |
-| $\mu$ group | M-GL + refit | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20.00 | 4.00 | 16.00 | 0.00 | 0.859 | 1.000 | 0.022 | 0.800 | 0.889 | 0.072 | noise는 줄지만 common 좌표 유지 |
-| adaptive $\mu$ group | M-AGL + refit | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | 20.00 | 4.00 | 16.00 | 0.00 | 0.859 | 1.000 | 0.022 | 0.800 | 0.889 | 0.072 | $\mu$-support 기준 |
-| raw $\eta$ entry-wise | E-L + refit | $\lambda_\eta\sum_{k,j}\lvert\eta_{kj}\rvert$ | 43.65 | 4.00 | 16.00 | 23.65 | 0.853 | 1.000 | 0.150 | 0.378 | 0.545 | 0.254 | raw eta L1은 noise 선택 증가 |
-| raw $\eta$ group | E-GL + refit | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 21.15 | 4.00 | 16.00 | 1.15 | 0.858 | 1.000 | 0.028 | 0.759 | 0.862 | 0.089 | common 좌표 유지 |
-| centered $\eta$ entry-wise | E-CL + refit | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 19.05 | 0.05 | 16.00 | 3.00 | 0.860 | 1.000 | 0.017 | 0.846 | 0.915 | 0.098 | centering은 common 선택을 크게 줄임 |
-| centered $\eta$ group | E-CGL + refit | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 17.50 | 0.00 | 16.00 | 1.50 | 0.861 | 1.000 | 0.008 | 0.922 | 0.958 | 0.079 | centered eta group |
-| adaptive centered $\eta$ group | E-CAGL + refit | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 16.05 | 0.00 | 16.00 | 0.05 | 0.860 | 1.000 | 0.000 | 0.997 | 0.998 | 0.057 | true decision q=16 근처 |
-
-`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. 이 표는 S1 환경에서 실행한 rep=20 diagnostic 결과이며, S1-S6 본 결과가 아니라 구조 분해 결과로 해석한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$이고, true decision q는 16이다. `common q`, `specific q`, `noise q`는 각각 common 좌표 4개, decision/specific 좌표 16개, noise 좌표 180개 중 선택된 평균 개수다.
-
-- M-GL/M-AGL은 noise를 제거하지만 $\mu$-support 기준이므로 S1의 common q=4를 그대로 선택한다.
-- raw eta 계열 E-L/E-GL도 common 좌표를 유지한다. eta 자연모수만으로는 posterior decision support가 충분히 분리되지 않았다.
-- E-CL은 common q를 거의 제거하지만 entry-wise penalty라 noise q가 남는다.
-- E-CGL/E-CAGL은 centered eta contrast를 group 단위로 선택한다. E-CAGL은 selected q=16.05, common q=0.00, noise q=0.05로 S1의 decision support와 거의 일치했다.
-
-표에서 제외한 진단 후보:
-
-| 제외 후보 | 형식 | 제외 사유 |
-|:---|:---|:---|
-| M-CGL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}-\bar\mu_j\mathbf{1}\rVert_2$ | $\mu$는 단위 구면 제약을 갖는 방향 모수이고 posterior score에는 $\eta_k=\kappa_k\mu_k$가 들어간다. 따라서 $\mu$만 중심화하면 $\kappa$ 차이를 반영하지 못해 posterior decision support 목표와 일치하지 않는다. S1 보조 diagnostic에서도 selected q=21.00, common q=4.00, noise q=1.00으로 common 좌표를 유지했다. |
+`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. 이 진단에서 E-CAGL은 common 좌표를 선택하지 않고 noise 선택도 거의 없었다. 따라서 현재 주 후보는 E-CAGL로 둔다. 다만 이는 모든 조건에서 최선이라는 주장이 아니라, posterior decision support recovery 목표에 맞춘 구조라는 의미다.
 
 ## 3. 시뮬레이션 결과 요약
 
@@ -336,7 +290,15 @@ S1-S6은 평균 방향 각도로 난이도를 정한 진단이고, Study B는 tr
 | 10.0% | equal | 11.24% | 1000 | 16.24 | 0.00 | 16.00 | 0.24 | 0.993 | 0.720 |
 | 10.0% | heterogeneous | 10.52% | 1000 | 21.66 | 0.18 | 16.00 | 5.48 | 0.850 | 0.735 |
 
-\(e_B=2.5\%\)와 \(e_B=5\%\)에서는 n=1000 기준 E-CAGL이 selected q를 true decision q=16 근처로 맞추고 common q를 거의 선택하지 않았다. \(e_B=10\%\)에서는 ARI가 낮아지고, heterogeneous kappa 조건에서 noise q가 증가했다. 이 결과는 표본 수와 분리 난이도, 집중도 차이가 support recovery에 함께 영향을 준다는 점을 보여준다.
+\(e_B=2.5\%\)와 \(e_B=5\%\)에서는 n=1000 기준 E-CAGL이 selected q를 true decision q=16 근처로 맞추고 common q를 거의 선택하지 않았다. \(e_B=10\%\)에서는 ARI가 낮아지고, heterogeneous kappa 조건에서 noise q가 증가했다. 이 결과는 표본 수, 분리 난이도, 집중도 차이가 support recovery에 함께 영향을 준다는 점을 보여준다.
+
+아래 boxplot은 rep=50 raw 결과를 사용했다. 열은 target \(e_B\), 행은 sample size \(n\)이다. equal kappa와 heterogeneous kappa 결과는 각 panel 안에 함께 포함했다.
+
+![Study B F1 boxplot](../simulations/figures/studyb_boxplot_f1_by_eb_n_260714.png)
+
+![Study B selected noise q boxplot](../simulations/figures/studyb_boxplot_noiseq_by_eb_n_260714.png)
+
+![Study B log MSE eta boxplot](../simulations/figures/studyb_boxplot_logmse_eta_by_eb_n_260714.png)
 
 ### 3.3 Dense-support negative-control S1-N~S6-N
 
