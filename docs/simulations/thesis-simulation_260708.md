@@ -1,8 +1,8 @@
-# 논문용 시뮬레이션 요약 260708
+# 논문용 시뮬레이션 요약 260714
 
 ## 1. 목적
 
-7월 8일 연구미팅 공유용으로, 논문용 후보 시뮬레이션 S1-S6 결과를 정리한다.
+7월 14일 연구미팅 공유용으로, 논문용 후보 시뮬레이션 S1-S6 결과를 정리한다.
 이번 시뮬레이션의 주요 평가 기준은 군집 정확도 자체보다 사후 군집 결정에 쓰이는 support를 얼마나 잘 복원하는가이다.
 
 제안 모형의 목표 support는 중심화 eta 대비(centered eta contrast)
@@ -178,8 +178,8 @@ $$
 해석:
 
 - S3는 스트레스 테스트 설정으로, 모든 모형에서 군집 성능과 support 복원이 약해진다.
-- E-CAGL도 모든 decision 변수를 완벽하게 복원하지는 못하지만, 다른 모형보다 훨씬 덜 조밀하다.
-- 이 설정에서 E-CAGL은 ARI, F1, FPR, MSE_eta 기준으로 가장 좋은 결과를 보인다.
+- E-CAGL도 모든 decision 변수를 전부 복원하지는 못하지만, 다른 모형보다 덜 조밀하게 선택한다.
+- 이 설정에서 E-CAGL은 ARI, F1, FPR, MSE_eta 기준으로 상대적으로 높은 성능을 보인다.
 
 ### 2.5 S4: 평균 차이 보통 (60도) + 집중도 등분산
 
@@ -273,8 +273,8 @@ $$
 |---|---|---|
 | S1 | E-CAGL | Decision support를 거의 정확하게 복원한다. |
 | S2 | E-CAGL | 집중도가 같아도 S1과 같은 패턴이 유지된다. |
-| S3 | E-CAGL | 어려운 스트레스 설정이지만 E-CAGL이 가장 덜 조밀하고 F1/MSE_eta가 가장 좋다. |
-| S4 | E-CAGL | 평균 차이가 보통(60도)이어도 집중도가 같으면 E-CAGL이 참 q에 가장 가깝다. |
+| S3 | E-CAGL | 어려운 스트레스 설정이지만 E-CAGL이 덜 조밀하고 F1/MSE_eta가 상대적으로 높다. |
+| S4 | E-CAGL | 평균 차이가 보통(60도)이어도 집중도가 같으면 E-CAGL의 selected q가 참 q와 가깝다. |
 | S5 | 없음 | 약한 이분산으로 실제 30도 근처를 만들었지만, 모든 모형의 clustering과 support recovery가 크게 약해진다. |
 | S6 | 없음 | 실제 30도 등분산 stress setting에서는 모든 모형의 clustering과 support recovery가 크게 약해진다. |
 
@@ -283,7 +283,7 @@ $$
 - 개별 entry 패널티인 M-L과 E-CL은 거의 모든 좌표를 유지하는 경향이 있다.
 - 방향 그룹 패널티인 M-GL과 M-AGL은 대부분의 노이즈를 제거하지만 공통 좌표도 함께 유지한다.
 - Eta-group 패널티인 E-CGL과 E-CAGL은 posterior decision support를 직접 목표로 하므로 공통 좌표를 제거한다.
-- S1-S4 전체에서 decision-support recovery 기준으로는 E-CAGL이 가장 안정적이다. S5/S6는 평균 방향 차이를 30도 수준으로 낮춘 stress 진단으로 별도 해석한다.
+- S1-S4 전체에서 decision-support recovery 기준으로는 E-CAGL의 성능이 일관되게 높게 나타난다. S5/S6는 평균 방향 차이를 30도 수준으로 낮춘 stress 진단으로 별도 해석한다.
 
 주의할 점:
 
@@ -297,7 +297,7 @@ $$
 
 외부 baseline도 기본 시뮬레이션과 같은 protocol로 S1-N~S6-N에 대해 계산했다. Spherical k-means와 Dense vMF free kappa는 clustering baseline이며, Sparse k-means support는 posterior decision support가 아니라 feature support로 해석한다.
 
-기본 시뮬레이션은 true decision support가 16개인 sparse decision-support setting이다. Negative-control 시뮬레이션에서는 평균 방향 차이와 집중도 차이의 두 축은 유지하되, decision variable 수를 80개로 늘려 Eta-group 계열이 항상 유리한 sparse setting만 다루는 것이 아님을 확인한다.
+기본 시뮬레이션은 true decision support가 16개인 sparse decision-support setting이다. Negative-control 시뮬레이션에서는 평균 방향 차이와 집중도 차이의 두 축은 유지하되, decision variable 수를 80개로 늘려 Eta-group 계열이 sparse setting만 다루는 것이 아님을 확인한다.
 
 이번 결과는 dense decision support에 대한 `rep=50 diagnostic`이다. S1-N~S4-N 전체 요약은 `results/paper_eta_negative_control_s1n_s4n_rep50_260702/paper_eta_negative_control_s1n_s4n_rep50_summary.csv`에 저장했고, S5-N/S6-N은 각 scenario 결과 폴더의 summary를 사용했다.
 
@@ -389,12 +389,13 @@ $$
 | 모형 | ARI | selected q | common q | specific q | noise q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_eta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | M-L | 0.563 | 199.30 | 4.00 | 80.00 | 115.30 | 1.000 | 0.994 | 0.401 | 0.573 | 0.000553 | 8.860 | 1.002 |
-| M-GL | 0.000 | 4.02 | 4.00 | 0.00 | 0.02 | 0.000 | 0.034 | 0.000 | NA | 0.002158 | 95.514 | 3.957 |
-| M-AGL | 0.000 | 4.02 | 4.00 | 0.02 | 0.00 | 0.000 | 0.033 | 0.004 | 0.024 | 0.002156 | 96.456 | 3.945 |
+| M-GL | 0.000 | 4.02 | 4.00 | 0.00 | 0.02 | 0.000 | 0.034 | 0.000 | 0.000 | 0.002158 | 95.514 | 3.957 |
+| M-AGL | 0.000 | 4.02 | 4.00 | 0.02 | 0.00 | 0.000 | 0.033 | 0.004 | 0.000 | 0.002156 | 96.456 | 3.945 |
 | E-CL | 0.564 | 196.04 | 3.80 | 80.00 | 112.24 | 1.000 | 0.967 | 0.408 | 0.580 | 0.000726 | 9.981 | 0.996 |
-| E-CGL | NA | 0.00 | 0.00 | 0.00 | 0.00 | 0.000 | 0.000 | NA | NA | NA | NA | NA |
-| E-CAGL | 0.629 | 16.70 | 0.00 | 16.00 | 0.70 | 0.200 | 0.006 | 0.959 | 0.979 | 0.004234 | 258.843 | 0.388 |
+| E-CGL | NA | 0.00 | 0.00 | 0.00 | 0.00 | 0.000 | 0.000 | NA | 0.000 | NA | NA | NA |
+| E-CAGL | 0.629 | 16.70 | 0.00 | 16.00 | 0.70 | 0.200 | 0.006 | 0.959 | 0.331 | 0.004234 | 258.843 | 0.388 |
 
+S4-N에서 E-CAGL은 50회 중 10회만 nonzero support를 선택했다. 표의 F1은 전체 50회 기준으로 재계산한 값이고, nonzero support가 선택된 10회만 보면 F1=0.979이다. 재계산 상세는 `results/paper_eta_s4n_metric_audit_260708/s4n_metric_recheck_notes.md`에 따로 남겼다.
 
 외부 clustering baseline:
 
@@ -452,9 +453,9 @@ $$
 
 - S1-N과 S2-N에서는 decision q가 80으로 조밀해져도 E-CAGL이 TPR=1에 가깝고 selected q도 80에 가깝다. 이 두 경우는 Eta-group이 dense support에서 바로 무너진다는 증거는 아니다.
 - S3-N에서는 평균 방향 차이가 보통(60도)이고 집중도 차이가 있는 상황에서 E-CAGL이 decision variable을 과소선택했다. M-AGL의 F1은 0.877, E-CAGL의 F1은 0.840으로 M-AGL이 support F1에서는 더 좋았다.
-- S4-N에서는 E-CGL이 BIC에서 zero support를 선택했고, E-CAGL도 50회 중 10회만 refit이 유효했다. 이는 clean한 M-계열 우위라기보다, 보통 수준의 평균 차이(60도)와 조밀 support가 결합될 때 Eta-group tuning failure가 발생할 수 있음을 나타내는 진단이다.
+- S4-N에서는 E-CGL이 BIC에서 zero support를 선택했고, E-CAGL도 50회 중 10회만 nonzero support를 선택했다. E-CAGL의 전체 50회 기준 F1은 0.331이고, nonzero support 10회 기준 F1은 0.979이다. 이는 보통 수준의 평균 차이(60도)와 조밀 support가 결합될 때 Eta-group tuning failure가 발생할 수 있음을 나타내는 진단이다.
 - S5-N과 S6-N에서는 평균 방향 차이가 30도 수준으로 작아지면서 모든 모형의 ARI가 거의 0에 가까워졌다. M-L/E-CL은 거의 dense support를 선택하고, E-CGL/E-CAGL은 zero-support 또는 극단적 과소선택으로 간다.
-- 따라서 dense decision support negative-control은 Eta-group이 항상 유리하다는 주장을 피하고, posterior decision support recovery가 약해지는 조건을 정리하는 appendix/limitation 결과로 둔다.
+- 따라서 dense decision support negative-control은 Eta-group의 적용 범위를 분리하고, posterior decision support recovery가 약해지는 조건을 정리하는 appendix/limitation 결과로 둔다.
 - 외부 baseline에서는 Dense vMF free kappa와 Spherical k-means가 clustering-only 기준으로 S1-N~S4-N에서 비교적 강하게 작동하지만, sparse support를 제공하지 않는다. Sparse k-means는 feature support를 선택하지만 ARI가 낮고 posterior decision support와 목표가 다르다.
 
 ### 3.5 현재 결론
@@ -532,4 +533,67 @@ common q는 모든 component에 같은 방향으로 들어가는 공통 배경 �
 - 이 결과는 제안 모형의 목표가 prototype sparsity가 아니라 centered eta contrast 기반 posterior decision support recovery임을 나타낸다.
 - MSE_kappa는 E-CGL/E-CAGL에서 크게 나타난다. 이는 common background coordinate를 제거하면서 kappa 복원 오차가 커지는 현상으로, 이 설정에서는 MSE_eta와 decision support 지표를 중심 지표로 보고한다.
 
-요약하면 shared-background 설정에서는 M 계열과 E 계열의 목표 차이가 뚜렷하게 나타난다. M 계열은 prototype support를 복원하고, E 계열은 posterior decision support를 더 직접적으로 복원한다.
+요약하면 shared-background 설정에서는 M 계열과 E 계열의 목표 차이가 뚜렷하게 나타난다. M 계열은 prototype support를 복원하고, E 계열은 posterior decision support를 중심으로 복원한다.
+
+## 5. Oracle Bayes error 기반 Study B 난이도 진단
+
+### 5.1 목적과 설정
+
+이 진단은 각도만으로 난이도를 정하지 않고, true parameter에서 계산한 oracle Bayes error \(e_B\)로 군집 분리 난이도를 맞춘 Study B 예비 결과다. 목적은 쉬운/중간/어려운 분리 조건에서 E-CAGL의 posterior decision support recovery가 유지되는지 확인하는 것이다.
+
+| 항목 | 값 |
+|---|---:|
+| K | 4 |
+| d | 200 |
+| n | 300, 1000 |
+| target oracle Bayes error | 2.5%, 5%, 10% |
+| common q | 4 |
+| decision q | 16 |
+| noise q | 180 |
+| true decision q | 16 |
+| kappa equal | (45,45,45,45) |
+| kappa heterogeneous | (30,40,50,60) |
+| 반복 수 | 50 |
+| 초기값 탐색 | nstart=10 |
+| path length | 240 |
+| 선택 기준 | BIC 후 선택 support에서 refit |
+
+Calibration 결과는 다음과 같다.
+
+| target \(e_B\) | kappa | achieved \(e_B\) |
+|---:|:---|---:|
+| 2.5% | equal | 2.42% |
+| 2.5% | heterogeneous | 2.54% |
+| 5.0% | equal | 4.58% |
+| 5.0% | heterogeneous | 4.54% |
+| 10.0% | equal | 11.24% |
+| 10.0% | heterogeneous | 10.52% |
+
+### 5.2 E-CAGL 결과 요약
+
+아래 표는 결과 파일의 `E-AGL` 행을 문서의 명명 체계에 맞춰 E-CAGL로 표기한 것이다. `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
+
+| target \(e_B\) | achieved \(e_B\) | n | kappa | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta | zero-support |
+|---:|---:|---:|:---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2.5% | 2.42% | 300 | equal | 17.92 | 0.00 | 16.00 | 1.92 | 0.943 | 0.931 | 0.257 | 0 |
+| 2.5% | 2.54% | 300 | heterogeneous | 18.00 | 0.02 | 16.00 | 1.98 | 0.941 | 0.933 | 0.264 | 0 |
+| 2.5% | 2.42% | 1000 | equal | 16.04 | 0.00 | 16.00 | 0.04 | 0.999 | 0.935 | 0.053 | 0 |
+| 2.5% | 2.54% | 1000 | heterogeneous | 16.04 | 0.00 | 16.00 | 0.04 | 0.999 | 0.935 | 0.051 | 0 |
+| 5.0% | 4.58% | 300 | equal | 16.76 | 0.00 | 16.00 | 0.76 | 0.977 | 0.875 | 0.231 | 0 |
+| 5.0% | 4.54% | 300 | heterogeneous | 18.24 | 0.04 | 16.00 | 2.20 | 0.935 | 0.868 | 0.288 | 0 |
+| 5.0% | 4.58% | 1000 | equal | 16.12 | 0.00 | 16.00 | 0.12 | 0.996 | 0.879 | 0.058 | 0 |
+| 5.0% | 4.54% | 1000 | heterogeneous | 16.06 | 0.00 | 16.00 | 0.06 | 0.998 | 0.876 | 0.056 | 0 |
+| 10.0% | 11.24% | 300 | equal | 16.98 | 0.00 | 15.54 | 1.44 | 0.942 | 0.700 | 0.348 | 1 |
+| 10.0% | 10.52% | 300 | heterogeneous | 21.48 | 0.12 | 14.88 | 6.48 | 0.794 | 0.681 | 0.814 | 0 |
+| 10.0% | 11.24% | 1000 | equal | 16.24 | 0.00 | 16.00 | 0.24 | 0.993 | 0.720 | 0.069 | 0 |
+| 10.0% | 10.52% | 1000 | heterogeneous | 21.66 | 0.18 | 16.00 | 5.48 | 0.850 | 0.735 | 0.114 | 0 |
+
+### 5.3 결과 해석
+
+- \(e_B=2.5\%\)와 \(e_B=5\%\)에서는 n=1000에서 E-CAGL이 selected q를 16 근처로 맞추고, common q를 거의 선택하지 않았다.
+- \(e_B=10\%\)에서도 equal kappa에서는 n=1000 기준 selected q=16.24, F1=0.993으로 decision support가 유지됐다.
+- \(e_B=10\%\), heterogeneous kappa에서는 E-CAGL이 decision q=16은 유지했지만 noise q=5.48을 함께 선택했다. 이 조건은 난이도와 집중도 차이가 동시에 있는 경우의 over-selection 진단으로 본다.
+- n=300에서는 표본 수가 작아질수록 noise q가 증가하고, hard heterogeneous setting에서 F1과 ARI가 함께 낮아졌다.
+- D-GL/D-AGL은 같은 결과 파일에서 common q=4를 주로 선택했다. 이는 M 계열이 prototype/direction support를 목표로 하고, E 계열이 posterior decision support를 목표로 한다는 차이를 다시 확인시킨다.
+
+현재 결과는 rep=50 중간 진단이다. 최종 논문용 full simulation에서는 \(e_B=2.5\%,5\%,10\%\)를 모두 포함하되, hard heterogeneous setting은 별도 난이도 진단으로 해석한다.

@@ -1,4 +1,4 @@
-# Thesis Meeting 260708
+# Thesis Meeting 260714
 
 ## 1. 이번 미팅 목적
 
@@ -287,7 +287,7 @@ $$
 
 ## 3. 시뮬레이션 결과 요약
 
-시뮬레이션은 S1-S6 기본 시뮬레이션과 S1-N~S6-N dense-support negative-control로 정리했다. 목적은 clustering accuracy 자체보다 posterior decision support recovery가 유지되는 조건과 약해지는 조건을 확인하는 데 있다. 전체 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 둔다.
+시뮬레이션은 S1-S6 기본 시뮬레이션, oracle Bayes error 기반 Study B 난이도 진단, S1-N~S6-N dense-support negative-control로 정리했다. 목적은 clustering accuracy 자체보다 posterior decision support recovery가 유지되는 조건과 약해지는 조건을 확인하는 데 있다. 전체 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 둔다.
 
 비교 모형은 penalty를 거는 공간과 group/adaptive 여부로 구분한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$는 centered eta contrast다.
 
@@ -317,7 +317,28 @@ Adaptive weight는 $w_j^{(M)}\propto(\lVert\mu_{\cdot j}^{init}\rVert_2+\epsilon
 
 S1-S4에서는 E-CAGL이 clustering 성능을 유지하면서 selected q를 true q=16 근처로 맞췄다. M-L과 E-CL은 ARI는 유지했지만 selected q가 거의 전체 차원에 가까웠다. S5-S6은 weak-signal limitation으로 분리해 해석한다.
 
-### 3.2 Dense-support negative-control S1-N~S6-N
+### 3.2 Oracle Bayes error 기반 Study B 난이도 진단
+
+S1-S6은 평균 방향 각도로 난이도를 정한 진단이고, Study B는 true parameter에서 계산한 oracle Bayes error \(e_B\)로 군집 분리 난이도를 맞춘 예비 결과다. 설정은 \(K=4\), \(d=200\), \(n\in\{300,1000\}\), common q=4, decision q=16, noise q=180, path length=240, rep=50이다.
+
+| target \(e_B\) | kappa | achieved \(e_B\) | n | E-CAGL selected q | common q | decision q | noise q | F1 | ARI |
+|:---:|:---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2.5% | equal | 2.42% | 300 | 17.92 | 0.00 | 16.00 | 1.92 | 0.943 | 0.931 |
+| 2.5% | heterogeneous | 2.54% | 300 | 18.00 | 0.02 | 16.00 | 1.98 | 0.941 | 0.933 |
+| 2.5% | equal | 2.42% | 1000 | 16.04 | 0.00 | 16.00 | 0.04 | 0.999 | 0.935 |
+| 2.5% | heterogeneous | 2.54% | 1000 | 16.04 | 0.00 | 16.00 | 0.04 | 0.999 | 0.935 |
+| 5.0% | equal | 4.58% | 300 | 16.76 | 0.00 | 16.00 | 0.76 | 0.977 | 0.875 |
+| 5.0% | heterogeneous | 4.54% | 300 | 18.24 | 0.04 | 16.00 | 2.20 | 0.935 | 0.868 |
+| 5.0% | equal | 4.58% | 1000 | 16.12 | 0.00 | 16.00 | 0.12 | 0.996 | 0.879 |
+| 5.0% | heterogeneous | 4.54% | 1000 | 16.06 | 0.00 | 16.00 | 0.06 | 0.998 | 0.876 |
+| 10.0% | equal | 11.24% | 300 | 16.98 | 0.00 | 15.54 | 1.44 | 0.942 | 0.700 |
+| 10.0% | heterogeneous | 10.52% | 300 | 21.48 | 0.12 | 14.88 | 6.48 | 0.794 | 0.681 |
+| 10.0% | equal | 11.24% | 1000 | 16.24 | 0.00 | 16.00 | 0.24 | 0.993 | 0.720 |
+| 10.0% | heterogeneous | 10.52% | 1000 | 21.66 | 0.18 | 16.00 | 5.48 | 0.850 | 0.735 |
+
+\(e_B=2.5\%\)와 \(e_B=5\%\)에서는 n=1000 기준 E-CAGL이 selected q를 true decision q=16 근처로 맞추고 common q를 거의 선택하지 않았다. \(e_B=10\%\)에서는 ARI가 낮아지고, heterogeneous kappa 조건에서 noise q가 증가했다. 이 결과는 표본 수와 분리 난이도, 집중도 차이가 support recovery에 함께 영향을 준다는 점을 보여준다.
+
+### 3.3 Dense-support negative-control S1-N~S6-N
 
 Negative-control은 평균 방향 차이와 집중도 차이의 축은 유지하되, decision q를 16에서 80으로 늘린 dense decision-support setting이다. sparse support 가정 밖에서 Eta-group의 동작을 확인하기 위한 설정이다.
 
@@ -326,13 +347,13 @@ Negative-control은 평균 방향 차이와 집중도 차이의 축은 유지하
 | S1-N | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.857, selected q=82.40, F1=0.985 | Dense vMF ARI=0.835 | dense support에서도 true q=80 근처 선택 |
 | S2-N | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.897, selected q=81.82, F1=0.989 | Dense vMF ARI=0.886 | dense support에서도 true q=80 근처 선택 |
 | S3-N | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.565, selected q=76.06, F1=0.840 | Dense vMF ARI=0.545 | M-AGL보다 support F1이 낮아지는 limitation |
-| S4-N | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.629, selected q=16.70, F1=0.979 | Dense vMF ARI=0.562 | E-CAGL이 decision q=80 중 일부만 선택. BIC 튜닝 한계 |
+| S4-N | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.629, selected q=16.70, F1=0.331 | Dense vMF ARI=0.562 | 50회 중 10회만 nonzero support 선택. 조건부 F1=0.979 |
 | S5-N | 평균 차이 작음(30도), 약한 집중도 이분산 | ARI=0.001, selected q=0.06, F1=0.025 | Dense vMF ARI=0.024 | weak signal에서 전체적으로 성능 저하 |
 | S6-N | 평균 차이 작음(30도), 집중도 등분산 | ARI=0.005, selected q=2.04, F1=0.172 | Dense vMF ARI=0.012 | dense/sparse 여부와 무관하게 signal 자체가 약함 |
 
 S1-N과 S2-N에서는 E-CAGL의 selected q가 true q=80 근처였다. 반면 S3-N과 S4-N에서는 평균 방향 차이가 보통 수준일 때 Eta-group 계열의 과소선택 또는 BIC 튜닝 한계가 관찰됐다. S5-N/S6-N은 signal 자체가 약한 stress-test로 해석한다.
 
-### 3.3 외부 baseline 해석
+### 3.4 외부 baseline 해석
 
 외부 baseline은 제안 모형과 목표가 다르므로 ARI/NMI/purity 중심으로만 비교한다.
 

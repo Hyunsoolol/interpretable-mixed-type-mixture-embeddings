@@ -1,0 +1,13 @@
+"common_norm","endpoint_error_low","endpoint_error_high","achieved_oracle_error","target_oracle_error","scenario","kappa","source_scenario","target_eB","n"
+16.6010335922241,0.0152,0.6524,0.0242,0.025,"equal_kappa","45,45,45,45","OBE5_equal_kappa",0.025,300
+6.86377830505371,0.0216,0.1444,0.0254,0.025,"heterogeneous_kappa","30,40,50,60","OBE5_heterogeneous_kappa",0.025,300
+16.6010335922241,0.0152,0.6524,0.0242,0.025,"equal_kappa","45,45,45,45","OBE5_equal_kappa",0.025,1000
+6.86377830505371,0.0216,0.1444,0.0254,0.025,"heterogeneous_kappa","30,40,50,60","OBE5_heterogeneous_kappa",0.025,1000
+25.1739812850952,0.0152,0.6524,0.0458,0.05,"equal_kappa","45,45,45,45","OBE5_equal_kappa",0.05,300
+20.0251796722412,0.0216,0.1444,0.0454,0.05,"heterogeneous_kappa","30,40,50,60","OBE5_heterogeneous_kappa",0.05,300
+25.1739812850952,0.0152,0.6524,0.0458,0.05,"equal_kappa","45,45,45,45","OBE5_equal_kappa",0.05,1000
+20.0251796722412,0.0216,0.1444,0.0454,0.05,"heterogeneous_kappa","30,40,50,60","OBE5_heterogeneous_kappa",0.05,1000
+33.5815916061401,0.0152,0.6524,0.1124,0.1,"equal_kappa","45,45,45,45","OBE5_equal_kappa",0.1,300
+27.9449764251709,0.0216,0.1444,0.1052,0.1,"heterogeneous_kappa","30,40,50,60","OBE5_heterogeneous_kappa",0.1,300
+33.5815916061401,0.0152,0.6524,0.1124,0.1,"equal_kappa","45,45,45,45","OBE5_equal_kappa",0.1,1000
+27.9449764251709,0.0216,0.1444,0.1052,0.1,"heterogeneous_kappa","30,40,50,60","OBE5_heterogeneous_kappa",0.1,1000
