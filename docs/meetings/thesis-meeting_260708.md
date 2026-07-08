@@ -300,7 +300,30 @@ S1-S6은 평균 방향 각도로 난이도를 정한 진단이고, Study B는 tr
 
 ![Study B log MSE eta boxplot](../simulations/figures/studyb_boxplot_logmse_eta_by_eb_n_260714.png)
 
-### 3.3 Dense-support negative-control S1-N~S6-N
+### 3.3 K 선택 진단
+
+이 진단의 목적은 제안 모형을 K 선택 모형으로 제시하는 것이 아니라, \(K\)와 sparsity tuning을 동시에 선택할 때의 민감도를 확인하는 데 있다. 설정은 Study B의 \(e_B=5\%\), \(K^\ast=4\), \(n=1000\), \(d=200\), rep=5이며, \(K_{\mathrm{fit}}\in\{2,\ldots,8\}\)를 비교했다.
+
+| 환경 | 방법 | BIC 기준 selected K | EBIC 기준 selected K | support 선택 해석 |
+|:---|:---|:---|:---|:---|
+| equal kappa | Dense vMF | 5/5회 \(K=4\) | 5/5회 \(K=2\) | sparse support 없음 |
+| equal kappa | M-GL | 4/5회 \(K=4\) | 5/5회 \(K=4\) | common q=4도 함께 선택 |
+| equal kappa | M-AGL | 4/5회 \(K=4\) | 4/5회 \(K=4\) | common q=4도 함께 선택 |
+| equal kappa | E-CAGL | 주로 \(K=8\) | \(K=7,8\) | EBIC에서 selected q=18.2, decision q=16.0 |
+| heterogeneous kappa | Dense vMF | 5/5회 \(K=3\) | 5/5회 \(K=2\) | 이분산에서 과소선택 |
+| heterogeneous kappa | M-GL | 5/5회 \(K=4\) | 5/5회 \(K=4\) | common q=4도 함께 선택 |
+| heterogeneous kappa | M-AGL | 5/5회 \(K=4\) | 5/5회 \(K=4\) | common q=4도 함께 선택 |
+| heterogeneous kappa | E-CAGL | 주로 \(K=8\) | \(K=7,8\) | EBIC에서 selected q=17.2, decision q=16.0 |
+
+요약하면, E-CAGL은 \(K\)를 고정했을 때 posterior decision support를 잘 분리하지만, \(K\)와 \(\lambda_\eta\)를 동시에 고르면 \(K\)를 크게 선택하는 경향이 있었다. 따라서 main support-recovery simulation은 \(K=K^\ast\)로 고정하고, 실제 적용 절차는 \(K\) 선택과 support 선택을 분리한다.
+
+실제 분석 절차는 다음처럼 정리한다.
+
+1. Dense vMF 또는 M-GL/M-AGL 계열로 \(K\) 후보를 탐색한다.
+2. 선택된 \(K\)를 고정한 뒤 E-CAGL path에서 \(\lambda_\eta\)를 선택한다.
+3. 최종 해석은 posterior decision support \(\{j:\lVert \widehat c_{\cdot j}\rVert_2>0\}\)를 기준으로 한다.
+
+### 3.4 Dense-support negative-control S1-N~S6-N
 
 Negative-control은 평균 방향 차이와 집중도 차이의 축은 유지하되, decision q를 16에서 80으로 늘린 dense decision-support setting이다. sparse support 가정 밖에서 Eta-group의 동작을 확인하기 위한 설정이다.
 
@@ -315,7 +338,7 @@ Negative-control은 평균 방향 차이와 집중도 차이의 축은 유지하
 
 S1-N과 S2-N에서는 E-CAGL의 selected q가 true q=80 근처였다. 반면 S3-N과 S4-N에서는 평균 방향 차이가 보통 수준일 때 Eta-group 계열의 과소선택 또는 BIC 튜닝 한계가 관찰됐다. S5-N/S6-N은 signal 자체가 약한 stress-test로 해석한다.
 
-### 3.4 외부 baseline 해석
+### 3.5 외부 baseline 해석
 
 외부 baseline은 제안 모형과 목표가 다르므로 ARI/NMI/purity 중심으로만 비교한다.
 
@@ -341,6 +364,7 @@ E-CAGL의 주요 비용과 제약은 다음과 같다.
 | 튜닝 비용 | eta path, adaptive weight, BIC 선택에 민감 |
 | weak signal | S5/S6처럼 signal이 약한 조건에서 zero-support 또는 과소선택 관찰 |
 | dense decision support | S3-N/S4-N에서 과소선택 관찰 |
+| K와 sparsity 동시 선택 | E-CGL/E-CAGL에서 \(K\)를 크게 선택하는 경향. \(K\) 선택과 support 선택을 분리 |
 | prototype sparsity target | Rossi-style setting은 posterior decision support가 아니라 prototype sparsity가 목표 |
 
 E-CAGL은 모든 조건에서 계산 시간 또는 ARI 기준의 우위 모형은 아니다. 본 결과에서는 계산/튜닝 비용을 수반하며, sparse posterior decision support recovery 지표가 높게 나타났다.
