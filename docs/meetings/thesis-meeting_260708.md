@@ -304,6 +304,10 @@ S1-S6은 평균 방향 각도로 난이도를 정한 진단이고, Study B는 tr
 
 이 진단의 목적은 제안 모형을 K 선택 모형으로 제시하는 것이 아니라, \(K\)와 sparsity tuning을 동시에 선택할 때의 민감도를 확인하는 데 있다. 설정은 Study B의 \(e_B=5\%\), \(K^\ast=4\), \(n=1000\), \(d=200\), rep=5이며, \(K_{\mathrm{fit}}\in\{2,\ldots,8\}\)를 비교했다.
 
+Rossi and Barbaro (2022, *Mixture of von Mises-Fisher distribution with sparse prototypes*)도 고차원 vMF mixture에서 \(K\)와 sparsity parameter \(\beta\)를 하나의 information criterion으로 동시에 선택할 때의 불안정성을 지적했다. Regularization이 component 수 증가에 따른 복잡도 penalty를 일부 상쇄할 수 있기 때문에, 해당 논문은 dense model에서 먼저 \(K\)를 선택하고, \(K\)를 고정한 뒤 path-following으로 \(\beta\)를 선택하는 2단계 절차를 사용했다. Wells Fargo 8-K 분석에서도 RICc로 \(K=14\)를 먼저 선택한 뒤, path-following에서 \(\beta=1072.253\), sparsity \(82.16\%\)를 선택했다.
+
+본 연구에서도 같은 원칙을 적용한다. Rossi 논문의 \(\beta\)는 sparse prototype을 위한 조절모수이고, 본 연구의 조절모수는 centered eta contrast에 대한 \(\lambda_\eta\)이다. 따라서 \(K\) 선택은 dense 또는 weakly penalized vMF 기준으로 별도 탐색하고, \(K\)가 정해진 뒤 E-CAGL path에서 \(\lambda_\eta\)를 선택하는 방향으로 정리한다.
+
 | 환경 | 방법 | BIC 기준 selected K | EBIC 기준 selected K | support 선택 해석 |
 |:---|:---|:---|:---|:---|
 | equal kappa | Dense vMF | 5/5회 \(K=4\) | 5/5회 \(K=2\) | sparse support 없음 |
