@@ -6,13 +6,13 @@ suppressPackageStartupMessages({
 })
 
 raw_dirs <- list.dirs("results", recursive = FALSE, full.names = TRUE)
-raw_dirs <- raw_dirs[grepl("^paper_eta_oracle_bayes_studyb_.*rep50_path240_260714$", basename(raw_dirs))]
+raw_dirs <- raw_dirs[grepl("^paper_eta_oracle_bayes_studyb_.*rep100_path240_260714$", basename(raw_dirs))]
 raw_files <- unlist(lapply(raw_dirs, function(path) {
   list.files(path, pattern = "_raw\\.csv$", full.names = TRUE)
 }), use.names = FALSE)
 
 if (length(raw_files) == 0) {
-  stop("No Study B rep=50 raw files found.")
+  stop("No Study B rep=100 raw files found.")
 }
 
 method_levels_raw <- c("D-L", "D-GL", "D-AGL", "E-L", "E-GL", "E-AGL")
@@ -64,7 +64,7 @@ make_boxplot <- function(data, y_col, y_label, title, filename, y_limits = NULL,
     scale_fill_manual(values = c("D-series" = "#5B8DEF", "E-series" = "#F39C6B")) +
     labs(
       title = title,
-      subtitle = "Boxplots use rep=50 raw results; equal and heterogeneous kappa settings are pooled within each panel.",
+      subtitle = "Boxplots use rep=100 raw results; equal and heterogeneous kappa settings are pooled within each panel.",
       x = NULL,
       y = y_label,
       fill = NULL
