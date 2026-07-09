@@ -1,22 +1,12 @@
-library(ggplot2)
+suppressPackageStartupMessages({
+  library(ggplot2)
+})
 
 fig_dir <- file.path("docs", "simulations", "figures")
 dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
 method_order <- c("M-L", "M-GL", "M-AGL", "E-CL", "E-CGL", "E-CAGL")
-method_colors <- c(
-  "M-L" = "#A6C8E5",
-  "M-GL" = "#4E79A7",
-  "M-AGL" = "#0B3C68",
-  "E-CL" = "#F7C59F",
-  "E-CGL" = "#F28E2B",
-  "E-CAGL" = "#B13A16"
-)
-support_colors <- c(
-  "common q" = "#A0CBE8",
-  "specific q" = "#59A14F",
-  "noise q" = "#E15759"
-)
+family_colors <- c("M-series" = "#5B8DEF", "E-series" = "#F39C6B")
 
 num <- function(x) suppressWarnings(as.numeric(x))
 
@@ -42,11 +32,17 @@ bind_rows_base <- function(rows) {
 }
 
 read_one <- function(path, scenario_label) {
+  if (!file.exists(path)) {
+    stop("Missing input file: ", path)
+  }
   x <- read.csv(path, stringsAsFactors = FALSE, check.names = FALSE)
   x$scenario_label <- scenario_label
   if ("method" %in% names(x)) {
     x$method <- recode_method_names(x$method)
   }
+  x$method <- factor(x$method, levels = method_order)
+  x$method_family <- ifelse(grepl("^M-", as.character(x$method)), "M-series", "E-series")
+  x$method_family <- factor(x$method_family, levels = c("M-series", "E-series"))
   if (!("MSE_eta" %in% names(x)) && "MSE_centered_eta" %in% names(x)) {
     x$MSE_eta <- x$MSE_centered_eta
   }
@@ -67,7 +63,8 @@ make_metric_long <- function(x) {
   do.call(rbind, lapply(metrics, function(metric) {
     data.frame(
       scenario_label = x$scenario_label,
-      method = factor(x$method, levels = method_order),
+      method = x$method,
+      method_family = x$method_family,
       metric = metric,
       value = num(x[[metric]]),
       stringsAsFactors = FALSE
@@ -79,21 +76,24 @@ make_support_long <- function(x) {
   do.call(rbind, list(
     data.frame(
       scenario_label = x$scenario_label,
-      method = factor(x$method, levels = method_order),
+      method = x$method,
+      method_family = x$method_family,
       support_type = "common q",
       value = num(x$common_selected_q),
       stringsAsFactors = FALSE
     ),
     data.frame(
       scenario_label = x$scenario_label,
-      method = factor(x$method, levels = method_order),
+      method = x$method,
+      method_family = x$method_family,
       support_type = "specific q",
       value = num(x$decision_selected_q),
       stringsAsFactors = FALSE
     ),
     data.frame(
       scenario_label = x$scenario_label,
-      method = factor(x$method, levels = method_order),
+      method = x$method,
+      method_family = x$method_family,
       support_type = "noise q",
       value = num(x$noise_selected_q),
       stringsAsFactors = FALSE
@@ -104,77 +104,88 @@ make_support_long <- function(x) {
 save_metric_plot <- function(x, outfile, title) {
   long <- make_metric_long(x)
   long$scenario_label <- factor(long$scenario_label, levels = unique(x$scenario_label))
-  p <- ggplot(long, aes(x = scenario_label, y = value, fill = method)) +
-    geom_col(position = position_dodge(width = 0.78), width = 0.68, na.rm = TRUE) +
-    facet_wrap(~metric, scales = "free_y", ncol = 2) +
-    scale_fill_manual(values = method_colors, drop = FALSE)
+  long <- long[!is.na(long$value), , drop = FALSE]
+  p <- ggplot(long, aes(x = method, y = value, fill = method_family)) +
+    geom_boxplot(width = 0.72, linewidth = 0.35, outlier.size = 0.55, outlier.alpha = 0.65, na.rm = TRUE) +
+    facet_grid(metric ~ scenario_label, scales = "free_y") +
+    scale_fill_manual(values = family_colors, drop = FALSE)
   p <- p +
-    labs(title = title, x = NULL, y = NULL, fill = "method") +
-    theme_minimal(base_size = 11) +
+    labs(
+      title = title,
+      subtitle = "Boxplots use replicate-level raw results.",
+      x = NULL,
+      y = NULL,
+      fill = NULL
+    ) +
+    theme_bw(base_size = 11) +
     theme(
-      plot.title = element_text(face = "bold", size = 14),
+      plot.title = element_text(face = "bold", size = 13),
+      plot.subtitle = element_text(size = 9, color = "grey25"),
+      strip.background = element_rect(fill = "grey92", color = "grey70"),
+      strip.text = element_text(face = "bold", size = 8),
       axis.text.x = element_text(angle = 35, hjust = 1),
+      axis.text.y = element_text(size = 8),
+      panel.grid.major.x = element_blank(),
       panel.grid.minor = element_blank(),
       legend.position = "bottom"
     )
-  ggsave(outfile, p, width = 10.5, height = 6.2, dpi = 180)
+  ggsave(outfile, p, width = 14, height = 8.4, dpi = 220)
 }
 
 save_support_plot <- function(x, outfile, title) {
   long <- make_support_long(x)
   long$scenario_label <- factor(long$scenario_label, levels = unique(x$scenario_label))
   long$support_type <- factor(long$support_type, levels = c("common q", "specific q", "noise q"))
-  p <- ggplot(long, aes(x = method, y = value, fill = support_type)) +
-    geom_col(width = 0.72, na.rm = TRUE) +
-    facet_wrap(~scenario_label, scales = "free_y", ncol = ifelse(length(unique(x$scenario_label)) == 1, 1, 3)) +
-    scale_fill_manual(values = support_colors, drop = FALSE) +
-    labs(title = title, x = NULL, y = "selected coordinates", fill = NULL) +
-    theme_minimal(base_size = 11) +
+  long <- long[!is.na(long$value), , drop = FALSE]
+  p <- ggplot(long, aes(x = method, y = value, fill = method_family)) +
+    geom_boxplot(width = 0.72, linewidth = 0.35, outlier.size = 0.55, outlier.alpha = 0.65, na.rm = TRUE) +
+    facet_grid(support_type ~ scenario_label, scales = "free_y") +
+    scale_fill_manual(values = family_colors, drop = FALSE) +
+    labs(
+      title = title,
+      subtitle = "Boxplots use replicate-level raw results.",
+      x = NULL,
+      y = "selected coordinates",
+      fill = NULL
+    ) +
+    theme_bw(base_size = 11) +
     theme(
-      plot.title = element_text(face = "bold", size = 14),
+      plot.title = element_text(face = "bold", size = 13),
+      plot.subtitle = element_text(size = 9, color = "grey25"),
+      strip.background = element_rect(fill = "grey92", color = "grey70"),
+      strip.text = element_text(face = "bold", size = 8),
       axis.text.x = element_text(angle = 35, hjust = 1),
+      axis.text.y = element_text(size = 8),
+      panel.grid.major.x = element_blank(),
       panel.grid.minor = element_blank(),
       legend.position = "bottom"
     )
-  height <- ifelse(length(unique(x$scenario_label)) == 1, 4.6, 7.2)
-  ggsave(outfile, p, width = 10.5, height = height, dpi = 180)
+  height <- ifelse(length(unique(x$scenario_label)) == 1, 6.0, 7.8)
+  ggsave(outfile, p, width = 14, height = height, dpi = 220)
 }
 
 basic_paths <- c(
-  S1 = "results/paper_eta_first_s1_angle90_kappa30_60_rep50_260702/paper_eta_first_s1_angle90_kappa30_60_rep50_260702_summary.csv",
-  S2 = "results/paper_eta_first_s2_angle90_kappa45_equal_rep50_260702/paper_eta_first_s2_angle90_kappa45_equal_rep50_260702_summary.csv",
-  S3 = "results/paper_eta_first_s3_angle60_kappa30_60_rep50_260702/paper_eta_first_s3_angle60_kappa30_60_rep50_260702_summary.csv",
-  S4 = "results/paper_eta_first_s4_angle60_kappa45_equal_rep50_260702/paper_eta_first_s4_angle60_kappa45_equal_rep50_260702_summary.csv",
-  S5 = "results/paper_eta_first_s5_angle30_kappa43_47_rep50_260702/paper_eta_first_s5_angle30_kappa43_47_rep50_260702_summary.csv",
-  S6 = "results/paper_eta_first_s6_angle30_kappa45_equal_rep50_260702/paper_eta_first_s6_angle30_kappa45_equal_rep50_260702_summary.csv"
+  S1 = "results/paper_eta_first_s1_angle90_kappa30_60_rep50_260702/paper_eta_first_s1_angle90_kappa30_60_rep50_260702_raw.csv",
+  S2 = "results/paper_eta_first_s2_angle90_kappa45_equal_rep50_260702/paper_eta_first_s2_angle90_kappa45_equal_rep50_260702_raw.csv",
+  S3 = "results/paper_eta_first_s3_angle60_kappa30_60_rep50_260702/paper_eta_first_s3_angle60_kappa30_60_rep50_260702_raw.csv",
+  S4 = "results/paper_eta_first_s4_angle60_kappa45_equal_rep50_260702/paper_eta_first_s4_angle60_kappa45_equal_rep50_260702_raw.csv",
+  S5 = "results/paper_eta_first_s5_angle30_kappa43_47_rep50_260702/paper_eta_first_s5_angle30_kappa43_47_rep50_260702_raw.csv",
+  S6 = "results/paper_eta_first_s6_angle30_kappa45_equal_rep50_260702/paper_eta_first_s6_angle30_kappa45_equal_rep50_260702_raw.csv"
 )
 basic <- bind_rows_base(Map(read_one, basic_paths, names(basic_paths)))
 
-negative <- read.csv(
-  "results/paper_eta_negative_control_s1n_s4n_rep50_260702/paper_eta_negative_control_s1n_s4n_rep50_summary.csv",
-  stringsAsFactors = FALSE,
-  check.names = FALSE
+negative_paths <- c(
+  "S1-N" = "results/paper_eta_neg_s1n_angle90_kappa30_60_rep50_260702/paper_eta_neg_s1n_angle90_kappa30_60_rep50_260702_raw.csv",
+  "S2-N" = "results/paper_eta_neg_s2n_angle90_kappa45_equal_rep50_260702/paper_eta_neg_s2n_angle90_kappa45_equal_rep50_260702_raw.csv",
+  "S3-N" = "results/paper_eta_neg_s3n_angle60_kappa30_60_rep50_260702/paper_eta_neg_s3n_angle60_kappa30_60_rep50_260702_raw.csv",
+  "S4-N" = "results/paper_eta_neg_s4n_angle60_kappa45_equal_rep50_260702/paper_eta_neg_s4n_angle60_kappa45_equal_rep50_260702_raw.csv",
+  "S5-N" = "results/paper_eta_neg_s5n_angle30_kappa43_47_rep50_260702/paper_eta_neg_s5n_angle30_kappa43_47_rep50_260702_raw.csv",
+  "S6-N" = "results/paper_eta_neg_s6n_angle30_kappa45_equal_rep50_260702/paper_eta_neg_s6n_angle30_kappa45_equal_rep50_260702_raw.csv"
 )
-negative$scenario_label <- negative$scenario
-negative$method <- recode_method_names(negative$method)
-negative$MSE_eta <- negative$MSE_eta
-negative$common_selected_q <- num(negative$common_selected_q)
-negative$decision_selected_q <- num(negative$decision_selected_q)
-negative$noise_selected_q <- num(negative$noise_selected_q)
-negative <- bind_rows_base(list(
-  negative,
-  read_one(
-    "results/paper_eta_neg_s5n_angle30_kappa43_47_rep50_260702/paper_eta_neg_s5n_angle30_kappa43_47_rep50_260702_summary.csv",
-    "S5-N"
-  ),
-  read_one(
-    "results/paper_eta_neg_s6n_angle30_kappa45_equal_rep50_260702/paper_eta_neg_s6n_angle30_kappa45_equal_rep50_260702_summary.csv",
-    "S6-N"
-  )
-))
+negative <- bind_rows_base(Map(read_one, negative_paths, names(negative_paths)))
 
 shared <- read_one(
-  "results/paper_eta_shared_background_e1c_b3_delta8_14_rep50_260706/paper_eta_shared_background_e1c_b3_delta8_14_rep50_260706_summary.csv",
+  "results/paper_eta_shared_background_e1c_b3_delta8_14_rep50_260706/paper_eta_shared_background_e1c_b3_delta8_14_rep50_260706_raw.csv",
   "Shared"
 )
 
