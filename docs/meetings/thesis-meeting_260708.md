@@ -156,15 +156,13 @@ M 계열은 prototype support, E 계열은 posterior decision support를 선택 
 
 ### 3.3 Oracle Bayes error 기반 Study B
 
-$$
-K=4,\quad d=200,\quad n\in\{300,1000\},\quad
-q_C=4,\quad q_D=16,\quad q_N=180,\quad R=100.
-$$
+$K = 4, \quad d = 200, \quad n \in \{300, 1000\}, \quad q_C = 4, \quad q_D = 16, \quad q_N = 180, \quad R = 100.$
 
-$$
-e_B\in\{2.5\%,5\%,10\%\},qquad
-\kappa\in\{(45,45,45,45),(30,40,50,60)\}.
-$$
+```math
+e_B \in \{2.5\%, 5\%, 10\%\}, \qquad
+\kappa \in \{(45,45,45,45), (30,40,50,60)\}.
+```
+
 
 각 값은 equal/heterogeneous $\kappa$ 조건의 시나리오별 평균을 동일 가중 평균한 결과다.
 
@@ -234,17 +232,9 @@ $$
 ## 6. 현재 결론
 
 $$
-\boxed{
-\text{posterior decision support}
-\;\Longrightarrow\;
-\eta=\kappa\mu
-\;\Longrightarrow\;
-c_{kj}=\eta_{kj}-\bar\eta_j
-\;\Longrightarrow\;
-\sum_jw_j\lVert c_{\cdot j}\rVert_2
-}
+\text{posterior decision support} \Rightarrow \eta = \kappa\mu \Rightarrow c_{kj} = \eta_{kj} - \bar{\eta}_{j} \Rightarrow \sum_{j} w_j \|c_{\cdot j}\|_2
 $$
 
-- E-CAGL은 sparse posterior decision support 복원에 초점을 둔다.
-- 약한 신호, 일부 dense-support 환경, $K$와 $\lambda_\eta$의 동시 선택에서는 성능 저하가 관찰됐다.
-- 다음 검증 항목은 refit/df 정합성과 동일한 $\mu$에서 $\kappa$만 다른 concentration-only 환경이다.
+* E-CAGL은 sparse posterior decision support 복원에 초점을 둔다.
+* 약한 신호, 일부 dense-support 환경, $K$와 $\lambda_\eta$의 동시 선택에서는 성능 저하가 관찰됐다.
+* 다음 검증 항목은 refit/df 정합성과 동일한 $\mu$에서 $\kappa$만 다른 concentration-only 환경이다.
