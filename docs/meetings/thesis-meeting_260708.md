@@ -232,7 +232,7 @@ $$
 ## 6. 현재 결론
 
 $$
-\text{posterior decision support; } \Rightarrow ; \eta = \kappa\mu ; \Rightarrow ; c_{kj} = \eta_{kj} - \bar{\eta}_{j} ; \Rightarrow ; \sum_{j} w_j \|c_{\cdot j}\|_2
+\text{posterior decision support} \Rightarrow \eta = \kappa\mu \Rightarrow c_{kj} = \eta_{kj} - \bar{\eta}_{j} \Rightarrow \sum_{j} w_j \|c_{\cdot j}\|_2
 $$
 
 * E-CAGL은 sparse posterior decision support 복원에 초점을 둔다.
