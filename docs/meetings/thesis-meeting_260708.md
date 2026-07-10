@@ -1,299 +1,183 @@
 # 연구미팅 자료: Eta-group 방법론과 시뮬레이션 결과 (2026-07-14)
 
-## 1. 이번 미팅 목적
+## 1. 핵심 정리
 
-이번 문서는 2026-06-24 연구미팅 피드백에 대한 답변과 이후 실험 결과를 정리한 자료다. 구성은 다음 흐름으로 둔다.
+- 선택 대상은 prototype support가 아니라 **posterior decision support**다.
+- 자연모수 $\eta_k=\kappa_k\mu_k$의 component 간 centered contrast를 사용한다.
+- 주 모형은 coordinate-wise adaptive group penalty인 E-CAGL이다.
+- $K$와 sparsity parameter $\lambda_\eta$는 분리해서 선택한다.
 
-- Eta-group penalty의 구성: $\eta$, centered contrast, coordinate-wise group penalty, adaptive weight
-- Eta penalty ablation과 관련 penalty 문헌에서의 위치
-- 논문용 시뮬레이션 결과: S1-S6, Study B, dense-support negative-control, 외부 baseline
-- \(K\) 선택과 sparsity tuning 분리 기준
-- 제안 모형의 계산 비용과 한계
+전체 수치표는 [시뮬레이션 결과 부록](../simulations/thesis-simulation_260708.md)에 정리했다.
 
-전체 시뮬레이션 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 정리했고, 이전 negative-control 세부 진단은 [negative_control_summary_260708.md](../../results/negative_control_summary_260708/negative_control_summary_260708.md)에 별도 문서로 남겼다.
+## 2. 제안 penalty
 
-## 2. Eta-group penalty 구성과 변수 선택 기준
+### 2.1 $\mu$가 아니라 $\eta$
 
-제안 모형의 penalty는 네 가지 선택으로 구성된다. 핵심은 posterior decision score에 직접 들어가는 $\eta$를 기준으로, component 간 차이를 만드는 centered contrast만 coordinate 단위로 선택하는 것이다.
-
-$$
-\eta_k=\kappa_k\mu_k,\qquad
-c_{kj}=\eta_{kj}-\bar\eta_j,\qquad
-\bar\eta_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}.
-$$
-
-최종 후보는 adaptive centered Eta-group penalty다.
+vMF mixture에서
 
 $$
-\boxed{
-\lambda_\eta
-\sum_{j=1}^d
-w_j\|c_{\cdot j}\|_2
-}
-$$
-
-여기서 선택되는 support는
-
-$$
-\widehat S_\eta=\{j:\|c_{\cdot j}\|_2>0\}
-$$
-
-로 정의한다. 즉, common effect가 아니라 component 간 posterior decision 차이를 만드는 coordinate를 선택한다.
-
-### 2.1 $\mu$가 아니라 $\eta$를 기준으로 둔다
-
-vMF mixture의 posterior score에서 component $k$를 구분하는 선형항은
-
-$$
-s_k(x) =
-\log \pi_k+\log C_d(\kappa_k)+\eta_k^\top x,
+\eta_k=\kappa_k\mu_k,
 \qquad
-\eta_k=\kappa_k\mu_k.
+s_k(x)=\log\pi_k+\log C_d(\kappa_k)+\eta_k^\top x.
 $$
 
-이다. 두 component $k,\ell$의 score 차이는
+따라서 두 component의 score 차이는
 
 $$
-s_k(x)-s_\ell(x)=
-\mathrm{const}_{k\ell}
-+
-(\eta_k-\eta_\ell)^\top x
+s_k(x)-s_\ell(x)
+=a_{k\ell}+(\eta_k-\eta_\ell)^\top x,
 $$
 
-이므로 posterior decision에는 $\mu_k$ 단독이 아니라 $\eta_k=\kappa_k\mu_k$가 직접 들어간다. 예를 들어 $\mu_{1j}=\mu_{2j}=0.1$이어도 $\kappa_1=20$, $\kappa_2=80$이면
-
 $$
-\eta_{1j}=2,\qquad \eta_{2j}=8.
-$$
-
-이다. $\mu$ 기준으로는 같은 좌표처럼 보이지만, posterior score에서는 다른 크기의 효과를 갖는다. 또한 $\eta_k\ne0$, $\kappa_k>0$, $\|\mu_k\|_2=1$이면
-
-$$
-\kappa_k=\|\eta_k\|_2,\qquad
-\mu_k=\eta_k/\|\eta_k\|_2
+a_{k\ell}
+=\log\frac{\pi_k}{\pi_\ell}
++\log\frac{C_d(\kappa_k)}{C_d(\kappa_\ell)}.
 $$
 
-로 복원된다. 다만 $\eta_k=0$ 또는 $\kappa_k=0$이면 방향 $\mu_k$는 식별되지 않고, mixture label switching은 별도 문제다.
+$\eta_k\neq0$이면
 
-### 2.2 raw $\eta$가 아니라 centered contrast를 사용한다
+$$
+\kappa_k=\lVert\eta_k\rVert_2,
+\qquad
+\mu_k=\frac{\eta_k}{\lVert\eta_k\rVert_2}.
+$$
+
+$\eta_k=0$에서는 $\mu_k$가 식별되지 않으며, mixture label switching은 별도 문제다.
+
+### 2.2 raw $\eta$가 아니라 centered $\eta$
 
 좌표 $j$에 대해
 
 $$
-\eta_{\cdot j} =
-\bar\eta_j\mathbf 1+c_{\cdot j},
+\eta_{\cdot j}=\bar\eta_j\mathbf 1+c_{\cdot j},
+\qquad
+\bar\eta_j=K^{-1}\sum_{k=1}^K\eta_{kj},
 \qquad
 \mathbf 1^\top c_{\cdot j}=0.
 $$
 
-공통 성분 $\bar\eta_j\mathbf 1$은 두 component의 log-posterior odds에서 coordinate $j$의 관측값 $x_j$에 곱해지는 선형항에서 상쇄된다.
-
 $$
-(\bar\eta_j\mathbf 1)_k-(\bar\eta_j\mathbf 1)_\ell=0,
-\qquad
 \eta_{kj}-\eta_{\ell j}=c_{kj}-c_{\ell j}.
 $$
 
-따라서 본 연구의 decision support는 $x_j$가 component 간 score 차이에 직접 기여하는지, 즉 $c_{\cdot j}$가 0이 아닌지를 기준으로 정의한다. 공통 성분 $\bar\eta_j$는 penalized fit의 parameterization에 남으며, $\kappa_k=\lVert\eta_k\rVert_2$를 통해 정규화 상수 $C_d(\kappa_k)$에 간접적으로 영향을 줄 수 있다. 현재 selected-coordinate refit과의 차이는 5절의 구현 한계로 구분한다. 예를 들어
+따라서 $x_j$가 component 간 선형 score 차이를 만드는 조건은
 
 $$
-\eta_{\cdot j}=(5,5,5,5)
-\quad\Rightarrow\quad
-c_{\cdot j}=(0,0,0,0)
+j\in S_{\mathrm{dec}}
+\iff
+\lVert c_{\cdot j}\rVert_2>0.
 $$
 
-이면 공통 효과이므로 decision support에는 들어가지 않는다. 반면
+$\bar\eta_j$는 penalized fit에 남으며, $\kappa_k=\lVert\eta_k\rVert_2$를 통해 $C_d(\kappa_k)$에 영향을 줄 수 있다.
+
+### 2.3 entry-wise $L_1$이 아니라 coordinate-wise group $L_2$
 
 $$
-\eta_{\cdot j}=(8,4,4,4)
-\quad\Rightarrow\quad
-c_{\cdot j}=(3,-1,-1,-1)
+P_{\mathrm{CGL}}(\eta)
+=\lambda_\eta\sum_{j=1}^d\lVert c_{\cdot j}\rVert_2.
 $$
 
-이면 component 간 posterior score 차이를 만든다.
-
-### 2.3 entry-wise가 아니라 coordinate-wise group $L_2$ penalty를 사용한다
-
-제안 penalty는 coordinate $j$의 centered contrast vector 전체를 하나의 단위로 선택한다.
+Adaptive 확장은
 
 $$
-\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2.
-$$
-
-이는
-
-$$
-\|c_{\cdot j}\|_2=0
-$$
-
-이면 coordinate $j$ 전체를 decision support에서 제외하고,
-
-$$
-\|c_{\cdot j}\|_2>0
-$$
-
-이면 해당 coordinate를 posterior decision에 사용하는 구조다.
-
-대비되는 entry-wise penalty는
-
-$$
-\lambda_\eta\sum_{k,j}|c_{kj}|
-$$
-
-이다. 이 경우 같은 coordinate 안에서 일부 component contrast만 남거나 사라질 수 있다. 예를 들어
-
-$$
-c_{\cdot j}=(3,-1,-1,-1)
-$$
-
-은 하나의 decision coordinate가 만드는 contrast pattern이다. Group $L_2$ penalty는 이 좌표 전체를 선택하거나 제외한다.
-
-### 2.4 adaptive weight는 선택적으로 사용한다
-
-기본 centered Eta-group penalty는
-
-$$
-\lambda_\eta
-\sum_{j=1}^d
-\|c_{\cdot j}\|_2
-$$
-
-이다. Adaptive 확장에서는 coordinate별 weight를 추가하여
-
-$$
-\lambda_\eta
-\sum_{j=1}^d
-w_j\|c_{\cdot j}\|_2
-$$
-
-로 둔다. $w_j=1$이면 E-CGL이고, 초기 추정값 $c_{\cdot j}^{init}$에 대해
-
-$$
-w_j =
-\left(\|c_{\cdot j}^{init}\|_2+\epsilon\right)^{-\gamma}
-$$
-
-를 사용하면 E-CAGL이다. 이번 시뮬레이션에서는
-
-$$
-\gamma=1,\qquad \epsilon=10^{-6}
-$$
-
-로 두고, weight는 median-normalization을 적용했다. Adaptive weight는 기본 centered Eta-group penalty의 선택적 확장으로, 초기 contrast가 큰 좌표는 상대적으로 약하게, 초기 contrast가 작은 좌표는 더 강하게 축소한다.
-
-### 2.5 Eta penalty ablation 진단
-
-이 절은 S1-S6 성능표가 아니라 penalty 구조를 분해한 진단이다. 기준 환경은 S1 setting(`K=4`, `n=1000`, `d=200`, common q=4, decision q=16, noise q=180, rep=20)이다.
-
-| 확인 항목 | 비교 모형 | 핵심 penalty | selected q | common q | noise q | F1 | MSE_eta | 해석 |
-|:---|:---|:---|---:|---:|---:|---:|---:|:---|
-| $\mu$ target | M-GL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ | 20.00 | 4.00 | 0.00 | 0.889 | 0.072 | common 좌표가 남음 |
-| raw $\eta$ target | E-GL | $\lambda_\eta\sum_j\lVert\eta_{\cdot j}\rVert_2$ | 21.15 | 4.00 | 1.15 | 0.862 | 0.089 | common 좌표가 남음 |
-| centered entry-wise L1 | E-CL | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ | 19.05 | 0.05 | 3.00 | 0.915 | 0.098 | common은 줄지만 noise가 남음 |
-| centered group | E-CGL | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 17.50 | 0.00 | 1.50 | 0.958 | 0.079 | decision 좌표 중심 선택 |
-| adaptive centered group | E-CAGL | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 16.05 | 0.00 | 0.05 | 0.998 | 0.057 | true decision q=16 근처 |
-
-`MSE_eta`는 `MSE_centered_eta`를 줄여 쓴 표기다. 이 진단에서 E-CAGL은 common 좌표를 선택하지 않고 noise 선택도 거의 없었다. 따라서 현재 주 후보는 E-CAGL로 둔다. 다만 이는 모든 조건에서 최선이라는 주장이 아니라, posterior decision support 복원 목표에 맞춘 구조라는 의미다.
-
-### 2.6 관련 penalty 문헌과 본 연구의 위치
-
-Guo et al. (2010)은 model-based clustering에서 cluster center의 pairwise difference에 fusion penalty를 두어 cluster pair별 변수 선택을 다루었다.
-
-$$
-\lambda
-\sum_{j=1}^p
-\sum_{k<\ell}
-w_{k\ell j}
-|\mu_{kj}-\mu_{\ell j}|.
-$$
-
-Bondell and Reich (2009)는 ANOVA에서 level effect의 pairwise difference를 shrink하여 level collapsing과 factor selection을 동시에 다루었다.
-
-$$
-\sum_{j} \sum_{k \lt m} w_{j}^{(km)} |\beta_{jk} - \beta_{jm}|, \qquad \sum_{k} \beta_{jk} = 0
-$$
-
-Li et al. (2022)은 finite mixture regression에서 predictor effect를 common effect와 cluster-specific effect로 분해하여, relevant variable과 source of heterogeneity를 동시에 선택했다.
-
-$$
-x^\top\beta_0+x^\top\beta_k,
+P_{\mathrm{CAGL}}(\eta)
+=\lambda_\eta\sum_{j=1}^d w_j\lVert c_{\cdot j}\rVert_2,
 \qquad
-\sum_{k=1}^K \beta_{kj}=0.
+w_j=\left(\lVert c_{\cdot j}^{\mathrm{init}}\rVert_2+\epsilon\right)^{-\gamma}.
 $$
 
-여기서 $\beta_{0j}$는 common effect이고, $\beta_{kj}$는 component-specific deviation이다. 본 연구의 centered eta contrast도 같은 분해 구조를 갖는다.
+이번 실험에서는
 
 $$
-\eta_{\cdot j} =
-\bar\eta_j\mathbf 1+c_{\cdot j},
+\gamma=1,
 \qquad
-\sum_{k=1}^K c_{kj}=0.
+\epsilon=10^{-6},
 $$
 
-$\bar\eta_j$는 coordinate $j$의 common natural-parameter baseline이고, $c_{kj}$는 posterior decision score에서 component 간 차이를 만드는 부분이다. 따라서 본 연구의 penalty
+이며 weight에 median normalization을 적용했다. E-CGL은 $w_j=1$인 기본 모형이고, E-CAGL은 선택적 adaptive 확장이다.
 
-$$
-\lambda_\eta\sum_{j=1}^d\|c_{\cdot j}\|_2
-$$
+### 2.4 비교 모형
 
-는 common/heterogeneous effect 분해를 vMF mixture의 natural parameter $\eta=\kappa\mu$와 posterior decision support 문제로 옮긴 형태로 해석된다.
-
-정리하면, 위 문헌들은 절대 크기보다 집단 간 차이를 기준으로 변수 선택을 구성한다. 본 연구에서는 이 아이디어를 vMF mixture의 posterior decision score에 맞추어, $\eta=\kappa\mu$의 centered contrast $c_{kj}$에 coordinate-wise group penalty를 둔다.
-
-## 3. 시뮬레이션 결과 요약
-
-시뮬레이션은 S1-S6 기본 시뮬레이션, oracle Bayes error 기반 Study B 난이도 진단, S1-N~S6-N dense-support negative-control, 외부 baseline 비교로 정리했다. 목적은 clustering accuracy 자체보다 posterior decision support 복원이 유지되는 조건과 약해지는 조건을 확인하는 데 있다. 전체 표는 [thesis-simulation_260708.md](../simulations/thesis-simulation_260708.md)에 둔다.
-
-비교 모형은 penalty를 거는 공간과 group/adaptive 여부로 구분한다. 여기서 $c_{kj}=\eta_{kj}-\bar\eta_j$는 centered eta contrast다.
-
-| Model | penalty |
+| 모형 | penalty |
 |:---|:---|
 | M-L | $\lambda_\mu\sum_{k,j}\lvert\mu_{kj}\rvert$ |
 | M-GL | $\lambda_\mu\sum_j\lVert\mu_{\cdot j}\rVert_2$ |
-| M-AGL | $\lambda_\mu\sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ |
+| M-AGL | $\lambda_\mu\sum_jw_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ |
 | E-CL | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ |
 | E-CGL | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ |
-| E-CAGL | $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ |
+| E-CAGL | $\lambda_\eta\sum_jw_j^{(E)}\lVert c_{\cdot j}\rVert_2$ |
 
-Adaptive weight는 $w_j^{(M)}\propto(\lVert\mu_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$, $w_j^{(E)}\propto(\lVert c_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$로 두고, 이번 시뮬레이션에서는 $\gamma=1$, $\epsilon=10^{-6}$을 사용했다.
+### 2.5 구조 분해 진단
 
-### 3.1 기본 시뮬레이션 S1-S6
+S1 환경: $K=4$, $n=1000$, $d=200$, common q=4, decision q=16, noise q=180, rep=20.
 
-기본 시뮬레이션은 true decision support가 16개인 sparse decision-support setting이다. common q=4는 모든 component에 공통으로 들어가므로 decision support에는 포함하지 않는다.
+| 구조 | 모형 | selected q | common q | noise q | F1 | MSE_eta |
+|:---|:---|---:|---:|---:|---:|---:|
+| $\mu$ group | M-GL | 20.00 | 4.00 | 0.00 | 0.889 | 0.072 |
+| raw $\eta$ group | E-GL | 21.15 | 4.00 | 1.15 | 0.862 | 0.089 |
+| centered entry-wise | E-CL | 19.05 | 0.05 | 3.00 | 0.915 | 0.098 |
+| centered group | E-CGL | 17.50 | 0.00 | 1.50 | 0.958 | 0.079 |
+| adaptive centered group | E-CAGL | 16.05 | 0.00 | 0.05 | 0.998 | 0.057 |
 
-| Scenario | 설정 | E-CAGL 핵심 결과 | 외부 baseline 결과 | 해석 |
-|:---|:---|:---|:---|:---|
-| S1 | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.865, selected q=16.06, F1=0.998, MSE_eta=0.057 | Dense vMF ARI=0.836 | E-CAGL selected q가 true q=16 근처 |
-| S2 | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.904, selected q=16.12, F1=0.996, MSE_eta=0.057 | Dense vMF ARI=0.880 | 집중도 차이가 없는 조건에서도 support 복원 유지 |
-| S3 | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.631, selected q=21.22, F1=0.881, MSE_eta=0.250 | Dense vMF ARI=0.539 | 중간 난도 setting. support 복원 일부 저하 |
-| S4 | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.651, selected q=16.32, F1=0.990, MSE_eta=0.079 | Dense vMF ARI=0.561 | selected q가 true q=16 근처 |
-| S5 | 평균 차이 작음(30도), 약한 집중도 이분산 | selected q=0.02, nonzero refit=1/50 | Dense vMF ARI=0.029 | 약한 신호 조건. 대부분 zero support 선택 |
-| S6 | 평균 차이 작음(30도), 집중도 등분산 | selected q=0.56, nonzero refit=2/50 | Dense vMF ARI=0.011 | 약한 신호 조건. 대부분 zero support 선택 |
+여기서 `MSE_eta`는 $\mathrm{MSE}_{\mathrm{centered}\ \eta}$다.
 
-S1-S4에서는 E-CAGL이 clustering 성능을 유지하면서 selected q를 true q=16 근처로 맞췄다. M-L과 E-CL은 ARI는 유지했지만 selected q가 거의 전체 차원에 가까웠다. S5-S6은 약한 신호 조건에서의 한계로 분리해 해석한다.
+관련 penalty 구조는 다음과 연결된다.
 
-### 3.2 Oracle Bayes error 기반 Study B 난이도 진단
+| 문헌 | 핵심 구조 |
+|:---|:---|
+| Guo et al. (2010) | $\sum_j\sum_{k<\ell}w_{k\ell j}\lvert\mu_{kj}-\mu_{\ell j}\rvert$ |
+| Bondell and Reich (2009) | ANOVA level difference와 sum-to-zero constraint |
+| Li et al. (2022) | common effect와 cluster-specific deviation 분해 |
+| 본 연구 | $\eta_{\cdot j}=\bar\eta_j\mathbf1+c_{\cdot j}$와 coordinate group selection |
 
-S1-S6은 평균 방향 각도로 난이도를 정한 진단이고, Study B는 true parameter에서 계산한 oracle Bayes error \(e_B\)로 군집 분리 난이도를 맞춘 결과다. 설정은 \(K=4\), \(d=200\), \(n\in\{300,1000\}\), common q=4, decision q=16, noise q=180, path length=240, rep=100이다.
+## 3. 시뮬레이션 근거
 
-| target \(e_B\) | kappa | achieved \(e_B\) | n | E-CAGL selected q | common q | decision q | noise q | F1 | ARI |
-|:---:|:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 2.5% | equal | 2.42% | 300 | 17.97 | 0.03 | 16.00 | 1.94 | 0.942 | 0.930 |
-| 2.5% | heterogeneous | 2.54% | 300 | 18.23 | 0.02 | 16.00 | 2.21 | 0.935 | 0.931 |
-| 2.5% | equal | 2.42% | 1000 | 16.05 | 0.00 | 16.00 | 0.05 | 0.998 | 0.936 |
-| 2.5% | heterogeneous | 2.54% | 1000 | 16.03 | 0.00 | 16.00 | 0.03 | 0.999 | 0.938 |
-| 5.0% | equal | 4.58% | 300 | 16.73 | 0.03 | 16.00 | 0.70 | 0.978 | 0.874 |
-| 5.0% | heterogeneous | 4.54% | 300 | 17.95 | 0.04 | 16.00 | 1.91 | 0.943 | 0.866 |
-| 5.0% | equal | 4.58% | 1000 | 16.09 | 0.00 | 16.00 | 0.09 | 0.997 | 0.880 |
-| 5.0% | heterogeneous | 4.54% | 1000 | 16.06 | 0.00 | 16.00 | 0.06 | 0.998 | 0.880 |
-| 10.0% | equal | 11.24% | 300 | 16.92 | 0.02 | 15.55 | 1.35 | 0.945 | 0.703 |
-| 10.0% | heterogeneous | 10.52% | 300 | 19.49 | 0.09 | 14.92 | 4.48 | 0.841 | 0.683 |
-| 10.0% | equal | 11.24% | 1000 | 16.20 | 0.01 | 16.00 | 0.19 | 0.994 | 0.722 |
-| 10.0% | heterogeneous | 10.52% | 1000 | 18.94 | 0.09 | 16.00 | 2.85 | 0.916 | 0.741 |
+### 3.1 기본 및 negative-control
 
-\(e_B=2.5\%\)와 \(e_B=5\%\)에서는 n=1000 기준 E-CAGL이 selected q를 true decision q=16 근처로 맞추고 common q를 거의 선택하지 않았다. \(e_B=10\%\)에서는 ARI가 낮아졌고, heterogeneous kappa 조건에서 noise q가 증가했다. 이 결과는 표본 수, 분리 난이도, 집중도 차이가 support 복원에 함께 영향을 준다는 점을 보여준다.
+| 환경 | E-CAGL 결과 | 해석 |
+|:---|:---|:---|
+| S1-S4: decision q=16 | selected q=16.06-21.22, F1=0.881-0.998, ARI=0.631-0.904 | sparse decision support 복원 |
+| S5-S6: 30도 | nonzero refit=1/50, 2/50 | 약한 신호에서 zero-support 선택 |
+| S1-N/S2-N: decision q=80 | selected q=81.82-82.40, F1=0.985-0.989 | 큰 평균 차이에서는 dense support도 유지 |
+| S3-N | selected q=76.06, F1=0.840 | M-AGL F1=0.877보다 낮음 |
+| S4-N | nonzero refit=10/50, F1(all)=0.331 | dense support와 보통 분리에서 tuning failure |
+| S5-N/S6-N | nonzero refit=3/50, 3/50 | 약한 신호에서 대부분 zero support |
 
-아래 boxplot은 rep=100 raw 결과를 사용했다. 열은 target \(e_B\), 행은 sample size \(n\)이다. equal kappa와 heterogeneous kappa 결과는 각 panel 안에 함께 포함했다. Zero-support 반복은 F1=0으로 포함했고, refit이 없어 정의되지 않는 MSE_eta는 해당 그림에서 제외했다.
+### 3.2 Shared-background
+
+설정은 common q=80, decision q=20, noise q=100, rep=50이다.
+
+| 모형 | selected q | common q | decision q | noise q | F1 |
+|:---|---:|---:|---:|---:|---:|
+| M-AGL | 102.40 | 79.96 | 20.00 | 2.44 | 0.327 |
+| E-CAGL | 20.48 | 0.30 | 20.00 | 0.18 | 0.988 |
+
+M 계열은 prototype support, E 계열은 posterior decision support를 선택 대상으로 둔다.
+
+### 3.3 Oracle Bayes error 기반 Study B
+
+$$
+K=4,quad d=200,quad n\in\{300,1000\},quad
+q_C=4,quad q_D=16,quad q_N=180,quad R=100.
+$$
+
+$$
+e_B\in\{2.5\%,5\%,10\%\},qquad
+\kappa\in\{(45,45,45,45),(30,40,50,60)\}.
+$$
+
+아래 범위는 equal/heterogeneous $\kappa$ 두 결과의 최솟값과 최댓값이다.
+
+| target $e_B$ | $n$ | selected q | common q | noise q | F1 | ARI | MSE_eta |
+|---:|---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 2.5% | 300 | 17.97-18.23 | 0.02-0.03 | 1.94-2.21 | 0.935-0.942 | 0.930-0.931 | 0.253-0.260 |
+| 2.5% | 1000 | 16.03-16.05 | 0.00 | 0.03-0.05 | 0.998-0.999 | 0.936-0.938 | 0.052-0.054 |
+| 5.0% | 300 | 16.73-17.95 | 0.03-0.04 | 0.70-1.91 | 0.943-0.978 | 0.866-0.874 | 0.222-0.271 |
+| 5.0% | 1000 | 16.06-16.09 | 0.00 | 0.06-0.09 | 0.997-0.998 | 0.880 | 0.056-0.059 |
+| 10.0% | 300 | 16.92-19.49 | 0.02-0.09 | 1.35-4.48 | 0.841-0.945 | 0.683-0.703 | 0.355-0.780 |
+| 10.0% | 1000 | 16.20-18.94 | 0.01-0.09 | 0.19-2.85 | 0.916-0.994 | 0.722-0.741 | 0.070-0.093 |
+
+Zero-support 반복은 F1=0으로 포함하며, refit이 없는 MSE_eta는 boxplot에서 제외했다.
 
 ![Study B F1 boxplot](../simulations/figures/studyb_boxplot_f1_by_eb_n_260714.png)
 
@@ -301,83 +185,66 @@ S1-S6은 평균 방향 각도로 난이도를 정한 진단이고, Study B는 tr
 
 ![Study B log MSE eta boxplot](../simulations/figures/studyb_boxplot_logmse_eta_by_eb_n_260714.png)
 
-### 3.3 Dense-support negative-control S1-N~S6-N
+## 4. $K$와 $\lambda_\eta$ 선택
 
-Negative-control은 평균 방향 차이와 집중도 차이의 축은 유지하되, decision q를 16에서 80으로 늘린 dense decision-support setting이다. sparse support 가정 밖에서 Eta-group의 동작을 확인하기 위한 설정이다.
+동시 선택 진단은 $K^\ast=4$, $n=1000$, $d=200$, $e_B=5\%$, rep=5에서 수행했다.
 
-| Scenario | 설정 | E-CAGL 핵심 결과 | 외부 baseline 결과 | 해석 |
-|:---|:---|:---|:---|:---|
-| S1-N | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.857, selected q=82.40, F1=0.985 | Dense vMF ARI=0.835 | dense support에서도 true q=80 근처 선택 |
-| S2-N | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.897, selected q=81.82, F1=0.989 | Dense vMF ARI=0.886 | dense support에서도 true q=80 근처 선택 |
-| S3-N | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.565, selected q=76.06, F1=0.840 | Dense vMF ARI=0.545 | M-AGL보다 support F1이 낮아짐 |
-| S4-N | 평균 차이 보통(60도), 집중도 등분산 | selected q=16.70, nonzero refit=10/50, F1(all)=0.331 | Dense vMF ARI=0.562 | 조건부 F1=0.979; zero-support 반복을 포함하면 성능 저하 |
-| S5-N | 평균 차이 작음(30도), 약한 집중도 이분산 | selected q=0.06, nonzero refit=3/50 | Dense vMF ARI=0.024 | 약한 신호에서 대부분 zero support 선택 |
-| S6-N | 평균 차이 작음(30도), 집중도 등분산 | selected q=2.04, nonzero refit=3/50 | Dense vMF ARI=0.012 | dense/sparse 여부와 무관하게 signal 자체가 약함 |
+| 방법 | equal $\kappa$ | heterogeneous $\kappa$ |
+|:---|:---|:---|
+| Dense vMF | BIC: $K=4$; EBIC: $K=2$ | BIC: $K=3$; EBIC: $K=2$ |
+| M-GL/M-AGL | 대부분 또는 전부 $K=4$ | 전부 $K=4$ |
+| E-CAGL all-in-one | 주로 $K=7,8$ | 주로 $K=7,8$ |
 
-S1-N과 S2-N에서는 E-CAGL의 selected q가 true q=80 근처였다. 반면 S3-N과 S4-N에서는 평균 방향 차이가 보통 수준일 때 Eta-group 계열의 과소선택 또는 BIC 튜닝 한계가 관찰됐다. S5-N/S6-N은 신호 자체가 약한 조건으로 해석한다.
+현재 선택 절차는
 
-### 3.4 외부 baseline 해석
+$$
+\widehat K
+=\arg\min_{K\in\mathcal K}\mathrm{IC}_{\mathrm{dense/group}}(K),
+$$
 
-외부 baseline은 제안 모형과 목표가 다르므로 ARI/NMI/purity 중심으로만 비교한다.
+$$
+\widehat\lambda_\eta
+=\arg\min_{\lambda_\eta}
+\mathrm{BIC}(\widehat K,\lambda_\eta)
+$$
 
-- Spherical k-means와 Dense vMF free kappa는 clustering-only baseline이며 sparse support를 제공하지 않는다.
-- Sparse k-means는 feature support를 선택하지만 posterior decision support와는 목표가 다르다.
-- Rossi 2022 setting은 $\mu_k$ prototype sparsity 비교용이다. `d=100`에서 sparsity 5%, 10%, 15%이면 common-like coordinate 기대값이 약 81개, 66개, 52개로, 공통/공유 변수가 많은 구조다. dbmovMFs는 현재 로컬 R 환경에 없어 제외했다.
+의 2단계로 분리한다. Rossi and Barbaro (2022)의 dense-$K$ 선택 후 sparsity path 선택 구조와 같은 방향이다.
 
-## 4. K 선택 진단과 tuning 분리
+현재 centered eta BIC는
 
-이 진단의 목적은 제안 모형을 K 선택 모형으로 제시하는 것이 아니라, \(K\)와 sparsity tuning을 동시에 선택할 때의 민감도를 확인하는 데 있다. 설정은 Study B의 \(e_B=5\%\), \(K^\ast=4\), \(n=1000\), \(d=200\), rep=5이며, \(K_{\mathrm{fit}}\in\{2,\ldots,8\}\)를 비교했다.
+$$
+\mathrm{BIC}(\lambda_\eta)
+=-2\ell(\widehat\Theta_{\lambda_\eta})
++\log(n)\left[(K-1)+d+(K-1)m_{\lambda_\eta}\right]
+$$
 
-Rossi and Barbaro (2022, *Mixture of von Mises-Fisher distribution with sparse prototypes*)도 고차원 vMF mixture에서 \(K\)와 sparsity parameter \(\beta\)를 하나의 information criterion으로 동시에 선택할 때의 불안정성을 지적했다. Regularization이 component 수 증가에 따른 복잡도 penalty를 일부 상쇄할 수 있기 때문에, 해당 논문은 dense model에서 먼저 \(K\)를 선택하고, \(K\)를 고정한 뒤 path-following으로 \(\beta\)를 선택하는 2단계 절차를 사용했다. Wells Fargo 8-K 분석에서도 RICc로 \(K=14\)를 먼저 선택한 뒤, path-following에서 \(\beta=1072.253\), sparsity \(82.16\%\)를 선택했다.
+이며 penalized path에서 BIC를 선택한 뒤 support refit을 수행한다.
 
-본 연구에서도 같은 원칙을 적용한다. Rossi 논문의 \(\beta\)는 sparse prototype을 위한 조절모수이고, 본 연구의 조절모수는 centered eta contrast에 대한 \(\lambda_\eta\)이다. 따라서 \(K\) 선택은 dense 또는 weakly penalized vMF 기준으로 별도 탐색하고, \(K\)가 정해진 뒤 E-CAGL path에서 \(\lambda_\eta\)를 선택한다.
+## 5. 비용과 한계
 
-| 환경 | 방법 | BIC 기준 selected K | EBIC 기준 selected K | support 선택 해석 |
-|:---|:---|:---|:---|:---|
-| equal kappa | Dense vMF | 5/5회 \(K=4\) | 5/5회 \(K=2\) | sparse support 없음 |
-| equal kappa | M-GL | 4/5회 \(K=4\) | 5/5회 \(K=4\) | common q=4도 함께 선택 |
-| equal kappa | M-AGL | 4/5회 \(K=4\) | 4/5회 \(K=4\) | common q=4도 함께 선택 |
-| equal kappa | E-CAGL | 주로 \(K=8\) | \(K=7,8\) | EBIC에서 selected q=18.2, decision q=16.0 |
-| heterogeneous kappa | Dense vMF | 5/5회 \(K=3\) | 5/5회 \(K=2\) | 이분산에서 과소선택 |
-| heterogeneous kappa | M-GL | 5/5회 \(K=4\) | 5/5회 \(K=4\) | common q=4도 함께 선택 |
-| heterogeneous kappa | M-AGL | 5/5회 \(K=4\) | 5/5회 \(K=4\) | common q=4도 함께 선택 |
-| heterogeneous kappa | E-CAGL | 주로 \(K=8\) | \(K=7,8\) | EBIC에서 selected q=17.2, decision q=16.0 |
-
-E-CAGL은 \(K\)를 고정한 Study B에서 높은 support F1을 보였지만, \(K\)와 \(\lambda_\eta\)를 동시에 고른 rep=5 진단에서는 큰 \(K\)를 선택하는 경향이 있었다. 따라서 main simulation은 \(K=K^\ast\)로 고정하고, 실제 적용에서는 \(K\) 선택과 support 선택을 분리한다.
-
-실제 분석에서는 다음 절차를 기준으로 둔다.
-
-1. Dense vMF 또는 M-GL/M-AGL 계열로 \(K\) 후보를 탐색한다.
-2. 선택된 \(K\)를 고정한 뒤 E-CAGL path에서 \(\lambda_\eta\)를 선택한다.
-3. 최종 해석은 posterior decision support \(\{j:\lVert \widehat c_{\cdot j}\rVert_2>0\}\)를 기준으로 한다.
-
-## 5. 계산 비용과 한계
-
-제안 모형 E-CAGL의 비용은 계산 시간뿐 아니라 튜닝과 해석 구조가 더 복잡하다는 점에 있다. S1 1회 실행 시간 benchmark 기준(`K=4`, `n=1000`, `d=200`, `nstart=10`, path=240, Rcpp helper ON)에서 E-CAGL은 M-L보다 느렸지만 M-GL/M-AGL보다는 빠르게 나왔다.
-
-| 비교 | 1회 시간 | 해석 |
-|:---|---:|:---|
-| M-L | 3.75 sec | 계산 시간은 짧지만 selected q=200으로 support 복원에는 한계 |
-| M-GL / M-AGL | 8.82 / 8.53 sec | group/adaptive group penalty로 계산량 증가 |
-| E-CGL / E-CAGL | 5.62 / 5.53 sec | M-L보다 약 1.5배 느리고 selected q는 true q=16 근처 |
-
-E-CAGL의 주요 비용과 제약은 다음과 같다.
-
-| 비용 또는 불리한 조건 | 내용 |
+| 항목 | 확인 결과 |
 |:---|:---|
-| 계산 비용 | M-L보다 약 1.47배 느림 |
-| 튜닝 비용 | eta path, adaptive weight, BIC 선택에 민감 |
-| 약한 신호 | S5/S6처럼 신호가 약한 조건에서 선택 support가 0에 가깝거나 과소선택됨 |
-| dense decision support | S3-N/S4-N에서 과소선택 관찰 |
-| K와 sparsity 동시 선택 | E-CGL/E-CAGL에서 \(K\)를 크게 선택하는 경향. \(K\) 선택과 support 선택을 분리 |
-| prototype sparsity target | Rossi-style setting은 posterior decision support가 아니라 prototype sparsity가 목표 |
-| support refit 정의 | centered penalty 단계는 common $\eta$ baseline을 유지하지만, 현재 refit은 선택된 decision coordinate만 남김. 최종 원고 전 refit target과 BIC df의 일관성 점검 필요 |
-
-E-CAGL은 모든 조건에서 계산 시간 또는 ARI 기준의 우위 모형은 아니다. 본 결과에서는 계산/튜닝 비용을 수반하며, sparse posterior decision support 복원 지표가 높게 나타났다.
+| 계산 시간 | E-CAGL 5.53초; M-L 3.75초; M-GL/M-AGL 8.82/8.53초 |
+| 약한 신호 | S5/S6에서 대부분 zero support |
+| dense support | S3-N/S4-N에서 과소선택 또는 tuning failure |
+| $K$ 동시 선택 | E-CAGL all-in-one에서 $K=7,8$ 선호 |
+| refit 정의 | penalty 단계는 common $\eta$ baseline을 유지하지만 현재 refit은 selected coordinate만 유지 |
+| BIC df | refit target과 df의 일관성 추가 점검 필요 |
 
 ## 6. 현재 결론
 
-- 제안 모형의 선택 대상은 전체 prototype support가 아니라 centered $\eta$ contrast로 정의한 posterior decision support다.
-- Study B에서 E-CAGL은 $n=1000$일 때 common coordinate를 거의 선택하지 않았고, 난도가 높고 이분산인 조건에서는 noise 선택이 증가했다.
-- Dense-support 및 약한 신호 진단에서는 과소선택과 zero-support가 관찰되어 적용 범위가 확인됐다.
-- $K$와 $\lambda_\eta$의 동시 선택은 불안정했으며, 두 조절 항목을 분리하는 절차를 후속 검증한다.
+$$
+\boxed{
+\text{posterior decision support}
+\;\Longrightarrow\;
+\eta=\kappa\mu
+\;\Longrightarrow\;
+c_{kj}=\eta_{kj}-\bar\eta_j
+\;\Longrightarrow\;
+\sum_jw_j\lVert c_{\cdot j}\rVert_2
+}
+$$
+
+- E-CAGL은 sparse posterior decision support 복원에 초점을 둔다.
+- 약한 신호, 일부 dense-support 환경, $K$와 $\lambda_\eta$의 동시 선택에서는 성능 저하가 관찰됐다.
+- 다음 검증 항목은 refit/df 정합성과 동일한 $\mu$에서 $\kappa$만 다른 concentration-only 환경이다.
