@@ -1,4 +1,4 @@
-# Thesis Meeting 260714
+# 연구미팅 자료: Eta-group 방법론과 시뮬레이션 결과 (2026-07-14)
 
 ## 1. 이번 미팅 목적
 
@@ -86,7 +86,7 @@ $$
 \mathbf 1^\top c_{\cdot j}=0.
 $$
 
-공통 성분 $\bar\eta_j\mathbf 1$은 모든 component score에 동일하게 더해지므로 decision 차이에서 사라진다.
+공통 성분 $\bar\eta_j\mathbf 1$은 두 component의 log-posterior odds에서 coordinate $j$의 관측값 $x_j$에 곱해지는 선형항에서 상쇄된다.
 
 $$
 (\bar\eta_j\mathbf 1)_k-(\bar\eta_j\mathbf 1)_\ell=0,
@@ -94,7 +94,7 @@ $$
 \eta_{kj}-\eta_{\ell j}=c_{kj}-c_{\ell j}.
 $$
 
-따라서 coordinate $j$가 posterior decision boundary에 기여하는지는 raw $\eta_{\cdot j}$의 절대 크기가 아니라 $c_{\cdot j}$의 존재 여부로 판단한다. 예를 들어
+따라서 본 연구의 decision support는 $x_j$가 component 간 score 차이에 직접 기여하는지, 즉 $c_{\cdot j}$가 0이 아닌지를 기준으로 정의한다. 공통 성분 $\bar\eta_j$는 penalized fit의 parameterization에 남으며, $\kappa_k=\lVert\eta_k\rVert_2$를 통해 정규화 상수 $C_d(\kappa_k)$에 간접적으로 영향을 줄 수 있다. 현재 selected-coordinate refit과의 차이는 5절의 구현 한계로 구분한다. 예를 들어
 
 $$
 \eta_{\cdot j}=(5,5,5,5)
@@ -213,7 +213,7 @@ $$
 \sum_{j} \sum_{k \lt m} w_{j}^{(km)} |\beta_{jk} - \beta_{jm}|, \qquad \sum_{k} \beta_{jk} = 0
 $$
 
-Li et al. (2020)은 finite mixture regression에서 predictor effect를 common effect와 cluster-specific effect로 분해하여, relevant variable과 source of heterogeneity를 동시에 선택했다.
+Li et al. (2022)은 finite mixture regression에서 predictor effect를 common effect와 cluster-specific effect로 분해하여, relevant variable과 source of heterogeneity를 동시에 선택했다.
 
 $$
 x^\top\beta_0+x^\top\beta_k,
@@ -267,8 +267,8 @@ Adaptive weight는 $w_j^{(M)}\propto(\lVert\mu_{\cdot j}^{init}\rVert_2+\epsilon
 | S2 | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.904, selected q=16.12, F1=0.996, MSE_eta=0.057 | Dense vMF ARI=0.880 | 집중도 차이가 없는 조건에서도 support 복원 유지 |
 | S3 | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.631, selected q=21.22, F1=0.881, MSE_eta=0.250 | Dense vMF ARI=0.539 | 중간 난도 setting. support 복원 일부 저하 |
 | S4 | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.651, selected q=16.32, F1=0.990, MSE_eta=0.079 | Dense vMF ARI=0.561 | selected q가 true q=16 근처 |
-| S5 | 평균 차이 작음(30도), 약한 집중도 이분산 | ARI=0.015, selected q=0.02, F1=0.118, MSE_eta=1.040 | Dense vMF ARI=0.029 | 약한 신호 조건. 선택 support가 0에 가깝게 수축 |
-| S6 | 평균 차이 작음(30도), 집중도 등분산 | ARI=0.012, selected q=0.56, F1=0.105, MSE_eta=2.354 | Dense vMF ARI=0.011 | 약한 신호 조건. 모든 방법의 성능이 낮음 |
+| S5 | 평균 차이 작음(30도), 약한 집중도 이분산 | selected q=0.02, nonzero refit=1/50 | Dense vMF ARI=0.029 | 약한 신호 조건. 대부분 zero support 선택 |
+| S6 | 평균 차이 작음(30도), 집중도 등분산 | selected q=0.56, nonzero refit=2/50 | Dense vMF ARI=0.011 | 약한 신호 조건. 대부분 zero support 선택 |
 
 S1-S4에서는 E-CAGL이 clustering 성능을 유지하면서 selected q를 true q=16 근처로 맞췄다. M-L과 E-CL은 ARI는 유지했지만 selected q가 거의 전체 차원에 가까웠다. S5-S6은 약한 신호 조건에서의 한계로 분리해 해석한다.
 
@@ -293,7 +293,7 @@ S1-S6은 평균 방향 각도로 난이도를 정한 진단이고, Study B는 tr
 
 \(e_B=2.5\%\)와 \(e_B=5\%\)에서는 n=1000 기준 E-CAGL이 selected q를 true decision q=16 근처로 맞추고 common q를 거의 선택하지 않았다. \(e_B=10\%\)에서는 ARI가 낮아졌고, heterogeneous kappa 조건에서 noise q가 증가했다. 이 결과는 표본 수, 분리 난이도, 집중도 차이가 support 복원에 함께 영향을 준다는 점을 보여준다.
 
-아래 boxplot은 rep=100 raw 결과를 사용했다. 열은 target \(e_B\), 행은 sample size \(n\)이다. equal kappa와 heterogeneous kappa 결과는 각 panel 안에 함께 포함했다.
+아래 boxplot은 rep=100 raw 결과를 사용했다. 열은 target \(e_B\), 행은 sample size \(n\)이다. equal kappa와 heterogeneous kappa 결과는 각 panel 안에 함께 포함했다. Zero-support 반복은 F1=0으로 포함했고, refit이 없어 정의되지 않는 MSE_eta는 해당 그림에서 제외했다.
 
 ![Study B F1 boxplot](../simulations/figures/studyb_boxplot_f1_by_eb_n_260714.png)
 
@@ -310,9 +310,9 @@ Negative-control은 평균 방향 차이와 집중도 차이의 축은 유지하
 | S1-N | 평균 차이 큼(90도), 집중도 이분산 | ARI=0.857, selected q=82.40, F1=0.985 | Dense vMF ARI=0.835 | dense support에서도 true q=80 근처 선택 |
 | S2-N | 평균 차이 큼(90도), 집중도 등분산 | ARI=0.897, selected q=81.82, F1=0.989 | Dense vMF ARI=0.886 | dense support에서도 true q=80 근처 선택 |
 | S3-N | 평균 차이 보통(60도), 집중도 이분산 | ARI=0.565, selected q=76.06, F1=0.840 | Dense vMF ARI=0.545 | M-AGL보다 support F1이 낮아짐 |
-| S4-N | 평균 차이 보통(60도), 집중도 등분산 | ARI=0.629, selected q=16.70, F1=0.331 | Dense vMF ARI=0.562 | 50회 중 10회만 nonzero support 선택. 조건부 F1=0.979 |
-| S5-N | 평균 차이 작음(30도), 약한 집중도 이분산 | ARI=0.001, selected q=0.06, F1=0.025 | Dense vMF ARI=0.024 | 약한 신호에서 전체적으로 성능 저하 |
-| S6-N | 평균 차이 작음(30도), 집중도 등분산 | ARI=0.005, selected q=2.04, F1=0.172 | Dense vMF ARI=0.012 | dense/sparse 여부와 무관하게 signal 자체가 약함 |
+| S4-N | 평균 차이 보통(60도), 집중도 등분산 | selected q=16.70, nonzero refit=10/50, F1(all)=0.331 | Dense vMF ARI=0.562 | 조건부 F1=0.979; zero-support 반복을 포함하면 성능 저하 |
+| S5-N | 평균 차이 작음(30도), 약한 집중도 이분산 | selected q=0.06, nonzero refit=3/50 | Dense vMF ARI=0.024 | 약한 신호에서 대부분 zero support 선택 |
+| S6-N | 평균 차이 작음(30도), 집중도 등분산 | selected q=2.04, nonzero refit=3/50 | Dense vMF ARI=0.012 | dense/sparse 여부와 무관하게 signal 자체가 약함 |
 
 S1-N과 S2-N에서는 E-CAGL의 selected q가 true q=80 근처였다. 반면 S3-N과 S4-N에서는 평균 방향 차이가 보통 수준일 때 Eta-group 계열의 과소선택 또는 BIC 튜닝 한계가 관찰됐다. S5-N/S6-N은 신호 자체가 약한 조건으로 해석한다.
 
@@ -324,7 +324,7 @@ S1-N과 S2-N에서는 E-CAGL의 selected q가 true q=80 근처였다. 반면 S3-
 - Sparse k-means는 feature support를 선택하지만 posterior decision support와는 목표가 다르다.
 - Rossi 2022 setting은 $\mu_k$ prototype sparsity 비교용이다. `d=100`에서 sparsity 5%, 10%, 15%이면 common-like coordinate 기대값이 약 81개, 66개, 52개로, 공통/공유 변수가 많은 구조다. dbmovMFs는 현재 로컬 R 환경에 없어 제외했다.
 
-## 4. K 선택과 tuning 기준
+## 4. K 선택 진단과 tuning 분리
 
 이 진단의 목적은 제안 모형을 K 선택 모형으로 제시하는 것이 아니라, \(K\)와 sparsity tuning을 동시에 선택할 때의 민감도를 확인하는 데 있다. 설정은 Study B의 \(e_B=5\%\), \(K^\ast=4\), \(n=1000\), \(d=200\), rep=5이며, \(K_{\mathrm{fit}}\in\{2,\ldots,8\}\)를 비교했다.
 
@@ -343,7 +343,7 @@ Rossi and Barbaro (2022, *Mixture of von Mises-Fisher distribution with sparse p
 | heterogeneous kappa | M-AGL | 5/5회 \(K=4\) | 5/5회 \(K=4\) | common q=4도 함께 선택 |
 | heterogeneous kappa | E-CAGL | 주로 \(K=8\) | \(K=7,8\) | EBIC에서 selected q=17.2, decision q=16.0 |
 
-E-CAGL은 \(K\)를 고정했을 때 posterior decision support를 잘 분리하지만, \(K\)와 \(\lambda_\eta\)를 동시에 고르면 \(K\)를 크게 선택하는 경향이 있었다. 따라서 main simulation은 \(K=K^\ast\)로 고정하고, 실제 적용 절차는 \(K\) 선택과 support 선택을 분리한다.
+E-CAGL은 \(K\)를 고정한 Study B에서 높은 support F1을 보였지만, \(K\)와 \(\lambda_\eta\)를 동시에 고른 rep=5 진단에서는 큰 \(K\)를 선택하는 경향이 있었다. 따라서 main simulation은 \(K=K^\ast\)로 고정하고, 실제 적용에서는 \(K\) 선택과 support 선택을 분리한다.
 
 실제 분석에서는 다음 절차를 기준으로 둔다.
 
@@ -371,5 +371,13 @@ E-CAGL의 주요 비용과 제약은 다음과 같다.
 | dense decision support | S3-N/S4-N에서 과소선택 관찰 |
 | K와 sparsity 동시 선택 | E-CGL/E-CAGL에서 \(K\)를 크게 선택하는 경향. \(K\) 선택과 support 선택을 분리 |
 | prototype sparsity target | Rossi-style setting은 posterior decision support가 아니라 prototype sparsity가 목표 |
+| support refit 정의 | centered penalty 단계는 common $\eta$ baseline을 유지하지만, 현재 refit은 선택된 decision coordinate만 남김. 최종 원고 전 refit target과 BIC df의 일관성 점검 필요 |
 
 E-CAGL은 모든 조건에서 계산 시간 또는 ARI 기준의 우위 모형은 아니다. 본 결과에서는 계산/튜닝 비용을 수반하며, sparse posterior decision support 복원 지표가 높게 나타났다.
+
+## 6. 현재 결론
+
+- 제안 모형의 선택 대상은 전체 prototype support가 아니라 centered $\eta$ contrast로 정의한 posterior decision support다.
+- Study B에서 E-CAGL은 $n=1000$일 때 common coordinate를 거의 선택하지 않았고, 난도가 높고 이분산인 조건에서는 noise 선택이 증가했다.
+- Dense-support 및 약한 신호 진단에서는 과소선택과 zero-support가 관찰되어 적용 범위가 확인됐다.
+- $K$와 $\lambda_\eta$의 동시 선택은 불안정했으며, 두 조절 항목을 분리하는 절차를 후속 검증한다.

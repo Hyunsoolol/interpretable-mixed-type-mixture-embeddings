@@ -16,7 +16,7 @@ if (length(raw_files) == 0) {
 }
 
 method_levels_raw <- c("D-L", "D-GL", "D-AGL", "E-L", "E-GL", "E-AGL")
-method_levels_plot <- c("D-L", "D-GL", "D-AGL", "E-CL", "E-CGL", "E-CAGL")
+method_levels_plot <- c("M-L", "M-GL", "M-AGL", "E-CL", "E-CGL", "E-CAGL")
 
 read_one <- function(path) {
   out <- read.csv(path, stringsAsFactors = FALSE)
@@ -31,10 +31,14 @@ df <- bind_rows(lapply(raw_files, read_one)) %>%
     target_oracle_error %in% c(0.025, 0.05, 0.10)
   ) %>%
   mutate(
-    method_label = recode(method, "E-L" = "E-CL", "E-GL" = "E-CGL", "E-AGL" = "E-CAGL"),
+    method_label = recode(
+      method,
+      "D-L" = "M-L", "D-GL" = "M-GL", "D-AGL" = "M-AGL",
+      "E-L" = "E-CL", "E-GL" = "E-CGL", "E-AGL" = "E-CAGL"
+    ),
     method_label = factor(method_label, levels = method_levels_plot),
-    family = if_else(grepl("^D-", method_label), "D-series", "E-series"),
-    family = factor(family, levels = c("D-series", "E-series")),
+    family = if_else(grepl("^M-", method_label), "M-series", "E-series"),
+    family = factor(family, levels = c("M-series", "E-series")),
     target_label = case_when(
       target_oracle_error == 0.025 ~ "e_B = 2.5%",
       target_oracle_error == 0.05 ~ "e_B = 5.0%",
@@ -46,6 +50,7 @@ df <- bind_rows(lapply(raw_files, read_one)) %>%
     selected_common_q = common_false_selection_rate * common_q,
     selected_decision_q = decision_selection_rate * decision_q,
     selected_noise_q = noise_false_selection_rate * noise_q,
+    F1_plot = if_else(!is.finite(F1) & selected_q == 0, 0, F1),
     MSE_eta = MSE_centered_eta,
     log_MSE_eta = log(MSE_eta + 1e-12)
   )
@@ -57,14 +62,16 @@ if (nrow(df) == 0) {
 fig_dir <- file.path("docs", "simulations", "figures")
 dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
-make_boxplot <- function(data, y_col, y_label, title, filename, y_limits = NULL, hline = NULL) {
+make_boxplot <- function(data, y_col, y_label, title, filename, y_limits = NULL,
+                         hline = NULL,
+                         subtitle = "Boxplots use rep=100 raw results; equal and heterogeneous kappa settings are pooled within each panel.") {
   p <- ggplot(data, aes(x = method_label, y = .data[[y_col]], fill = family)) +
     geom_boxplot(width = 0.72, linewidth = 0.35, outlier.size = 0.55, outlier.alpha = 0.65) +
     facet_grid(n_label ~ target_label) +
-    scale_fill_manual(values = c("D-series" = "#5B8DEF", "E-series" = "#F39C6B")) +
+    scale_fill_manual(values = c("M-series" = "#5B8DEF", "E-series" = "#F39C6B")) +
     labs(
       title = title,
-      subtitle = "Boxplots use rep=100 raw results; equal and heterogeneous kappa settings are pooled within each panel.",
+      subtitle = subtitle,
       x = NULL,
       y = y_label,
       fill = NULL
@@ -99,16 +106,18 @@ make_boxplot(
   y_label = "ARI",
   title = "Study B clustering accuracy by oracle error level and sample size",
   filename = "studyb_boxplot_ari_by_eb_n_260714.png",
-  y_limits = c(0, 1)
+  y_limits = c(0, 1),
+  subtitle = "Rep=100 raw results; kappa settings are pooled, and zero-support rows without a refit ARI are omitted."
 )
 
 make_boxplot(
   df,
-  y_col = "F1",
+  y_col = "F1_plot",
   y_label = "Decision support F1",
   title = "Study B decision-support recovery by oracle error level and sample size",
   filename = "studyb_boxplot_f1_by_eb_n_260714.png",
-  y_limits = c(0, 1)
+  y_limits = c(0, 1),
+  subtitle = "Rep=100 raw results; kappa settings are pooled, and zero-support rows are included with F1=0."
 )
 
 make_boxplot(
@@ -136,7 +145,8 @@ make_boxplot(
   y_col = "log_MSE_eta",
   y_label = "log(MSE_eta)",
   title = "Study B centered eta estimation error by oracle error level and sample size",
-  filename = "studyb_boxplot_logmse_eta_by_eb_n_260714.png"
+  filename = "studyb_boxplot_logmse_eta_by_eb_n_260714.png",
+  subtitle = "Rep=100 raw results; kappa settings are pooled, and rows without a refit MSE_eta are omitted."
 )
 
 cat("Created Study B boxplots in ", normalizePath(fig_dir), "\n", sep = "")
