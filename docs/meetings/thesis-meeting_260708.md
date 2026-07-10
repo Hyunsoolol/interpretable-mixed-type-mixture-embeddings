@@ -132,6 +132,34 @@ S1 환경: $K=4$, $n=1000$, $d=200$, common q=4, decision q=16, noise q=180, rep
 
 ## 3. 시뮬레이션 근거
 
+**S1-S6 시나리오 구성**
+
+공통 설정은 $K=4$, $n=1000$, $d=200$, common q=4, decision q=16, noise q=180, rep=50, nstart=10, path length=240, BIC 선택 후 refit이다.
+
+| 환경 | 목표 방향 차이 | 집중도 구조 | $\kappa$ | common q | decision q | noise q |
+|:---|:---:|:---:|:---|---:|---:|---:|
+| S1 | 큼 (90도) | 이분산 | $(30,40,50,60)$ | 4 | 16 | 180 |
+| S2 | 큼 (90도) | 등분산 | $(45,45,45,45)$ | 4 | 16 | 180 |
+| S3 | 보통 (60도) | 이분산 | $(30,40,50,60)$ | 4 | 16 | 180 |
+| S4 | 보통 (60도) | 등분산 | $(45,45,45,45)$ | 4 | 16 | 180 |
+| S5 | 작음 (30도) | 약한 이분산 | $(43,44,46,47)$ | 4 | 16 | 180 |
+| S6 | 작음 (30도) | 등분산 | $(45,45,45,45)$ | 4 | 16 | 180 |
+
+**S1-N부터 S6-N까지의 negative-control 구성**
+
+방향 차이와 $\kappa$ 구조는 S1-S6와 같고, decision support만 80개로 늘려 sparse decision-support 가정을 약화했다.
+
+| 환경 | 목표 방향 차이 | 집중도 구조 | $\kappa$ | common q | decision q | noise q |
+|:---|:---:|:---:|:---|---:|---:|---:|
+| S1-N | 큼 (90도) | 이분산 | $(30,40,50,60)$ | 4 | 80 | 116 |
+| S2-N | 큼 (90도) | 등분산 | $(45,45,45,45)$ | 4 | 80 | 116 |
+| S3-N | 보통 (60도) | 이분산 | $(30,40,50,60)$ | 4 | 80 | 116 |
+| S4-N | 보통 (60도) | 등분산 | $(45,45,45,45)$ | 4 | 80 | 116 |
+| S5-N | 작음 (30도) | 약한 이분산 | $(43,44,46,47)$ | 4 | 80 | 116 |
+| S6-N | 작음 (30도) | 등분산 | $(45,45,45,45)$ | 4 | 80 | 116 |
+
+표의 각도는 생성 목표다. 이분산에서는 정규화 과정 때문에 실제 pairwise angle에 차이가 생길 수 있으며, S3의 실제 평균은 66.02도, S5는 29.47도였다.
+
 ### 3.1 기본 및 negative-control
 
 각 셀은 `selected q / F1`이며, 반복 수는 50회이다.
@@ -245,6 +273,28 @@ Zero-support 반복은 F1=0으로 포함했다. 반복별 분포와 $\kappa$ 조
 ![Study B selected noise q boxplot](../simulations/figures/studyb_boxplot_noiseq_by_eb_n_260714.png)
 
 ![Study B log MSE eta boxplot](../simulations/figures/studyb_boxplot_logmse_eta_by_eb_n_260714.png)
+
+### 3.4 Rossi-type M-L 대비 불리한 조건
+
+M-L은 Rossi와 Barbaro (2022)의 sparse $\mu$ prototype 모형을 재현한 기준이다. M-L과 E-CGL은 support 목표가 다르므로 decision F1만으로 절대적 우열을 판단하지 않고, ARI, MSE_eta와 zero-support 안정성을 함께 비교했다.
+
+| 환경 | M-L | E-CGL (주) | 확인 결과 |
+|:---|:---|:---|:---|
+| S3-N | ARI=0.547, MSE_eta=2.280 | ARI=0.558, MSE_eta=2.309 | ARI와 decision F1은 E-CGL이 높지만 MSE_eta는 소폭 큼 |
+| S4-N | ARI=0.563, F1=0.573, selected q=199.30 | zero support=50/50, F1=0.000 | E-CGL의 BIC tuning이 명확히 불리함 |
+| S5 | ARI=0.031, selected q=198.56 | zero support=50/50 | M-L은 dense fit을 반환하지만 두 모형 모두 군집 분리가 거의 되지 않음 |
+| S6 | ARI=0.010, selected q=199.02 | nonzero support=1/50 | E-CGL의 support 선택이 불안정함 |
+| S5-N/S6-N | ARI=0.023/0.012, F1=0.571/0.570 | zero support=50/50, 50/50 | 약한 신호에서 E-CGL의 support 선택이 불안정함 |
+
+별도 Rossi-style prototype-sparse pilot(rep=5)에서도 불리한 조건이 확인되었다. Prototype zero 비율은 5%, 10%, 15%이며, 아래 valid 값은 이 순서의 세 cell을 요약한다.
+
+| 설정 | M-L | E-CAGL | 해석 |
+|:---|:---|:---|:---|
+| $n=200$, overlap 2.5% | valid=5/5, ARI=0.889-0.936 | valid=3-4/5, ARI=0.867-0.930 | Eta 계열이 prototype support를 과소선택 |
+| $n=200$, overlap 5% | valid=5/5, ARI=0.794-0.849 | valid=0/5, 0/5, 1/5 | 작은 표본과 높은 overlap에서 Eta 계열의 zero-support 선택 집중 |
+| $n=1000$, overlap 2.5-5% | 모든 cell valid=5/5 | 모든 cell valid=5/5 | ARI는 유사하지만 prototype-support 지표는 대체로 M-L이 높음 |
+
+이 pilot은 E-CAGL만 포함했으므로 E-CGL과 M-L의 직접 비교로 해석하지 않는다. 현재 결과에서 E-CGL의 분명한 약점은 약한 신호 또는 dense support와 보통 이하의 분리가 결합될 때 BIC가 zero support를 선택할 수 있다는 점이다.
 
 ## 4. $K$와 $\lambda_\eta$ 선택
 
