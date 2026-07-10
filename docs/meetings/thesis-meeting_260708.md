@@ -163,6 +163,7 @@ e_B \in \{2.5\%, 5\%, 10\%\}, \qquad
 \kappa \in \{(45,45,45,45), (30,40,50,60)\}.
 $$
 
+
 아래 범위는 equal/heterogeneous $\kappa$ 두 결과의 최솟값과 최댓값이다.
 
 | target $e_B$ | $n$ | selected q | common q | noise q | F1 | ARI | MSE_eta |
