@@ -158,10 +158,10 @@ M 계열은 prototype support, E 계열은 posterior decision support를 선택 
 
 $K = 4, \quad d = 200, \quad n \in \{300, 1000\}, \quad q_C = 4, \quad q_D = 16, \quad q_N = 180, \quad R = 100.$
 
-$$
+```math
 e_B \in \{2.5\%, 5\%, 10\%\}, \qquad
 \kappa \in \{(45,45,45,45), (30,40,50,60)\}.
-$$
+```
 
 
 아래 범위는 equal/heterogeneous $\kappa$ 두 결과의 최솟값과 최댓값이다.
