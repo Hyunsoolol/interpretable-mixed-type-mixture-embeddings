@@ -4,7 +4,7 @@
 
 실자료의 주 분석은 **Classic3 SPLADE top-2000**으로 구성하였다. E-CGL은 2,000개 좌표 중 1,347개를 선택하여 32.7%를 제거하면서 dense vMF (component별 집중도)와 같은 test ARI 0.9927과 NMI 0.9863을 유지하였다. 반복 재선택에서 Nogueira stability는 0.884였다.
 
-따라서 Classic3 결과는 E-CGL이 군집 배정을 유지하면서 posterior decision coordinate를 안정적으로 축약한 사례로 보고한다. 선택된 좌표도 CISI의 `library`, CRAN의 `flow`, MED의 `tumor`처럼 class별 주제와 연결되는 token으로 확인되었다. 선택 비율은 67.4%이므로 극희소 support가 아니라 **해석 가능한 중간 밀도의 decision support**로 해석한다. E-ACGL은 E-CGL과 거의 같은 결과를 보여 adaptive 보조 모형으로 둔다.
+Classic3에서 E-CGL은 군집 배정을 유지하면서 posterior decision coordinate를 안정적으로 축약하였다. 선택된 좌표도 CISI의 `library`, CRAN의 `flow`, MED의 `tumor`처럼 class별 주제와 연결되는 token으로 확인되었다. 선택 비율은 67.4%이므로 극희소 support가 아니라 **해석 가능한 중간 밀도의 decision support**에 해당한다. E-ACGL은 E-CGL과 거의 같은 결과를 보인 adaptive 보조 모형이다.
 
 | 자료 | 문서 내 역할 | 핵심 결과 |
 |---|---|---|
@@ -170,7 +170,7 @@ Classic3의 주 분석은 자료에 제공된 세 주제에 대응하는 $K=3$�
 1. Classic3에서 E-CGL은 held-out 군집 성능을 유지하면서 좌표를 안정적으로 축약하였다.
 2. Classic3의 selected coordinate는 vocabulary token에 대응하여 class별 중심화 자연모수 대비로 해석할 수 있었다.
 3. BBC5와 CSTR에서는 좌표 축약이 군집 또는 밀도 적합의 손실을 동반하였다.
-4. E-ACGL은 세 자료에서 E-CGL을 일관되게 개선하지 않아 adaptive 보조 모형으로 둔다.
+4. E-ACGL은 세 자료에서 E-CGL을 일관되게 개선하지 않았으며 adaptive 보조 결과로 보고한다.
 5. 실제 feature support의 정답이 없으므로 TPR, FPR, Precision, F1은 보고하지 않는다.
 6. M-L과 E-CGL의 selected $q$는 각각 prototype-union support와 posterior-decision support를 나타낸다.
 

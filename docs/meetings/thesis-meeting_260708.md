@@ -86,7 +86,7 @@ P_{\mathrm{CAGL}}(\eta)
 w_j=\left(\lVert c_{\cdot j}^{\mathrm{init}}\rVert_2+\epsilon\right)^{-\gamma}.
 $$
 
-이번 실험에서는
+시뮬레이션에서는
 
 $$
 \gamma=1,
@@ -106,6 +106,8 @@ $$
 | E-CL | $\lambda_\eta\sum_{k,j}\lvert c_{kj}\rvert$ |
 | E-CGL | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ |
 | E-ACGL | $\lambda_\eta\sum_jw_j^{(E)}\lVert c_{\cdot j}\rVert_2$ |
+
+M-L은 Rossi and Barbaro (2022)의 sparse vMF prototype 방법을 재현한 비교 모형이며, 방향모수 $\mu$에 entry-wise $L_1$ penalty를 적용한다. M-L의 support는 prototype coordinate를, E-CGL의 support는 posterior decision coordinate를 나타낸다.
 
 ### 2.5 구조 분해 진단
 
@@ -323,7 +325,7 @@ $$
 \mathrm{BIC}(\widehat K,\lambda_\eta)
 $$
 
-의 2단계로 분리한다. Rossi and Barbaro (2022)의 dense-$K$ 선택 후 sparsity path 선택 구조와 같은 방향이다.
+의 2단계로 분리한다. Rossi and Barbaro (2022)의 dense 모형 기반 $K$ 선택 후 sparsity path를 선택하는 2단계 구조와 일치한다.
 
 현재 centered eta BIC는
 
@@ -335,7 +337,36 @@ $$
 
 이며 penalized path에서 BIC를 선택한 뒤 support refit을 수행한다.
 
-## 5. 비용과 한계
+## 5. Classic3 실자료 분석
+
+Classic3의 CISI·CRAN·MED 초록 3,890건을 SPLADE top-2,000 좌표로 표현하였다. 주 분석은 자료에 제공된 세 주제에 맞춰 $K=3$으로 수행하였다.
+
+| 모형 | selected q | test ARI | test NMI |
+|:---|---:|---:|---:|
+| Dense vMF (component별 집중도) | 2,000 | 0.9927 | 0.9863 |
+| M-L | 2,000 | 0.9892 | 0.9787 |
+| **E-CGL (주)** | **1,347** | **0.9927** | **0.9863** |
+| E-ACGL (보조) | 1,348 | 0.9927 | 0.9863 |
+
+E-CGL은 dense vMF와 같은 test ARI를 유지하면서 653개 좌표를 제거하였다. 중심화 자연모수 대비
+
+$$
+\widehat c_{kj}=\widehat\eta_{kj}-K^{-1}\sum_{\ell=1}^{K}\widehat\eta_{\ell j}
+$$
+
+의 부호별 상위 token은 다음과 같다.
+
+| class | $\widehat c_{kj}>0$: score 증가 | $\widehat c_{kj}<0$: score 감소 |
+|:---|:---|:---|
+| CISI | `library` (+137.0), `information` (+121.6), `librarian` (+117.5) | `flow` (-59.5), `pressure` (-52.1), `effect` (-45.7) |
+| CRAN | `flow` (+119.3), `mach` (+87.1), `pressure` (+84.0) | `library` (-68.5), `information` (-59.8), `librarian` (-58.8) |
+| MED | `tumor` (+71.1), `inhibitor` (+67.5), `dose` (+50.7) | `library` (-68.5), `information` (-61.8), `flow` (-59.8) |
+
+양수와 음수는 해당 class의 posterior score가 component 평균보다 높아지거나 낮아지는 상대적 기여를 뜻한다. Token 자체의 절대적 선호 또는 배척을 의미하지 않는다.
+
+Label-free $K$ 진단에서 bootstrap stability는 $K=3$에서 최대였지만 BIC와 conditional OOB density는 후보 상한인 $K=10$을 선택하였다. 따라서 Classic3 결과는 $K=3$에 조건부인 broad-topic support 분석이며, 잠재 density component 수의 추정 결과는 아니다.
+
+## 6. 비용과 한계
 
 | 항목 | 확인 결과 |
 |:---|:---|
@@ -346,7 +377,7 @@ $$
 | refit 정의 | penalty 단계는 common $\eta$ baseline을 유지하지만 현재 refit은 selected coordinate만 유지 |
 | BIC df | refit target과 df의 일관성 추가 점검 필요 |
 
-## 6. 현재 결론
+## 7. 결과 요약
 
 $$
 \text{posterior decision support} \Rightarrow \eta = \kappa\mu \Rightarrow c_{kj} = \eta_{kj} - \bar{\eta}_{j} \Rightarrow \lambda_\eta\sum_{j}\|c_{\cdot j}\|_2
@@ -355,4 +386,4 @@ $$
 * E-CGL은 sparse posterior decision support 복원을 위한 주 모형이다.
 * E-ACGL은 $\lambda_\eta\sum_j w_j^{(E)}\|c_{\cdot j}\|_2$를 사용하는 adaptive 보조 확장이다.
 * 약한 신호, 일부 dense-support 환경, $K$와 $\lambda_\eta$의 동시 선택에서는 성능 저하가 관찰됐다.
-* 다음 검증 항목은 refit/df 정합성과 동일한 $\mu$에서 $\kappa$만 다른 concentration-only 환경이다.
+* 현재 미검증 범위는 refit/df 정합성과 동일한 $\mu$에서 $\kappa$만 다른 concentration-only 환경이다.
