@@ -1,6 +1,6 @@
 # 연구미팅 백업자료: 모형, 선택 기준, 지표 및 계산 검증 (2026-07-14)
 
-이 문서는 연구미팅 본문에서 생략한 모형 정의와 구현 세부사항을 정리한다. 현재 결과의 주 모형은 E-CGL이며, E-CAGL은 adaptive 보조 확장이다.
+이 문서는 연구미팅 본문에서 생략한 모형 정의와 구현 세부사항을 정리한다. 현재 결과의 주 모형은 E-CGL이며, E-ACGL은 adaptive 보조 확장이다.
 
 ## 1. 기호
 
@@ -28,7 +28,7 @@ $$
 | M-AGL | $\mu_{\cdot j}$ | $\lambda_\mu\sum_jw_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | 예 | 예 | prototype coordinate support | adaptive $\mu$-group 비교 |
 | E-CL | $c_{kj}$ | $\lambda_\eta\sum_{k,j}|c_{kj}|$ | 아니오 | 아니오 | decision entry/union support | centered eta에서 group 효과 분리 |
 | **E-CGL** | $c_{\cdot j}$ | $\lambda_\eta\sum_j\lVert c_{\cdot j}\rVert_2$ | 예 | 아니오 | posterior decision support | **주 제안 모형** |
-| E-CAGL | $c_{\cdot j}$ | $\lambda_\eta\sum_jw_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 예 | 예 | posterior decision support | adaptive 보조 확장 |
+| E-ACGL | $c_{\cdot j}$ | $\lambda_\eta\sum_jw_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | 예 | 예 | posterior decision support | adaptive 보조 확장 |
 
 Adaptive weight는 다음과 같다.
 
@@ -76,9 +76,9 @@ $s_k=|\{j:\widehat\mu_{kj}\ne0\}|$, $m=|\widehat S|$, $r_j=|\{k:\widehat c_{kj}\
 | M-L | $(2K-1)+\sum_k\max(1,s_k-1)$ |
 | M-GL, M-AGL | $(K-1)+K+K\max(m-1,1)$ |
 | E-CL | $(K-1)+d+\sum_j\max(r_j-1,0)$ |
-| E-CGL, E-CAGL | $(K-1)+d+(K-1)m$ |
+| E-CGL, E-ACGL | $(K-1)+d+(K-1)m$ |
 
-E-CGL/E-CAGL의 자유도는 다음 세 항으로 해석한다.
+E-CGL/E-ACGL의 자유도는 다음 세 항으로 해석한다.
 
 $$
 \underbrace{K-1}_{\text{mixing proportions}}
@@ -123,7 +123,7 @@ $$
 | 구조 | sparse prototype | common effect + sum-to-zero cluster deviation | common eta + centered eta contrast |
 | 패널티 | $\beta\sum_k\lVert\mu_k\rVert_1$ | $\lambda\sum_{j,k}w_{jk}|\beta_{jk}|$ | $\lambda_\eta\sum_jw_j\lVert c_{\cdot j}\rVert_2$ |
 | group 선택 | 아니오 | 아니오, entry-wise $L_1$ | coordinate-wise group $L_2$ |
-| adaptive | 사용하지 않음 | 사용, 수치실험 $\gamma=1$ | E-CAGL에서 선택적 사용, $\gamma=1$ |
+| adaptive | 사용하지 않음 | 사용, 수치실험 $\gamma=1$ | E-ACGL에서 선택적 사용, $\gamma=1$ |
 | 선택 목표 | sparse prototype 해석 | source of heterogeneity | posterior decision support |
 | 모형 선택 | path following과 BIC, $K$/sparsity 분리 논의 | BIC로 component와 tuning 탐색 | $K$와 $\lambda_\eta$의 2단계 선택 검토 |
 
@@ -154,7 +154,7 @@ $$
 
 Zero-support 반복에서는 $TP_r=FP_r=0$, $FN_r=q_{\mathrm{true}}$이므로 $F_{1,\mathrm{all}}$에는 선택 실패가 반영된다. 기존 summary의 `mean(..., na.rm=TRUE)`는 F1이 NA인 zero-support 반복을 제외할 수 있으므로 어려운 설정에서는 conditional 결과가 된다.
 
-S4-N의 E-CAGL 예시는 다음과 같다.
+S4-N의 E-ACGL 예시는 다음과 같다.
 
 | 반복 수 | valid support | zero support | selected q (all) | F1 all | F1 valid | ARI valid |
 |---:|---:|---:|---:|---:|---:|---:|
@@ -175,7 +175,7 @@ $F_{1,\mathrm{valid}}=0.979$만 제시하면 40회의 zero-support 선택이 제
 | M-AGL | 8.530 | 20 | 0.895 | 0.889 | 0.074 |
 | E-CL | 8.530 | 200 | 0.868 | 0.148 | 0.697 |
 | **E-CGL** | **5.620** | **16** | **0.897** | **1.000** | **0.054** |
-| E-CAGL | 5.530 | 16 | 0.897 | 1.000 | 0.054 |
+| E-ACGL | 5.530 | 16 | 0.897 | 1.000 | 0.054 |
 
 단일 반복 시간이므로 모형의 이론적 계산복잡도 순위로 해석하지 않는다. Runtime은 df보다 EM 반복 수, path 길이, line search와 선택 support에 더 직접적으로 영향을 받는다.
 
@@ -210,7 +210,7 @@ Median OFF/ON ratio는 2.359이며, 이 설정에서 elapsed time은 약 57.6% �
 |:---|:---|
 | 왜 M 계열과 E 계열의 selected q가 다른가? | M 계열은 prototype support, E 계열은 component 간 posterior score 차이를 만드는 decision support를 선택한다. |
 | 왜 E-CGL이 주 모형인가? | 자연모수의 centered contrast를 coordinate 단위로 직접 선택하며 adaptive 초기값 의존성이 없다. |
-| E-CAGL은 왜 보조인가? | 신호별 차등 shrinkage가 유리할 수 있지만 초기 dense fit과 weight 구성에 추가로 의존한다. |
+| E-ACGL은 왜 보조인가? | 신호별 차등 shrinkage가 유리할 수 있지만 초기 dense fit과 weight 구성에 추가로 의존한다. |
 | BIC는 refit 후 계산하는가? | 현재 support 선택은 penalized path의 BIC-before-refit이며, 선택 후 support-constrained refit을 수행한다. |
 | BIC df는 exact한가? | 아니다. 현재 모형 선택을 위한 implementation-level approximation이다. |
 | S4-N의 F1이 0.979인가 0.331인가? | 0.979는 valid 10회 기준, 0.331은 zero-support 40회를 포함한 전체 50회 기준이다. |

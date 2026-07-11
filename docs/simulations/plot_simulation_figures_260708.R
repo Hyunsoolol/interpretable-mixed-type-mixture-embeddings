@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 fig_dir <- file.path("docs", "simulations", "figures")
 dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
-method_order <- c("M-L", "M-GL", "M-AGL", "E-CL", "E-CGL", "E-CAGL")
+method_order <- c("M-L", "M-GL", "M-AGL", "E-CL", "E-CGL", "E-ACGL")
 family_colors <- c("M-series" = "#5B8DEF", "E-series" = "#F39C6B")
 
 num <- function(x) suppressWarnings(as.numeric(x))
@@ -17,7 +17,7 @@ recode_method_names <- function(method) {
   method[method == "D-AGL"] <- "M-AGL"
   method[method == "E-L"] <- "E-CL"
   method[method == "E-GL"] <- "E-CGL"
-  method[method == "E-AGL"] <- "E-CAGL"
+  method[method == "E-AGL"] <- "E-ACGL"
   method
 }
 

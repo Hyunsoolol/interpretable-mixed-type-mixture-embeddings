@@ -16,7 +16,7 @@ if (length(raw_files) == 0) {
 }
 
 method_levels_raw <- c("D-L", "D-GL", "D-AGL", "E-L", "E-GL", "E-AGL")
-method_levels_plot <- c("M-L", "M-GL", "M-AGL", "E-CL", "E-CGL", "E-CAGL")
+method_levels_plot <- c("M-L", "M-GL", "M-AGL", "E-CL", "E-CGL", "E-ACGL")
 
 read_one <- function(path) {
   out <- read.csv(path, stringsAsFactors = FALSE)
@@ -34,7 +34,7 @@ df <- bind_rows(lapply(raw_files, read_one)) %>%
     method_label = recode(
       method,
       "D-L" = "M-L", "D-GL" = "M-GL", "D-AGL" = "M-AGL",
-      "E-L" = "E-CL", "E-GL" = "E-CGL", "E-AGL" = "E-CAGL"
+      "E-L" = "E-CL", "E-GL" = "E-CGL", "E-AGL" = "E-ACGL"
     ),
     method_label = factor(method_label, levels = method_levels_plot),
     family = if_else(grepl("^M-", method_label), "M-series", "E-series"),
