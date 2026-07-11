@@ -12,6 +12,14 @@ Classic3에서 E-CGL은 군집 배정을 유지하면서 posterior decision coor
 | BBC5 | 부록: 강건성 및 희소화 비용 | 좌표 축약과 함께 ARI와 test density가 감소 |
 | CSTR | 부록: 문헌 재현 및 적용 한계 | Rossi M-L이 E-CGL/E-ACGL보다 높은 ARI 기록 |
 
+### 1.1 자료 구성과 선행연구 기준
+
+| 자료 | 구성과 특성 | 선행연구의 기준 모형 |
+|---|---|---|
+| **Classic3** | CISI·CRAN·MED의 세 문헌군으로 구성된 비교적 잘 분리된 문서 자료다. [Banerjee et al. (2005)](https://jmlr.csail.mit.edu/papers/v6/banerjee05a.html)는 원 자료 3,893건을 보고했으며, 본 분석의 SPLADE 변환본은 3,890건이다. | Banerjee et al.은 frequency-sensitive spherical $k$-means, spherical $k$-means, hard-moVMF, soft-moVMF를 비교하였다. 본 분석에서는 spherical $k$-means와 dense vMF를 방향자료 기준 모형으로 사용하였다. |
+| **BBC5** | 2004-2005년 BBC 뉴스의 business·entertainment·politics·sport·tech 5개 주제 자료다. [원 자료](https://derekgreene.com/bbc/)는 2,225건이며, 본 분석은 중복 101건을 제거한 2,124건을 사용하였다. | [Greene and Cunningham (2006)](https://doi.org/10.1145/1143844.1143892)은 BBC 자료에서 kernel $k$-means와 대각우세 완화 방법을 비교하였다. 본 분석에서는 동일한 주제 구조를 SPLADE 좌표의 희소화 강건성 점검에 사용하였다. |
+| **CSTR** | University of Rochester의 컴퓨터과학 기술보고서 초록 475건을 1,000개 단어의 이진 좌표로 표현한 고차원 소표본 자료이며, 네 연구 분야 라벨을 갖는다. | [Rossi and Barbaro (2022)](https://doi.org/10.1016/j.neucom.2022.05.118)은 spherical $k$-means, dbmovMFs, 공통 집중도와 component별 집중도의 dense vMF, $L_1$ sparse prototype vMF를 비교하였다. 본 분석의 M-L은 이 sparse prototype 경로를 재현한다. |
+
 ## 2. Classic3 주 분석
 
 ### 2.1 데이터 표현과 SPLADE 선택
