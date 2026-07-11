@@ -2,7 +2,7 @@
 
 ## 1. 핵심 결과
 
-실자료의 주 분석은 **Classic3 SPLADE top-2000**으로 구성하였다. E-CGL은 2,000개 좌표 중 1,347개를 선택하여 32.7%를 제거하면서 dense free-$\kappa_k$ vMF와 같은 test ARI 0.9927과 NMI 0.9863을 유지하였다. 반복 재선택에서 Nogueira stability는 0.884였다.
+실자료의 주 분석은 **Classic3 SPLADE top-2000**으로 구성하였다. E-CGL은 2,000개 좌표 중 1,347개를 선택하여 32.7%를 제거하면서 dense vMF (component별 집중도)와 같은 test ARI 0.9927과 NMI 0.9863을 유지하였다. 반복 재선택에서 Nogueira stability는 0.884였다.
 
 따라서 Classic3 결과는 E-CGL이 군집 배정을 유지하면서 posterior decision coordinate를 안정적으로 축약한 사례로 보고한다. 선택된 좌표도 CISI의 `library`, CRAN의 `flow`, MED의 `tumor`처럼 class별 주제와 연결되는 token으로 확인되었다. 선택 비율은 67.4%이므로 극희소 support가 아니라 **해석 가능한 중간 밀도의 decision support**로 해석한다. E-ACGL은 E-CGL과 거의 같은 결과를 보여 adaptive 보조 모형으로 둔다.
 
@@ -30,18 +30,27 @@ SPLADE 좌표 중 train 자료에서 분산이 큰 2,000개를 선택하고, 층
 
 제공된 주제 라벨은 train/test 분할과 ARI/NMI 평가에만 사용하였으며, 좌표 선택·초기화·모수 추정에는 사용하지 않았다. E-CGL과 E-ACGL은 train path의 각 고유 support에서 full fixed-support numerical refit을 수행한 후 BIC로 선택하였다.
 
-### 2.2 Held-out 성능
+### 2.2 비교 모형과 held-out 성능
+
+M-L은 [Rossi and Barbaro (2022)](https://doi.org/10.1016/j.neucom.2022.05.118)의 sparse vMF prototype 방법을 재현한 비교 모형이다. `M`은 방향모수 $\mu$를, `L`은 entry-wise $L_1$ penalty를 뜻한다.
+
+$$
+\mathcal P_{\mathrm{M-L}}(\mu)
+=\lambda_\mu\sum_{k=1}^{K}\sum_{j=1}^{d}\lvert\mu_{kj}\rvert.
+$$
+
+따라서 M-L의 selected $q$는 방향 prototype $\mu_k$의 nonzero coordinate union이며, E-CGL의 posterior decision support와는 선택 대상이 다르다.
 
 | 방법 | 선택 기준 | selected $q$ | support 비율 | test NLL/document | test ARI | test NMI |
 |---|---|---:|---:|---:|---:|---:|
 | Spherical $k$-means | cosine objective | 2,000 | 1.000 | NA | 0.9856 | 0.9710 |
-| Dense vMF, shared $\kappa$ | unpenalized | 2,000 | 1.000 | -4871.6918 | 0.9856 | 0.9710 |
-| Dense vMF, free $\kappa_k$ | unpenalized | 2,000 | 1.000 | **-4872.9015** | **0.9927** | **0.9863** |
+| Dense vMF (공통 집중도) | unpenalized | 2,000 | 1.000 | -4871.6918 | 0.9856 | 0.9710 |
+| Dense vMF (component별 집중도) | unpenalized | 2,000 | 1.000 | **-4872.9015** | **0.9927** | **0.9863** |
 | M-L | BIC before refit | 2,000 | 1.000 | -4871.0937 | 0.9892 | 0.9787 |
 | **E-CGL** | BIC after full support refit | **1,347** | **0.674** | -4872.2942 | **0.9927** | **0.9863** |
 | E-ACGL | BIC after full support refit | 1,348 | 0.674 | -4872.2981 | 0.9927 | 0.9863 |
 
-E-CGL의 test NLL은 dense free-$\kappa_k$ vMF보다 문서당 0.6073 높았다. 이는 predictive density의 최댓값보다 군집 배정을 유지하는 좌표 축약에 해당한다. E-ACGL은 support 크기와 held-out 성능에서 E-CGL을 개선하지 않았다.
+E-CGL의 test NLL은 dense vMF (component별 집중도)보다 문서당 0.6073 높았다. 이는 predictive density의 최댓값보다 군집 배정을 유지하는 좌표 축약에 해당한다. E-ACGL은 support 크기와 held-out 성능에서 E-CGL을 개선하지 않았다.
 
 Held-out negative log-likelihood는 $-n_{\mathrm{test}}^{-1}\sum_i\log \widehat p(x_i)$로 계산하였다. vMF는 연속 밀도이므로 값이 음수일 수 있으며, 작은 값이 더 높은 test density를 뜻한다.
 
@@ -73,13 +82,13 @@ $$
 \qquad x_j\ge 0.
 $$
 
-| 대응 class | 양의 centered-$\eta$ contrast 상위 token |
-|---|---|
-| CISI | library, information, librarian, libraries, research |
-| CRAN | flow, mach, pressure, boundary, theory |
-| MED | tumor, inhibitor, dose, disease, rat |
+| 대응 class | score를 높이는 토큰: $\widehat c_{kj}>0$ | score를 낮추는 토큰: $\widehat c_{kj}<0$ |
+|---|---|---|
+| CISI | `library` (+137.0), `information` (+121.6), `librarian` (+117.5), `libraries` (+99.7), `research` (+71.9) | `flow` (-59.5), `pressure` (-52.1), `effect` (-45.7), `mach` (-43.6), `inhibitor` (-39.4) |
+| CRAN | `flow` (+119.3), `mach` (+87.1), `pressure` (+84.0), `boundary` (+70.6), `theory` (+66.8) | `library` (-68.5), `information` (-59.8), `librarian` (-58.8), `libraries` (-49.9), `tumor` (-35.6) |
+| MED | `tumor` (+71.1), `inhibitor` (+67.5), `dose` (+50.7), `disease` (+47.6), `rat` (+47.4) | `library` (-68.5), `information` (-61.8), `flow` (-59.8), `librarian` (-58.8), `theory` (-56.9) |
 
-CISI는 정보검색·도서관, CRAN은 유체·공학, MED는 의생명 관련 token이 상위에 나타났다. 같은 token이 다른 class에서는 음의 contrast를 보여, 단순 출현 빈도가 아니라 component 간 상대적 decision contribution으로 해석할 수 있다. Class label은 모형 적합에 사용하지 않고 적합 후 component 명명에만 사용하였다.
+CISI는 정보검색·도서관, CRAN은 유체·공학, MED는 의생명 관련 token이 양의 방향에 나타났다. 반대로 같은 token이 다른 class에서는 음의 값을 보여 component 간 상대적 decision contribution을 함께 나타냈다. 양수는 해당 class의 score를 component 평균보다 높이고, 음수는 낮춘다는 뜻이며 token 자체의 절대적 선호·배척을 뜻하지 않는다. Class label은 모형 적합에 사용하지 않고 적합 후 component 명명에만 사용하였다.
 
 ![Classic3 E-CGL selected-token centered-Eta contrasts](figures/classic3_ecgl_centered_eta_heatmap_260714.png)
 
@@ -93,12 +102,12 @@ BBC5는 중복 기사 101건을 분할 전에 제거한 2,124건의 5개 주제 
 
 | 방법 | selected $q$ | test NLL/document | test ARI | test NMI |
 |---|---:|---:|---:|---:|
-| Dense vMF, free $\kappa_k$ | 1,000 | **-2126.2275** | **0.8959** | **0.8736** |
+| Dense vMF (component별 집중도) | 1,000 | **-2126.2275** | **0.8959** | **0.8736** |
 | M-L | 1,000 | -2124.8031 | 0.8889 | 0.8667 |
 | E-CGL | **679** | -2124.7525 | 0.8849 | 0.8615 |
 | E-ACGL | 691 | -2124.8671 | 0.8849 | 0.8615 |
 
-E-CGL은 좌표의 32.1%를 제거했지만 dense free-$\kappa_k$ vMF보다 test ARI가 0.0109 낮고 test NLL이 문서당 1.4750 높았다. BBC5에서는 군집 구분 정보가 선택된 centered-$\eta$ support에 충분히 집중되지 않아, 좌표 축약이 군집·밀도 적합의 손실을 동반한 것으로 해석된다. E-ACGL도 이 손실을 줄이지 못했다.
+E-CGL은 좌표의 32.1%를 제거했지만 dense vMF (component별 집중도)보다 test ARI가 0.0109 낮고 test NLL이 문서당 1.4750 높았다. BBC5에서는 군집 구분 정보가 선택된 중심화 자연모수 대비 support에 충분히 집중되지 않아, 좌표 축약이 군집·밀도 적합의 손실을 동반한 것으로 해석된다. E-ACGL도 이 손실을 줄이지 못했다.
 
 ### A.2 CSTR: prototype-oriented support가 유리한 사례
 
@@ -106,12 +115,12 @@ CSTR은 475개 컴퓨터과학 기술보고서 초록을 1,000개 이진 단어 
 
 | 방법 | 단계 | selected $q$ 평균 | ARI 평균 (SD) | NMI 평균 |
 |---|---|---:|---:|---:|
-| Dense shared-$\kappa$ vMF | dense | 1,000.0 | 0.8023 (0.0087) | 0.7650 |
+| Dense vMF (공통 집중도) | dense | 1,000.0 | 0.8023 (0.0087) | 0.7650 |
 | **Rossi M-L** | penalized | 888.7 | **0.8083 (0.0079)** | **0.7703** |
 | E-CGL | refit | 311.1 | 0.6153 (0.0065) | 0.6449 |
 | E-ACGL | refit | 313.3 | 0.6066 (0.0109) | 0.6401 |
 
-현재 구현은 논문의 dense shared-$\kappa$ vMF ARI 0.804와 M-L ARI 0.808을 각각 0.8023과 0.8083으로 근접하게 재현하였다. 반면 E-CGL은 평균 311.1개 좌표를 선택한 뒤 ARI가 0.6153으로 감소하였다.
+현재 구현은 논문의 공통 집중도 dense vMF ARI 0.804와 M-L ARI 0.808을 각각 0.8023과 0.8083으로 근접하게 재현하였다. 반면 E-CGL은 평균 311.1개 좌표를 선택한 뒤 ARI가 0.6153으로 감소하였다.
 
 이 결과는 CSTR의 이진 어휘 구조가 sparse posterior decision support보다 dense 또는 prototype-oriented support와 더 잘 맞는다는 해석과 일관된다. 또한 $n=475$에 비해 $d=1{,}000$인 조건은 centered contrast support 추정에 불리하게 작용할 수 있다.
 
@@ -159,7 +168,7 @@ Classic3의 주 분석은 자료에 제공된 세 주제에 대응하는 $K=3$�
 실자료 결과가 뒷받침하는 범위는 다음과 같다.
 
 1. Classic3에서 E-CGL은 held-out 군집 성능을 유지하면서 좌표를 안정적으로 축약하였다.
-2. Classic3의 selected coordinate는 vocabulary token에 대응하여 class별 centered-$\eta$ contrast로 해석할 수 있었다.
+2. Classic3의 selected coordinate는 vocabulary token에 대응하여 class별 중심화 자연모수 대비로 해석할 수 있었다.
 3. BBC5와 CSTR에서는 좌표 축약이 군집 또는 밀도 적합의 손실을 동반하였다.
 4. E-ACGL은 세 자료에서 E-CGL을 일관되게 개선하지 않아 adaptive 보조 모형으로 둔다.
 5. 실제 feature support의 정답이 없으므로 TPR, FPR, Precision, F1은 보고하지 않는다.
@@ -170,6 +179,7 @@ Classic3의 주 분석은 자료에 제공된 세 주제에 대응하는 $K=3$�
 - `results/realdata_final_validation_260711/realdata_final_validation_summary.csv`
 - `results/realdata_final_validation_260711/realdata_final_irene_audit.csv`
 - `results/realdata_final_validation_260711/classic3_ecgl_top_token_contrasts.csv`
+- `results/realdata_final_validation_260711/classic3_ecgl_signed_token_contrasts.csv`
 - `scripts/plot_classic3_interpretability_260714.R`
 - `results/classic3_exact_bic_reselection_stability_b20_nstart30_260711/classic3_reselection_summary.csv`
 - `results/classic3_splade_holdout_k_selection_k2_10_260711/classic3_dense_k_selection.csv`

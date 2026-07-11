@@ -22,6 +22,10 @@ out_csv <- file.path(
   "results", "realdata_final_validation_260711",
   "classic3_ecgl_top_token_contrasts.csv"
 )
+signed_out_csv <- file.path(
+  "results", "realdata_final_validation_260711",
+  "classic3_ecgl_signed_token_contrasts.csv"
+)
 out_png <- file.path(
   "docs", "manuscript", "figures",
   "classic3_ecgl_centered_eta_heatmap_260714.png"
@@ -96,6 +100,28 @@ top_rows <- do.call(rbind, lapply(seq_len(K), function(k) {
 }))
 
 utils::write.csv(top_rows, out_csv, row.names = FALSE)
+
+signed_rows <- do.call(rbind, lapply(seq_len(K), function(k) {
+  values <- centered_by_class[k, ]
+  eligible <- which(fit$active & is.finite(values))
+  positive <- head(eligible[order(values[eligible], decreasing = TRUE)], top_n)
+  negative <- head(eligible[order(values[eligible], decreasing = FALSE)], top_n)
+  rbind(
+    data.frame(
+      target_class = class_names[k], direction = "positive",
+      rank = seq_along(positive), feature_id = positive,
+      token = tokens[positive], contrast = values[positive],
+      stringsAsFactors = FALSE
+    ),
+    data.frame(
+      target_class = class_names[k], direction = "negative",
+      rank = seq_along(negative), feature_id = negative,
+      token = tokens[negative], contrast = values[negative],
+      stringsAsFactors = FALSE
+    )
+  )
+}))
+utils::write.csv(signed_rows, signed_out_csv, row.names = FALSE)
 
 plot_rows <- do.call(rbind, lapply(seq_len(nrow(top_rows)), function(i) {
   do.call(rbind, lapply(seq_len(K), function(k) {
@@ -200,4 +226,5 @@ print(data.frame(
 cat("\ntop tokens:\n")
 print(top_rows[, c("target_class", "rank", "token", "centered_norm")], row.names = FALSE)
 cat("\nSaved CSV:", normalizePath(out_csv, winslash = "/"), "\n")
+cat("Saved signed CSV:", normalizePath(signed_out_csv, winslash = "/"), "\n")
 cat("Saved PNG:", normalizePath(out_png, winslash = "/"), "\n")
