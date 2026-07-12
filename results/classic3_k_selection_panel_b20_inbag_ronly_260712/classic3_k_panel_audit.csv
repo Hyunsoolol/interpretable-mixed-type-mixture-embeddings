@@ -1,0 +1,12 @@
+"check","observed","expected","pass"
+"reference_rows",18,18,TRUE
+"bootstrap_rows",360,360,TRUE
+"all_reference_converged",1,1,TRUE
+"all_bootstrap_finite_oob",0,0,TRUE
+"all_bootstrap_converged",1,1,TRUE
+"train_test_vocab_identical",1,1,TRUE
+"labels_excluded_from_selection",1,1,TRUE
+"finite_ICL",1,1,TRUE
+"finite_entropy",1,1,TRUE
+"finite_token_coherence",1,1,TRUE
+"bootstrap_initialization_inbag_only",1,1,TRUE

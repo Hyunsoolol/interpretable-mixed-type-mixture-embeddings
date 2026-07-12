@@ -1,0 +1,7 @@
+*
+!.gitignore
+!classic3_k_component_interpretation_notes.md
+!classic3_k_component_summary.csv
+!classic3_k_label_component_counts.csv
+!classic3_k10_component_token_summary.csv
+!classic3_k_component_score_audit.csv

@@ -13,6 +13,16 @@ $$
 
 에서 0이 아닌 좌표이다. 따라서 common variable은 $\mu$에는 존재할 수 있지만 모든 성분에 같은 방향으로 들어가므로 decision support에는 포함하지 않는다.
 
+E 계열의 선택 후 재적합에서는 비선택 좌표를 0으로 제거하지 않고
+
+$$
+c_{\cdot j}=0
+\quad\Longleftrightarrow\quad
+\eta_{1j}=\cdots=\eta_{Kj}=\bar\eta_j
+$$
+
+를 적용한다. 각 path support에서 공통 baseline을 포함한 exact centered-$\eta$ refit을 수행하고, refit observed log-likelihood의 BIC로 최종 support를 선택한다. 기존 $\eta_{\cdot j}=0$ active-only refit은 A/B 진단에만 유지한다.
+
 ## 2. 기본 시뮬레이션
 
 ### 2.1 시뮬레이션 설정
@@ -30,8 +40,8 @@ $$
 | 참 decision $q$ | 16 |
 | 초기값 반복 | nstart = 10 |
 | 경로 길이 | 240 |
-| 선택 기준 | BIC |
-| 재적합 | 모든 모형 적용 |
+| 선택 기준 | M 계열: BIC path, E 계열: BIC-after-exact-refit |
+| 재적합 | M 계열: prototype support refit, E 계열: centered-$\eta$ fixed-support refit |
 | 반복 수 | 50 |
 
 시나리오 설계:
@@ -72,13 +82,13 @@ $$
 | 모형 | 패널티 형태 | adaptive weight 설정 |
 |---|---|---|
 | M-L | $\lambda_\mu \sum_{k,j}\lvert \mu_{kj}\rvert$ | 없음 |
-| M-GL | $\lambda_\mu \sum_j \|\mu_{\cdot j}\|_2$ | 없음 |
-| M-AGL | $\lambda_\mu \sum_j w_j^{(M)}\|\mu_{\cdot j}\|_2$ | $w_j^{(M)}=(\|\mu_{\cdot j}^{init}\|_2+\epsilon)^{-\gamma}$ |
+| M-GL | $\lambda_\mu \sum_j \lVert\mu_{\cdot j}\rVert_2$ | 없음 |
+| M-AGL | $\lambda_\mu \sum_j w_j^{(M)}\lVert\mu_{\cdot j}\rVert_2$ | $w_j^{(M)}=(\lVert\mu_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$ |
 | E-CL | $\lambda_\eta \sum_{k,j}\lvert c_{kj}\rvert$ | 없음 |
-| E-CGL | $\lambda_\eta \sum_j \|c_{\cdot j}\|_2$ | 없음 |
-| E-ACGL | $\lambda_\eta \sum_j w_j^{(E)}\|c_{\cdot j}\|_2$ | $w_j^{(E)}=(\|c_{\cdot j}^{init}\|_2+\epsilon)^{-\gamma}$ |
+| E-CGL | $\lambda_\eta \sum_j \lVert c_{\cdot j}\rVert_2$ | 없음 |
+| E-ACGL | $\lambda_\eta \sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$ | $w_j^{(E)}=(\lVert c_{\cdot j}^{init}\rVert_2+\epsilon)^{-\gamma}$ |
 
-여기서 $c_{kj}=\eta_{kj}-\bar{\eta}_j$이다. Adaptive 모형에서는 $\gamma=1$, $\epsilon=10^{-6}$을 사용했고, 계산된 weight는 median이 1이 되도록 정규화했다. 모든 모형은 BIC로 tuning parameter를 선택한 뒤 선택된 support에서 재적합했다.
+여기서 $c_{kj}=\eta_{kj}-\bar{\eta}_j$이다. Adaptive 모형에서는 $\gamma=1$, $\epsilon=10^{-6}$을 사용했고, 계산된 weight는 median이 1이 되도록 정규화했다. E-CL은 entry-wise path에서 얻은 coordinate union을, E-CGL과 E-ACGL은 coordinate group support를 exact centered-$\eta$ refit한다.
 
 평가 지표:
 
@@ -539,7 +549,7 @@ common q는 모든 component에 같은 방향으로 들어가는 공통 배경 �
 - M-GL/M-AGL은 prototype support 관점에서 common q와 specific q를 함께 선택한다. posterior decision support 관점에서는 common q까지 선택하므로 selected q가 약 102개로 커진다.
 - E-CGL/E-ACGL은 common q를 거의 선택하지 않고 specific q 20개를 중심으로 선택한다. 특히 E-ACGL은 selected q=20.48, common q=0.30, noise q=0.18로 true decision q=20에 근접한다.
 - 이 결과는 제안 모형의 목표가 prototype sparsity가 아니라 centered eta contrast 기반 posterior decision support recovery임을 나타낸다.
-- E-CGL/E-ACGL은 M 계열보다 MSE_kappa가 크게 나타났다. 현재 refit이 selected decision coordinate만 남기므로, full prototype/concentration 복원과 decision-support 복원이 서로 다른 목표임을 함께 보고한다.
+- E-CGL/E-ACGL의 exact centered-support refit은 비선택 좌표의 centered contrast를 0으로 두고 공통 $\eta$ baseline은 유지한다. 따라서 full prototype support와 posterior decision support는 서로 다른 목표다.
 
 Shared-background 설정에서 M 계열은 prototype support를 복원하고, E 계열은 posterior decision support를 중심으로 복원하였다.
 
@@ -564,149 +574,159 @@ Shared-background 설정에서 M 계열은 prototype support를 복원하고, E 
 | 반복 수 | 100 |
 | 초기값 탐색 | nstart=10 |
 | path length | 240 |
-| 선택 기준 | BIC로 support 선택 후 refit |
+| E 계열 선택 기준 | penalized path의 BIC 상위 40개 support를 exact refit한 뒤 BIC 재선택 |
 
 Calibration 결과는 다음과 같다.
 
 | target \(e_B\) | kappa | achieved \(e_B\) |
 |---:|:---|---:|
-| 2.5% | equal | 2.42% |
-| 2.5% | heterogeneous | 2.54% |
-| 5.0% | equal | 4.58% |
-| 5.0% | heterogeneous | 4.54% |
-| 10.0% | equal | 11.24% |
-| 10.0% | heterogeneous | 10.52% |
+| 2.5% | equal | 2.33% |
+| 2.5% | heterogeneous | 2.73% |
+| 5.0% | equal | 5.14% |
+| 5.0% | heterogeneous | 5.00% |
+| 10.0% | equal | 10.09% |
+| 10.0% | heterogeneous | 9.84% |
 
 ### 5.2 전체 모형 결과 요약
 
-아래 표는 6개 비교 모형 전체 결과를 난이도별로 나누어 정리한 것이다. 결과 파일의 `D-L`, `D-GL`, `D-AGL`은 각각 M-L, M-GL, M-AGL로, `E-L`, `E-GL`, `E-AGL`은 각각 E-CL, E-CGL, E-ACGL로 표기했다. `MSE_eta`는 `MSE_centered_eta`를 뜻한다.
+아래 표는 6개 비교 모형의 반복별 평균이다. 모형 약어는 M 계열과 E 계열로 통일했으며, `MSE_eta`는 `MSE_centered_eta`를 뜻한다. E-CGL과 E-ACGL은 BIC-after exact centered-support refit 결과다.
 
 #### 5.2.1 target \(e_B=2.5\%\)
 
 | n | kappa | method | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta |
 |---:|:---|:---|---:|---:|---:|---:|---:|---:|---:|
-| 1000 | equal | M-L | 199.45 | 4.00 | 16.00 | 179.45 | 0.149 | 0.923 | 0.678 |
-| 1000 | equal | M-GL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.936 | 0.068 |
-| 1000 | equal | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.936 | 0.068 |
-| 1000 | equal | E-CL | 197.54 | 3.95 | 16.00 | 177.59 | 0.150 | 0.923 | 0.677 |
-| 1000 | equal | E-CGL | 17.03 | 0.01 | 16.00 | 1.02 | 0.969 | 0.936 | 0.070 |
-| 1000 | equal | E-ACGL | 16.05 | 0.00 | 16.00 | 0.05 | 0.998 | 0.936 | 0.054 |
-| 1000 | heterogeneous | M-L | 199.51 | 4.00 | 16.00 | 179.51 | 0.148 | 0.923 | 0.670 |
-| 1000 | heterogeneous | M-GL | 20.09 | 3.92 | 16.00 | 0.17 | 0.887 | 0.938 | 0.066 |
-| 1000 | heterogeneous | M-AGL | 20.08 | 3.93 | 16.00 | 0.15 | 0.887 | 0.938 | 0.066 |
-| 1000 | heterogeneous | E-CL | 197.39 | 3.93 | 16.00 | 177.46 | 0.150 | 0.923 | 0.670 |
-| 1000 | heterogeneous | E-CGL | 17.12 | 0.03 | 16.00 | 1.09 | 0.966 | 0.937 | 0.069 |
-| 1000 | heterogeneous | E-ACGL | 16.03 | 0.00 | 16.00 | 0.03 | 0.999 | 0.938 | 0.052 |
-| 300 | equal | M-L | 199.53 | 4.00 | 16.00 | 179.53 | 0.148 | 0.888 | 2.428 |
-| 300 | equal | M-GL | 36.88 | 4.00 | 16.00 | 16.88 | 0.605 | 0.923 | 0.659 |
-| 300 | equal | M-AGL | 47.89 | 4.00 | 16.00 | 27.89 | 0.501 | 0.917 | 0.897 |
-| 300 | equal | E-CL | 197.98 | 3.96 | 16.00 | 178.02 | 0.150 | 0.889 | 2.422 |
-| 300 | equal | E-CGL | 17.85 | 0.08 | 16.00 | 1.77 | 0.945 | 0.931 | 0.267 |
-| 300 | equal | E-ACGL | 17.97 | 0.03 | 16.00 | 1.94 | 0.942 | 0.930 | 0.253 |
-| 300 | heterogeneous | M-L | 199.63 | 4.00 | 16.00 | 179.63 | 0.148 | 0.887 | 2.424 |
-| 300 | heterogeneous | M-GL | 45.45 | 3.39 | 16.00 | 26.06 | 0.521 | 0.925 | 0.814 |
-| 300 | heterogeneous | M-AGL | 53.77 | 3.65 | 16.00 | 34.12 | 0.459 | 0.914 | 0.992 |
-| 300 | heterogeneous | E-CL | 197.99 | 3.93 | 16.00 | 178.06 | 0.150 | 0.888 | 2.417 |
-| 300 | heterogeneous | E-CGL | 18.91 | 0.07 | 16.00 | 2.84 | 0.917 | 0.931 | 0.297 |
-| 300 | heterogeneous | E-ACGL | 18.23 | 0.02 | 16.00 | 2.21 | 0.935 | 0.931 | 0.260 |
+| 1000 | equal | M-L | 199.49 | 4.00 | 16.00 | 179.49 | 0.149 | 0.923 | 0.673 |
+| 1000 | equal | M-GL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.937 | 0.065 |
+| 1000 | equal | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.937 | 0.065 |
+| 1000 | equal | E-CL | 197.41 | 3.86 | 16.00 | 177.55 | 0.150 | 0.923 | 0.673 |
+| 1000 | equal | **E-CGL (주)** | **16.05** | **0.00** | **16.00** | **0.05** | **0.998** | **0.938** | **0.054** |
+| 1000 | equal | E-ACGL (보조) | 16.00 | 0.00 | 16.00 | 0.00 | 1.000 | 0.938 | 0.053 |
+| 1000 | heterogeneous | M-L | 199.63 | 4.00 | 16.00 | 179.63 | 0.148 | 0.911 | 0.682 |
+| 1000 | heterogeneous | M-GL | 20.03 | 4.00 | 16.00 | 0.03 | 0.888 | 0.930 | 0.066 |
+| 1000 | heterogeneous | M-AGL | 20.01 | 4.00 | 16.00 | 0.01 | 0.889 | 0.930 | 0.066 |
+| 1000 | heterogeneous | E-CL | 197.73 | 3.98 | 16.00 | 177.75 | 0.150 | 0.911 | 0.682 |
+| 1000 | heterogeneous | **E-CGL (주)** | **16.04** | **0.00** | **16.00** | **0.04** | **0.999** | **0.931** | **0.053** |
+| 1000 | heterogeneous | E-ACGL (보조) | 16.05 | 0.00 | 16.00 | 0.05 | 0.998 | 0.931 | 0.053 |
+| 300 | equal | M-L | 199.58 | 4.00 | 16.00 | 179.58 | 0.148 | 0.887 | 2.438 |
+| 300 | equal | M-GL | 40.32 | 4.00 | 16.00 | 20.32 | 0.630 | 0.926 | 0.721 |
+| 300 | equal | M-AGL | 47.16 | 4.00 | 16.00 | 27.16 | 0.561 | 0.920 | 0.873 |
+| 300 | equal | E-CL | 197.69 | 3.97 | 16.00 | 177.72 | 0.150 | 0.885 | 2.443 |
+| 300 | equal | **E-CGL (주)** | **16.37** | **0.02** | **16.00** | **0.35** | **0.990** | **0.936** | **0.194** |
+| 300 | equal | E-ACGL (보조) | 18.53 | 0.04 | 16.00 | 2.49 | 0.955 | 0.935 | 0.255 |
+| 300 | heterogeneous | M-L | 199.59 | 4.00 | 16.00 | 179.59 | 0.148 | 0.872 | 2.487 |
+| 300 | heterogeneous | M-GL | 43.99 | 3.96 | 16.00 | 24.03 | 0.605 | 0.911 | 0.792 |
+| 300 | heterogeneous | M-AGL | 58.31 | 3.99 | 16.00 | 38.32 | 0.487 | 0.900 | 1.089 |
+| 300 | heterogeneous | E-CL | 197.96 | 3.90 | 16.00 | 178.06 | 0.150 | 0.869 | 2.497 |
+| 300 | heterogeneous | **E-CGL (주)** | **16.65** | **0.00** | **16.00** | **0.65** | **0.984** | **0.925** | **0.215** |
+| 300 | heterogeneous | E-ACGL (보조) | 17.44 | 0.02 | 16.00 | 1.42 | 0.966 | 0.924 | 0.245 |
 
 #### 5.2.2 target \(e_B=5.0\%\)
 
 | n | kappa | method | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta |
 |---:|:---|:---|---:|---:|---:|---:|---:|---:|---:|
-| 1000 | equal | M-L | 199.53 | 4.00 | 16.00 | 179.53 | 0.148 | 0.853 | 0.721 |
-| 1000 | equal | M-GL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.879 | 0.072 |
-| 1000 | equal | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.879 | 0.072 |
-| 1000 | equal | E-CL | 197.53 | 3.94 | 16.00 | 177.59 | 0.150 | 0.853 | 0.720 |
-| 1000 | equal | E-CGL | 17.09 | 0.03 | 16.00 | 1.06 | 0.967 | 0.880 | 0.074 |
-| 1000 | equal | E-ACGL | 16.09 | 0.00 | 16.00 | 0.09 | 0.997 | 0.880 | 0.059 |
-| 1000 | heterogeneous | M-L | 199.71 | 4.00 | 16.00 | 179.71 | 0.148 | 0.849 | 0.723 |
-| 1000 | heterogeneous | M-GL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.878 | 0.068 |
-| 1000 | heterogeneous | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.878 | 0.068 |
-| 1000 | heterogeneous | E-CL | 197.67 | 3.96 | 16.00 | 177.71 | 0.150 | 0.849 | 0.722 |
-| 1000 | heterogeneous | E-CGL | 17.14 | 0.03 | 16.00 | 1.11 | 0.966 | 0.880 | 0.073 |
-| 1000 | heterogeneous | E-ACGL | 16.06 | 0.00 | 16.00 | 0.06 | 0.998 | 0.880 | 0.056 |
-| 300 | equal | M-L | 199.71 | 4.00 | 16.00 | 179.71 | 0.148 | 0.782 | 2.704 |
-| 300 | equal | M-GL | 42.23 | 4.00 | 16.00 | 22.23 | 0.550 | 0.860 | 0.792 |
-| 300 | equal | M-AGL | 60.72 | 4.00 | 16.00 | 40.72 | 0.417 | 0.836 | 1.217 |
-| 300 | equal | E-CL | 198.17 | 3.91 | 16.00 | 178.26 | 0.149 | 0.787 | 2.684 |
-| 300 | equal | E-CGL | 17.42 | 0.07 | 16.00 | 1.35 | 0.958 | 0.870 | 0.262 |
-| 300 | equal | E-ACGL | 16.73 | 0.03 | 16.00 | 0.70 | 0.978 | 0.874 | 0.222 |
-| 300 | heterogeneous | M-L | 199.69 | 4.00 | 16.00 | 179.69 | 0.148 | 0.766 | 2.864 |
-| 300 | heterogeneous | M-GL | 41.31 | 4.00 | 16.00 | 21.31 | 0.558 | 0.854 | 0.783 |
-| 300 | heterogeneous | M-AGL | 71.36 | 4.00 | 16.00 | 51.36 | 0.366 | 0.818 | 1.468 |
-| 300 | heterogeneous | E-CL | 198.22 | 3.95 | 16.00 | 178.27 | 0.149 | 0.769 | 2.827 |
-| 300 | heterogeneous | E-CGL | 17.90 | 0.07 | 16.00 | 1.83 | 0.944 | 0.867 | 0.291 |
-| 300 | heterogeneous | E-ACGL | 17.95 | 0.04 | 16.00 | 1.91 | 0.943 | 0.866 | 0.271 |
+| 1000 | equal | M-L | 199.58 | 4.00 | 16.00 | 179.58 | 0.148 | 0.840 | 0.725 |
+| 1000 | equal | M-GL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.868 | 0.069 |
+| 1000 | equal | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.868 | 0.069 |
+| 1000 | equal | E-CL | 197.54 | 3.90 | 16.00 | 177.64 | 0.150 | 0.840 | 0.725 |
+| 1000 | equal | **E-CGL (주)** | **16.09** | **0.00** | **16.00** | **0.09** | **0.997** | **0.868** | **0.058** |
+| 1000 | equal | E-ACGL (보조) | 16.11 | 0.00 | 16.00 | 0.11 | 0.997 | 0.868 | 0.058 |
+| 1000 | heterogeneous | M-L | 199.73 | 4.00 | 16.00 | 179.73 | 0.148 | 0.835 | 0.740 |
+| 1000 | heterogeneous | M-GL | 20.01 | 4.00 | 16.00 | 0.01 | 0.889 | 0.869 | 0.069 |
+| 1000 | heterogeneous | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.869 | 0.069 |
+| 1000 | heterogeneous | E-CL | 198.15 | 3.99 | 16.00 | 178.16 | 0.149 | 0.834 | 0.741 |
+| 1000 | heterogeneous | **E-CGL (주)** | **16.06** | **0.00** | **16.00** | **0.06** | **0.998** | **0.870** | **0.056** |
+| 1000 | heterogeneous | E-ACGL (보조) | 16.04 | 0.00 | 16.00 | 0.04 | 0.999 | 0.870 | 0.055 |
+| 300 | equal | M-L | 199.60 | 4.00 | 16.00 | 179.60 | 0.148 | 0.752 | 2.798 |
+| 300 | equal | M-GL | 39.23 | 4.00 | 16.00 | 19.23 | 0.669 | 0.837 | 0.712 |
+| 300 | equal | M-AGL | 59.19 | 4.00 | 16.00 | 39.19 | 0.502 | 0.814 | 1.173 |
+| 300 | equal | E-CL | 197.77 | 3.92 | 16.00 | 177.85 | 0.150 | 0.751 | 2.804 |
+| 300 | equal | **E-CGL (주)** | **16.18** | **0.00** | **16.00** | **0.18** | **0.995** | **0.855** | **0.203** |
+| 300 | equal | E-ACGL (보조) | 16.46 | 0.00 | 16.00 | 0.46 | 0.989 | 0.855 | 0.212 |
+| 300 | heterogeneous | M-L | 199.77 | 4.00 | 16.00 | 179.77 | 0.148 | 0.747 | 2.938 |
+| 300 | heterogeneous | M-GL | 47.61 | 4.00 | 16.00 | 27.61 | 0.570 | 0.829 | 0.935 |
+| 300 | heterogeneous | M-AGL | 71.45 | 4.00 | 16.00 | 51.45 | 0.411 | 0.809 | 1.439 |
+| 300 | heterogeneous | E-CL | 197.95 | 3.98 | 16.00 | 177.97 | 0.150 | 0.750 | 2.918 |
+| 300 | heterogeneous | **E-CGL (주)** | **16.30** | **0.00** | **16.00** | **0.30** | **0.991** | **0.857** | **0.218** |
+| 300 | heterogeneous | E-ACGL (보조) | 17.14 | 0.02 | 16.00 | 1.12 | 0.973 | 0.857 | 0.249 |
 
 #### 5.2.3 target \(e_B=10.0\%\)
 
 | n | kappa | method | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta |
 |---:|:---|:---|---:|---:|---:|---:|---:|---:|---:|
-| 1000 | equal | M-L | 199.74 | 4.00 | 16.00 | 179.74 | 0.148 | 0.654 | 0.890 |
-| 1000 | equal | M-GL | 20.14 | 4.00 | 16.00 | 0.14 | 0.885 | 0.720 | 0.087 |
-| 1000 | equal | M-AGL | 20.01 | 4.00 | 16.00 | 0.01 | 0.889 | 0.721 | 0.085 |
-| 1000 | equal | E-CL | 198.34 | 3.98 | 16.00 | 178.36 | 0.149 | 0.654 | 0.889 |
-| 1000 | equal | E-CGL | 17.19 | 0.05 | 16.00 | 1.14 | 0.964 | 0.720 | 0.087 |
-| 1000 | equal | E-ACGL | 16.20 | 0.01 | 16.00 | 0.19 | 0.994 | 0.722 | 0.070 |
-| 1000 | heterogeneous | M-L | 199.95 | 4.00 | 16.00 | 179.95 | 0.148 | 0.662 | 1.036 |
-| 1000 | heterogeneous | M-GL | 23.78 | 4.00 | 16.00 | 3.78 | 0.804 | 0.738 | 0.134 |
-| 1000 | heterogeneous | M-AGL | 25.54 | 4.00 | 16.00 | 5.54 | 0.770 | 0.735 | 0.136 |
-| 1000 | heterogeneous | E-CL | 199.23 | 3.97 | 16.00 | 179.26 | 0.149 | 0.662 | 1.042 |
-| 1000 | heterogeneous | E-CGL | 20.58 | 0.07 | 16.00 | 4.51 | 0.875 | 0.739 | 0.121 |
-| 1000 | heterogeneous | E-ACGL | 18.94 | 0.09 | 16.00 | 2.85 | 0.916 | 0.741 | 0.093 |
-| 300 | equal | M-L | 199.57 | 4.00 | 16.00 | 179.57 | 0.148 | 0.433 | 4.344 |
-| 300 | equal | M-GL | 31.43 | 4.00 | 15.94 | 11.49 | 0.672 | 0.680 | 1.695 |
-| 300 | equal | M-AGL | 53.14 | 4.00 | 15.94 | 33.20 | 0.461 | 0.633 | 1.644 |
-| 300 | equal | E-CL | 198.12 | 3.97 | 16.00 | 178.15 | 0.149 | 0.423 | 4.512 |
-| 300 | equal | E-CGL | 17.53 | 0.05 | 16.00 | 1.48 | 0.954 | 0.706 | 0.314 |
-| 300 | equal | E-ACGL | 16.92 | 0.02 | 15.55 | 1.35 | 0.945 | 0.703 | 0.355 |
-| 300 | heterogeneous | M-L | 199.62 | 4.00 | 16.00 | 179.62 | 0.148 | 0.524 | 4.493 |
-| 300 | heterogeneous | M-GL | 37.67 | 4.00 | 15.80 | 17.87 | 0.589 | 0.629 | 10.182 |
-| 300 | heterogeneous | M-AGL | 70.03 | 4.00 | 15.96 | 50.07 | 0.371 | 0.589 | 5.274 |
-| 300 | heterogeneous | E-CL | 198.38 | 3.95 | 16.00 | 178.43 | 0.149 | 0.522 | 4.565 |
-| 300 | heterogeneous | E-CGL | 21.75 | 0.14 | 15.57 | 6.04 | 0.825 | 0.690 | 0.779 |
-| 300 | heterogeneous | E-ACGL | 19.49 | 0.09 | 14.92 | 4.48 | 0.841 | 0.683 | 0.780 |
+| 1000 | equal | M-L | 199.72 | 4.00 | 16.00 | 179.72 | 0.148 | 0.681 | 0.855 |
+| 1000 | equal | M-GL | 20.11 | 4.00 | 16.00 | 0.11 | 0.886 | 0.742 | 0.081 |
+| 1000 | equal | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.742 | 0.079 |
+| 1000 | equal | E-CL | 198.29 | 3.96 | 16.00 | 178.33 | 0.149 | 0.680 | 0.857 |
+| 1000 | equal | **E-CGL (주)** | **16.12** | **0.01** | **16.00** | **0.11** | **0.996** | **0.744** | **0.066** |
+| 1000 | equal | E-ACGL (보조) | 16.04 | 0.00 | 16.00 | 0.04 | 0.999 | 0.743 | 0.065 |
+| 1000 | heterogeneous | M-L | 199.93 | 4.00 | 16.00 | 179.93 | 0.148 | 0.676 | 0.977 |
+| 1000 | heterogeneous | M-GL | 23.07 | 4.00 | 16.00 | 3.07 | 0.852 | 0.747 | 0.108 |
+| 1000 | heterogeneous | M-AGL | 23.44 | 4.00 | 16.00 | 3.44 | 0.850 | 0.746 | 0.114 |
+| 1000 | heterogeneous | E-CL | 199.27 | 3.99 | 16.00 | 179.28 | 0.149 | 0.672 | 0.998 |
+| 1000 | heterogeneous | **E-CGL (주)** | **17.98** | **0.06** | **16.00** | **1.92** | **0.966** | **0.751** | **0.084** |
+| 1000 | heterogeneous | E-ACGL (보조) | 16.32 | 0.02 | 16.00 | 0.30 | 0.991 | 0.752 | 0.070 |
+| 300 | equal | M-L | 199.71 | 4.00 | 16.00 | 179.71 | 0.148 | 0.466 | 4.090 |
+| 300 | equal | M-GL | 27.87 | 4.00 | 16.00 | 7.87 | 0.788 | 0.699 | 0.526 |
+| 300 | equal | M-AGL | 62.30 | 4.00 | 15.99 | 42.31 | 0.488 | 0.636 | 1.541 |
+| 300 | equal | E-CL | 197.41 | 3.94 | 16.00 | 177.47 | 0.150 | 0.471 | 4.048 |
+| 300 | equal | **E-CGL (주)** | **16.35** | **0.01** | **15.98** | **0.36** | **0.989** | **0.717** | **0.251** |
+| 300 | equal | E-ACGL (보조) | 16.13 | 0.00 | 15.96 | 0.17 | 0.993 | 0.715 | 0.247 |
+| 300 | heterogeneous | M-L | 199.68 | 4.00 | 16.00 | 179.68 | 0.148 | 0.526 | 4.368 |
+| 300 | heterogeneous | M-GL | 41.99 | 4.00 | 15.94 | 22.05 | 0.594 | 0.634 | 11.190 |
+| 300 | heterogeneous | M-AGL | 65.77 | 4.00 | 15.97 | 45.80 | 0.420 | 0.607 | 3.773 |
+| 300 | heterogeneous | E-CL | 197.94 | 3.94 | 16.00 | 178.00 | 0.150 | 0.529 | 4.347 |
+| 300 | heterogeneous | **E-CGL (주)** | **18.41** | **0.04** | **15.23** | **3.14** | **0.903** | **0.693** | **0.794** |
+| 300 | heterogeneous | E-ACGL (보조) | 19.30 | 0.06 | 15.08 | 4.16 | 0.908 | 0.697 | 0.725 |
 
-### 5.3 Adaptive 보조 모형 E-ACGL 결과
+### 5.3 계산 검증과 결과 해석
 
-아래 표는 adaptive 보조 모형 E-ACGL의 난이도별 support recovery 결과다.
-
-| target \(e_B\) | achieved \(e_B\) | n | kappa | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta | zero-support |
-|---:|---:|---:|:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 2.5% | 2.42% | 1000 | equal | 16.05 | 0.00 | 16.00 | 0.05 | 0.998 | 0.936 | 0.054 | 0 |
-| 2.5% | 2.54% | 1000 | heterogeneous | 16.03 | 0.00 | 16.00 | 0.03 | 0.999 | 0.938 | 0.052 | 0 |
-| 2.5% | 2.42% | 300 | equal | 17.97 | 0.03 | 16.00 | 1.94 | 0.942 | 0.930 | 0.253 | 0 |
-| 2.5% | 2.54% | 300 | heterogeneous | 18.23 | 0.02 | 16.00 | 2.21 | 0.935 | 0.931 | 0.260 | 0 |
-| 5.0% | 4.58% | 1000 | equal | 16.09 | 0.00 | 16.00 | 0.09 | 0.997 | 0.880 | 0.059 | 0 |
-| 5.0% | 4.54% | 1000 | heterogeneous | 16.06 | 0.00 | 16.00 | 0.06 | 0.998 | 0.880 | 0.056 | 0 |
-| 5.0% | 4.58% | 300 | equal | 16.73 | 0.03 | 16.00 | 0.70 | 0.978 | 0.874 | 0.222 | 0 |
-| 5.0% | 4.54% | 300 | heterogeneous | 17.95 | 0.04 | 16.00 | 1.91 | 0.943 | 0.866 | 0.271 | 0 |
-| 10.0% | 11.24% | 1000 | equal | 16.20 | 0.01 | 16.00 | 0.19 | 0.994 | 0.722 | 0.070 | 0 |
-| 10.0% | 10.52% | 1000 | heterogeneous | 18.94 | 0.09 | 16.00 | 2.85 | 0.916 | 0.741 | 0.093 | 0 |
-| 10.0% | 11.24% | 300 | equal | 16.92 | 0.02 | 15.55 | 1.35 | 0.945 | 0.703 | 0.355 | 2 |
-| 10.0% | 10.52% | 300 | heterogeneous | 19.49 | 0.09 | 14.92 | 4.48 | 0.841 | 0.683 | 0.780 | 0 |
-
-### 5.4 결과 해석
-
-- \(e_B=2.5\%\)와 \(e_B=5\%\)에서는 n=1000 기준 E-ACGL이 selected q를 16 근처로 맞추고 common q를 거의 선택하지 않았다.
-- \(e_B=10\%\)에서도 equal kappa에서는 n=1000 기준 selected q=16.20, F1=0.994로 decision support가 유지됐다.
-- \(e_B=10\%\), heterogeneous kappa에서는 E-ACGL이 decision q=16을 유지했지만 noise q가 2.85로 증가했다. 이 조건에서는 분리 난이도와 집중도 차이가 함께 커질 때 noise 선택이 증가했다.
-- n=300에서는 표본 수가 작아질수록 noise q가 증가하고, hard heterogeneous setting에서 F1과 ARI가 함께 낮아졌다.
-- M-GL/M-AGL은 같은 결과 파일에서 common q=4를 주로 선택했다. M 계열의 선택은 prototype/direction support로, E 계열의 선택은 posterior decision support로 해석한다.
+- 12개 cell, 6개 모형, 반복 100회의 최종 행 7,200개를 확인했다. M-GL에서 1회 계산 실패가 있었으며 해당 cell은 유효한 99회 평균이다.
+- E 계열 exact-refit 후보 96,000개는 모두 수렴했다. 추가 수렴이 필요했던 후보는 24개였고, 최대 반복 수는 566회였다.
+- BIC 차이가 작은 9개 반복을 더 엄격한 수렴 기준으로 재검산했으며 선택 support는 9/9회 유지되었다.
+- E-CGL은 $n=1000$에서 common q를 0.00-0.06개 선택했고, F1은 0.966-0.999였다.
+- $e_B=10\%$, $n=300$, heterogeneous $\kappa$에서 E-CGL의 F1은 0.903, noise q는 3.14로 난이도 증가의 영향이 나타났다.
+- E-ACGL은 일부 어려운 조건에서 noise 선택을 줄였지만, $n=300$의 쉬운·중간 조건에서는 E-CGL이 더 안정적이었다. 주 모형은 E-CGL, adaptive 확장은 E-ACGL로 구분한다.
 
 ## 6. Study B 주요 지표 boxplot
 
-아래 그림은 Study B rep=100 raw 결과를 사용한 boxplot이다. 열은 target \(e_B\)로 정의한 분리 난이도, 행은 sample size \(n\)을 나타낸다. 각 panel에는 equal kappa와 heterogeneous kappa 결과를 함께 포함하였다. M 계열은 파랑, E 계열은 주황으로 표시하였다. Zero-support 반복은 F1=0으로 포함하며, refit이 없어 정의되지 않는 ARI와 MSE_eta는 해당 그림에서 제외한다.
-
-Selected q 그림의 점선은 true decision q=16이고, selected noise q 그림의 점선은 0이다.
-
-![Study B ARI boxplot](figures/studyb_boxplot_ari_by_eb_n_260714.png)
+아래 그림은 최종 rep=100 결과다. 열은 target $e_B$, 행은 표본 수 $n$이며, 각 panel은 등분산·이분산 $\kappa$ 조건을 함께 포함한다. M 계열은 파랑, E 계열은 주황으로 표시하였다.
 
 ![Study B F1 boxplot](figures/studyb_boxplot_f1_by_eb_n_260714.png)
-
-![Study B selected q boxplot](figures/studyb_boxplot_selectedq_by_eb_n_260714.png)
 
 ![Study B selected noise q boxplot](figures/studyb_boxplot_noiseq_by_eb_n_260714.png)
 
 ![Study B log MSE eta boxplot](figures/studyb_boxplot_logmse_eta_by_eb_n_260714.png)
+
+## 7. $K$ two-step 진단
+
+$K^\ast=4$, $n=1000$, $d=200$, target $e_B=5\%$, rep=20에서 Dense vMF의 $K=2,\ldots,8$을 비교하였다. 모든 K는 nstart=10으로 적합했으며, 독립 test sample 5,000개는 density 기준에만 사용하고 true label은 선택에 사용하지 않았다.
+
+| 1단계 기준 | equal $\kappa$ | heterogeneous $\kappa$ |
+|:---|:---:|:---:|
+| BIC | $K=4$: 13/20; $K=2$: 6/20; $K=3$: 1/20 | $K=3$: 20/20 |
+| RICc | $K=2$: 20/20 | $K=2$: 20/20 |
+| EBIC$_{0.5}$ | $K=2$: 20/20 | $K=2$: 20/20 |
+| EBIC$_1$ | $K=2$: 20/20 | $K=2$: 20/20 |
+| ICL-BIC | $K=4$: 12/20; $K=2$: 8/20 | $K=3$: 20/20 |
+| independent test NLL | $K=4$: 20/20 | $K=4$: 20/20 |
+
+제한된 bootstrap 진단은 자료 반복 3회, bootstrap 5회, $K=2,\ldots,6$에서 수행하였다.
+
+| bootstrap 기준 | equal $\kappa$ | heterogeneous $\kappa$ |
+|:---|:---:|:---:|
+| OOB NLL minimum | $K=4$ (3/3) | $K=4$ (3/3) |
+| OOB NLL 1-SE | $K=4$ (3/3) | $K=4$ (3/3) |
+| pairwise stability | $K=4$ (3/3) | $K=2$ (3/3) |
+
+선택된 $K$를 E-CGL support 선택까지 연결한 rep=20 결과는 다음과 같다. 2단계에서는 Eta path 240과 BIC-after exact centered-support refit을 사용하였다.
+
+| $\kappa$ 조건 | $K=4$ 선택 | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|
+| equal | 20/20 | 16.05 | 0.00 | 16.00 | 0.05 | 0.998 | 0.861 | 0.060 |
+| heterogeneous | 20/20 | 16.05 | 0.00 | 16.00 | 0.05 | 0.998 | 0.869 | 0.060 |
+
+BIC-before의 평균 selected q는 equal 17.10, heterogeneous 17.30이었으며, exact refit 후 BIC 재선택에서는 두 조건 모두 16.05였다. 총 1,600개 candidate exact refit은 모두 수렴했고, centered-support 제약 오차의 최댓값은 $3.55\times10^{-15}$였다.
+
+초기 비수렴은 35/280개였으며 모두 $K\ge5$에서 발생했다. 동일 초기값과 `max_iter=300` 재시도로 35개 모두 수렴하였다. Nested nstart=30 감사에서 $K=3,4$의 로그우도 증가는 최대 0.013이었고, $K=5$에서는 최대 8.41이었다.
+
+현재 Study B에서는 independent test NLL과 bootstrap OOB NLL이 $K=4$를 선택하였다. BIC·ICL은 일부 또는 전체 조건에서 과소선택했고, RICc·EBIC는 두 조건 모두 $K=2$를 선택했다. Pairwise stability도 이분산에서 $K=2$를 선호하여 coarse partition 선호가 확인되었다. Independent test NLL은 simulation 진단이며, 실제 자료에서는 held-out 또는 bootstrap OOB density와 정보지수·stability를 함께 평가한다.

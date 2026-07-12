@@ -1,0 +1,7 @@
+*
+!.gitignore
+!classic3_k_panel_notes.md
+!classic3_k_panel_summary.csv
+!classic3_k_selection_by_criterion.csv
+!classic3_k_panel_audit.csv
+!classic3_k_bootstrap_stability.csv

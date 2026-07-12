@@ -36,7 +36,15 @@ SPLADE는 일반적인 dense LLM embedding이 아니라 **pretrained language mo
 
 SPLADE 좌표 중 train 자료에서 분산이 큰 2,000개를 선택하고, 층화 분할한 train 3,111건과 test 779건에 같은 vocabulary를 적용하였다. 모든 문서는 단위 $L_2$ 노름으로 정규화하여 vMF mixture의 구면 자료 조건에 맞췄다.
 
-제공된 주제 라벨은 train/test 분할과 ARI/NMI 평가에만 사용하였으며, 좌표 선택·초기화·모수 추정에는 사용하지 않았다. E-CGL과 E-ACGL은 train path의 각 고유 support에서 full fixed-support numerical refit을 수행한 후 BIC로 선택하였다.
+제공된 주제 라벨은 train/test 분할과 ARI/NMI 평가에만 사용하였으며, 좌표 선택·초기화·모수 추정에는 사용하지 않았다. E-CGL과 E-ACGL은 train path의 각 고유 support에서 exact centered-$\eta$ fixed-support refit을 수행한 후 BIC로 선택하였다. 비선택 좌표에서는
+
+$$
+c_{\cdot j}=0,
+\qquad
+\eta_{1j}=\cdots=\eta_{Kj}=\bar\eta_j
+$$
+
+를 적용하므로 공통 baseline은 유지되지만 해당 좌표는 posterior decision support에 포함되지 않는다.
 
 ### 2.2 비교 모형과 held-out 성능
 
@@ -152,7 +160,7 @@ Bootstrap 초기값은 각 in-bag 표본에서만 추정하였다. 다만 SPLADE
 | shared $\kappa$ | 10 | 8 | 8 | 8 | 10 | **3** |
 | free $\kappa_k$ | 10 | 7 | 9 | 7 | 10 | **3** |
 
-Likelihood와 OOB density는 후보 범위의 상단을 선호한 반면, bootstrap partition stability는 두 $\kappa$ 모형에서 모두 $K=3$에서 최대였다. Bootstrap 결과는 $B=10$의 탐색적 진단이다.
+Likelihood와 OOB density는 후보 범위의 상단을 선호한 반면, bootstrap partition stability는 두 $\kappa$ 모형에서 모두 $K=3$에서 최대였다. In-bag 초기값만 사용한 $B=20$ 진단에서 360개 bootstrap fit이 모두 수렴했으며, OOB NLL minimum과 1-SE 결과도 두 $\kappa$ 모형에서 모두 $K=10$이었다.
 
 E-CGL은 대표 후보 $K=3,7,8,10$에서 각각 path를 적합하고, full fixed-support numerical refit 후 BIC로 support를 선택하였다.
 
@@ -163,7 +171,19 @@ E-CGL은 대표 후보 $K=3,7,8,10$에서 각각 path를 적합하고, full fixe
 | 8 | 1,063 | -4910.6019 | 0.4927 | 0.9961 | 0.9804 | 0.5362 |
 | 10 | 980 | **-4917.5464** | 0.3982 | 0.9923 | 0.9718 | 0.4752 |
 
-![Classic3 K-selection diagnostics](figures/classic3_k_selection_diagnostics_260714.png)
+$K=10$의 test component를 제공된 broad topic에 사후 대응하면 CISI 3개, CRAN 5개, MED 2개로 분할되었다.
+
+| broad topic | $K=10$ component의 test 문서 수 | 대표 양의 centered-$\eta$ token |
+|---|---|---|
+| CISI | 147, 85, 59 | `scientific·information`; `library·librarian`; `retrieval·retrieve` |
+| CRAN | 72, 60, 56, 55, 37 | `heat·thermal`; `boundary·layers`; `flow·wing`; `mach·tunnel`; `buck·shell` |
+| MED | 123, 79 | `inhibitor·rat`; `child·disease` |
+
+10개 component 중 9개의 test purity는 1.000이었고, CRAN-1 component는 CISI 1건과 MED 5건을 포함하여 purity 0.923이었다. Component 명칭은 적합 후 다수 topic으로 부여했으며 라벨은 모형 적합이나 $K$ 선택에 사용하지 않았다.
+
+![Classic3 K=3 and K=10 label-component heatmap](figures/classic3_k3_k10_label_component_heatmap_260712.png)
+
+![Classic3 K-selection diagnostics](figures/classic3_k_selection_diagnostics_b20_260712.png)
 
 $K$가 증가할수록 held-out density는 개선되지만 세 주제 라벨과의 일치는 감소하였다. 한편 $K=7$--10에서도 purity와 homogeneity는 0.97 이상이고 completeness가 감소하여, 큰 $K$의 분할은 세 주제를 혼합하기보다 각 주제를 여러 component로 세분하는 양상을 보였다. 이 지표는 사후 라벨 진단이며 $K$ 선택에는 사용하지 않았다.
 
@@ -191,8 +211,10 @@ Classic3의 주 분석은 자료에 제공된 세 주제에 대응하는 $K=3$�
 - `scripts/plot_classic3_interpretability_260714.R`
 - `results/classic3_exact_bic_reselection_stability_b20_nstart30_260711/classic3_reselection_summary.csv`
 - `results/classic3_splade_holdout_k_selection_k2_10_260711/classic3_dense_k_selection.csv`
-- `results/classic3_k_selection_panel_b10_inbag_260714/classic3_k_panel_summary.csv`
-- `results/classic3_k_selection_panel_final_260714/classic3_ecgl_exact_bic_k_comparison.csv`
+- `results/classic3_k_selection_panel_b20_inbag_ronly_260712/classic3_k_panel_summary.csv`
+- `results/classic3_k_selection_panel_final_b20_260712/classic3_ecgl_exact_bic_k_comparison.csv`
+- `results/classic3_k_component_interpretation_260712/classic3_k_component_summary.csv`
+- `results/classic3_k_component_interpretation_260712/classic3_k10_component_token_summary.csv`
 - `r/realdata/classic3_k_selection_panel_diag_260714.r`
 - `r/realdata/classic3_k_selection_panel_summarize_260714.r`
 - `results/bbc5_splade_holdout_train_exact_ic_named_260711/bbc5_exact_after_refit_ic_selection.csv`

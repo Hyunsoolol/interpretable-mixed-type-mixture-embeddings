@@ -1,10 +1,11 @@
-# 연구미팅 자료: Eta-group 방법론과 시뮬레이션 결과 (2026-07-14)
+# 연구미팅 자료: E-CGL 방법론과 실증 결과 (2026-07-14)
 
 ## 1. 핵심 정리
 
 - 선택 대상은 prototype support가 아니라 **posterior decision support**다.
 - 자연모수 $\eta_k=\kappa_k\mu_k$의 component 간 centered contrast를 사용한다.
 - 주 모형은 coordinate-wise group penalty인 E-CGL이며, E-ACGL은 adaptive 보조 확장이다.
+- 선택 후에는 $c_{\cdot j}=0$을 고정하고 공통 $\bar\eta_j$를 재추정하는 exact centered-$\eta$ refit(B)을 사용한다.
 - $K$와 sparsity parameter $\lambda_\eta$는 분리해서 선택한다.
 
 전체 수치표는 [시뮬레이션 결과 부록](../simulations/thesis-simulation_260708.md)에 정리했다.
@@ -96,7 +97,43 @@ $$
 
 이며 weight에 median normalization을 적용했다. E-CGL은 $w_j=1$인 기본 모형이고, E-ACGL은 선택적 adaptive 확장이다.
 
-### 2.4 비교 모형
+### 2.4 선택 후 refit 제약
+
+선택 support를
+
+$$
+\widehat S_{\mathrm{dec}}
+=\{j:\lVert\widehat c_{\cdot j}\rVert_2>0\}
+$$
+
+로 두면, 비선택 좌표에 대한 centered-$\eta$ 제약은
+
+$$
+j\notin\widehat S_{\mathrm{dec}}
+\quad\Longrightarrow\quad
+c_{\cdot j}=0
+\quad\Longleftrightarrow\quad
+\eta_{1j}=\cdots=\eta_{Kj}=\bar\eta_j
+$$
+
+이다. 기존 active-only refit(A)과 exact centered-$\eta$ refit(B)은 다음과 같다.
+
+| refit | 비선택 좌표 제약 | 공통 baseline $\bar\eta_j$ | 역할 |
+|:---|:---|:---|:---|
+| A: active-only | $\eta_{1j}=\cdots=\eta_{Kj}=0$ | 제거 | 기존 결과와의 진단 비교 |
+| B: centered fixed-support | $c_{\cdot j}=0$ | 전체 좌표에서 재추정 | 주 분석 |
+
+B refit의 실용적 자유도는
+
+$$
+\operatorname{df}_B(m)
+=d+(K-1)m+(K-1)\mathbf 1(m>0),
+\qquad m=|\widehat S_{\mathrm{dec}}|,
+$$
+
+이며, 각 path support를 B로 refit한 observed log-likelihood에 BIC를 적용한다.
+
+### 2.5 비교 모형
 
 | 모형 | penalty |
 |:---|:---|
@@ -109,7 +146,7 @@ $$
 
 M-L은 Rossi and Barbaro (2022)의 sparse vMF prototype 방법을 재현한 비교 모형이며, 방향모수 $\mu$에 entry-wise $L_1$ penalty를 적용한다. M-L의 support는 prototype coordinate를, E-CGL의 support는 posterior decision coordinate를 나타낸다.
 
-### 2.5 구조 분해 진단
+### 2.6 구조 분해 및 refit 진단
 
 S1 환경: $K=4$, $n=1000$, $d=200$, common q=4, decision q=16, noise q=180, rep=20.
 
@@ -123,6 +160,19 @@ S1 환경: $K=4$, $n=1000$, $d=200$, common q=4, decision q=16, noise q=180, rep
 | adaptive centered group (보조) | E-ACGL | 16.05 | 0.00 | 0.05 | 0.998 | 0.057 |
 
 여기서 `MSE_eta`는 $\mathrm{MSE}_{\mathrm{centered}\ \eta}$다.
+
+동일한 Study B 표본과 support에서 A와 B를 비교한 진단은 다음과 같다. 설정은 $K=4$, $n=300$, $d=200$, 목표 oracle Bayes error $5\%$, $\kappa=(30,40,50,60)$, path length 240, rep=5이다.
+
+| 모형 | selector/refit | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta | MSE_kappa | log-likelihood |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| E-CGL | BIC-before + A | 18.0 | 0.2 | 16.0 | 1.8 | 0.943 | 0.853 | 0.288 | 32.03 | 74,045.75 |
+| E-CGL | 같은 support + B | 18.0 | 0.2 | 16.0 | 1.8 | 0.943 | 0.849 | 0.291 | 9.40 | 74,437.76 |
+| E-CGL | BIC-after + B | 16.2 | 0.0 | 16.0 | 0.2 | 0.994 | 0.854 | 0.200 | 7.11 | 74,426.43 |
+| E-ACGL | BIC-before + A | 16.2 | 0.0 | 16.0 | 0.2 | 0.994 | 0.856 | 0.199 | 37.95 | 74,015.94 |
+| E-ACGL | 같은 support + B | 16.2 | 0.0 | 16.0 | 0.2 | 0.994 | 0.856 | 0.200 | 7.14 | 74,426.43 |
+| E-ACGL | BIC-after + B | 16.2 | 0.0 | 16.0 | 0.2 | 0.994 | 0.856 | 0.200 | 7.14 | 74,426.43 |
+
+고정 support에서는 A와 B의 support 지표가 동일했다. B는 공통 baseline을 유지하면서 $\kappa$ 오차를 줄였고, BIC-after에서는 E-CGL의 noise 선택이 감소했다. 1,620개 candidate exact refit에서 실패는 없었으며 최대 centered-support 제약 오차는 $1.78\times10^{-15}$였다. 이 표는 refit 정의를 확인하기 위한 진단 결과다.
 
 관련 penalty 구조는 다음과 연결된다.
 
@@ -215,61 +265,68 @@ e_B \in \{2.5\%, 5\%, 10\%\}, \qquad
 \kappa \in \{(45,45,45,45), (30,40,50,60)\}.
 ```
 
+E-CGL과 E-ACGL은 penalized path의 BIC 상위 40개 support를 exact centered-support refit한 뒤 BIC를 다시 계산하였다. 경계 후보가 선택되면 전체 support로 확장하는 guard를 두었으며, 최종 1,200개 E 계열 적합에서 full fallback은 발생하지 않았다. 아래 값은 등분산·이분산 $\kappa$ 결과의 동일 가중 평균이다.
 
-결과 파일의 D-L, D-GL, D-AGL은 각각 M-L, M-GL, M-AGL로, E-L, E-GL, E-AGL은 각각 E-CL, E-CGL, E-ACGL로 표기했다. E-CGL이 주 모형이고 E-ACGL은 adaptive 보조 결과다. 각 값은 equal/heterogeneous $\kappa$ 조건의 시나리오별 평균을 동일 가중 평균한 결과다.
+| target $e_B$ | achieved $e_B$: equal | achieved $e_B$: heterogeneous |
+|---:|---:|---:|
+| 2.5% | 2.33% | 2.73% |
+| 5.0% | 5.14% | 5.00% |
+| 10.0% | 10.09% | 9.84% |
 
 #### target $e_B=2.5\%$
 
 | $n$ | 모형 | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta |
 |---:|:---|---:|---:|---:|---:|---:|---:|---:|
-| 300 | M-L | 199.58 | 4.00 | 16.00 | 179.58 | 0.148 | 0.887 | 2.426 |
-| 300 | M-GL | 41.17 | 3.70 | 16.00 | 21.47 | 0.563 | 0.924 | 0.736 |
-| 300 | M-AGL | 50.83 | 3.83 | 16.00 | 31.01 | 0.480 | 0.915 | 0.945 |
-| 300 | E-CL | 197.99 | 3.95 | 16.00 | 178.04 | 0.150 | 0.889 | 2.419 |
-| 300 | **E-CGL (주)** | 18.38 | 0.08 | 16.00 | 2.31 | 0.931 | 0.931 | 0.282 |
-| 300 | E-ACGL (보조) | 18.10 | 0.03 | 16.00 | 2.08 | 0.938 | 0.930 | 0.256 |
-| 1000 | M-L | 199.48 | 4.00 | 16.00 | 179.48 | 0.149 | 0.923 | 0.674 |
-| 1000 | M-GL | 20.05 | 3.96 | 16.00 | 0.09 | 0.888 | 0.937 | 0.067 |
-| 1000 | M-AGL | 20.04 | 3.97 | 16.00 | 0.08 | 0.888 | 0.937 | 0.067 |
-| 1000 | E-CL | 197.47 | 3.94 | 16.00 | 177.53 | 0.150 | 0.923 | 0.673 |
-| 1000 | **E-CGL (주)** | 17.08 | 0.02 | 16.00 | 1.06 | 0.967 | 0.936 | 0.069 |
-| 1000 | E-ACGL (보조) | 16.04 | 0.00 | 16.00 | 0.04 | 0.999 | 0.937 | 0.053 |
+| 300 | M-L | 199.59 | 4.00 | 16.00 | 179.59 | 0.148 | 0.880 | 2.462 |
+| 300 | M-GL | 42.16 | 3.98 | 16.00 | 22.18 | 0.617 | 0.918 | 0.756 |
+| 300 | M-AGL | 52.74 | 4.00 | 16.00 | 32.74 | 0.524 | 0.910 | 0.981 |
+| 300 | E-CL | 197.83 | 3.94 | 16.00 | 177.89 | 0.150 | 0.877 | 2.470 |
+| 300 | **E-CGL (주)** | **16.51** | **0.01** | **16.00** | **0.50** | **0.987** | **0.931** | **0.204** |
+| 300 | E-ACGL (보조) | 17.99 | 0.03 | 16.00 | 1.96 | 0.960 | 0.930 | 0.250 |
+| 1000 | M-L | 199.56 | 4.00 | 16.00 | 179.56 | 0.148 | 0.917 | 0.678 |
+| 1000 | M-GL | 20.02 | 4.00 | 16.00 | 0.02 | 0.889 | 0.933 | 0.066 |
+| 1000 | M-AGL | 20.01 | 4.00 | 16.00 | 0.01 | 0.889 | 0.934 | 0.065 |
+| 1000 | E-CL | 197.57 | 3.92 | 16.00 | 177.65 | 0.150 | 0.917 | 0.678 |
+| 1000 | **E-CGL (주)** | **16.05** | **0.00** | **16.00** | **0.05** | **0.999** | **0.934** | **0.053** |
+| 1000 | E-ACGL (보조) | 16.03 | 0.00 | 16.00 | 0.03 | 0.999 | 0.934 | 0.053 |
 
 #### target $e_B=5.0\%$
 
 | $n$ | 모형 | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta |
 |---:|:---|---:|---:|---:|---:|---:|---:|---:|
-| 300 | M-L | 199.70 | 4.00 | 16.00 | 179.70 | 0.148 | 0.774 | 2.784 |
-| 300 | M-GL | 41.77 | 4.00 | 16.00 | 21.77 | 0.554 | 0.857 | 0.787 |
-| 300 | M-AGL | 66.04 | 4.00 | 16.00 | 46.04 | 0.392 | 0.827 | 1.342 |
-| 300 | E-CL | 198.20 | 3.93 | 16.00 | 178.27 | 0.149 | 0.778 | 2.756 |
-| 300 | **E-CGL (주)** | 17.66 | 0.07 | 16.00 | 1.59 | 0.951 | 0.869 | 0.276 |
-| 300 | E-ACGL (보조) | 17.34 | 0.04 | 16.00 | 1.31 | 0.960 | 0.870 | 0.247 |
-| 1000 | M-L | 199.62 | 4.00 | 16.00 | 179.62 | 0.148 | 0.851 | 0.722 |
-| 1000 | M-GL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.879 | 0.070 |
-| 1000 | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.879 | 0.070 |
-| 1000 | E-CL | 197.60 | 3.95 | 16.00 | 177.65 | 0.150 | 0.851 | 0.721 |
-| 1000 | **E-CGL (주)** | 17.12 | 0.03 | 16.00 | 1.09 | 0.966 | 0.880 | 0.073 |
-| 1000 | E-ACGL (보조) | 16.08 | 0.00 | 16.00 | 0.08 | 0.998 | 0.880 | 0.057 |
+| 300 | M-L | 199.69 | 4.00 | 16.00 | 179.69 | 0.148 | 0.750 | 2.868 |
+| 300 | M-GL | 43.42 | 4.00 | 16.00 | 23.42 | 0.620 | 0.833 | 0.823 |
+| 300 | M-AGL | 65.32 | 4.00 | 16.00 | 45.32 | 0.457 | 0.811 | 1.306 |
+| 300 | E-CL | 197.86 | 3.95 | 16.00 | 177.91 | 0.150 | 0.751 | 2.861 |
+| 300 | **E-CGL (주)** | **16.24** | **0.00** | **16.00** | **0.24** | **0.993** | **0.856** | **0.210** |
+| 300 | E-ACGL (보조) | 16.80 | 0.01 | 16.00 | 0.79 | 0.981 | 0.856 | 0.231 |
+| 1000 | M-L | 199.66 | 4.00 | 16.00 | 179.66 | 0.148 | 0.838 | 0.732 |
+| 1000 | M-GL | 20.01 | 4.00 | 16.00 | 0.01 | 0.889 | 0.869 | 0.069 |
+| 1000 | M-AGL | 20.00 | 4.00 | 16.00 | 0.00 | 0.889 | 0.869 | 0.069 |
+| 1000 | E-CL | 197.85 | 3.95 | 16.00 | 177.90 | 0.150 | 0.837 | 0.733 |
+| 1000 | **E-CGL (주)** | **16.08** | **0.00** | **16.00** | **0.08** | **0.998** | **0.869** | **0.057** |
+| 1000 | E-ACGL (보조) | 16.08 | 0.00 | 16.00 | 0.08 | 0.998 | 0.869 | 0.057 |
 
 #### target $e_B=10.0\%$
 
 | $n$ | 모형 | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta |
 |---:|:---|---:|---:|---:|---:|---:|---:|---:|
-| 300 | M-L | 199.60 | 4.00 | 16.00 | 179.60 | 0.148 | 0.478 | 4.418 |
-| 300 | M-GL | 34.55 | 4.00 | 15.87 | 14.68 | 0.630 | 0.654 | 5.938 |
-| 300 | M-AGL | 61.59 | 4.00 | 15.95 | 41.64 | 0.416 | 0.611 | 3.459 |
-| 300 | E-CL | 198.25 | 3.96 | 16.00 | 178.29 | 0.149 | 0.472 | 4.539 |
-| 300 | **E-CGL (주)** | 19.64 | 0.10 | 15.79 | 3.76 | 0.890 | 0.698 | 0.547 |
-| 300 | E-ACGL (보조) | 18.21 | 0.06 | 15.24 | 2.92 | 0.893 | 0.693 | 0.568 |
-| 1000 | M-L | 199.85 | 4.00 | 16.00 | 179.85 | 0.148 | 0.658 | 0.963 |
-| 1000 | M-GL | 21.96 | 4.00 | 16.00 | 1.96 | 0.845 | 0.729 | 0.110 |
-| 1000 | M-AGL | 22.78 | 4.00 | 16.00 | 2.78 | 0.829 | 0.728 | 0.110 |
-| 1000 | E-CL | 198.79 | 3.98 | 16.00 | 178.81 | 0.149 | 0.658 | 0.965 |
-| 1000 | **E-CGL (주)** | 18.89 | 0.06 | 16.00 | 2.83 | 0.919 | 0.730 | 0.104 |
-| 1000 | E-ACGL (보조) | 17.57 | 0.05 | 16.00 | 1.52 | 0.955 | 0.731 | 0.082 |
+| 300 | M-L | 199.70 | 4.00 | 16.00 | 179.70 | 0.148 | 0.496 | 4.229 |
+| 300 | M-GL | 34.93 | 4.00 | 15.97 | 14.96 | 0.691 | 0.667 | 5.858 |
+| 300 | M-AGL | 64.04 | 4.00 | 15.98 | 44.06 | 0.454 | 0.621 | 2.657 |
+| 300 | E-CL | 197.68 | 3.94 | 16.00 | 177.74 | 0.150 | 0.500 | 4.198 |
+| 300 | **E-CGL (주)** | **17.38** | **0.03** | **15.61** | **1.75** | **0.946** | **0.705** | **0.523** |
+| 300 | E-ACGL (보조) | 17.72 | 0.03 | 15.52 | 2.17 | 0.951 | 0.706 | 0.486 |
+| 1000 | M-L | 199.83 | 4.00 | 16.00 | 179.83 | 0.148 | 0.678 | 0.916 |
+| 1000 | M-GL | 21.59 | 4.00 | 16.00 | 1.59 | 0.869 | 0.744 | 0.095 |
+| 1000 | M-AGL | 21.72 | 4.00 | 16.00 | 1.72 | 0.870 | 0.744 | 0.096 |
+| 1000 | E-CL | 198.78 | 3.98 | 16.00 | 178.81 | 0.149 | 0.676 | 0.928 |
+| 1000 | **E-CGL (주)** | **17.05** | **0.04** | **16.00** | **1.02** | **0.981** | **0.748** | **0.075** |
+| 1000 | E-ACGL (보조) | 16.18 | 0.01 | 16.00 | 0.17 | 0.995 | 0.748 | 0.067 |
 
-Zero-support 반복은 F1=0으로 포함했다. 반복별 분포와 $\kappa$ 조건에 따른 차이는 하단 boxplot에 제시했다.
+E-CGL은 $n=1000$에서 모든 난이도에 걸쳐 common q를 0.00-0.04개 선택했고 F1은 0.981-0.999였다. 가장 어려운 이분산 조건($e_B=10\%, n=300$)에서는 selected q=18.41, noise q=3.14, F1=0.903, ARI=0.693이었다. E-ACGL의 개선은 조건별로 달랐으므로 E-CGL을 주 모형으로 유지한다.
+
+M-GL의 $e_B=2.5\%$, 등분산, $n=1000$에서 1회 계산 실패가 있었고 해당 cell 평균은 유효한 99회를 사용했다. BIC 차이가 작은 9개 E 계열 반복을 더 엄격한 수렴 기준으로 재검산했을 때 선택 support는 9/9회 동일했다.
 
 ![Study B F1 boxplot](../simulations/figures/studyb_boxplot_f1_by_eb_n_260714.png)
 
@@ -301,41 +358,70 @@ M-L은 Rossi와 Barbaro (2022)의 sparse $\mu$ prototype 모형을 재현한 기
 
 ## 4. $K$와 $\lambda_\eta$ 선택
 
-동시 선택 진단은 $K^\ast=4$, $n=1000$, $d=200$, $e_B=5\%$, rep=5에서 수행했다.
+$K^\ast=4$, $n=1000$, $d=200$, $e_B=5\%$에서 $K\in\{2,\ldots,8\}$을 비교했다. All-in-one 진단은 rep=5, Dense vMF 1단계 진단은 rep=20이다.
 
 Dense vMF는 sparsity penalty를 두지 않고($\lambda=0$) 모든 $d$개 coordinate를 사용하며, component별 $\mu_k$와 $\kappa_k$를 추정하는 vMF mixture다. 변수 선택은 수행하지 않는다.
 
+**$K$와 sparsity의 동시 선택**
+
 | 방법 | equal $\kappa$ | heterogeneous $\kappa$ |
 |:---|:---|:---|
-| Dense vMF | BIC: $K=4$; EBIC: $K=2$ | BIC: $K=3$; EBIC: $K=2$ |
 | M-GL/M-AGL | 대부분 또는 전부 $K=4$ | 전부 $K=4$ |
-| E-CGL all-in-one (주) | BIC: $K=6$-$8$; EBIC: $K=4,6,8$ | BIC: $K=6,8$; EBIC: $K=4,6,8$ |
-| E-ACGL all-in-one (보조) | BIC: $K=6,8$; EBIC: $K=7,8$ | BIC: $K=5,8$; EBIC: $K=7,8$ |
+| E-CGL all-in-one | 주로 $K=6$-$8$ | 주로 $K=6$-$8$ |
+| E-ACGL all-in-one | 주로 $K=6$-$8$ | 주로 $K=7$-$8$ |
 
-현재 선택 절차는
+E 계열에서는 regularization과 component 수가 서로 보상되어 큰 $K$가 선택되었다. Rossi and Barbaro (2022)의 CSTR 분석과 같이 $K$ 선택과 sparsity 선택을 분리하였다.
 
 $$
 \widehat K
-=\arg\min_{K\in\mathcal K}\mathrm{IC}_{\mathrm{dense/group}}(K),
-$$
-
-$$
+=\arg\min_{K\in\mathcal K}\mathrm{IC}_{\mathrm{dense}}(K),
+\qquad
 \widehat\lambda_\eta
-=\arg\min_{\lambda_\eta}
-\mathrm{BIC}(\widehat K,\lambda_\eta)
+=\arg\min_{\lambda_\eta}\mathrm{BIC}^{\mathrm{refit}}(\widehat K,\lambda_\eta).
 $$
 
-의 2단계로 분리한다. Rossi and Barbaro (2022)의 dense 모형 기반 $K$ 선택 후 sparsity path를 선택하는 2단계 구조와 일치한다.
+**1단계 Dense vMF 기준의 rep=20 결과**
 
-현재 centered eta BIC는
+| 기준 | equal $\kappa$ | heterogeneous $\kappa$ |
+|:---|:---:|:---:|
+| BIC | $K=4$: 13/20; $K=2,3$: 7/20 | $K=3$: 20/20 |
+| RICc | $K=2$: 20/20 | $K=2$: 20/20 |
+| EBIC$_{0.5}$, EBIC$_1$ | $K=2$: 20/20 | $K=2$: 20/20 |
+| ICL-BIC | $K=4$: 12/20; $K=2$: 8/20 | $K=3$: 20/20 |
+| independent test NLL | $K=4$: 20/20 | $K=4$: 20/20 |
+
+독립 test NLL은 모형 선택에 true label을 사용하지 않았으며 두 $\kappa$ 조건에서 모두 $K=4$를 선택했다. 제한된 bootstrap 진단(자료 반복 3회, bootstrap 5회)에서도 OOB NLL의 minimum과 1-SE 규칙은 두 조건 모두 $K=4$를 3/3회 선택했다.
+
+| bootstrap 기준 | equal $\kappa$ | heterogeneous $\kappa$ |
+|:---|:---:|:---:|
+| OOB NLL minimum | $K=4$ (3/3) | $K=4$ (3/3) |
+| OOB NLL 1-SE | $K=4$ (3/3) | $K=4$ (3/3) |
+| pairwise stability | $K=4$ (3/3) | $K=2$ (3/3) |
+
+**연결된 two-step 결과 (rep=20)**
+
+Independent test NLL로 선택한 $K=4$를 각 반복에 고정한 뒤, E-CGL path 240과 BIC-after exact centered-support refit을 적용하였다.
+
+| $\kappa$ 조건 | $K=4$ 선택 | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|
+| equal | 20/20 | 16.05 | 0.00 | 16.00 | 0.05 | 0.998 | 0.861 | 0.060 |
+| heterogeneous | 20/20 | 16.05 | 0.00 | 16.00 | 0.05 | 0.998 | 0.869 | 0.060 |
+
+BIC-before의 평균 selected q는 equal 17.10, heterogeneous 17.30이었고, exact refit 후 BIC 재선택에서는 두 조건 모두 16.05로 감소하였다. 1,600개 candidate exact refit은 모두 수렴했으며 최대 centered-support 제약 오차는 $3.55\times10^{-15}$였다.
+
+초기 비수렴 35/280개는 동일 초기값과 `max_iter=300` 재시도로 모두 수렴했다. Nested nstart 감사에서 $K=3,4$의 로그우도 증가는 최대 0.013이었으므로 $K=3$ 대 $K=4$ 차이는 초기값보다 정보지수 패널티의 영향이 컸다. Pairwise stability는 이분산에서 더 거친 $K=2$ 분할을 선호했으므로 단독 기준으로 사용하지 않는다.
+
+Two-step 구조는 E 계열 all-in-one의 큰 $K$ 선호를 분리한다. Study B에서는 predictive density가 $K=4$를 일관되게 선택했지만, Classic3에서는 density 기준과 stability가 서로 다른 component 해상도를 선택했다. Main support-recovery 결과는 $K=4$에 조건부로 유지하며, 실자료에서는 held-out/OOB density·정보지수·stability와 분석 목적의 해상도를 분리하여 보고한다.
+
+최종 Study B의 $\lambda_\eta$ 선택은
 
 $$
-\mathrm{BIC}(\lambda_\eta)
-=-2\ell(\widehat\Theta_{\lambda_\eta})
-+\log(n)\left[(K-1)+d+(K-1)m_{\lambda_\eta}\right]
+\mathrm{BIC}^{\mathrm{refit}}(\lambda_\eta)
+=-2\ell(\widehat\Theta_{\lambda_\eta}^{\mathrm{refit}})
++\log(n)\left[d+(K-1)m_{\lambda_\eta}+(K-1)\mathbf 1(m_{\lambda_\eta}>0)\right]
 $$
 
-이며 penalized path에서 BIC를 선택한 뒤 support refit을 수행한다.
+을 사용했다. 이 자유도는 exact effective df가 아니라 support별 모형 선택을 위한 근사다. 연결된 rep=20 결과는 3.3절의 $K=4$ 고정 rep=100 결과와 같은 support-recovery 양상을 보였다.
 
 ## 5. Classic3 실자료 분석
 
@@ -364,7 +450,11 @@ $$
 
 양수와 음수는 해당 class의 posterior score가 component 평균보다 높아지거나 낮아지는 상대적 기여를 뜻한다. Token 자체의 절대적 선호 또는 배척을 의미하지 않는다.
 
-Label-free $K$ 진단에서 bootstrap stability는 $K=3$에서 최대였지만 BIC와 conditional OOB density는 후보 상한인 $K=10$을 선택하였다. 따라서 Classic3 결과는 $K=3$에 조건부인 broad-topic support 분석이며, 잠재 density component 수의 추정 결과는 아니다.
+Label-free $K$ 진단에서 in-bag 초기값만 사용한 bootstrap $B=20$의 stability는 $K=3$에서 최대였지만, BIC와 OOB NLL minimum·1-SE는 후보 상한인 $K=10$을 선택하였다. E-CGL의 test NLL은 $K=3$의 -4872.294에서 $K=10$의 -4917.546으로 감소했으나, test ARI는 0.993에서 0.398, completeness는 0.986에서 0.475로 감소하였다.
+
+$K=10$은 CISI를 `scientific`, `library`, `retrieval` 중심의 3개 component로, CRAN을 `heat`, `boundary`, `flow`, `mach`, `shell` 중심의 5개 component로, MED를 `inhibitor`와 `child` 중심의 2개 component로 분할하였다. 10개 중 9개 component의 test purity는 1.000이었다. 따라서 큰 $K$는 세 주제를 혼합하기보다 주제 내부를 세분하며, Classic3 주 결과는 $K=3$에 조건부인 broad-topic support 분석으로 구분한다.
+
+![Classic3 K=3 and K=10 component resolution](../manuscript/figures/classic3_k3_k10_label_component_heatmap_260712.png)
 
 ## 6. 비용과 한계
 
@@ -374,16 +464,17 @@ Label-free $K$ 진단에서 bootstrap stability는 $K=3$에서 최대였지만 B
 | 약한 신호 | S5/S6에서 E-CGL과 E-ACGL 모두 대부분 zero support |
 | dense support | S3-N/S4-N에서 과소선택 또는 tuning failure |
 | $K$ 동시 선택 | E-CGL/E-ACGL all-in-one에서 큰 $K$를 선호 |
-| refit 정의 | penalty 단계는 common $\eta$ baseline을 유지하지만 현재 refit은 selected coordinate만 유지 |
-| BIC df | refit target과 df의 일관성 추가 점검 필요 |
+| refit 정의 | exact centered-support refit은 비선택 contrast를 0으로 두고 common $\eta$ baseline은 유지 |
+| BIC df | exact-refit support에 맞춘 $d+(K-1)m+(K-1)\mathbf 1(m>0)$ 근사를 사용하며 exact effective df로 주장하지 않음 |
+| sparse 실자료 계산 | 현재 Rcpp E-step은 dense matrix용이며 Classic3 bootstrap $K$ 진단은 R-only로 실행 |
 
 ## 7. 결과 요약
 
 $$
-\text{posterior decision support} \Rightarrow \eta = \kappa\mu \Rightarrow c_{kj} = \eta_{kj} - \bar{\eta}_{j} \Rightarrow \lambda_\eta\sum_{j}\|c_{\cdot j}\|_2
+\text{posterior decision support} \Rightarrow \eta = \kappa\mu \Rightarrow c_{kj} = \eta_{kj} - \bar{\eta}_{j} \Rightarrow \lambda_\eta\sum_{j}\lVert c_{\cdot j}\rVert_2
 $$
 
 * E-CGL은 sparse posterior decision support 복원을 위한 주 모형이다.
-* E-ACGL은 $\lambda_\eta\sum_j w_j^{(E)}\|c_{\cdot j}\|_2$를 사용하는 adaptive 보조 확장이다.
+* E-ACGL은 $\lambda_\eta\sum_j w_j^{(E)}\lVert c_{\cdot j}\rVert_2$를 사용하는 adaptive 보조 확장이다.
 * 약한 신호, 일부 dense-support 환경, $K$와 $\lambda_\eta$의 동시 선택에서는 성능 저하가 관찰됐다.
-* 현재 미검증 범위는 refit/df 정합성과 동일한 $\mu$에서 $\kappa$만 다른 concentration-only 환경이다.
+* 추가 정리 범위는 concentration-only 환경의 반복 확대와 정보지수·df 민감도 결과의 부록 표 구성이다.

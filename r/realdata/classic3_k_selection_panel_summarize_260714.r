@@ -9,6 +9,11 @@ if (!requireNamespace("Matrix", quietly = TRUE)) stop("Matrix is required.")
 if (!requireNamespace("ggplot2", quietly = TRUE)) stop("ggplot2 is required.")
 suppressPackageStartupMessages(library(Matrix))
 
+getenv_chr <- function(name, default) {
+  value <- Sys.getenv(name, unset = "")
+  if (nzchar(value)) value else default
+}
+
 train_path <- file.path(
   "data", "classic3", "processed",
   "classic3_splade_holdout_train_top2000_260711.rds"
@@ -17,9 +22,19 @@ test_path <- file.path(
   "data", "classic3", "processed",
   "classic3_splade_holdout_test_top2000_260711.rds"
 )
-panel_dir <- file.path("results", "classic3_k_selection_panel_b10_inbag_260714")
-out_dir <- file.path("results", "classic3_k_selection_panel_final_260714")
+panel_dir <- getenv_chr(
+  "CLASSIC3_PANEL_SUMMARY_INPUT_DIR",
+  file.path("results", "classic3_k_selection_panel_b10_inbag_260714")
+)
+out_dir <- getenv_chr(
+  "CLASSIC3_PANEL_SUMMARY_OUT_DIR",
+  file.path("results", "classic3_k_selection_panel_final_260714")
+)
 figure_dir <- file.path("docs", "manuscript", "figures")
+figure_name <- getenv_chr(
+  "CLASSIC3_PANEL_SUMMARY_FIGURE",
+  "classic3_k_selection_diagnostics_260714.png"
+)
 K_values <- c(3L, 7L, 8L, 10L)
 
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
@@ -217,6 +232,10 @@ criteria <- utils::read.csv(
   file.path(panel_dir, "classic3_k_selection_by_criterion.csv"),
   check.names = FALSE
 )
+bootstrap_raw <- utils::read.csv(
+  file.path(panel_dir, "classic3_k_bootstrap_raw.csv"), check.names = FALSE
+)
+bootstrap_reps <- length(unique(bootstrap_raw$bootstrap))
 
 utils::write.csv(
   ecgl,
@@ -308,7 +327,7 @@ p <- ggplot2::ggplot(
     axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 8))
   )
 
-figure_path <- file.path(figure_dir, "classic3_k_selection_diagnostics_260714.png")
+figure_path <- file.path(figure_dir, figure_name)
 ggplot2::ggsave(figure_path, p, width = 7.4, height = 6.0, dpi = 180)
 
 fmt <- function(x, digits = 4L) formatC(x, format = "f", digits = digits)
@@ -325,7 +344,10 @@ notes <- c(
   "# Classic3 K-selection panel",
   "",
   "- Selection diagnostics are label-free; labels are used only for post-fit ARI/NMI.",
-  "- Bootstrap results use B=10 and are an exploratory stability diagnostic.",
+  sprintf(
+    "- Bootstrap results use B=%d and are an exploratory stability diagnostic.",
+    bootstrap_reps
+  ),
   "- Bootstrap fits use in-bag-only initializations. The SPLADE top-2000 representation remains fixed from the full training split.",
   "- An earlier full-train-initialized bootstrap diagnostic is superseded and is not used here.",
   "- Dense-vMF likelihood/IC and out-of-bag density criteria favor finer partitions near the upper K boundary.",
