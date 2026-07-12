@@ -36,6 +36,7 @@ source_k4_helpers <- function() {
   idx <- grep("fit_rossi_pair <-", lines, fixed = TRUE)[1]
   if (is.na(idx)) stop("Could not find helper boundary in rb2022_k4_pilot_compare_run.r.")
   eval(parse(text = lines[seq_len(idx - 1L)]), envir = .GlobalEnv)
+  source_no_bom(file.path("r", "methods", "eta_centered_exact_refit_260711.r"))
 }
 
 source_k4_helpers()
@@ -67,12 +68,24 @@ cfg <- list(
   adaptive_gamma = as.numeric(Sys.getenv("PAPER_S1_ADAPTIVE_GAMMA", "1")),
   adaptive_eps = as.numeric(Sys.getenv("PAPER_S1_ADAPTIVE_EPS", "1e-6")),
   select_ic = toupper(Sys.getenv("PAPER_S1_SELECT_IC", "BIC")),
+  eta_refit_mode = toupper(Sys.getenv("PAPER_S1_ETA_REFIT_MODE", "BIC_AFTER_EXACT")),
+  eta_refit_shortlist = as.integer(Sys.getenv("PAPER_S1_ETA_REFIT_SHORTLIST", "0")),
+  exact_refit_max_iter = as.integer(Sys.getenv("PAPER_S1_EXACT_REFIT_MAX_ITER", "160")),
   base_seed = as.integer(Sys.getenv("PAPER_S1_BASE_SEED", "20260702")),
   use_rcpp = parse_bool_env("PAPER_S1_USE_RCPP", "1"),
   out_dir = Sys.getenv("PAPER_S1_OUT_DIR", "results/paper_eta_first_s1_smoke_260702")
 )
 
 if (!cfg$select_ic %in% c("BIC", "EBIC")) stop("PAPER_S1_SELECT_IC must be BIC or EBIC.")
+if (!cfg$eta_refit_mode %in% c("BIC_AFTER_EXACT", "LEGACY_A")) {
+  stop("PAPER_S1_ETA_REFIT_MODE must be BIC_AFTER_EXACT or LEGACY_A.")
+}
+if (!is.finite(cfg$eta_refit_shortlist) || cfg$eta_refit_shortlist < 0L) {
+  stop("PAPER_S1_ETA_REFIT_SHORTLIST must be a nonnegative integer.")
+}
+if (!is.finite(cfg$exact_refit_max_iter) || cfg$exact_refit_max_iter < 1L) {
+  stop("PAPER_S1_EXACT_REFIT_MAX_ITER must be a positive integer.")
+}
 if (length(cfg$kappa) != cfg$K) stop("PAPER_S1_KAPPA length must match K.")
 if (cfg$common_q + cfg$K * cfg$decision_per_component > cfg$d) {
   stop("common_q + K * decision_per_component must be <= d.")
@@ -189,10 +202,19 @@ add_runtime_columns <- function(row, refit_status = "support_refit") {
     line_search_halving = NA_integer_, line_search_accepted = NA,
     adaptive_penalty = NA_integer_, adaptive_gamma = NA_real_, adaptive_eps = NA_real_,
     adaptive_weight_min = NA_real_, adaptive_weight_median = NA_real_, adaptive_weight_max = NA_real_,
-    refit_status = refit_status
+    refit_status = refit_status,
+    selector_rule = NA_character_, refit_type = NA_character_,
+    current_bic_before_selected_q = NA_real_, support_changed_after_refit = NA,
+    exact_converged = NA, exact_failed = NA, exact_iter = NA_integer_,
+    exact_constraint_error = NA_real_, exact_min_loglik_diff = NA_real_,
+    exact_min_q_diff = NA_real_, exact_refit_elapsed_sec = NA_real_,
+    exact_candidate_count = NA_integer_, exact_unique_support_count = NA_integer_,
+    exact_shortlist_requested = NA_integer_, exact_shortlist_applied = NA
   )
   for (nm in names(defaults)) if (!nm %in% names(row)) row[[nm]] <- defaults[[nm]]
-  row$refit_status <- refit_status
+  if (!"refit_status" %in% names(row) || is.na(row$refit_status) || row$refit_status == "") {
+    row$refit_status <- refit_status
+  }
   row
 }
 
@@ -574,16 +596,113 @@ fit_eta_path <- function(X, z, params, cfg, method = c("E-L", "E-GL", "E-AGL")) 
     if (active_count <= 1) break
   }
   tab <- do.call(rbind, rows)
-  idx <- safe_best(tab, cfg$select_ic)
-  fit_best <- fits[[idx]]
-  active <- if (method == "E-L") active_eta_l1(fit_best) else active_eta_centered(fit_best)
-  base <- tab[idx, , drop = FALSE]
-  if (!any(active)) {
-    out <- append_type_metrics(fit_zero_refit_row(method, base, active), active, params)
+  before_idx <- safe_best(tab, cfg$select_ic)
+  before_fit <- fits[[before_idx]]
+  before_active <- if (method == "E-L") {
+    active_eta_l1(before_fit)
   } else {
-    refit <- fit_support_refit(X, cfg$K, active, fit_best, max_iter = cfg$max_iter)
-    out <- method_row(method, refit, X, z, params, active, lambda_eta = base$lambda_eta)
+    active_eta_centered(before_fit)
+  }
+
+  if (cfg$eta_refit_mode == "LEGACY_A") {
+    active <- before_active
+    base <- tab[before_idx, , drop = FALSE]
+    if (!any(active)) {
+      out <- append_type_metrics(fit_zero_refit_row(method, base, active), active, params)
+    } else {
+      refit <- fit_support_refit(X, cfg$K, active, before_fit, max_iter = cfg$max_iter)
+      out <- method_row(method, refit, X, z, params, active, lambda_eta = base$lambda_eta)
+      out <- append_type_metrics(out, active, params)
+    }
+    out$selector_rule <- "BIC_before_legacy_A_refit"
+    out$refit_type <- "active_only_A"
+    out$current_bic_before_selected_q <- sum(before_active)
+    out$support_changed_after_refit <- FALSE
+  } else {
+    actives <- lapply(fits, function(candidate) {
+      if (method == "E-L") active_eta_l1(candidate) else active_eta_centered(candidate)
+    })
+    keys <- vapply(actives, function(active) {
+      if (!any(active)) "<empty>" else paste(which(active), collapse = ";")
+    }, character(1))
+    unique_keys <- unique(keys)
+    source_indices <- vapply(seq_along(unique_keys), function(u) {
+      indices <- which(keys == unique_keys[u])
+      indices[which.max(tab$loglik[indices])]
+    }, integer(1))
+    shortlist_applied <- method != "E-L" && cfg$eta_refit_shortlist > 0L &&
+      cfg$eta_refit_shortlist < length(unique_keys)
+    candidate_u <- if (shortlist_applied) {
+      rank_ic <- vapply(seq_along(source_indices), function(u) {
+        eta_centered_support_ic(
+          tab$loglik[source_indices[u]], actives[[source_indices[u]]],
+          nrow(X), cfg$K, ncol(X)
+        )[[cfg$select_ic]]
+      }, numeric(1))
+      rank_order <- order(
+        rank_ic,
+        tab$selected_q[source_indices], source_indices
+      )
+      rank_order[seq_len(min(cfg$eta_refit_shortlist, length(rank_order)))]
+    } else {
+      seq_along(unique_keys)
+    }
+    exact_candidates <- vector("list", length(candidate_u))
+    exact_rows <- vector("list", length(candidate_u))
+
+    for (j in seq_along(candidate_u)) {
+      u <- candidate_u[j]
+      source_idx <- source_indices[u]
+      active_u <- actives[[source_idx]]
+      exact_u <- fit_eta_centered_support_refit_exact(
+        X, active_u, fits[[source_idx]], max_iter = cfg$exact_refit_max_iter
+      )
+      ic_u <- eta_centered_support_ic(
+        exact_u$loglik, active_u, nrow(X), cfg$K, ncol(X)
+      )
+      exact_candidates[[j]] <- list(
+        fit = exact_u, active = active_u, source_idx = source_idx, ic = ic_u
+      )
+      exact_rows[[j]] <- data.frame(
+        candidate = u, source_idx = source_idx, support_key = unique_keys[u],
+        selected_q = sum(active_u), loglik = exact_u$loglik,
+        BIC = ic_u$BIC, EBIC = ic_u$EBIC,
+        failed = exact_u$failed, converged = exact_u$converged
+      )
+    }
+    exact_tab <- do.call(rbind, exact_rows)
+    valid <- !exact_tab$failed & is.finite(exact_tab[[cfg$select_ic]])
+    if (!any(valid)) stop("No valid exact centered-Eta refit candidate.")
+    selected_j <- which(valid)[which.min(exact_tab[[cfg$select_ic]][valid])]
+    selected_u <- candidate_u[selected_j]
+    selected <- exact_candidates[[selected_j]]
+    active <- selected$active
+    base <- tab[selected$source_idx, , drop = FALSE]
+    out <- method_row(
+      method, selected$fit, X, z, params, active,
+      lambda_eta = base$lambda_eta, ic = selected$ic
+    )
+    if (sum(active) == 0L && is.na(out$F1)) out$F1 <- 0
     out <- append_type_metrics(out, active, params)
+    out$selector_rule <- paste0(
+      cfg$select_ic, "_after_exact_B_refit",
+      if (shortlist_applied) paste0("_shortlist", length(candidate_u)) else "_full"
+    )
+    out$refit_status <- "exact_centered_support"
+    out$refit_type <- "centered_baseline_B"
+    out$current_bic_before_selected_q <- sum(before_active)
+    out$support_changed_after_refit <- keys[before_idx] != unique_keys[selected_u]
+    out$exact_converged <- selected$fit$converged
+    out$exact_failed <- selected$fit$failed
+    out$exact_iter <- selected$fit$iter
+    out$exact_constraint_error <- selected$fit$constraint_error
+    out$exact_min_loglik_diff <- selected$fit$min_loglik_diff
+    out$exact_min_q_diff <- selected$fit$min_q_diff
+    out$exact_refit_elapsed_sec <- selected$fit$elapsed_sec
+    out$exact_candidate_count <- nrow(exact_tab)
+    out$exact_unique_support_count <- length(unique_keys)
+    out$exact_shortlist_requested <- cfg$eta_refit_shortlist
+    out$exact_shortlist_applied <- shortlist_applied
   }
   out$penalty_target <- ifelse(method == "E-L", "eta_entry", "eta_group")
   out$penalty_group <- as.integer(method != "E-L")
@@ -671,6 +790,13 @@ for (rep_id in seq_len(cfg$n_rep)) {
         adaptive_weight_median = NA_real_, adaptive_weight_max = NA_real_,
         refit_status = conditionMessage(e), penalty_target = NA_character_,
         penalty_group = NA_integer_, penalty_adaptive = NA_integer_,
+        selector_rule = NA_character_, refit_type = NA_character_,
+        current_bic_before_selected_q = NA_real_, support_changed_after_refit = NA,
+        exact_converged = NA, exact_failed = NA, exact_iter = NA_integer_,
+        exact_constraint_error = NA_real_, exact_min_loglik_diff = NA_real_,
+        exact_min_q_diff = NA_real_, exact_refit_elapsed_sec = NA_real_,
+        exact_candidate_count = NA_integer_, exact_unique_support_count = NA_integer_,
+        exact_shortlist_requested = NA_integer_, exact_shortlist_applied = NA,
         scenario = cfg$scenario_id, rep = rep_id,
         n = cfg$n, d = cfg$d, K_true = cfg$K, common_q = cfg$common_q,
         decision_q = cfg$K * cfg$decision_per_component,
@@ -691,18 +817,52 @@ for (rep_id in seq_len(cfg$n_rep)) {
 raw <- do.call(rbind, row_list)
 
 safe_mean <- function(x) if (sum(!is.na(x)) == 0) NA_real_ else mean(x, na.rm = TRUE)
+
+aggregate_support_all_reps <- function(sub) {
+  reps <- length(unique(sub$rep))
+  true_q <- safe_mean(sub$true_q)
+  d_val <- safe_mean(sub$d)
+  selected_q <- ifelse(is.na(sub$selected_q), 0, sub$selected_q)
+  tpr <- ifelse(is.na(sub$TPR), 0, sub$TPR)
+  if (!is.finite(reps) || reps == 0 || !is.finite(true_q) || true_q <= 0 ||
+      !is.finite(d_val) || d_val <= true_q) {
+    return(data.frame(
+      valid_support_reps = sum(selected_q >= 1, na.rm = TRUE),
+      valid_support_rate = NA_real_,
+      zero_selected_reps = sum(selected_q < 1, na.rm = TRUE),
+      Precision_all_reps = NA_real_,
+      F1_all_reps = NA_real_
+    ))
+  }
+  tp <- sum(tpr * true_q)
+  selected <- sum(selected_q)
+  fp <- selected - tp
+  fn <- reps * true_q - tp
+  precision <- if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
+  f1 <- if ((2 * tp + fp + fn) > 0) 2 * tp / (2 * tp + fp + fn) else NA_real_
+  data.frame(
+    valid_support_reps = sum(selected_q >= 1, na.rm = TRUE),
+    valid_support_rate = sum(selected_q >= 1, na.rm = TRUE) / reps,
+    zero_selected_reps = sum(selected_q < 1, na.rm = TRUE),
+    Precision_all_reps = precision,
+    F1_all_reps = f1
+  )
+}
+
 num_cols <- names(raw)[vapply(raw, is.numeric, logical(1))]
 groups <- unique(raw[, c("scenario", "method")])
 summary <- do.call(rbind, lapply(seq_len(nrow(groups)), function(i) {
   sub <- raw[raw$scenario == groups$scenario[i] & raw$method == groups$method[i], ]
   means <- as.data.frame(as.list(vapply(sub[, num_cols, drop = FALSE], safe_mean, numeric(1))))
+  support_all <- aggregate_support_all_reps(sub)
   data.frame(
     scenario = groups$scenario[i],
     method = groups$method[i],
     reps = length(unique(sub$rep)),
     valid_reps = sum(!is.na(sub$ARI)),
     error_reps = sum(sub$method == "ERROR"),
-    zero_support_refit_reps = sum(sub$refit_status == "zero_active_support", na.rm = TRUE),
+    zero_support_refit_reps = sum(sub$selected_q == 0, na.rm = TRUE),
+    support_all,
     means,
     row.names = NULL
   )
@@ -732,21 +892,23 @@ notes <- c(
   sprintf("- Target pairwise direction angle: %.1f degrees.", cfg$target_angle_deg),
   sprintf("- Kappa: (%s).", paste(cfg$kappa, collapse = ", ")),
   sprintf("- Repetitions: %d.", cfg$n_rep),
-  sprintf("- Tuning: %s, all rows are support-refit results.", cfg$select_ic),
+  sprintf("- Tuning: %s; Eta refit mode: %s.", cfg$select_ic, cfg$eta_refit_mode),
+  sprintf("- Exact Eta refit: max_iter=%d; shortlist=%d (0 means B-full).",
+          cfg$exact_refit_max_iter, cfg$eta_refit_shortlist),
   sprintf("- Rcpp helpers: %s.", ifelse(cfg$use_rcpp, "ON", "OFF")),
   "",
   "## Summary",
   "",
-  "| method | reps | valid | ARI | true q | selected q | TPR | FPR | Precision | F1 | MSE_mu | MSE_kappa | MSE_centered_eta | common false | noise FPR |",
-  "|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
+  "| method | reps | valid ARI | valid support | ARI | true q | selected q | TPR | FPR | Precision all | F1 all | F1 valid | MSE_mu | MSE_kappa | MSE_centered_eta | common false | noise FPR |",
+  "|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
 )
 for (i in seq_len(nrow(summary))) {
   notes <- c(notes, sprintf(
-    "| %s | %d | %d | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |",
-    summary$method[i], summary$reps[i], summary$valid_reps[i],
+    "| %s | %d | %d | %d | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |",
+    summary$method[i], summary$reps[i], summary$valid_reps[i], summary$valid_support_reps[i],
     fmt(summary$ARI[i]), fmt(summary$true_q[i], 0), fmt(summary$selected_q[i], 2),
-    fmt(summary$TPR[i]), fmt(summary$FPR[i]), fmt(summary$Precision[i]),
-    fmt(summary$F1[i]), fmt(summary$MSE_mu[i]), fmt(summary$MSE_kappa[i]),
+    fmt(summary$TPR[i]), fmt(summary$FPR[i]), fmt(summary$Precision_all_reps[i]),
+    fmt(summary$F1_all_reps[i]), fmt(summary$F1[i]), fmt(summary$MSE_mu[i]), fmt(summary$MSE_kappa[i]),
     fmt(summary$MSE_centered_eta[i]), fmt(summary$common_false_selection_rate[i]),
     fmt(summary$noise_false_selection_rate[i])
   ))
@@ -759,6 +921,7 @@ notes <- c(
   "",
   "- True q is the posterior decision support size, not the number of common signal coordinates.",
   "- Common coordinates have equal eta values across components and should not be selected as decision coordinates.",
+  "- F1 all and Precision all aggregate all repetitions, while F1 valid uses the original valid-row average.",
   "- This run is a paper-simulation candidate; check smoke output before treating larger repetitions as final."
 )
 writeLines(notes, notes_path)
