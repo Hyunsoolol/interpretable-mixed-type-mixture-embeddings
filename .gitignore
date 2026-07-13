@@ -1,6 +1,25 @@
 # Large generated simulation outputs
 results/**/cells/
 results/**/*raw.csv
+results/**/*path_candidates.csv
+results/**/*candidate_supports.csv
+results/**/*.rds
+results/**/repeat_*/
+results/**/sourcecpp_cache/
+results/**/temp_methods/
+results/**/run.out
+results/**/run.err
+results/**/wrapper.out
+results/**/wrapper.err
+results/**/*.pid
+
+# Local data and session/cache artifacts
+/data/
+**/__pycache__/
+*.py[cod]
+.Rhistory
+.RData
+.Ruserdata
 
 # Rcpp benchmark/generated build artifacts
 results/rcpp_*/repeat_*/
@@ -15,8 +34,26 @@ r/rcpp/**/cache/
 *.dll
 *.log
 
-# Local R code kept on disk, not tracked
-r/*.r
-r/*.R
-r/**/*.r
-r/**/*.R
+# Local Obsidian workspace state
+.obsidian/workspace*.json
+.obsidian/cache/
+.obsidian/plugins/
+.trash/
+local_backup/
+
+# Executable research code is retained locally and not tracked
+r/
+scripts/
+legacy/python/
+docs/**/*.R
+docs/**/*.r
+*.py
+*.cpp
+*.cc
+*.cxx
+*.h
+*.hpp
+*.ps1
+*.bat
+*.cmd
+*.sh
