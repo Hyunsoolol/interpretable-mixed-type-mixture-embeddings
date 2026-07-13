@@ -126,9 +126,7 @@ $$
 B refit의 실용적 자유도는
 
 $$
-\operatorname{df}_B(m)
-=d+(K-1)m+(K-1)\mathbf 1(m>0),
-\qquad m=|\widehat S_{\mathrm{dec}}|,
+\mathrm{df}_B(m) = d + (K-1)m + (K-1)\mathbf{1}(m > 0), \qquad m = |\widehat{S}_{\mathrm{dec}}|,
 $$
 
 이며, 각 path support를 B로 refit한 observed log-likelihood에 BIC를 적용한다.
