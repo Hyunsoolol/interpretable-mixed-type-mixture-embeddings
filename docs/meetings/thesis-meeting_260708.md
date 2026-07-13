@@ -5,7 +5,7 @@
 - 선택 대상은 prototype support가 아니라 **posterior decision support**다.
 - 자연모수 $\eta_k=\kappa_k\mu_k$의 component 간 centered contrast를 사용한다.
 - 주 모형은 coordinate-wise group penalty인 E-CGL이며, E-ACGL은 adaptive 보조 확장이다.
-- 선택 후에는 $c_{\cdot j}=0$을 고정하고 공통 $\bar\eta_j$를 재추정하는 exact centered- $\eta$ refit(B)을 사용한다.
+- 선택 후에는 $c_{\cdot j}=0$을 고정하고 공통 $\bar\eta_j$를 재추정하는 exact centered-$\eta$ refit(B)을 사용한다.
 - $K$와 sparsity parameter $\lambda_\eta$는 분리해서 선택한다.
 
 전체 수치표는 [시뮬레이션 결과 부록](../simulations/thesis-simulation_260708.md)에 정리했다.
