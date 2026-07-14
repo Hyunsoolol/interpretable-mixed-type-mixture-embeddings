@@ -181,6 +181,9 @@ S1 환경: $K=4$, $n=1000$, $d=200$, common q=4, decision q=16, noise q=180, rep
 | Li et al. (2022) | common effect와 cluster-specific deviation 분해 |
 | 본 연구 | $\eta_{\cdot j}=\bar\eta_j\mathbf1+c_{\cdot j}$와 coordinate group selection |
 
+- 수축 편향 제거 (Belloni & Chernozhukov, 2013): 페널티로 변수만 솎아낸 뒤, Unpenalized Refitting을 해야만 살아남은 모수의 편향이 완벽히 소멸(Post-Lasso)
+
+- 엄밀한 BIC 정의 (Chen & Chen, 2008): BIC는 페널티로 왜곡된 우도가 아닌, Unpenalized MLE으로 평가되어야 이론적으로 타당하며, 이를 통해서만 고차원 노이즈를 완벽히 통제
 
 ## 3. 시뮬레이션 근거
 
