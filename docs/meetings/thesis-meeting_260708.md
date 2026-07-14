@@ -161,14 +161,14 @@ S1 환경: $K=4$, $n=1000$, $d=200$, common q=4, decision q=16, noise q=180, rep
 
 동일한 Study B 표본과 support에서 A와 B를 비교한 진단은 다음과 같다. 설정은 $K=4$, $n=300$, $d=200$, 목표 oracle Bayes error $5\%$, $\kappa=(30,40,50,60)$, path length 240, rep=5이다.
 
-| 모형 | selector/refit | selected q | common q | decision q | noise q | F1 | ARI | MSE_eta | MSE_kappa | log-likelihood |
-|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| E-CGL | BIC-before + A | 18.0 | 0.2 | 16.0 | 1.8 | 0.943 | 0.853 | 0.288 | 32.03 | 74,045.75 |
-| E-CGL | 같은 support + B | 18.0 | 0.2 | 16.0 | 1.8 | 0.943 | 0.849 | 0.291 | 9.40 | 74,437.76 |
-| E-CGL | BIC-after + B | 16.2 | 0.0 | 16.0 | 0.2 | 0.994 | 0.854 | 0.200 | 7.11 | 74,426.43 |
-| E-ACGL | BIC-before + A | 16.2 | 0.0 | 16.0 | 0.2 | 0.994 | 0.856 | 0.199 | 37.95 | 74,015.94 |
-| E-ACGL | 같은 support + B | 16.2 | 0.0 | 16.0 | 0.2 | 0.994 | 0.856 | 0.200 | 7.14 | 74,426.43 |
-| E-ACGL | BIC-after + B | 16.2 | 0.0 | 16.0 | 0.2 | 0.994 | 0.856 | 0.200 | 7.14 | 74,426.43 |
+|모형|변수 선택 및 재추정 전략|selected q|common q|decision q|noise q|F1|ARI|MSE_eta|MSE_kappa|log-likelihood|
+|---|---|---|---|---|---|---|---|---|---|---|
+|E-CGL|사전 BIC + Refit A|18.0|0.2|16.0|1.8|0.943|0.853|0.288|32.03|74,045.75|
+|E-CGL|사전 BIC + Refit B|18.0|0.2|16.0|1.8|0.943|0.849|0.291|9.40|74,437.76|
+|E-CGL|사후 BIC + Refit B|16.2|0.0|16.0|0.2|0.994|0.854|0.200|7.11|74,426.43|
+|E-ACGL|사전 BIC + Refit A|16.2|0.0|16.0|0.2|0.994|0.856|0.199|37.95|74,015.94|
+|E-ACGL|사전 BIC + Refit B|16.2|0.0|16.0|0.2|0.994|0.856|0.200|7.14|74,426.43|
+|E-ACGL|사후 BIC + Refit B|16.2|0.0|16.0|0.2|0.994|0.856|0.200|7.14|74,426.43|
 
 고정 support에서는 A와 B의 support 지표가 동일했다. B는 공통 baseline을 유지하면서 $\kappa$ 오차를 줄였고, BIC-after에서는 E-CGL의 noise 선택이 감소했다. 1,620개 candidate exact refit에서 실패는 없었으며 최대 centered-support 제약 오차는 $1.78\times10^{-15}$였다. 이 표는 refit 정의를 확인하기 위한 진단 결과다.
 
@@ -180,6 +180,7 @@ S1 환경: $K=4$, $n=1000$, $d=200$, common q=4, decision q=16, noise q=180, rep
 | Bondell and Reich (2009) | ANOVA level difference와 sum-to-zero constraint |
 | Li et al. (2022) | common effect와 cluster-specific deviation 분해 |
 | 본 연구 | $\eta_{\cdot j}=\bar\eta_j\mathbf1+c_{\cdot j}$와 coordinate group selection |
+
 
 ## 3. 시뮬레이션 근거
 
