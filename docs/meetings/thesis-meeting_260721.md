@@ -76,8 +76,7 @@ $$
 두 component의 posterior score 차이는
 
 $$
-\log\frac{\tau_{ik}}{\tau_{i\ell}}
-=
+\log\frac{\tau_{ik}}{\tau_{i\ell}}= 
 \log\frac{\pi_k}{\pi_\ell}
 +\log\frac{C_d(\lVert\eta_k\rVert_2)}{C_d(\lVert\eta_\ell\rVert_2)}
 +(\eta_k-\eta_\ell)^\top x_i.
