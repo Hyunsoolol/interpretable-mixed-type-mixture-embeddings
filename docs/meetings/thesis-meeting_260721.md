@@ -48,7 +48,7 @@ E-CGL:
 
 $$\boxed{\widehat\Theta_{\lambda_\eta}^{\mathrm{E-CGL}}=\underset{\Theta}{\arg\max}\{\ell(\Theta)-\lambda_\eta\sum_{j=1}^d\lVert c_{\cdot j}\rVert_2\}}.$$
 
-$$\operatorname{prox}_{\lambda_\eta/L}(\widetilde c_{\cdot j})=(1-\frac{\lambda_\eta}{L\lVert\widetilde c_{\cdot j}\rVert_2})_+\widetilde c_{\cdot j}.$$
+$$\mathrm{prox}_{\lambda_\eta/L}(\widetilde c_{\cdot j})=(1-\frac{\lambda_\eta}{L\lVert\widetilde c_{\cdot j}\rVert_2})_+\widetilde c_{\cdot j}.$$
 
 E-ACGL:
 
