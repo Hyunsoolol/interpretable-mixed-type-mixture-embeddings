@@ -14,8 +14,6 @@ $$\eta_k=\kappa_k\mu_k,\qquad \eta_k\neq0\ \Longrightarrow\ \kappa_k=\lVert\eta_
 
 $$\eta_k=0\ \Longrightarrow\ \kappa_k=0,\qquad \mu_k\ \text{is not identified}.$$
 
-위 유일성은 component-level 관계이며 mixture label switching은 별도이다.
-
 ![3차원 vMF 분포: 같은 평균방향에서 집중도 비교](figures/vmf_3d_concentration_260721.png)
 
 $$p(x_i;\Theta)=\sum_{k=1}^K\pi_k C_d(\kappa_k)\exp(\kappa_k\mu_k^\top x_i),\qquad \pi_k>0,\quad \sum_{k=1}^K\pi_k=1.$$
