@@ -1,4 +1,4 @@
-# 연구미팅 자료: Centered - $\eta$ Group Penalty (2026-07-21)
+# 연구미팅 자료: Centered - $\eta$ Group Penalty (2026-07-22)
 
 ## 1. vMF 혼합분포와 변수선택 목표
 
