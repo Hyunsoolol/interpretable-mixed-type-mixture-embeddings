@@ -70,7 +70,7 @@ $$\eta_k(A)=a(A)+b_k(A),\qquad a(A)^\top b_k(A)=0.$$
 
 $$\lVert a(A)\rVert_2=A,\qquad \lVert b_k(A)\rVert_2=\sqrt{\kappa_k^2-A^2}\quad\Longrightarrow\quad \lVert\eta_k(A)\rVert_2=\kappa_k.$$
 
-$$\widehat e_B(A)=\frac1M\sum_{m=1}^M\mathbf{1}\left\{\underset{k}{\arg\max}\ P(Z_m=k\mid X_m;\Theta(A))\neq Z_m\right\},\qquad A^*: \widehat e_B(A^*)\simeq e_B^{\mathrm{target}}.$$
+$$\widehat e_B(A)=\frac1M\sum_{m=1}^M\mathbf 1{\underset{k}{\arg\max}\ P(Z_m=k\mid X_m;\Theta(A))\neq Z_m},\qquad A^*: \widehat e_B(A^*)\simeq e_B^{\mathrm{target}}.$$
 
 $\kappa_k$는 고정하고 $A$를 이분법으로 조정한 뒤 독립 Monte Carlo 표본에서 달성한 $e_B$를 확인했다.
 
