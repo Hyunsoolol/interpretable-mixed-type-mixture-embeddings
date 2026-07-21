@@ -8,6 +8,14 @@ $$f(x_i\mid z_i=k,\mu_k,\kappa_k)=C_d(\kappa_k)\exp(\kappa_k\mu_k^\top x_i),\qqu
 
 $$C_d(\kappa)=\frac{\kappa^{d/2-1}}{(2\pi)^{d/2}I_{d/2-1}(\kappa)}.$$
 
+### 1.1 모수 관계와 component-level 유일성
+
+$$\eta_k=\kappa_k\mu_k,\qquad \eta_k\neq0\ \Longrightarrow\ \kappa_k=\lVert\eta_k\rVert_2>0,\quad \mu_k=\frac{\eta_k}{\lVert\eta_k\rVert_2}\quad\text{(unique)}.$$
+
+$$\eta_k=0\ \Longrightarrow\ \kappa_k=0,\qquad \mu_k\ \text{is not identified}.$$
+
+위 유일성은 component-level 관계이며 mixture label switching은 별도이다.
+
 ![3차원 vMF 분포: 같은 평균방향에서 집중도 비교](figures/vmf_3d_concentration_260721.png)
 
 *화살표는 평균방향 $\mu$이다. $\kappa$가 클수록 표본이 $\mu$ 주위에 집중된다.*
@@ -17,8 +25,6 @@ $$p(x_i;\Theta)=\sum_{k=1}^K\pi_k C_d(\kappa_k)\exp(\kappa_k\mu_k^\top x_i),\qqu
 $$S_{\mathrm{dec}}=\{j:\exists\,k\neq\ell,\ \eta_{kj}\neq\eta_{\ell j}\}.$$
 
 ## 2. $\mu$가 아닌 자연모수 $\eta$
-
-$$\eta_k=\kappa_k\mu_k,\qquad \kappa_k=\lVert\eta_k\rVert_2,\qquad \mu_k=\frac{\eta_k}{\lVert\eta_k\rVert_2}\quad(\eta_k\neq0).$$
 
 $$p(x_i;\Theta)=\sum_{k=1}^K\pi_k C_d(\lVert\eta_k\rVert_2)\exp(\eta_k^\top x_i).$$
 
@@ -61,6 +67,14 @@ E-CGL은 주 모형, E-ACGL은 adaptive 확장이다.
 ## 5. 핵심 시뮬레이션 근거
 
 $$e_B=P\{\underset{k}{\arg\max}\ P(Z=k\mid X;\Theta)\neq Z\}.$$
+
+$$\eta_k(A)=a(A)+b_k(A),\qquad a(A)^\top b_k(A)=0.$$
+
+$$\lVert a(A)\rVert_2=A,\qquad \lVert b_k(A)\rVert_2=\sqrt{\kappa_k^2-A^2}\quad\Longrightarrow\quad \lVert\eta_k(A)\rVert_2=\kappa_k.$$
+
+$$\widehat e_B(A)=\frac1M\sum_{m=1}^M\mathbf 1\{\underset{k}{\arg\max}\ P(Z_m=k\mid X_m;\Theta(A))\neq Z_m\},\qquad A^*: \widehat e_B(A^*)\simeq e_B^{\mathrm{target}}.$$
+
+$\kappa_k$는 고정하고 $A$를 이분법으로 조정한 뒤 독립 Monte Carlo 표본에서 달성한 $e_B$를 확인했다.
 
 E 계열은 true-PG, 120-point path, BIC-after centered-support refit을 사용했다.
 
