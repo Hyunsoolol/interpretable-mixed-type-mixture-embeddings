@@ -32,15 +32,7 @@ tags:
 
 최종 구조는 다음과 같다.
 
-$$
-\boxed{
-\text{E-CGL primary}
-+
-\text{M-CGL directional companion}
-+
-\text{adaptive extensions in secondary analyses}
-}
-$$
+$$\boxed{\text{E-CGL primary}+\text{M-CGL directional companion}+\text{adaptive extensions in secondary analyses}}$$
 
 M-CGL은 수학적으로 유효한 모형이며 제외하지 않는다. 다만 E-CGL과 같은
 추정 대상을 갖지 않고, 구현·반복실험·실자료 근거도 아직 E-CGL과 같은
@@ -50,24 +42,11 @@ M-CGL은 수학적으로 유효한 모형이며 제외하지 않는다. 다만 E
 
 vMF mixture에서
 
-$$
-x_i\mid z_i=k\sim\mathrm{vMF}(\mu_k,\kappa_k),
-\qquad
-\|\mu_k\|_2=1,
-\qquad
-\eta_k=\kappa_k\mu_k
-$$
+$$x_{i}\mid z_{i}=k\sim\mathrm{vMF}(\mu_{k},\kappa_{k}),\qquad \|\mu_{k}\|_{2}=1,\qquad \eta_{k}=\kappa_{k}\mu_{k}$$
 
 이고 pairwise posterior log-odds는
 
-$$
-\log\frac{\tau_k(x)}{\tau_\ell(x)}
-=
-\log\frac{\pi_kC_d(\kappa_k)}
-{\pi_\ell C_d(\kappa_\ell)}
-+
-(\eta_k-\eta_\ell)^\top x
-$$
+$$\log\frac{\tau_{k}(x)}{\tau_{\ell}(x)}=\log\frac{\pi_{k}C_{d}(\kappa_{k})}{\pi_{\ell}C_{d}(\kappa_{\ell})}+(\eta_{k}-\eta_{\ell})^{\top}x$$
 
 이다. 현재 논문의 중심 질문은 component 방향 자체의 희소성이 아니라,
 posterior linear decision score의 component 차이를 만드는 coordinate를
@@ -75,35 +54,15 @@ posterior linear decision score의 component 차이를 만드는 coordinate를
 
 Centering matrix를
 
-$$
-H=I_K-\frac{1}{K}\mathbf 1\mathbf 1^\top
-$$
+$$H=I_{K}-\frac{1}{K}\mathbf{1}\mathbf{1}^{\top}$$
 
 로 두면 주 추정 대상은
 
-$$
-S_E^*
-=
-\left\{
-j:
-\left\|(H\eta^*)_{\cdot j}\right\|_2>0
-\right\}
-$$
+$$S_{E}^{*}=\{j:\|(H\eta^{*})_{\cdot j}\|_{2}>0\}$$
 
 이다. 따라서 이 추정 대상을 직접 정규화하는
 
-$$
-\widehat\Theta_{E\text{-}CGL}
-=
-\arg\max_\Theta
-\left[
-\ell(\Theta)
--
-\lambda_\eta
-\sum_{j=1}^d
-\left\|(H\eta)_{\cdot j}\right\|_2
-\right]
-$$
+$$\widehat{\Theta}_{E\text{-CGL}}=\arg\max_{\Theta}\{\ell(\Theta)-\lambda_{\eta}\sum_{j=1}^{d}\|(H\eta)_{\cdot j}\|_{2}\}$$
 
 를 주 제안 모형으로 둔다.
 
@@ -111,31 +70,11 @@ $$
 
 M-CGL은 다음의 유효한 제약 최적화 문제이다.
 
-$$
-\widehat\Theta_{M\text{-}CGL}
-=
-\arg\max_\Theta
-\left[
-\ell(\Theta)
--
-\lambda_\mu
-\sum_{j=1}^d
-\left\|(H\mu)_{\cdot j}\right\|_2
-\right],
-\qquad
-\mu_k\in\mathbb S^{d-1}.
-$$
+$$\widehat{\Theta}_{M\text{-CGL}}=\arg\max_{\Theta}\{\ell(\Theta)-\lambda_{\mu}\sum_{j=1}^{d}\|(H\mu)_{\cdot j}\|_{2}\},\qquad \mu_{k}\in\mathbb{S}^{d-1}$$
 
 그 추정 대상은
 
-$$
-S_M^*
-=
-\left\{
-j:
-\left\|(H\mu^*)_{\cdot j}\right\|_2>0
-\right\},
-$$
+$$S_{M}^{*}=\{j:\|(H\mu^{*})_{\cdot j}\|_{2}>0\}$$
 
 즉 component 간 **방향 이질성 support**이다. $H\mu$는 새로운 방향 모수가
 아니라 구면에 매립된 방향들의 extrinsic contrast이므로, $H\mu$ 자체가
@@ -151,21 +90,15 @@ component-entry prototype sparsity를 추정하며, M-CGL은 본 연구에서
 
 ### 4.1 공통 concentration
 
-$$
-\kappa_1=\cdots=\kappa_K=\kappa
-$$
+$$\kappa_{1}=\cdots=\kappa_{K}=\kappa$$
 
 이면
 
-$$
-H\eta=H(\kappa\mu)=\kappa H\mu
-$$
+$$H\eta=H(\kappa\mu)=\kappa H\mu$$
 
 이므로
 
-$$
-\boxed{S_M^*=S_E^*.}
-$$
+$$\boxed{S_{M}^{*}=S_{E}^{*}}$$
 
 이 경우 M-CGL과 E-CGL은 같은 population support를 목표로 한다. 따라서
 공통 $\kappa$ 실험은 두 수치 구현의 support equivalence를 확인하는
@@ -173,48 +106,29 @@ matched diagnostic이다.
 
 ### 4.2 서로 다른 concentration
 
-$$
-\eta=D_\kappa\mu,
-\qquad
-D_\kappa=\mathrm{diag}(\kappa_1,\ldots,\kappa_K)
-$$
+$$\eta=D_{\kappa}\mu,\qquad D_{\kappa}=\mathrm{diag}(\kappa_{1},\ldots,\kappa_{K})$$
 
 이면 일반적으로
 
-$$
-H\eta=HD_\kappa\mu\neq D_\kappa H\mu.
-$$
+$$H\eta=HD_{\kappa}\mu\neq D_{\kappa}H\mu$$
 
 따라서
 
-$$
-S_M^*\neq S_E^*
-$$
+$$S_{M}^{*}\neq S_{E}^{*}$$
 
 일 수 있다. 이는 어느 한 방법의 실패가 아니라 추정 대상의 차이이다.
 
 특히
 
-$$
-\mu_1=\cdots=\mu_K=\mu,
-\qquad
-\kappa_k\neq\kappa_\ell
-$$
+$$\mu_{1}=\cdots=\mu_{K}=\mu,\qquad \kappa_{k}\neq\kappa_{\ell}$$
 
 이면
 
-$$
-H\mu=0
-$$
+$$H\mu=0$$
 
-이지만, $\mu_j\neq0$인 coordinate에서는
+이지만, $\mu_{j}\neq0$인 coordinate에서는
 
-$$
-(H\eta)_{\cdot j}
-=
-\mu_jH(\kappa_1,\ldots,\kappa_K)^\top
-\neq0
-$$
+$$(H\eta)_{\cdot j}=\mu_{j}H(\kappa_{1},\ldots,\kappa_{K})^{\top}\neq0$$
 
 일 수 있다. M-CGL은 방향 차이가 없다고 판단하고, E-CGL은 concentration
 차이가 posterior linear score에 만든 coordinate 차이를 선택한다.
@@ -238,7 +152,7 @@ parameterization 차이를 직접 검증한다.
 
 | 설정 | 저장 결과 | 해석 |
 |---|---|---|
-| common $\kappa=(32,32,32,32)$, rep=5 | 네 방법 모두 selected $q=8$, target F1=1.000 | $S_M^*=S_E^*$ 확인 |
+| common $\kappa=(32,32,32,32)$, rep=5 | 네 방법 모두 selected $q=8$, target F1=1.000 | $S_{M}^{*}=S_{E}^{*}$ 확인 |
 | heterogeneous $\kappa=(22,28,34,40)$, rep=5 | M-CGL은 $q=8$, $F_{1,M}=1.000$; E-CGL은 $q=10.6$, $F_{1,E}=0.934$ | 서로 다른 estimand를 회복하는 방향 확인 |
 | Study-B-aligned $\kappa=(30,40,50,60)$, rep=5 | M-CGL은 $q=8$, E-CGL은 $q=12$; 각 target F1=1.000 | 방향 좌표 8개와 concentration-driven 좌표 4개가 분리됨 |
 | same $\mu$/different $\kappa$, rep=3 | truth-blind BIC에서 M 계열 $q=0$--1, E 계열 $q=10$--11 | concentration-only 차이의 방향 확인; 최종 반복 근거는 아님 |
@@ -271,7 +185,7 @@ E-CGL F1이 0.244--0.994로 변하여 sparse decision-support 가정의 한계�
 ### 6.3 실자료와 계산 근거
 
 Classic3에서 E-CGL은 2,000개 좌표 중 1,347개를 선택하여 32.7%를
-제거하면서 dense free-$\kappa_k$ vMF와 같은 test ARI 0.9927을
+제거하면서 dense free-$\kappa_{k}$ vMF와 같은 test ARI 0.9927을
 유지하였다. 반복 재선택의 Nogueira stability는 0.884였다. E-ACGL은
 support 크기와 held-out 성능을 개선하지 않았다.
 
@@ -326,7 +240,7 @@ global optimum, selector consistency 또는 일반적 수렴을 의미하지는 
 ### 9.1 본문
 
 1. **Introduction:** posterior decision support를 연구 질문으로 명시
-2. **Model and estimand:** $S_E^*$를 주 estimand, $S_M^*$를 대응 estimand로 정의
+2. **Model and estimand:** $S_{E}^{*}$를 주 estimand, $S_{M}^{*}$를 대응 estimand로 정의
 3. **Proposed method:** E-CGL 목적함수, 최적화, exact refit, BIC-after
 4. **Adaptive extension:** E-ACGL을 선택적 확장으로 정의
 5. **Directional companion:** M-CGL의 목적함수와 구면 제약 최적화를 요약
@@ -351,7 +265,7 @@ global optimum, selector consistency 또는 일반적 수렴을 의미하지는 
    decision-score support를 직접 대상으로 한다.
 2. M-CGL은 수학적으로 유효한 centered directional-support 대응 모형이다.
 3. 공통 $\kappa$에서는 두 population support가 일치한다.
-4. 서로 다른 $\kappa_k$에서는 두 estimand가 달라질 수 있다.
+4. 서로 다른 $\kappa_{k}$에서는 두 estimand가 달라질 수 있다.
 5. E-CGL은 지정된 sparse-decision Study B와 Classic3에서 support 축약
    근거를 보였으며, dense/weak setting에서는 한계가 확인되었다.
 6. Adaptive 방법은 기본 방법을 일관되게 개선하지 않아 보조 확장으로 둔다.
@@ -374,7 +288,7 @@ global optimum, selector consistency 또는 일반적 수렴을 의미하지는 
 
 1. M fit별 명시적 seed와 실행 순서 독립성 확보
 2. KKT/score residual, outer·ADMM·sphere convergence,
-   $\min_k\widehat\pi_k$, $\min_k N_k$ 기록
+   $\min_{k}\widehat{\pi}_{k}$, $\min_{k}N_{k}$ 기록
 3. common-$\kappa$, heterogeneous-$\kappa$,
    same-$\mu$/different-$\kappa$ 각각 rep=20
 4. 모든 후보 support에 동일한 truth-blind multistart refit 적용
