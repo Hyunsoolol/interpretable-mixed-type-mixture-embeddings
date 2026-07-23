@@ -1,3 +1,4 @@
+
 ---
 title: M/E-CGL Paper Structure Decision
 type: decision
@@ -11,6 +12,7 @@ tags:
   - simulation
   - manuscript
 ---
+
 
 # M/E-CGL 논문 구조 최종 결정
 
