@@ -61,8 +61,7 @@ $$
 이고 pairwise posterior log-odds는
 
 $$
-\log\frac{\tau_k(x)}{\tau_\ell(x)}
-=
+\log\frac{\tau_k(x)}{\tau_\ell(x)}=
 \log\frac{\pi_kC_d(\kappa_k)}
 {\pi_\ell C_d(\kappa_\ell)}
 +
@@ -93,8 +92,7 @@ $$
 이다. 따라서 이 추정 대상을 직접 정규화하는
 
 $$
-\widehat\Theta_{E\text{-}CGL}
-=
+\widehat\Theta_{E\text{-}CGL} = 
 \arg\max_\Theta
 \left[
 \ell(\Theta)
@@ -112,10 +110,7 @@ $$
 M-CGL은 다음의 유효한 제약 최적화 문제이다.
 
 $$
-\widehat\Theta_{M\text{-}CGL}
-=
-\arg\max_\Theta
-\left[
+\widehat\Theta_{M\text{-}CGL} = \arg\max_\Theta \left[
 \ell(\Theta)
 -
 \lambda_\mu
@@ -129,8 +124,7 @@ $$
 그 추정 대상은
 
 $$
-S_M^*
-=
+S_M^* =
 \left\{
 j:
 \left\|(H\mu^*)_{\cdot j}\right\|_2>0
