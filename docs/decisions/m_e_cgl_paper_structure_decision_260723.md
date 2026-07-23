@@ -362,15 +362,3 @@ penalized mixture에서 사용하는 practical model-selection approximation으�
 위 검증 결과가 부정적이면 M-CGL의 본문 결과 비중을 줄이고 Supplement
 diagnostic으로 이동한다. 그렇더라도 E-CGL을 주 제안 모형으로 두는 현재
 논문 구조는 유지한다.
-
-## 12. 근거 파일
-
-- [M/E parallel plan](../planning/m_e_cgl_parallel_paper_plan_260722.md)
-- [M/E implementation inventory](../planning/m_e_model_implementation_inventory_260722.md)
-- [Matched rep=5 notes](../../results/m_e_cgl_matched_rep5_combined_260723/m_e_cgl_matched_rep5_notes.md)
-- [Study-B-aligned heterogeneous notes](../../results/m_e_cgl_matched_studyb_heterogeneous_kappa_rep5_260723/m_e_cgl_matched_notes.md)
-- [Truth-blind retry audit](../../results/m_e_cgl_truth_blind_retry_ordered_v2_260723/truth_blind_retry_notes.md)
-- [Study B rep=100 validation](../../results/studyb_all_model_final_rep100_260717/studyb_final_all12_final_validation_notes.md)
-- [Study B rep=100 summary](../../results/studyb_all_model_final_rep100_260717/studyb_final_all12_summary.csv)
-- [Real-data results](../manuscript/thesis-realdata_260714.md)
-- [Claim-evidence matrix](../manuscript/claim_evidence_matrix_260714.md)
