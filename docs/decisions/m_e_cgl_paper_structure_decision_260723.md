@@ -1,4 +1,3 @@
-
 ---
 title: M/E-CGL Paper Structure Decision
 type: decision
@@ -7,12 +6,11 @@ date_created: 2026-07-23
 date_updated: 2026-07-23
 source_of_truth: true
 tags:
-  - methods
-  - estimand
-  - simulation
-  - manuscript
+  - methods
+  - estimand
+  - simulation
+  - manuscript
 ---
-
 
 # M/E-CGL 논문 구조 최종 결정
 
@@ -267,35 +265,35 @@ High-Dimensional vMF Mixtures**
 ### 9.2 본문
 
 1. **Introduction**
-   - 고차원 방향자료의 model-based clustering 문제
-   - sparse prototype support와 posterior linear decision-score support의 구분
-   - E-CGL의 연구 질문과 기여 범위
+   - 고차원 방향자료의 model-based clustering 문제
+   - sparse prototype support와 posterior linear decision-score support의 구분
+   - E-CGL의 연구 질문과 기여 범위
 2. **vMF mixture and estimands**
-   - vMF mixture와 pairwise posterior log-odds
-   - 주 추정 대상 $S_{E}^{*}$
-   - 방향성 대응 추정 대상 $S_{M}^{*}$
+   - vMF mixture와 pairwise posterior log-odds
+   - 주 추정 대상 $S_{E}^{*}$
+   - 방향성 대응 추정 대상 $S_{M}^{*}$
 3. **E-CGL methodology**
-   - centered natural-parameter group penalty
-   - proximal EM-type update와 step-halving safeguard
-   - exact centered-support refit
-   - BIC-after 주 선택 규칙, EBIC 민감도, practical df approximation
+   - centered natural-parameter group penalty
+   - proximal EM-type update와 step-halving safeguard
+   - exact centered-support refit
+   - BIC-after 주 선택 규칙, EBIC 민감도, practical df approximation
 4. **Relation to M-CGL**
-   - M-CGL의 유효한 구면 제약 목적함수
-   - common-$\kappa$ support equivalence
-   - heterogeneous-$\kappa$ estimand divergence
-   - 결합 제약이 만드는 계산상의 차이
+   - M-CGL의 유효한 구면 제약 목적함수
+   - common-$\kappa$ support equivalence
+   - heterogeneous-$\kappa$ estimand divergence
+   - 결합 제약이 만드는 계산상의 차이
 5. **Simulation studies**
-   - oracle Bayes error 기반 Study B
-   - M/E matched estimand diagnostic
-   - shared-background와 dense/weak negative control
+   - oracle Bayes error 기반 Study B
+   - M/E matched estimand diagnostic
+   - shared-background와 dense/weak negative control
 6. **Real-data analysis**
-   - Classic3 E-CGL 주 분석
-   - 선택 좌표와 signed centered-$\eta$ contrast 해석
-   - M-CGL은 matched 검증 완료 후 보조 결과로 포함
+   - Classic3 E-CGL 주 분석
+   - 선택 좌표와 signed centered-$\eta$ contrast 해석
+   - M-CGL은 matched 검증 완료 후 보조 결과로 포함
 7. **Discussion**
-   - estimand별 적용 범위
-   - adaptive 확장과 tuning 민감도
-   - dense support, weak signal, $K$ 선택의 한계
+   - estimand별 적용 범위
+   - adaptive 확장과 tuning 민감도
+   - dense support, weak signal, $K$ 선택의 한계
 
 E-CGL의 최적화는 자연모수의 유클리드 공간에서 수행되지만 mixture
 likelihood 자체는 비볼록이다. 따라서 계산상 장점은 “제약 없는 proximal
@@ -324,12 +322,12 @@ penalized mixture에서 사용하는 practical model-selection approximation으�
 사용 가능한 주장은 다음과 같다.
 
 1. E-CGL은 centered natural-parameter contrast를 통해 posterior log-odds의
-   선형 좌표항을 만드는 support를 직접 대상으로 한다.
+   선형 좌표항을 만드는 support를 직접 대상으로 한다.
 2. M-CGL은 수학적으로 유효한 centered directional-support 대응 모형이다.
 3. 공통 $\kappa$에서는 두 population support가 일치한다.
 4. 서로 다른 $\kappa_{k}$에서는 두 estimand가 달라질 수 있다.
 5. E-CGL은 지정된 sparse-decision Study B와 Classic3에서 support 축약
-   근거를 보였으며, dense/weak setting에서는 한계가 확인되었다.
+   근거를 보였으며, dense/weak setting에서는 한계가 확인되었다.
 6. Adaptive 방법은 기본 방법을 일관되게 개선하지 않아 보조 확장으로 둔다.
 
 다음 주장은 사용하지 않는다.
@@ -353,9 +351,9 @@ penalized mixture에서 사용하는 practical model-selection approximation으�
 
 1. M fit별 명시적 seed와 실행 순서 독립성 확보
 2. KKT/score residual, outer·ADMM·sphere convergence,
-   $\min_{k}\widehat{\pi}_{k}$, $\min_{k}N_{k}$ 기록
+   $\min_{k}\widehat{\pi}_{k}$, $\min_{k}N_{k}$ 기록
 3. common-$\kappa$, heterogeneous-$\kappa$,
-   same-$\mu$/different-$\kappa$ 각각 rep=20
+   same-$\mu$/different-$\kappa$ 각각 rep=20
 4. 모든 후보 support에 동일한 truth-blind multistart refit 적용
 5. BIC/EBIC 및 $m=0$ df 민감도 확인
 6. Classic3에서 동일 split·초기값을 사용한 M-CGL/E-CGL matched pilot
@@ -364,5 +362,3 @@ penalized mixture에서 사용하는 practical model-selection approximation으�
 위 검증 결과가 부정적이면 M-CGL의 본문 결과 비중을 줄이고 Supplement
 diagnostic으로 이동한다. 그렇더라도 E-CGL을 주 제안 모형으로 두는 현재
 논문 구조는 유지한다.
----
-여기서 수식 사진 처럼 잘 나오는 부분 수정해서 전체 다시 전달해줘.
