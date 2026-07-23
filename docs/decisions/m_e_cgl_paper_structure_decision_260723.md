@@ -224,31 +224,82 @@ global optimum, selector consistency 또는 일반적 수렴을 의미하지는 
 
 이 비대칭이 M/E co-primary 구조를 채택하지 않는 직접적인 실증 근거이다.
 
-## 8. 전문가 독립 검토
+## 8. 검토 결과
 
-| 검토 관점 | 독립 판정 |
+| 검토 관점 | 판정 |
 |---|---|
 | 이론·수학 | posterior decision support에는 E-CGL이 직접 대응하며 M-CGL은 별도 directional estimand |
 | 시뮬레이션 | E-CGL의 rep=100 근거와 M-CGL의 rep=5/3 근거를 동일 비중으로 둘 수 없음 |
 | 계산·최적화 | M-CGL은 유효하지만 비분리 제약 최적화와 selector 민감성 때문에 현재 diagnostic 단계 |
 | 저널 편집·리뷰 | E-only는 비교 누락 위험, co-primary는 초점과 근거 불균형 위험; companion 구조가 가장 명확함 |
 
-네 검토 모두 `E-CGL primary + M-CGL companion`에 동의하였다.
+각 기준은 `E-CGL primary + M-CGL companion` 구조를 지지한다.
+
+외부 구성안의 세부 제안은 다음과 같이 반영한다.
+
+| 제안 | 판정 | 원고 반영 |
+|---|---|---|
+| estimand를 estimator보다 먼저 정의 | 수용 | $S_{E}^{*}$와 $S_{M}^{*}$를 방법론보다 먼저 정의 |
+| E-CGL 주방법, M-CGL directional companion | 수용 | 최종 원고 구조로 유지 |
+| common-$\kappa$ equivalence와 heterogeneous-$\kappa$ divergence | 수용 | 독립 이론 절로 구성 |
+| exact centered-support refit 강조 | 수용 | support 제약과 공통 baseline을 구분하여 기술 |
+| adaptive 방법을 Supplement 중심으로 배치 | 수용 | 본문에는 정의와 핵심 민감도만 제시 |
+| EBIC를 주 선택 기준으로 사용 | 수정 | 현재 구현과 확정 결과에 맞춰 BIC-after를 주 기준, EBIC를 민감도로 사용 |
+| proximal EM의 단조증가·수렴을 보장 | 수정 | proximal EM-type update와 step-halving safeguard로 기술; global convergence는 주장하지 않음 |
+| M-CGL이 본질적으로 매우 불안정 | 기각 | 유효한 제약 모형이며, 현재 구현에서 결합 최적화와 selector 민감성이 관찰되었다고 기술 |
+| posterior decision 전체를 직접 선택 | 수정 | posterior log-odds의 **선형 좌표항**을 만드는 support로 한정 |
+| 새로운 estimand라고 단정 | 보류 | 문헌 검토 전에는 “정의하고 직접 추정한다”로 기술 |
+| 완벽한 filtering 또는 압도적 성능 | 기각 | cell별 수치와 적용 조건을 함께 보고 |
+| 현재 상태로 상위 저널 준비가 완료됨 | 기각 | M 반복 검증, matched 실자료, IC 민감도와 원고화가 남아 있음 |
 
 ## 9. 최종 원고 구성
 
-### 9.1 본문
+### 9.1 가제
 
-1. **Introduction:** posterior decision support를 연구 질문으로 명시
-2. **Model and estimand:** $S_{E}^{*}$를 주 estimand, $S_{M}^{*}$를 대응 estimand로 정의
-3. **Proposed method:** E-CGL 목적함수, 최적화, exact refit, BIC-after
-4. **Adaptive extension:** E-ACGL을 선택적 확장으로 정의
-5. **Directional companion:** M-CGL의 목적함수와 구면 제약 최적화를 요약
-6. **Theoretical relation:** common-$\kappa$ equivalence와 heterogeneous-$\kappa$ divergence
-7. **Simulation:** Study B는 E-CGL 중심, M/E matched estimand diagnostic은 별도 subsection
-8. **Real data:** Classic3 E-CGL 주 분석; M-CGL은 검증 완료 시 보조 비교
+**Centered Natural-Parameter Group Penalties for Posterior Decision Support in
+High-Dimensional vMF Mixtures**
 
-### 9.2 Supplement
+이 제목은 가제이며, “posterior decision support”의 선행 정의와 사용례를
+문헌 검토한 뒤 신규성 표현의 범위를 확정한다.
+
+### 9.2 본문
+
+1. **Introduction**
+   - 고차원 방향자료의 model-based clustering 문제
+   - sparse prototype support와 posterior linear decision-score support의 구분
+   - E-CGL의 연구 질문과 기여 범위
+2. **vMF mixture and estimands**
+   - vMF mixture와 pairwise posterior log-odds
+   - 주 추정 대상 $S_{E}^{*}$
+   - 방향성 대응 추정 대상 $S_{M}^{*}$
+3. **E-CGL methodology**
+   - centered natural-parameter group penalty
+   - proximal EM-type update와 step-halving safeguard
+   - exact centered-support refit
+   - BIC-after 주 선택 규칙, EBIC 민감도, practical df approximation
+4. **Relation to M-CGL**
+   - M-CGL의 유효한 구면 제약 목적함수
+   - common-$\kappa$ support equivalence
+   - heterogeneous-$\kappa$ estimand divergence
+   - 결합 제약이 만드는 계산상의 차이
+5. **Simulation studies**
+   - oracle Bayes error 기반 Study B
+   - M/E matched estimand diagnostic
+   - shared-background와 dense/weak negative control
+6. **Real-data analysis**
+   - Classic3 E-CGL 주 분석
+   - 선택 좌표와 signed centered-$\eta$ contrast 해석
+   - M-CGL은 matched 검증 완료 후 보조 결과로 포함
+7. **Discussion**
+   - estimand별 적용 범위
+   - adaptive 확장과 tuning 민감도
+   - dense support, weak signal, $K$ 선택의 한계
+
+E-CGL의 최적화는 자연모수의 유클리드 공간에서 수행되지만 mixture
+likelihood 자체는 비볼록이다. 따라서 계산상 장점은 “제약 없는 proximal
+구조”로 기술하며 global optimum이나 일반적 수렴을 주장하지 않는다.
+
+### 9.3 Supplement
 
 - E-ACGL과 M-ACGL의 전체 결과
 - M-CGL ADMM·product-of-spheres 계산 상세와 수치 잔차
@@ -257,12 +308,21 @@ global optimum, selector consistency 또는 일반적 수렴을 의미하지는 
 - runtime과 selector sensitivity
 - dense/weak negative-control 전체 결과
 
+### 9.4 모형 선택과 자유도 서술
+
+주 선택 규칙은 현재 확정 결과와 일치하는 BIC-after-refit이다. EBIC는
+고차원 선택 민감도로 보고하며, 자료 근거 없이 주 선택 규칙으로 승격하지
+않는다. 자유도는 exact effective degrees of freedom가 아니라 비정규
+penalized mixture에서 사용하는 practical model-selection approximation으로
+명시한다. 엄밀한 자유도를 일반적인 open problem이라고 단정하지 않고,
+본 연구에서 도출하지 않았다는 범위로 한정한다.
+
 ## 10. 원고에서 사용할 주장
 
 사용 가능한 주장은 다음과 같다.
 
-1. E-CGL은 centered natural-parameter contrast를 통해 posterior linear
-   decision-score support를 직접 대상으로 한다.
+1. E-CGL은 centered natural-parameter contrast를 통해 posterior log-odds의
+   선형 좌표항을 만드는 support를 직접 대상으로 한다.
 2. M-CGL은 수학적으로 유효한 centered directional-support 대응 모형이다.
 3. 공통 $\kappa$에서는 두 population support가 일치한다.
 4. 서로 다른 $\kappa_{k}$에서는 두 estimand가 달라질 수 있다.
@@ -279,6 +339,9 @@ global optimum, selector consistency 또는 일반적 수렴을 의미하지는 
 - adaptive penalty가 항상 기본 penalty보다 우월하다.
 - 현재 optimizer가 global optimum 또는 일반적 수렴을 보장한다.
 - 현재 BIC 자유도가 exact effective degrees of freedom이다.
+- M-CGL이 구면 제약 때문에 본질적으로 불안정하거나 성립하지 않는다.
+- posterior decision support가 prototype support보다 일반적으로 우월하다.
+- 문헌 검토 없이 posterior decision support를 새로운 estimand라고 단정한다.
 
 ## 11. 남은 필수 검증
 
