@@ -158,5 +158,5 @@ $$
 $$
 
 본문에는 $S_\mu$와 $S_\eta$의 관계와 matched structural diagnostic을
-포함하고, M-CGL의 구면 최적화·수렴 진단과 adaptive 결과는 Supplement에
-배치한다.
+포함하고, M-CGL의 구면 최적화, 수렴 진단과 adaptive 결과는 Supplement에
+배치하는 게 어떨지.
