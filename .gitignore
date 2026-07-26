@@ -57,3 +57,15 @@ docs/**/*.r
 *.bat
 *.cmd
 *.sh
+
+# Repository allowlist: keep all other research artifacts local-only.
+/*
+!/.gitignore
+!/docs/
+/docs/*
+!/docs/meetings/
+!/docs/meetings/**
+!/docs/methods/
+!/docs/methods/**
+!/docs/simulations/
+!/docs/simulations/**
