@@ -20,8 +20,7 @@ $$
 \mathrm{Matched\ comparator}
 :
 \qquad
-\mathrm{M\!-\!CGL}
-=
+\mathrm{M\!-\!CGL} =
 (H_KM,\ \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
 
@@ -52,8 +51,7 @@ $$
 ## 3. Centered group penalty
 
 $$
-\widehat\Theta_{\lambda_\mu}^{\mathrm{M-CGL}}
-=
+\widehat\Theta_{\lambda_\mu}^{\mathrm{M-CGL}} =
 \underset{\pi,\kappa,M}{\arg\max}
 \Big[
 \ell(\pi,\kappa,M)
@@ -64,8 +62,7 @@ $$
 $$
 
 $$
-\widehat\Theta_{\lambda_\eta}^{\mathrm{E-CGL}}
-=
+\widehat\Theta_{\lambda_\eta}^{\mathrm{E-CGL}} =
 \underset{\pi,E}{\arg\max}
 \Big[
 \ell(\pi,E)
