@@ -13,7 +13,7 @@ $$
 \qquad
 \mathrm{E-CGL}
 :
-(H_KE,\ \mathrm{group}\ L_2,\ \mathrm{centered}).
+(\boldsymbol{c}_j^{(\eta)},\ \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
 
 $$
@@ -21,7 +21,7 @@ $$
 :
 \qquad
 \mathrm{M-CGL}=
-(H_KM,\ \mathrm{group}\ L_2,\ \mathrm{centered}).
+(\boldsymbol{c}_j^{(\mu)},\ \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
 
 ## 2. 추정 대상
@@ -35,27 +35,39 @@ a_{k\ell}+(\eta_k-\eta_\ell)^{\mathsf T}x.
 $$
 
 $$
-H_K=I_K-\frac{1}{K}{\boldsymbol 1}_K{\boldsymbol 1}_K^{\mathsf T},
+\boldsymbol{\mu}_j=(\mu_{1j},\ldots,\mu_{Kj})^{\mathsf T},
 \qquad
-E=D_\kappa M,
+\bar\mu_j=\frac{1}{K}\sum_{k=1}^{K}\mu_{kj},
 \qquad
-D_\kappa=\mathrm{diag}(\kappa_1,\ldots,\kappa_K).
+\boldsymbol{c}_j^{(\mu)}=\boldsymbol{\mu}_j-\bar\mu_j\mathbf{1}_K,
+\qquad
+c_{kj}^{(\mu)}=\mu_{kj}-\bar\mu_j.
+$$
+
+$$
+\boldsymbol{\eta}_j=(\eta_{1j},\ldots,\eta_{Kj})^{\mathsf T},
+\qquad
+\bar\eta_j=\frac{1}{K}\sum_{k=1}^{K}\eta_{kj},
+\qquad
+\boldsymbol{c}_j^{(\eta)}=\boldsymbol{\eta}_j-\bar\eta_j\mathbf{1}_K,
+\qquad
+c_{kj}^{(\eta)}=\eta_{kj}-\bar\eta_j.
 $$
 
 | 대상 | Support | 모형 |
 |---|---|---|
-| prototype | $S_P=\{j:\lVert M_{\cdot j}\rVert_2>0\}$ | M-L |
-| directional heterogeneity | $S_\mu=\{j:\lVert(H_KM)_{\cdot j}\rVert_2>0\}$ | M-CGL |
-| posterior-score heterogeneity | $S_\eta=\{j:\lVert(H_KE)_{\cdot j}\rVert_2>0\}$ | E-CGL |
+| prototype | $S_P=\{j:\lVert\boldsymbol{\mu}_j\rVert_2>0\}$ | M-L |
+| directional heterogeneity | $S_\mu=\{j:\lVert\boldsymbol{c}_j^{(\mu)}\rVert_2>0\}$ | M-CGL |
+| posterior-score heterogeneity | $S_\eta=\{j:\lVert\boldsymbol{c}_j^{(\eta)}\rVert_2>0\}$ | E-CGL |
 
 ## 3. Centered group penalty
 
 $$
 \widehat\Theta_{\lambda_\mu}^{\mathrm{M-CGL}}=
-\underset{\pi,\kappa,M}{\arg\max}
+\underset{\pi,\kappa,\mu}{\arg\max}
 \Big[
-\ell(\pi,\kappa,M)
--\lambda_\mu\sum_{j=1}^{d}\lVert(H_KM)_{\cdot j}\rVert_2
+\ell(\pi,\kappa,\mu)
+-\lambda_\mu\sum_{j=1}^{d}\lVert\boldsymbol{c}_j^{(\mu)}\rVert_2
 \Big],
 \qquad
 \lVert\mu_k\rVert_2=1.
@@ -63,42 +75,34 @@ $$
 
 $$
 \widehat\Theta_{\lambda_\eta}^{\mathrm{E-CGL}}=
-\underset{\pi,E}{\arg\max}
+\underset{\pi,\eta}{\arg\max}
 \Big[
-\ell(\pi,E)
--\lambda_\eta\sum_{j=1}^{d}\lVert(H_KE)_{\cdot j}\rVert_2
+\ell(\pi,\eta)
+-\lambda_\eta\sum_{j=1}^{d}\lVert\boldsymbol{c}_j^{(\eta)}\rVert_2
 \Big].
 $$
 
-$H_KM$은 방향 모수가 아니라 성분 간 좌표 contrast이다. 예를 들어
+$\boldsymbol{c}_j^{(\mu)}$는 방향 모수가 아니라 성분 간 좌표 contrast이다. 예를 들어
 $\mu_1=(a,b)$, $\mu_2=(a,-b)$, $a^2+b^2=1$이면 단위구면 제약과 첫 번째
 좌표 equality가 동시에 성립한다.
 
 ## 4. 이론적 관계
 
 $$
-\begin{aligned}
-\kappa&=\bar\kappa{\boldsymbol 1}_K+h,
-&
-M&={\boldsymbol 1}_K\bar\mu^{\mathsf T}+U,
-&
-U&=H_KM,\\
-H_KE
-&=\bar\kappa U
-+h\bar\mu^{\mathsf T}
-+H_K\mathrm{diag}(h)U.
-\end{aligned}
+\kappa_1=\cdots=\kappa_K=\kappa
+\quad\Longrightarrow\quad
+c_{kj}^{(\eta)}=\kappa c_{kj}^{(\mu)}
+\quad\Longrightarrow\quad
+S_\eta=S_\mu.
 $$
 
 $$
-\kappa_1=\cdots=\kappa_K=\kappa
-\ \Longrightarrow\
-H_KE=\kappa H_KM
-\ \Longrightarrow\
-S_\eta=S_\mu,
+\boldsymbol{c}_j^{(\eta)}=
+\big(\kappa_1\mu_{1j}-\bar\eta_j,\ldots,
+\kappa_K\mu_{Kj}-\bar\eta_j\big)^{\mathsf T},
 \qquad
 \kappa_k\ \mathrm{heterogeneous}
-\ \Longrightarrow\
+\quad\Longrightarrow\quad
 S_\eta\neq S_\mu\ \mathrm{가능}.
 $$
 
