@@ -7,11 +7,11 @@
 > E-CGL과 Rossi M-L은 패널티 대상과 구조가 달라 직접 비교의 정합성이 낮다.
 
 $$
-\mathrm{M\!-\!L}
+\mathrm{M-L}
 :
-(\mu,\ \mathrm{entry\!-\!wise}\ L_1,\ \mathrm{uncentered}),
+(\mu,\ \mathrm{entry-wise}\ L_1,\ \mathrm{uncentered}),
 \qquad
-\mathrm{E\!-\!CGL}
+\mathrm{E-CGL}
 :
 (H_KE,\ \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
@@ -20,8 +20,7 @@ $$
 \mathrm{Matched\ comparator}
 :
 \qquad
-\mathrm{M\!-\!CGL}
-=
+\mathrm{M-CGL}=
 (H_KM,\ \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
 
@@ -31,8 +30,8 @@ $$
 x_i\mid z_i=k\sim\mathrm{vMF}(\mu_k,\kappa_k),
 \quad \eta_k=\kappa_k\mu_k,
 \quad
-\log\frac{\Pr(Z=k\mid x)}{\Pr(Z=\ell\mid x)}
-=a_{k\ell}+(\eta_k-\eta_\ell)^{\mathsf T}x.
+\log\frac{\Pr(Z=k\mid x)}{\Pr(Z=\ell\mid x)}=
+a_{k\ell}+(\eta_k-\eta_\ell)^{\mathsf T}x.
 $$
 
 $$
@@ -52,8 +51,7 @@ $$
 ## 3. Centered group penalty
 
 $$
-\widehat\Theta_{\lambda_\mu}^{\mathrm{M-CGL}}
-=
+\widehat\Theta_{\lambda_\mu}^{\mathrm{M-CGL}}=
 \underset{\pi,\kappa,M}{\arg\max}
 \Big[
 \ell(\pi,\kappa,M)
@@ -64,8 +62,7 @@ $$
 $$
 
 $$
-\widehat\Theta_{\lambda_\eta}^{\mathrm{E-CGL}}
-=
+\widehat\Theta_{\lambda_\eta}^{\mathrm{E-CGL}}=
 \underset{\pi,E}{\arg\max}
 \Big[
 \ell(\pi,E)
@@ -125,20 +122,16 @@ Support selection: BIC-after-refit.
 
 ## 6. 실행시간
 
-동일 반복에서의 평균 초/rep이며, `sourceCpp` 컴파일·로드 시간은 제외하였다.
+Rcpp 적용 후 평균 초/rep이며, `sourceCpp` 컴파일·로드 시간은 제외하였다.
 
-| 구조 | M-CGL R $\rightarrow$ Rcpp | M-ACGL R $\rightarrow$ Rcpp | E-CGL Rcpp | E-ACGL Rcpp |
+| 구조 | M-CGL | M-ACGL | E-CGL | E-ACGL |
 |---|---:|---:|---:|---:|
-| 공통 $\kappa$ | $26.3\rightarrow3.6$ | $37.3\rightarrow4.7$ | 2.2 | 2.1 |
-| 이질적 $\kappa$ | $51.5\rightarrow6.5$ | $58.3\rightarrow7.2$ | 2.7 | 3.6 |
-| 공통 $\eta$ | $60.4\rightarrow7.4$ | $56.1\rightarrow6.8$ | 2.9 | 3.5 |
-| 공통 $\mu$ | $141.5\rightarrow20.4$ | $190.9\rightarrow24.4$ | 17.3 | 16.8 |
+| 공통 $\kappa$ | 3.6 | 4.7 | 2.2 | 2.1 |
+| 이질적 $\kappa$ | 6.5 | 7.2 | 2.7 | 3.6 |
+| 공통 $\eta$ | 7.4 | 6.8 | 2.9 | 3.5 |
+| 공통 $\mu$ | 20.4 | 24.4 | 17.3 | 16.8 |
 
-M 계열은 ADMM 제어를 R에 유지하고, 반복되는 구면 목적함수와
-product-of-spheres update를 Rcpp로 계산하였다. 기존 R 구현 대비
-$6.9$--$8.2$배 단축되었으나, ADMM 내부 반복이 남아 있어 일반 구조에서는
-E 계열보다 약 $1.6$--$2.5$배 오래 걸렸다. 공통 $\mu$는 M 계열의 참
-support가 공집합인 경계 구조로, support 선택과 refit이 상대적으로 오래 걸렸다.
+모든 모형의 반복 계산에는 Rcpp를 사용하였다.
 
 ## 7. 수치 검증 및 논문 배치
 
@@ -147,9 +140,6 @@ support가 공집합인 경계 구조로, support 선택과 refit이 상대적�
 | 단위구면 / inactive equality 오차 | $\leq2.22\times10^{-16}$ / $0$ |
 | ADMM primal residual | $1.06\times10^{-10}$ |
 | M-ACGL weight 및 $w_j=1$ 환원 | PASS |
-| R 대비 Rcpp support / selected $q$ / BIC 선택 | 동일 |
-| Rcpp 수치 차이 | 일반 구조 $\leq10^{-8}$; 공통 $\mu$ 경계 $\leq5\times10^{-8}$ |
-| M 계열 Rcpp 단축률 | $6.9$--$8.2$배 |
 | truth-blind restart 후 M 계열 BIC 변경 | $3/6$ |
 | 내부 M-step 최종 stationarity | 추가 확인 필요 |
 
