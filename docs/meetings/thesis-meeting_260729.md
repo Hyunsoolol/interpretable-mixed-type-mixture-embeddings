@@ -7,11 +7,11 @@
 > E-CGL과 Rossi M-L은 패널티 대상과 구조가 달라 직접 비교의 정합성이 낮다.
 
 $$
-\mathrm{M\!-\!L}
+\mathrm{M-L}
 :
-(\mu,\ \mathrm{entry\!-\!wise}\ L_1,\ \mathrm{uncentered}),
+(\mu,\ \mathrm{entry-wise}\ L_1,\ \mathrm{uncentered}),
 \qquad
-\mathrm{E\!-\!CGL}
+\mathrm{E-CGL}
 :
 (H_KE,\ \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
@@ -20,7 +20,7 @@ $$
 \mathrm{Matched\ comparator}
 :
 \qquad
-\mathrm{M\!-\!CGL} =
+\mathrm{M-CGL} =
 (H_KM,\ \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
 
