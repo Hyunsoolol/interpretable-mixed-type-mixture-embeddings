@@ -209,44 +209,65 @@ M-CGL은 단위구면 제약과 ADMM 내부 반복을 포함하므로 E-CGL보�
 
 ## 백업 자료: Guarded path algorithms
 
-### Algorithm 1. E-CGL and E-ACGL
+### Algorithm 1. Guarded path algorithm for E-CGL and E-ACGL
 
-**Input:** $X$, $K$, path size $L$, method, iteration limits,
+**Input:** $X$, $K$, path size $L$, method indicator, iteration limits,
 $\varepsilon_{\mathrm{conv}}$, $\varepsilon_{\mathrm{acc}}$
 
 **Output:** $(\widehat S_\eta,\widehat\lambda_\eta)$,
-$\widehat\Theta_\eta^{\mathrm{refit}}$
+$\widehat\Theta_\eta^{\mathrm{refit}}$, numerical diagnostics
 
 | 단계 | 절차 |
 |---:|---|
+|  | **Stage 1: Dense start and path construction** |
 | 1 | 여러 초기값에서 dense vMF를 적합하고 최대 log-likelihood 해를 선택 |
-| 2 | E-CGL은 $w_j=1$; E-ACGL은 dense fit에서 adaptive weight를 계산한 뒤 고정 |
-| 3 | dense-to-sparse path $\Lambda_\eta$를 구성 |
-| 4 | 각 $\lambda_\eta$에서 직전 accepted fit을 warm start로 사용 |
-| 5 | E-step에서 $\tau_{ik}$, $N_k$, $r_k$를 계산 |
-| 6 | $\pi_k$와 centered - $\eta$ group proximal M-step을 갱신 |
-| 7 | majorization 또는 observed criterion이 감소하면 step size를 축소 |
-| 8 | 수렴 후 $S_{\eta,\lambda}$와 numerical diagnostics를 저장 |
-| 9 | 각 distinct support에서 $c_{kj}^{(\eta)}=0$ 제약 refit을 수행 |
-| 10 | BIC-after-refit이 최소인 $\widehat S_\eta$를 선택 |
+| 2 | E-CGL은 $w_j=1$; E-ACGL은 dense fit에서 $w_j$를 계산한 뒤 path 전체에서 고정 |
+| 3 | dense-to-sparse KKT-geometric path $\Lambda_\eta=(0,\lambda_{\eta,1},\ldots,\lambda_{\eta,L-1})$를 구성 |
+|  | **Stage 2: Guarded penalized path** |
+| 4 | 각 $\lambda_\eta\in\Lambda_\eta$에서 직전 accepted fit을 warm start로 사용 |
+| 5 | E-step에서 $\tau_{ik}$, $N_k=\sum_i\tau_{ik}$, $r_k=\sum_i\tau_{ik}x_i$를 계산 |
+| 6 | M-step에서 $\pi_k^{+}=N_k/n$와 centered-$\eta$ group proximal update를 계산 |
+| 7 | majorization 조건이 성립할 때까지 step size를 절반으로 축소 |
+| 8 | 보조함수 또는 penalized observed log-likelihood가 허용범위보다 감소하면 해당 update를 거절하고 이전 accepted estimate를 유지 |
+| 9 | 상대 criterion 변화가 $\varepsilon_{\mathrm{conv}}$ 미만이 될 때까지 5--8을 반복 |
+| 10 | $S_{\eta,\lambda}$, criterion, iteration 수, line-search 진단을 저장 |
+| 11 | path 종료 조건 또는 $L$에 도달할 때까지 4--10을 반복 |
+|  | **Stage 3: B-method support-constrained refit and selection** |
+| 12 | path에서 중복 support를 제거 |
+| 13 | 각 $S$에 대해 $j\notin S\Rightarrow c_{kj}^{(\eta)}=0$을 유지하는 support-constrained refit을 수행 |
+| 14 | $\mathrm{BIC}^{\mathrm{refit}}(S)=-2\ell(\widehat\Theta_S^{\mathrm{refit}})+\log(n)\mathrm{df}_{\mathrm{nom}}(S)$를 계산 |
+| 15 | $\widehat S_\eta=\underset{S}{\arg\min}\ \mathrm{BIC}^{\mathrm{refit}}(S)$를 선택 |
+| 16 | $\widehat S_\eta$, $\widehat\lambda_\eta$, $\widehat\Theta_\eta^{\mathrm{refit}}$와 수치 진단을 반환 |
 
-### Algorithm 2. M-CGL and M-ACGL
+### Algorithm 2. Guarded path algorithm for M-CGL and M-ACGL
 
-**Input:** $X$, $K$, path size $L$, method, iteration limits,
+**Input:** $X$, $K$, path size $L$, method indicator, iteration limits,
 $\varepsilon_{\mathrm{conv}}$, $\varepsilon_{\mathrm{acc}}$
 
 **Output:** $(\widehat S_\mu,\widehat\lambda_\mu)$,
-$\widehat\Theta_\mu^{\mathrm{refit}}$
+$\widehat\Theta_\mu^{\mathrm{refit}}$, numerical diagnostics
 
 | 단계 | 절차 |
 |---:|---|
+|  | **Stage 1: Dense start and path construction** |
 | 1 | 여러 초기값에서 dense vMF를 적합하고 최대 log-likelihood 해를 선택 |
-| 2 | M-CGL은 $w_j=1$; M-ACGL은 dense fit에서 adaptive weight를 계산한 뒤 고정 |
-| 3 | centered - $\mu$ norm을 기준으로 path $\Lambda_\mu$를 구성 |
-| 4 | 각 $\lambda_\mu$에서 직전 accepted fit을 warm start로 사용 |
-| 5 | E-step에서 $\tau_{ik}$, $N_k$, $r_k$를 계산 |
-| 6 | ADMM에서 product-of-spheres $\mu$-update와 group thresholding을 수행 |
-| 7 | $A_d(\kappa_k)=r_k^{\mathsf T}\mu_k/N_k$의 수치적 근으로 $\kappa_k$를 갱신 |
-| 8 | criterion이 감소하면 step halving 또는 dense restart를 적용 |
-| 9 | 각 distinct support에서 $c_{kj}^{(\mu)}=0$과 $\lVert\mu_k\rVert_2=1$ 제약 refit을 수행 |
-| 10 | BIC-after-refit이 최소인 $\widehat S_\mu$를 선택 |
+| 2 | M-CGL은 $w_j=1$; M-ACGL은 dense fit에서 $w_j$를 계산한 뒤 path 전체에서 고정 |
+| 3 | centered-$\mu$ norm의 $\lambda_{\max}$ proxy로 geometric path $\Lambda_\mu=(0,\lambda_{\mu,1},\ldots,\lambda_{\mu,L-1})$를 구성 |
+|  | **Stage 2: Guarded penalized path** |
+| 4 | 각 $\lambda_\mu\in\Lambda_\mu$에서 직전 accepted fit을 warm start로 사용 |
+| 5 | E-step에서 $\tau_{ik}$, $N_k=\sum_i\tau_{ik}$, $r_k=\sum_i\tau_{ik}x_i$를 계산 |
+| 6 | M-step에서 $\pi_k^{+}=N_k/n$를 갱신 |
+| 7 | $Z=C^{(\mu)}$ 분할변수와 dual variable을 두고 ADMM을 수행 |
+| 8 | $\mu$-update에서 product of spheres 위의 Rcpp tangent-gradient와 retraction을 수행 |
+| 9 | $Z$-update에서 coordinate-wise group soft-thresholding을 적용한 뒤 dual variable을 갱신 |
+| 10 | $A_d(\kappa_k)=r_k^{\mathsf T}\mu_k/N_k$의 수치적 근으로 $\kappa_k$를 갱신 |
+| 11 | penalized 보조함수 또는 observed criterion이 감소하면 step halving을 적용하고, 실패하면 dense start에서 재시도 |
+| 12 | 상대 criterion 변화가 $\varepsilon_{\mathrm{conv}}$ 미만이 될 때까지 5--11을 반복하고 $S_{\mu,\lambda}$와 ADMM 진단을 저장 |
+|  | **Stage 3: B-method support-constrained refit and selection** |
+| 13 | 각 distinct $S$에 대해 $j\notin S\Rightarrow c_{kj}^{(\mu)}=0$과 $\lVert\mu_k\rVert_2=1$을 유지하는 refit을 수행 |
+| 14 | $\mathrm{BIC}^{\mathrm{refit}}(S)=-2\ell(\widehat\Theta_S^{\mathrm{refit}})+\log(n)\mathrm{df}_{\mathrm{nom}}(S)$를 계산 |
+| 15 | $\widehat S_\mu=\underset{S}{\arg\min}\ \mathrm{BIC}^{\mathrm{refit}}(S)$를 선택 |
+| 16 | $\widehat S_\mu$, $\widehat\lambda_\mu$, $\widehat\Theta_\mu^{\mathrm{refit}}$와 ADMM·구면 제약 진단을 반환 |
+
+$\mathrm{df}_{\mathrm{nom}}(S)$는 엄밀한 유효 자유도가 아니라 BIC 계산에
+사용하는 실용적 명목 차원 근사치이다.
