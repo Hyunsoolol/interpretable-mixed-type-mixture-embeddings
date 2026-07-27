@@ -78,6 +78,38 @@ $$
 \lVert\mu_k\rVert_2=1
 $$
 
+### 3.1 단위구면 제약과 penalty의 정합성
+
+Rossi M-L에서 단위노름이 고정되어도 $L_1$-norm은 고정되지 않는다.
+
+$$
+\lVert\mu_k\rVert_2=1
+\quad\Longrightarrow\quad
+1\leq\lVert\mu_k\rVert_1\leq\sqrt d.
+$$
+
+$L_1$ penalty는 $\mu_k$ 전체를 0으로 만들지 않고, 단위구면 위에서 일부
+$\mu_{kj}$를 0으로 만들어 sparse prototype을 추정한다.
+
+M-CGL은 $\mu_k$ 자체가 아니라 군집 간 좌표 contrast를 축소한다.
+
+$$
+\lVert\boldsymbol c_j^{(\mu)}\rVert_2=0
+\quad\Longleftrightarrow\quad
+\mu_{1j}=\cdots=\mu_{Kj}=\bar\mu_j.
+$$
+
+$$
+\mu_1=(a,b),
+\qquad
+\mu_2=(a,-b),
+\qquad
+a^2+b^2=1.
+$$
+
+두 벡터는 모두 단위구면 위에 있고 첫 번째 좌표의 contrast는 0이다.
+따라서 centered-$\mu$ equality와 $\lVert\mu_k\rVert_2=1$은 양립한다.
+
 경로에서 얻은 각 support에 B 방식의 support-constrained refit을 적용한
 후 current nominal-df BIC로 선택한다. 비선택 좌표는 contrast만 0으로
 고정하고 공통 baseline은 유지한다.
