@@ -134,6 +134,10 @@ $$
 Path 120, BIC-after-refit을 사용하였다. 괄호는
 $(\widehat q_C,\widehat q_D,\widehat q_N)$이다.
 
+$F_{1,\mu}$는 추정 support와 참 directional support $S_\mu$의 일치도이고,
+$F_{1,\eta}$는 참 posterior-score support $S_\eta$와의 일치도이다.
+`-`는 성능 0이 아니라 해당 target 기준을 보고하지 않았음을 뜻한다.
+
 | $\kappa$ | 모형 | selected $q$ | $F_{1,\mu}$ | $F_{1,\eta}$ | ARI | $\mathrm{MSE}_\mu$ | $\mathrm{MSE}_\kappa$ | $\mathrm{MSE}_\eta$ |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | 공통 | M-CGL | 16.7 (0.3, 16.0, 0.3) | 0.980 | 0.980 | 0.841 | $4.63\times10^{-4}$ | 8.995 | 0.276 |
@@ -168,26 +172,98 @@ Rcpp 적용 후 평균 초/rep이며, `sourceCpp` 컴파일·로드 시간은 �
 
 모든 모형의 반복 계산에는 Rcpp를 사용하였다.
 
-## 8. 수치 검증 및 논문 배치
+## 8. E-CGL과 M-CGL 비교
 
-| 검증 | 결과 |
-|---|---:|
-| 단위구면 / inactive equality 오차 | $\leq2.22\times10^{-16}$ / $0$ |
-| ADMM primal residual | $1.06\times10^{-10}$ |
-| M-ACGL weight 및 $w_j=1$ 환원 | PASS |
-| truth-blind restart 후 M 계열 BIC 변경 | $3/6$ |
-| 내부 M-step 최종 stationarity | 추가 확인 필요 |
+| 구분 | M-CGL | E-CGL |
+|---|---|---|
+| 패널티 대상 | $c_{kj}^{(\mu)}=\mu_{kj}-\bar\mu_j$ | $c_{kj}^{(\eta)}=\eta_{kj}-\bar\eta_j$ |
+| 선택 의미 | 군집 간 방향 차이 | 군집 간 posterior-score 차이 |
+| 적합한 상황 | 집중도와 무관한 방향 이질성이 연구 대상인 경우 | 실제 군집 구분에 사용되는 좌표가 연구 대상인 경우 |
+| 이질적 $\kappa_k$ | 방향 차이만 반영 | 방향과 집중도 차이를 함께 반영 |
+| 계산 구조 | 단위구면 제약을 포함한 결합 최적화 | 자연모수 공간의 proximal 최적화 |
+| 논문 내 역할 | directional companion | 주 제안 모형 |
+
+공통 집중도에서는 두 support가 일치한다.
+
+$$
+\kappa_1=\cdots=\kappa_K
+\quad\Longrightarrow\quad
+S_\mu=S_\eta.
+$$
+
+| 연구 목적 | 모형 |
+|---|---|
+| 군집별 평균 방향이 다른 좌표 선택 | M-CGL |
+| posterior 분류에 기여하는 좌표 선택 | E-CGL |
+| 집중도 차이를 군집 구분 정보에 포함 | E-CGL |
+| 약한 신호에 adaptive weight 적용 | M-ACGL 또는 E-ACGL |
 
 $$
 \boxed{
-\text{E-CGL: primary}
+\mathrm{E-CGL}:\text{posterior-score support의 주 모형},
 \qquad
-\text{M-CGL: directional companion}
-\qquad
-\text{E-ACGL, M-ACGL: Supplement}
+\mathrm{M-CGL}:\text{방향 이질성의 대응 모형}
 }
 $$
 
-본문에는 $S_\mu$와 $S_\eta$의 관계와 matched structural diagnostic을
-포함하고, M-CGL의 구면 최적화, 수렴 진단과 adaptive 결과는 Supplement에
-배치하는 게 어떨지.
+## 9. Guarded path algorithms
+
+### Algorithm 1. Guarded path algorithm for E-CGL and E-ACGL
+
+**Input:** $X$, $K$, path size $L$, method indicator, iteration limits,
+$\varepsilon_{\mathrm{conv}}$, $\varepsilon_{\mathrm{acc}}$
+
+**Output:** $(\widehat S_\eta,\widehat\lambda_\eta)$,
+$\widehat\Theta_\eta^{\mathrm{refit}}$, numerical diagnostics
+
+| 단계 | 절차 |
+|---:|---|
+|  | **Stage 1: Dense start and path construction** |
+| 1 | 여러 초기값에서 dense vMF를 적합하고 최대 log-likelihood 해를 선택 |
+| 2 | E-CGL은 $w_j=1$; E-ACGL은 dense fit에서 $w_j$를 계산한 뒤 고정 |
+| 3 | dense-to-sparse KKT-geometric path $\Lambda_\eta=(0,\lambda_{\eta,1},\ldots,\lambda_{\eta,L-1})$ 구성 |
+|  | **Stage 2: Guarded penalized path** |
+| 4 | 각 $\lambda_\eta\in\Lambda_\eta$에서 직전 accepted fit을 warm start로 사용 |
+| 5 | E-step: $\tau_{ik}$, $N_k=\sum_i\tau_{ik}$, $r_k=\sum_i\tau_{ik}x_i$ 계산 |
+| 6 | M-step: $\pi_k^{+}=N_k/n$ 및 centered-$\eta$ group proximal update |
+| 7 | majorization 조건이 성립할 때까지 step size를 절반으로 축소 |
+| 8 | 보조함수 또는 penalized log-likelihood가 허용범위보다 감소하면 path fit을 중단하고 이전 accepted estimate를 반환 |
+| 9 | 상대 criterion 변화가 $\varepsilon_{\mathrm{conv}}$ 미만이 될 때까지 5--8 반복 |
+| 10 | $S_{\eta,\lambda}$, criterion 및 수치 진단 저장 |
+| 11 | path 종료 조건 또는 $L$에 도달할 때까지 4--10 반복 |
+|  | **Stage 3: Exact refit and support selection** |
+| 12 | path에서 중복 support 제거 |
+| 13 | 각 $S$에 대해 $j\notin S\Rightarrow c_{kj}^{(\eta)}=0$ 제약하에서 exact refit |
+| 14 | $\mathrm{BIC}^{\mathrm{refit}}(S)=-2\ell(\widehat\Theta_S^{\mathrm{refit}})+\log(n)\mathrm{df}(S)$ 계산 |
+| 15 | $\widehat S_\eta=\arg\min_S\mathrm{BIC}^{\mathrm{refit}}(S)$ 선택 |
+| 16 | $\widehat S_\eta$, $\widehat\lambda_\eta$, $\widehat\Theta_\eta^{\mathrm{refit}}$ 및 진단 반환 |
+
+### Algorithm 2. Guarded path algorithm for M-CGL and M-ACGL
+
+**Input:** $X$, $K$, path size $L$, method indicator, iteration limits,
+$\varepsilon_{\mathrm{conv}}$, $\varepsilon_{\mathrm{acc}}$
+
+**Output:** $(\widehat S_\mu,\widehat\lambda_\mu)$,
+$\widehat\Theta_\mu^{\mathrm{refit}}$, numerical diagnostics
+
+| 단계 | 절차 |
+|---:|---|
+|  | **Stage 1: Dense start and path construction** |
+| 1 | 여러 초기값에서 dense vMF를 적합하고 최대 log-likelihood 해를 선택 |
+| 2 | M-CGL은 $w_j=1$; M-ACGL은 dense fit에서 $w_j$를 계산한 뒤 고정 |
+| 3 | centered-$\mu$ norm의 $\lambda_{\max}$ proxy로 geometric path $\Lambda_\mu=(0,\lambda_{\mu,1},\ldots,\lambda_{\mu,L-1})$ 구성 |
+|  | **Stage 2: Guarded penalized path** |
+| 4 | 각 $\lambda_\mu\in\Lambda_\mu$에서 직전 accepted fit을 warm start로 사용 |
+| 5 | E-step: $\tau_{ik}$, $N_k=\sum_i\tau_{ik}$, $r_k=\sum_i\tau_{ik}x_i$ 계산 |
+| 6 | M-step: $\pi_k^{+}=N_k/n$ 갱신 |
+| 7 | $Z=C^{(\mu)}$ 분할변수를 두고 ADMM 수행 |
+| 8 | $\mu$-update: product of spheres에서 Rcpp tangent-gradient와 retraction 수행 |
+| 9 | $Z$-update: coordinate-wise group soft-thresholding 후 dual variable 갱신 |
+| 10 | $\kappa$-update: $A_d(\kappa_k)=r_k^{\mathsf T}\mu_k/N_k$의 수치적 근 계산 |
+| 11 | penalized 보조함수와 observed criterion이 감소하면 step halving; 실패 시 dense start로 재시도 |
+| 12 | 상대 criterion 변화가 $\varepsilon_{\mathrm{conv}}$ 미만이 될 때까지 5--11 반복하고 $S_{\mu,\lambda}$ 저장 |
+|  | **Stage 3: Exact refit and support selection** |
+| 13 | 각 distinct $S$에 대해 $j\notin S\Rightarrow c_{kj}^{(\mu)}=0$ 및 $\lVert\mu_k\rVert_2=1$ 제약하에서 refit |
+| 14 | $\mathrm{BIC}^{\mathrm{refit}}(S)=-2\ell(\widehat\Theta_S^{\mathrm{refit}})+\log(n)\mathrm{df}(S)$ 계산 |
+| 15 | $\widehat S_\mu=\arg\min_S\mathrm{BIC}^{\mathrm{refit}}(S)$ 선택 |
+| 16 | $\widehat S_\mu$, $\widehat\lambda_\mu$, $\widehat\Theta_\mu^{\mathrm{refit}}$ 및 ADMM·구면 제약 진단 반환 |
