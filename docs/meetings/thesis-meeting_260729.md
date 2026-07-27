@@ -5,6 +5,8 @@
 지난 연구미팅에서는 E-CGL과 Rossi 계열 M-L의 패널티 대상과 구조가 달라
 직접 비교의 정합성이 낮다는 의견이 있었다.
 
+> 논문의 중심은 E-CGL로 하고, M-CGL은 방향 이질성을 추정하는 이론 및 실증적 companion으로 유지하는 게 어떤지 확인.
+
 | 모형 | 패널티 대상 | 구조 | 추정 대상 |
 |---|---|---|---|
 | M-L | $\mu_{kj}$ | entry-wise $L_1$, uncentered | prototype support |
