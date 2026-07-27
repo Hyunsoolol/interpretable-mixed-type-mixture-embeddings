@@ -191,7 +191,7 @@ $\mathrm{MSE}_\eta$는 centered - $\eta$ contrast의 MSE이다.
 ## 7. 실행시간
 
 구조적 진단 설정 $(K,n,d)=(4,400,24)$, path 21에서 측정한 Rcpp 적용 후
-평균 초/rep이다. `sourceCpp` 컴파일·로드 시간은 제외하였다.
+평균 초/rep이다. `sourceCpp` 컴파일, 로드 시간은 제외함.
 
 | 구조 | M-CGL | M-ACGL | E-CGL | E-ACGL |
 |---|---:|---:|---:|---:|
