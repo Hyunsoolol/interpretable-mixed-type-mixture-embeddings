@@ -9,7 +9,7 @@
 | E-ACGL, M-ACGL | adaptive weighted support | 보조 확장 |
 
 논문의 중심 증거는 target-specific support recovery, oracle-support gap,
-통계적·수치적 안정성이다. Dense vMF와 Rossi sparse prototype은 최소
+통계적, 수치적 안정성이다. Dense vMF와 Rossi sparse prototype은 최소
 비교군으로 유지한다.
 
 ## 1. Introduction
