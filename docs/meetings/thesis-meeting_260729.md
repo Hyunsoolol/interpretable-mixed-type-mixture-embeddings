@@ -203,20 +203,6 @@ $\mathrm{MSE}_\eta$는 centered - $\eta$ contrast의 MSE이다.
 M-CGL은 단위구면 제약과 ADMM 내부 반복을 포함하므로 E-CGL보다 계산량이
 크다.
 
-## 8. 연구미팅 결론
-
-| 항목 | 결론 |
-|---|---|
-| M-CGL의 수학적 성립 | 단위구면 제약을 포함한 centered directional-support 최적화로 성립 |
-| 공통 $\kappa$ | $S_\mu=S_\eta$이며 두 방법의 target이 일치 |
-| 이질적 $\kappa$ | $S_\mu$와 $S_\eta$가 서로 다른 이질성을 나타냄 |
-| E-CGL | posterior-score heterogeneity의 주 제안 모형 |
-| M-CGL | directional heterogeneity의 matched companion |
-| Adaptive 확장 | E-ACGL과 M-ACGL은 보조 분석 |
-| 논문 평가축 | target-specific recovery, oracle-support gap, 수렴 안정성 |
-| 기존 비교 | Dense vMF와 Rossi sparse prototype을 최소 비교군으로 유지 |
-| 남은 검증 | M-CGL 내부 stationarity, 공집합 support 선택, nominal-df 민감도 |
-
 ---
 
 ## 백업 자료: Guarded path algorithms
