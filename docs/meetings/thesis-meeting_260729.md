@@ -247,6 +247,38 @@ $\varepsilon_{\mathrm{conv}}$, $\varepsilon_{\mathrm{acc}}$
 **Output:** $(\widehat S_\mu,\widehat\lambda_\mu)$,
 $\widehat\Theta_\mu^{\mathrm{refit}}$, numerical diagnostics
 
+ADMM(Alternating Direction Method of Multipliers; 교대방향 승수법)은
+단위구면 제약과 centered group penalty를 분리한다.
+
+$$
+Z=\boldsymbol C^{(\mu)},
+\qquad
+\boldsymbol C^{(\mu)}=[c_{kj}^{(\mu)}]_{K\times d},
+\qquad
+\lVert\mu_k\rVert_2=1.
+$$
+
+$\mu$는 product of spheres 위에서 갱신하고, $Z$에는 group
+soft-thresholding을 적용한 뒤 dual update로 $Z=\boldsymbol C^{(\mu)}$를
+맞춘다.
+
+$$
+\rho_k=\frac{r_k^{\mathsf T}\mu_k}{N_k},
+\qquad
+A_d(\kappa)=\frac{I_{d/2}(\kappa)}{I_{d/2-1}(\kappa)},
+\qquad
+A_d(\kappa_k)=\rho_k,
+$$
+
+$$
+\kappa_{k,\mathrm B}=
+\frac{d\rho_k-\rho_k^3}{1-\rho_k^2}.
+$$
+
+Banerjee et al. (2005)의 $\kappa_{k,\mathrm B}$는 수치적 근 탐색구간의
+초기화에만 사용하며, 최종 $\kappa_k$는 $A_d(\kappa_k)=\rho_k$의
+수치해이다.
+
 | 단계 | 절차 |
 |---:|---|
 |  | **Stage 1: Dense start and path construction** |
@@ -260,7 +292,7 @@ $\widehat\Theta_\mu^{\mathrm{refit}}$, numerical diagnostics
 | 7 | $Z=C^{(\mu)}$ 분할변수와 dual variable을 두고 ADMM을 수행 |
 | 8 | $\mu$-update에서 product of spheres 위의 Rcpp tangent-gradient와 retraction을 수행 |
 | 9 | $Z$-update에서 coordinate-wise group soft-thresholding을 적용한 뒤 dual variable을 갱신 |
-| 10 | $A_d(\kappa_k)=r_k^{\mathsf T}\mu_k/N_k$의 수치적 근으로 $\kappa_k$를 갱신 |
+| 10 | Banerjee 근사값으로 탐색구간을 초기화하고 $A_d(\kappa_k)=r_k^{\mathsf T}\mu_k/N_k$의 수치적 근으로 $\kappa_k$를 갱신 |
 | 11 | penalized 보조함수 또는 observed criterion이 감소하면 step halving을 적용하고, 실패하면 dense start에서 재시도 |
 | 12 | 상대 criterion 변화가 $\varepsilon_{\mathrm{conv}}$ 미만이 될 때까지 5--11을 반복하고 $S_{\mu,\lambda}$와 ADMM 진단을 저장 |
 |  | **Stage 3: B-method support-constrained refit and selection** |
