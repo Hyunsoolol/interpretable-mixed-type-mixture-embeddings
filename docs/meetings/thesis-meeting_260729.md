@@ -179,9 +179,9 @@ $(\widehat q_C,\widehat q_D,\widehat q_N)$이다.
 
 Own-target $F_1$은 M 계열에서 $S_\mu$, E 계열에서 $S_\eta$를 기준으로
 계산하였다. $F_{1,\eta}$는 모든 모형을 posterior-score target으로 비교한
-교차 지표이다. MSE는 centered-$\eta$ 손실을 최소화하는 component
+교차 지표이다. MSE는 centered - $\eta$ 손실을 최소화하는 component
 permutation으로 label을 정렬한 후 계산했으며,
-$\mathrm{MSE}_\eta$는 centered-$\eta$ contrast의 MSE이다.
+$\mathrm{MSE}_\eta$는 centered - $\eta$ contrast의 MSE이다.
 
 - 공통 $\kappa$: $S_\mu=S_\eta$이며 M/E 계열의 support 회복이 유사하였다.
 - 이질적 $\kappa$: 참 support는 $(q_\mu,q_\eta)=(20,16)$이다.
@@ -236,7 +236,7 @@ $\widehat\Theta_\eta^{\mathrm{refit}}$
 | 3 | dense-to-sparse path $\Lambda_\eta$를 구성 |
 | 4 | 각 $\lambda_\eta$에서 직전 accepted fit을 warm start로 사용 |
 | 5 | E-step에서 $\tau_{ik}$, $N_k$, $r_k$를 계산 |
-| 6 | $\pi_k$와 centered-$\eta$ group proximal M-step을 갱신 |
+| 6 | $\pi_k$와 centered - $\eta$ group proximal M-step을 갱신 |
 | 7 | majorization 또는 observed criterion이 감소하면 step size를 축소 |
 | 8 | 수렴 후 $S_{\eta,\lambda}$와 numerical diagnostics를 저장 |
 | 9 | 각 distinct support에서 $c_{kj}^{(\eta)}=0$ 제약 refit을 수행 |
@@ -254,7 +254,7 @@ $\widehat\Theta_\mu^{\mathrm{refit}}$
 |---:|---|
 | 1 | 여러 초기값에서 dense vMF를 적합하고 최대 log-likelihood 해를 선택 |
 | 2 | M-CGL은 $w_j=1$; M-ACGL은 dense fit에서 adaptive weight를 계산한 뒤 고정 |
-| 3 | centered-$\mu$ norm을 기준으로 path $\Lambda_\mu$를 구성 |
+| 3 | centered - $\mu$ norm을 기준으로 path $\Lambda_\mu$를 구성 |
 | 4 | 각 $\lambda_\mu$에서 직전 accepted fit을 warm start로 사용 |
 | 5 | E-step에서 $\tau_{ik}$, $N_k$, $r_k$를 계산 |
 | 6 | ADMM에서 product-of-spheres $\mu$-update와 group thresholding을 수행 |
