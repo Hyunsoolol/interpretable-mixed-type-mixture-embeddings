@@ -108,7 +108,7 @@ a^2+b^2=1.
 $$
 
 두 벡터는 모두 단위구면 위에 있고 첫 번째 좌표의 contrast는 0이다.
-따라서 centered-$\mu$ equality와 $\lVert\mu_k\rVert_2=1$은 양립한다.
+따라서 centered - $\mu$ equality와 $\lVert\mu_k\rVert_2=1$은 양립한다.
 
 경로에서 얻은 각 support에 B 방식의 support-constrained refit을 적용한
 후 current nominal-df BIC로 선택한다. 비선택 좌표는 contrast만 0으로
