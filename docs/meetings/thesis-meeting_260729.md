@@ -6,6 +6,8 @@
 
 > E-CGL과 Rossi M-L은 패널티 대상과 구조가 달라 직접 비교의 정합성이 낮다.
 
+
+
 $$
 \mathrm{M-L}
 :
@@ -13,7 +15,7 @@ $$
 \qquad
 \mathrm{E-CGL}
 :
-(\boldsymbol{c}_j^{(\eta)},\ \mathrm{group}\ L_2,\ \mathrm{centered}).
+(\boldsymbol{c}_j^{(\eta)}=\boldsymbol{\eta}_j-\bar\eta_j\mathbf{1}_K,\   \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
 
 $$
@@ -21,7 +23,7 @@ $$
 :
 \qquad
 \mathrm{M-CGL}=
-(\boldsymbol{c}_j^{(\mu)},\ \mathrm{group}\ L_2,\ \mathrm{centered}).
+(\boldsymbol{c}_j^{(\mu)}=\boldsymbol{\mu}_j-\bar\mu_j\mathbf{1}_K,\ \mathrm{group}\ L_2,\ \mathrm{centered}).
 $$
 
 ## 2. 추정 대상
@@ -208,37 +210,8 @@ $$
 
 ## 9. Guarded path algorithms
 
-### Algorithm 1. Guarded path algorithm for E-CGL and E-ACGL
 
-**Input:** $X$, $K$, path size $L$, method indicator, iteration limits,
-$\varepsilon_{\mathrm{conv}}$, $\varepsilon_{\mathrm{acc}}$
-
-**Output:** $(\widehat S_\eta,\widehat\lambda_\eta)$,
-$\widehat\Theta_\eta^{\mathrm{refit}}$, numerical diagnostics
-
-| 단계 | 절차 |
-|---:|---|
-|  | **Stage 1: Dense start and path construction** |
-| 1 | 여러 초기값에서 dense vMF를 적합하고 최대 log-likelihood 해를 선택 |
-| 2 | E-CGL은 $w_j=1$; E-ACGL은 dense fit에서 $w_j$를 계산한 뒤 고정 |
-| 3 | dense-to-sparse KKT-geometric path $\Lambda_\eta=(0,\lambda_{\eta,1},\ldots,\lambda_{\eta,L-1})$ 구성 |
-|  | **Stage 2: Guarded penalized path** |
-| 4 | 각 $\lambda_\eta\in\Lambda_\eta$에서 직전 accepted fit을 warm start로 사용 |
-| 5 | E-step: $\tau_{ik}$, $N_k=\sum_i\tau_{ik}$, $r_k=\sum_i\tau_{ik}x_i$ 계산 |
-| 6 | M-step: $\pi_k^{+}=N_k/n$ 및 centered-$\eta$ group proximal update |
-| 7 | majorization 조건이 성립할 때까지 step size를 절반으로 축소 |
-| 8 | 보조함수 또는 penalized log-likelihood가 허용범위보다 감소하면 path fit을 중단하고 이전 accepted estimate를 반환 |
-| 9 | 상대 criterion 변화가 $\varepsilon_{\mathrm{conv}}$ 미만이 될 때까지 5--8 반복 |
-| 10 | $S_{\eta,\lambda}$, criterion 및 수치 진단 저장 |
-| 11 | path 종료 조건 또는 $L$에 도달할 때까지 4--10 반복 |
-|  | **Stage 3: Exact refit and support selection** |
-| 12 | path에서 중복 support 제거 |
-| 13 | 각 $S$에 대해 $j\notin S\Rightarrow c_{kj}^{(\eta)}=0$ 제약하에서 exact refit |
-| 14 | $\mathrm{BIC}^{\mathrm{refit}}(S)=-2\ell(\widehat\Theta_S^{\mathrm{refit}})+\log(n)\mathrm{df}(S)$ 계산 |
-| 15 | $\widehat S_\eta=\arg\min_S\mathrm{BIC}^{\mathrm{refit}}(S)$ 선택 |
-| 16 | $\widehat S_\eta$, $\widehat\lambda_\eta$, $\widehat\Theta_\eta^{\mathrm{refit}}$ 및 진단 반환 |
-
-### Algorithm 2. Guarded path algorithm for M-CGL and M-ACGL
+### Algorithm 1. Guarded path algorithm for M-CGL and M-ACGL
 
 **Input:** $X$, $K$, path size $L$, method indicator, iteration limits,
 $\varepsilon_{\mathrm{conv}}$, $\varepsilon_{\mathrm{acc}}$
@@ -267,3 +240,33 @@ $\widehat\Theta_\mu^{\mathrm{refit}}$, numerical diagnostics
 | 14 | $\mathrm{BIC}^{\mathrm{refit}}(S)=-2\ell(\widehat\Theta_S^{\mathrm{refit}})+\log(n)\mathrm{df}(S)$ 계산 |
 | 15 | $\widehat S_\mu=\arg\min_S\mathrm{BIC}^{\mathrm{refit}}(S)$ 선택 |
 | 16 | $\widehat S_\mu$, $\widehat\lambda_\mu$, $\widehat\Theta_\mu^{\mathrm{refit}}$ 및 ADMM·구면 제약 진단 반환 |
+
+### Algorithm 2. Guarded path algorithm for E-CGL and E-ACGL
+
+**Input:** $X$, $K$, path size $L$, method indicator, iteration limits,
+$\varepsilon_{\mathrm{conv}}$, $\varepsilon_{\mathrm{acc}}$
+
+**Output:** $(\widehat S_\eta,\widehat\lambda_\eta)$,
+$\widehat\Theta_\eta^{\mathrm{refit}}$, numerical diagnostics
+
+| 단계 | 절차 |
+|---:|---|
+|  | **Stage 1: Dense start and path construction** |
+| 1 | 여러 초기값에서 dense vMF를 적합하고 최대 log-likelihood 해를 선택 |
+| 2 | E-CGL은 $w_j=1$; E-ACGL은 dense fit에서 $w_j$를 계산한 뒤 고정 |
+| 3 | dense-to-sparse KKT-geometric path $\Lambda_\eta=(0,\lambda_{\eta,1},\ldots,\lambda_{\eta,L-1})$ 구성 |
+|  | **Stage 2: Guarded penalized path** |
+| 4 | 각 $\lambda_\eta\in\Lambda_\eta$에서 직전 accepted fit을 warm start로 사용 |
+| 5 | E-step: $\tau_{ik}$, $N_k=\sum_i\tau_{ik}$, $r_k=\sum_i\tau_{ik}x_i$ 계산 |
+| 6 | M-step: $\pi_k^{+}=N_k/n$ 및 centered-$\eta$ group proximal update |
+| 7 | majorization 조건이 성립할 때까지 step size를 절반으로 축소 |
+| 8 | 보조함수 또는 penalized log-likelihood가 허용범위보다 감소하면 path fit을 중단하고 이전 accepted estimate를 반환 |
+| 9 | 상대 criterion 변화가 $\varepsilon_{\mathrm{conv}}$ 미만이 될 때까지 5--8 반복 |
+| 10 | $S_{\eta,\lambda}$, criterion 및 수치 진단 저장 |
+| 11 | path 종료 조건 또는 $L$에 도달할 때까지 4--10 반복 |
+|  | **Stage 3: Exact refit and support selection** |
+| 12 | path에서 중복 support 제거 |
+| 13 | 각 $S$에 대해 $j\notin S\Rightarrow c_{kj}^{(\eta)}=0$ 제약하에서 exact refit |
+| 14 | $\mathrm{BIC}^{\mathrm{refit}}(S)=-2\ell(\widehat\Theta_S^{\mathrm{refit}})+\log(n)\mathrm{df}(S)$ 계산 |
+| 15 | $\widehat S_\eta=\arg\min_S\mathrm{BIC}^{\mathrm{refit}}(S)$ 선택 |
+| 16 | $\widehat S_\eta$, $\widehat\lambda_\eta$, $\widehat\Theta_\eta^{\mathrm{refit}}$ 및 진단 반환 |
