@@ -226,7 +226,7 @@ $\widehat\Theta_\eta^{\mathrm{refit}}$, numerical diagnostics
 |  | **Stage 2: Guarded penalized path** |
 | 4 | 각 $\lambda_\eta\in\Lambda_\eta$에서 직전 accepted fit을 warm start로 사용 |
 | 5 | E-step에서 $\tau_{ik}$, $N_k=\sum_i\tau_{ik}$, $r_k=\sum_i\tau_{ik}x_i$를 계산 |
-| 6 | M-step에서 $\pi_k^{+}=N_k/n$와 centered-$\eta$ group proximal update를 계산 |
+| 6 | M-step에서 $\pi_k^{+}=N_k/n$와 centered - $\eta$ group proximal update를 계산 |
 | 7 | majorization 조건이 성립할 때까지 step size를 절반으로 축소 |
 | 8 | 보조함수 또는 penalized observed log-likelihood가 허용범위보다 감소하면 해당 update를 거절하고 이전 accepted estimate를 유지 |
 | 9 | 상대 criterion 변화가 $\varepsilon_{\mathrm{conv}}$ 미만이 될 때까지 5--8을 반복 |
@@ -252,7 +252,7 @@ $\widehat\Theta_\mu^{\mathrm{refit}}$, numerical diagnostics
 |  | **Stage 1: Dense start and path construction** |
 | 1 | 여러 초기값에서 dense vMF를 적합하고 최대 log-likelihood 해를 선택 |
 | 2 | M-CGL은 $w_j=1$; M-ACGL은 dense fit에서 $w_j$를 계산한 뒤 path 전체에서 고정 |
-| 3 | centered-$\mu$ norm의 $\lambda_{\max}$ proxy로 geometric path $\Lambda_\mu=(0,\lambda_{\mu,1},\ldots,\lambda_{\mu,L-1})$를 구성 |
+| 3 | centered - $\mu$ norm의 $\lambda_{\max}$ proxy로 geometric path $\Lambda_\mu=(0,\lambda_{\mu,1},\ldots,\lambda_{\mu,L-1})$를 구성 |
 |  | **Stage 2: Guarded penalized path** |
 | 4 | 각 $\lambda_\mu\in\Lambda_\mu$에서 직전 accepted fit을 warm start로 사용 |
 | 5 | E-step에서 $\tau_{ik}$, $N_k=\sum_i\tau_{ik}$, $r_k=\sum_i\tau_{ik}x_i$를 계산 |
