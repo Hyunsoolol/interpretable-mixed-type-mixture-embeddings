@@ -99,14 +99,30 @@ S_\eta=S_\mu.
 $$
 
 $$
-\boldsymbol{c}_j^{(\eta)}=
-\big(\kappa_1\mu_{1j}-\bar\eta_j,\ldots,
-\kappa_K\mu_{Kj}-\bar\eta_j\big)^{\mathsf T},
+\eta_{kj}=\kappa_k\mu_{kj},
 \qquad
+\mu_{kj}=\frac{\eta_{kj}}{\kappa_k}.
+$$
+
+$$
+\eta_{1j}=\cdots=\eta_{Kj}=b_j\neq0
+\quad\Longrightarrow\quad
+\boldsymbol{c}_j^{(\eta)}=0,
+\qquad
+\mu_{kj}=\frac{b_j}{\kappa_k}.
+$$
+
+$$
 \kappa_k\ \mathrm{heterogeneous}
 \quad\Longrightarrow\quad
+\boldsymbol{c}_j^{(\mu)}\neq0,
+\qquad
 S_\eta\neq S_\mu\ \mathrm{가능}.
 $$
+
+E-CGL은 posterior-score contrast $S_\eta$를, M-CGL은 directional contrast
+$S_\mu$를 선택한다. E-CGL에서 $\boldsymbol{c}_j^{(\eta)}=0$인 공통
+baseline $\bar\eta_j=b_j$는 유지된다.
 
 ---
 
