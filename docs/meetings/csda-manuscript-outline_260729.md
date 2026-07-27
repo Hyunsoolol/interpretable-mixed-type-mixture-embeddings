@@ -88,7 +88,7 @@ M-CGL의 전체 반복식과 상세 residual 진단은 Supplement에 두고 본�
 - Rossi sparse prototype
 - M-CGL
 - E-CGL
-- Oracle-$S_\mu$와 Oracle-$S_\eta$
+- Oracle - $S_\mu$와 Oracle - $S_\eta$
 - Target-specific $F_1$, ARI, test NLL, parameter MSE
 
 ### 6.2 Estimand-specific recovery
