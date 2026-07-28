@@ -106,7 +106,7 @@ $$
 H_K = I_K-\frac{1}{K}\mathbf1_K\mathbf1_K^\top
 $$
 
-### 4.1 M-CGL의 centered-$\mu$
+### 4.1 M-CGL의 centered-mu
 
 좌표 $j$의 평균방향 평균과 contrast는 다음과 같다.
 
@@ -138,7 +138,7 @@ $$
 
 즉 해당 좌표에서 평균방향의 군집 간 차이가 없다.
 
-### 4.2 E-CGL의 centered-$\eta$
+### 4.2 E-CGL의 centered-eta
 
 좌표 $j$의 자연모수 평균과 contrast는 다음과 같다.
 
@@ -694,7 +694,7 @@ $$
 Z\approx H_KM
 $$
 
-### 10.12 Exact centered-$\mu$ support refit
+### 10.12 Exact centered-mu support refit
 
 고정 support refit에서는 inactive 좌표에 다음 equality를 부여한다.
 
