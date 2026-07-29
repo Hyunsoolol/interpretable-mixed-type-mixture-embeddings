@@ -281,6 +281,7 @@ $\widehat\Theta_\mu^{\mathrm{refit}}$, numerical diagnostics
 
 ADMM(Alternating Direction Method of Multipliers; 교대방향 승수법)은
 단위구면 제약과 centered group penalty를 분리한다.
+Wang, Y., Yin, W., & Zeng, J. (2019). Global convergence of ADMM in nonconvex nonsmooth optimization. Journal of Scientific Computing, 78(2), 1065-1092.
 
 $$
 Z=\boldsymbol C^{(\mu)},
