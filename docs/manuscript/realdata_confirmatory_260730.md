@@ -275,9 +275,9 @@ only as a reproduction check for the Rossi-style implementation.
 Classic3 is the main interpretive illustration: E-CGL retained 67.1% of the
 coordinates in its estimated posterior-score contrast support, had
 conditional support Jaccard 0.933, and produced coherent component contrasts
-after post-fit class alignment. Its held-out ARI and NLL were lower than the
-matched dense model on average. BBCSport showed held-out NLL loss for every
-sparse method in every split. The real-data evidence therefore concerns
+after post-fit class alignment. Its held-out ARI was lower and its NLL was
+higher than the matched dense model on average. BBCSport showed held-out NLL
+loss for every sparse method in every split. The real-data evidence concerns
 training-selected coordinate compression, split-conditional stability, and
 post-hoc interpretation, not support recovery or universal predictive and
 clustering superiority.
