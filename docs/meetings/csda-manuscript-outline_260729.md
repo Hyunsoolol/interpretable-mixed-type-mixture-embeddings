@@ -1,6 +1,6 @@
 # CSDA 투고 논문 구성안
 
-업데이트: 2026-07-31
+업데이트: 2026-08-03
 
 이 문서는 논문 본문이 아니라 장별 목적, 포함 결과, 본문과 보충자료의
 경계를 정한 목차 문서이다.
@@ -505,49 +505,82 @@ E-CGL보다 낮았다. Adaptive extension의 일률적 우월성은 주장하지
 
 ## 5. Real-data applications
 
-### 5.1 Datasets and analysis protocol
+### 5.1 Classic3 and the primary analysis protocol
 
-- Classic3: 주 적용 사례
-- BBCSport: 대조 사례
-- SPLADE vocabulary-aligned representation
-- 중복 제거, train-only vocabulary ranking, unit-norm normalization
-- 고정 반복 홀드아웃
-- benchmark label은 적합 후 평가와 성분 이름 부여에만 사용
+- Classic3를 본문 주 적용 사례로 사용한다.
+- 완전·근접 중복을 제거한 전체 자료
+  $n=3{,}883$, $d=2{,}000$, $K=3$을 한 번 적합한다.
+- 문서는 고정된 SPLADE vocabulary-aligned representation으로 변환하고,
+  label을 사용하지 않은 전체 payload의 분산 기준 상위 2,000개 좌표를
+  선택한 뒤 row-wise unit normalization을 적용한다.
+- benchmark label은 fitting, tuning 및 support 선택에 사용하지 않는다.
+  $K=3$ 확인과 적합 후 ARI/NMI, component 명명 및 시각화에만 사용한다.
+- 기존 five locked 80/20 splits는 삭제하지 않고 Supplement의
+  prespecified stability and held-out assessment로 유지한다.
+- 이전 계산 경로의 전체 자료 수치는 참고 기록으로만 보존하고 최종 본문
+  수치로 재사용하지 않는다.
 
 ### 5.2 Methods and evaluation
 
 - spherical $k$-means
+- sparse $k$-means
 - Dense vMF shared/free $\kappa$
 - M-L
-- M-CGL
-- E-CGL/E-ACGL
-- held-out ARI, NMI, NLL/doc, selected $q$, support stability, runtime
+- M-CGL: 대표 centered directional comparator
+- E-CGL: 주 방법
+- E-ACGL: adaptive extension
 
-희소 방법은 동일한 concentration 구조의 dense model과 paired comparison을
-수행한다. 실자료에는 참 support가 없으므로 TPR, FPR, precision, $F_1$을
-보고하지 않는다.
+전체 자료 적합은 $K=3$, `nstart=30`, centered path 240을 사용하고,
+각 희소 방법의 추정 대상을 보존하는 exact support-constrained refit 후
+방법별 명목 차원으로 BIC를 계산한다. M-L은 해당 방법의 path 및 refit
+규칙을 유지한다.
 
-### 5.3 Classic3: primary application
+본문 평가 지표는 다음과 같다.
 
-- 7개 방법의 평균과 표준편차
+$$
+\mathrm{ARI},\quad \mathrm{NMI},\quad q,\quad q/d,
+\quad \text{cluster sizes},\quad
+\ell(\widehat\Theta),\quad \mathrm{BIC}^{\mathrm{refit}}
+$$
+
+희소 방법은 동일한 concentration 구조의 dense model과 matched comparison을
+구성하고, 전체 자료 1회 적합의 차이는 기술적으로 보고한다. 실자료에는
+참 support가 없으므로 TPR, FPR, precision 및 support $F_1$을 보고하지
+않는다.
+
+### 5.3 Classic3 full-data results and interpretation
+
+- 전체 비교 방법의 ARI, NMI, selected $q$, $q/d$, cluster size,
+  observed log-likelihood 및 BIC-after-refit
 - E-CGL의 좌표 유지율
-- dense free-$\kappa_k$ 대비 paired ARI와 NLL 차이
-- 분할 간 support Jaccard
-- centered-$\eta$ token contrast heatmap
+- matched dense model과의 기술적 비교
+- 전체 자료 E-CGL centered-$\eta$ token contrast heatmap
+- component별 양·음의 주요 contrast token
 - 선택되지 않았지만 공통 baseline이 큰 token의 해석
+- convergence, numerical warning 및 path-boundary diagnostic
 
-### 5.4 BBCSport: contrast application
+최종 표와 그림은 current true proximal-gradient E path와 현재
+BIC-after-refit 규칙으로 전체 자료 적합을 다시 완료한 뒤 확정한다.
 
-- 동일한 평가표
-- 희소화에 따른 held-out NLL 손실
-- 정보가 조밀하게 분포할 때의 제한
-- E-CGL이 모든 자료에서 우월하지 않음을 명시
+### 5.4 Supplementary stability and contrast analyses
+
+- Classic3 five locked splits에서 ARI/NMI, $q/d$, held-out NLL,
+  support Jaccard 및 selection frequency를 보고한다.
+- 분할이 서로 겹치므로 평균과 표준편차는 기술통계로만 해석한다.
+- BBCSport는 정보가 조밀하게 분포한 contrast application으로 Supplement에
+  배치하고 희소화에 따른 held-out NLL 손실을 그대로 보고한다.
+- CSTR은 Rossi 방식 구현의 문헌 재현과 prototype-oriented limitation을
+  확인하는 보조 사례로만 사용한다.
+- E-CGL의 일률적 군집·예측 우월성을 주장하지 않는다.
 
 ### 5.5 Reproducibility statement
 
-본문에는 모든 선택 적합의 완료 여부와 핵심 수치 안정성만 기술한다.
-CSTR 문헌 재현, Bessel-ratio audit, path-resolution audit는 보충자료로
-이동한다.
+- 데이터 출처, 중복 제거 규칙, SPLADE model/revision, vocabulary ranking,
+  seed, software 및 hardware를 고정한다.
+- 본문에는 전체 자료에서 선택된 모든 적합의 완료 여부와 핵심 수치
+  안정성만 기술한다.
+- five-split 전체 표, support stability, BBCSport, CSTR 문헌 재현,
+  Bessel-ratio audit 및 path-resolution audit는 Supplement에 둔다.
 
 ## 6. Discussion
 
@@ -571,11 +604,11 @@ E-CGL은 posterior-score 이질성을 추정한다는 차이로 정리한다.
 | Table 1 | 방법별 estimand, penalty, concentration 구조 |
 | Table 2 | 시뮬레이션 설계와 참 support |
 | Table 3 | 주요 posterior-score support recovery 결과 |
-| Table 4 | Classic3와 BBCSport 반복 홀드아웃 결과 |
+| Table 4 | Classic3 전체 자료의 방법별 적합·좌표 선택 결과 |
 | Figure 1 | prototype, directional, posterior-score support 개념도 |
 | Figure 2 | concentration 구조별 target-specific $F_1$ |
 | Figure 3 | 표본 크기별 oracle benchmark gap |
-| Figure 4 | Classic3 centered-$\eta$ token contrast |
+| Figure 4 | Classic3 전체 자료 E-CGL centered-$\eta$ token contrast |
 
 본문에서는 동일 수치를 표와 그림에 중복하여 제시하지 않는다.
 
@@ -620,10 +653,10 @@ E-CGL은 posterior-score 이질성을 추정한다는 차이로 정리한다.
 
 ### S6. Additional real-data results
 
-- split-level 전체 표
-- support stability
-- 추가 token 표
-- BBCSport path diagnostic
+- Classic3 five-split 전체 표와 held-out 결과
+- support Jaccard 및 coordinate selection frequency
+- 추가 token 및 common-baseline 표
+- BBCSport 전체 결과와 path diagnostic
 - CSTR 문헌 재현
 
 ### S7. Reproducibility
