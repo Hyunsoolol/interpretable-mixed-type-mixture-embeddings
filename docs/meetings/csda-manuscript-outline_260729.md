@@ -295,7 +295,7 @@ $$
 - equal 및 heterogeneous concentration 결과는 합치지 않는다.
 - 평균과 함께 Monte Carlo standard error를 보고한다.
 
-모든 24개 DGP cell에 적용하는 공통 패널은 다음과 같다.
+현재 완료된 24개 DGP cell에 적용한 공통 패널은 다음과 같다.
 
 | 계열 | 방법 |
 |---|---|
@@ -304,6 +304,9 @@ $$
 | Published sparse vMF | M-L |
 | Proposed | E-CGL |
 | Adaptive sensitivity | E-ACGL |
+
+추가 예정인 $e_B=0.10$, $n=600,2000$ 두 cell은 4.4의 표본크기
+회복 진단이므로 E-CGL을 주 분석으로 하고 E-ACGL만 민감도로 저장한다.
 
 M-CGL은 $S_{\mu}$와 $S_{\eta}$의 관계를 확인하는 directional companion으로
 다음 11개 고유 cell에 적용한다.
@@ -395,7 +398,7 @@ eta-only 좌표에는 공통 방향계수 $\mu_{kj}=0.20$, mu-only 좌표에는
 
 ### 4.4 Sample size, oracle benchmarks, and selector sensitivity
 
-다음 조건을 고정한다.
+기본 표본크기 trajectory는 다음 조건을 고정한다.
 
 $$
 d=200,\qquad e_B=0.05,\qquad(q_C,q_D,q_N)=(4,16,180)
@@ -409,8 +412,29 @@ $$
 
 Equal 및 heterogeneous $\kappa$를 각각 실행한다. $n=300,1000$의 4개
 cell은 4.2에서 재사용하고, $n=600,2000$의 4개 cell을 추가한다.
-각 표본크기에서 BIC-selected support, path oracle 및 oracle-support refit을
-비교하여 path 생성 오차와 selector 오차를 분리한다.
+
+E-CGL의 어려운 조건에서 표본크기 회복을 확인하기 위해 다음 trajectory를
+추가한다.
+
+$$
+d=200,\qquad e_B=0.10,\qquad(q_C,q_D,q_N)=(4,16,180)
+$$
+
+$$
+\boldsymbol{\kappa}=(30,40,50,60),\qquad
+n\in\{300,600,1000,2000\}
+$$
+
+$n=300,1000$은 4.2의 기존 cell을 재사용하고, $n=600,2000$ 두 cell을
+rep=100으로 추가한다. 두 새 cell은 E-CGL을 주 분석으로 실행하며 E-ACGL은
+adaptive sensitivity로 함께 저장한다. M-CGL의 기존 $e_B=0.05$
+표본크기 결과는 Supplement에 제시하고, $e_B=0.10$ 확장에는 추가하지 않는다.
+
+4.4 본문 표는 M-CGL 행을 제외하고 E-CGL만 제시한다. 표는
+$e_B=0.05$의 equal/heterogeneous $\kappa$ 8행과 $e_B=0.10$의
+heterogeneous $\kappa$ 4행을 합한 12행으로 구성한다. 각 표본크기에서
+BIC-selected support, path oracle 및 oracle-support refit을 비교하여 path
+생성 오차와 selector 오차를 분리한다.
 
 핵심 표본크기 지표는 다음과 같다.
 
@@ -442,17 +466,18 @@ support recovery를 함께 보고한다. Weak-signal cell은 전체 Bayes 난이
 
 **Final execution scope and DGP validation.**
 
-| 연구 | 새 고유 cell 수 |
+| 연구 | 최종 계획의 새 고유 cell 수 |
 |---|---:|
 | Main posterior-score recovery | 12 |
 | Estimand separation | 3 |
-| Sample-size behavior | 4 |
+| Sample-size behavior | 6 |
 | Computation and limitations | 5 |
-| **합계** | **24** |
+| **합계** | **26** |
 
-최종 full simulation은 24개 고유 DGP cell과 cell당 100회 반복으로
-구성한다. 기존 결과는 DGP, 알고리즘, refit 및 selector가 모두 동일할
-때만 재사용한다.
+최종 원고 계획은 26개 고유 DGP cell과 cell당 100회 반복으로 구성한다.
+2026년 8월 3일 현재 24개 cell은 완료되었고, $e_B=0.10$,
+heterogeneous $\kappa$의 $n=600,2000$ 두 cell은 실행 전이다. 기존 결과는
+DGP, 알고리즘, refit 및 selector가 모두 동일할 때만 재사용한다.
 
 각 cell 생성 직후 다음 invariant와 참 support를 자동 검증한다.
 
@@ -473,7 +498,7 @@ Support를 구성한 뒤 전체 행을 다시 scaling하여 참 support가 달�
 objective trace, Rcpp equality, 전체 runtime 표, EBIC/df/path 민감도는
 보충자료에 둔다.
 
-**Rep=100 evidence freeze.**
+**Current rep=100 evidence freeze before the planned extension.**
 
 2026년 8월 3일 기준 24개 DGP cell과 M-CGL estimand panel의 최종 실행,
 selector audit 및 fixed-support oracle benchmark를 완료하였다.
@@ -505,6 +530,10 @@ $F_{1,\eta}$는 1이었다. 두 결과는 estimand와 selector에 따른 차이�
 Dense/high-dimensional 조건에서는 exact-support rate가 대부분 0이었다.
 E-ACGL은 일부 조건에서 false-positive를 줄였으나 strongly dense cell에서는
 E-CGL보다 낮았다. Adaptive extension의 일률적 우월성은 주장하지 않는다.
+
+$e_B=0.10$, heterogeneous $\kappa$의 $n=600,2000$ 표본크기 확장은
+위 evidence freeze에 아직 포함하지 않는다. 두 cell이 rep=100 무결성
+검증을 통과한 뒤 4.4의 12행 E-CGL 표와 표본크기 Figure를 확정한다.
 
 전체 결과와 수치표는
 [`csda-final-simulation-results_260803.md`](../simulations/csda-final-simulation-results_260803.md)에 정리하였다.
@@ -609,11 +638,11 @@ E-CGL은 posterior-score 이질성을 추정한다는 차이로 정리한다.
 |---|---|
 | Table 1 | 방법별 estimand, penalty, concentration 구조 |
 | Table 2 | 시뮬레이션 설계와 참 support |
-| Table 3 | 주요 support recovery, estimand separation 및 표본크기 결과 |
+| Table 3 | 주요 support recovery, estimand separation 및 두 난이도의 표본크기 결과 |
 | Table 4 | Classic3 전체 자료의 방법별 적합·좌표 선택 결과 |
 | Figure 1 | prototype, directional, posterior-score support 개념도 |
 | Figure 2 | concentration 구조별 target-specific $F_1$ |
-| Figure 3 | 표본 크기별 oracle benchmark gap |
+| Figure 3 | $e_B=0.05,0.10$의 표본 크기별 recovery 및 oracle benchmark gap |
 | Figure 4 | Classic3 전체 자료 E-CGL centered-$\eta$ token contrast |
 
 본문에서는 동일 수치를 표와 그림에 중복하여 제시하지 않는다.

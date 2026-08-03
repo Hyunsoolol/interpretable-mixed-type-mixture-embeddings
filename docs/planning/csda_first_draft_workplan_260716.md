@@ -2,8 +2,8 @@
 
 - 작성일: 2026-07-16
 - 최종 갱신일: 2026-08-03
-- 현재 단계: Classic3 전체 자료 본 분석과 five-split Supplement 분석 분리 확정
-- 다음 작업: Classic3 전체 자료 payload 검증 후 final guarded true-PG 적합
+- 현재 단계: 24개 완료 simulation cell의 근거 동결과 4.4 hard sample-size 확장 설계 확정
+- 다음 작업: $e_B=0.10$, heterogeneous $\kappa$의 $n=600,2000$ rep=100 확장 실행
 - 목표: CSDA 투고용 원고 초판과 Supplement 초안 완성
 
 ## 상태 표시
@@ -451,7 +451,7 @@
 - [x] M-ACGL: 최종 원고 비교군과 simulation에서 제외
 - [x] dbmovMFs: 최종 공통 패널에서 제외
 
-### B1.1 원고용 최종 simulation evidence freeze (2026-08-03)
+### B1.1 원고용 현재 simulation evidence freeze (2026-08-03)
 
 - [x] 24개 고유 DGP cell, cell당 rep=100 완료
 - [x] main jobs 236/236, method-repetition rows 15,500/15,500
@@ -460,6 +460,8 @@
 - [x] M-L/E 계열 path 240, M-CGL 60·120 support 합집합 및 path 240 민감도
 - [x] BIC-after-refit, 방법별 nominal dimension 및 target-specific support 적용
 - [x] E-CGL 주 specification과 E-ACGL adaptive sensitivity 역할 확정
+- [ ] $e_B=0.10$, heterogeneous $\kappa$의 $n=600,2000$ 두 cell 추가
+- [~] 현재 근거는 24개 cell이며, 위 두 cell 완료 후 최종 범위는 26개 cell
 
 핵심 범위:
 
@@ -469,8 +471,9 @@
 - \(n=2000\)에서 M-CGL과 E-CGL은 해당 표본크기 panel의 모든 조건에서
   target-specific \(F_1=1\), exact-support rate 1
 - dense/high-dimensional 조건은 exact recovery가 성립하지 않는 적용 범위로 유지
+- $e_B=0.10$ 표본크기 확장은 아직 이 evidence freeze에 포함하지 않음
 
-최종 근거 문서:
+현재 근거 문서:
 
 - `docs/simulations/csda-final-simulation-results_260803.md`
 - `docs/meetings/csda-manuscript-draft-sections1-4_260803.md`
@@ -932,6 +935,53 @@ Focused E-series 및 repeated-holdout rep=10 확증:
 - `docs/planning/b9_tuning_sensitivity_audit_260721.md`
 - `results/studyb_b9_selector_sensitivity_combined_rep5_260721/`
 
+### B10. 4.4 hard sample-size extension (실행 전)
+
+목적:
+
+- [ ] 어려운 분리 조건에서 E-CGL의 표본크기 증가에 따른 회복 양상을 확인
+- [ ] 4.4 본문 표를 E-CGL의 두 난이도 trajectory로 구성
+
+고정 설정:
+
+$$
+K=4,\qquad d=200,\qquad(q_C,q_D,q_N)=(4,16,180)
+$$
+
+$$
+e_B=0.10,\qquad
+\boldsymbol{\kappa}=(30,40,50,60),\qquad
+n\in\{300,600,1000,2000\}
+$$
+
+- [x] $n=300,1000$은 기존 rep=100 cell을 재사용
+- [ ] $n=600,2000$은 같은 DGP와 최종 tuning 규칙으로 rep=100 실행
+- [ ] E-CGL을 주 분석으로 실행하고 E-ACGL은 adaptive sensitivity로 저장
+- [x] M-CGL은 4.4 본문 표에서 제외
+- [x] 기존 $e_B=0.05$ M-CGL 표본크기 결과는 Supplement에 유지
+- [x] $e_B=0.10$ M-CGL 표본크기 확장은 실행하지 않음
+
+공통 계산 규칙:
+
+- final guarded true-PG와 Rcpp helper 사용
+- E 계열 path 240, `nstart=10`, cell당 rep=100
+- target-preserving support-constrained refit 후 BIC-after-refit 선택
+- path oracle과 oracle-$S_\eta$ refit을 함께 저장
+- $0\leq\kappa_k\leq10^6$ 경계, calibration 오차, ERROR row,
+  valid-refit rate 및 zero-support rate 검증
+
+4.4 본문 표:
+
+| 난이도 | concentration | 표본크기 | 본문 방법 |
+|---|---|---|---|
+| $e_B=0.05$ | equal $\kappa$ | $300,600,1000,2000$ | E-CGL |
+| $e_B=0.05$ | heterogeneous $\kappa$ | $300,600,1000,2000$ | E-CGL |
+| $e_B=0.10$ | heterogeneous $\kappa$ | $300,600,1000,2000$ | E-CGL |
+
+총 12행에서 BIC-selected support, path oracle 및 oracle-support refit을
+비교한다. 추가 실행은 두 고유 DGP cell이며, 완료 후 전체 계획 범위는
+24개에서 26개 cell로 증가한다.
+
 완료 기준:
 
 - 본문에 사용할 모든 숫자가 frozen summary 파일과 연결되어야 한다.
@@ -1106,7 +1156,10 @@ Focused E-series 및 repeated-holdout rep=10 확증:
 - [x] 4.1 Design and evaluation criteria
 - [x] 4.2 Posterior-score support recovery
 - [x] 4.3 Directional versus posterior-score estimands
-- [x] 4.4 Sample size, oracle benchmarks, and selector sensitivity
+- [~] 4.4 Sample size, oracle benchmarks, and selector sensitivity
+  - 본문 표는 M-CGL을 제외하고 E-CGL만 제시
+  - $e_B=0.05$ equal/heterogeneous $\kappa$의 네 표본크기 완료
+  - $e_B=0.10$ heterogeneous $\kappa$의 $n=600,2000$ 두 cell 실행 대기
 - [x] 4.5 Stress conditions and computation
 - [x] Rossi bridge, 전체 selector/path 진단, 반복별 분포 및 \(K\)-selection을
   Supplement로 분리
@@ -1149,14 +1202,15 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 
 - [~] Table 1. 방법별 estimand, penalty 및 concentration 구조
 - [~] Table 2. Simulation design과 참 support
-- [~] Table 3. 주요 support recovery, estimand separation 및 표본크기 결과
+- [~] Table 3. 주요 support recovery, estimand separation 및 E-CGL의
+  두 난이도별 네 표본크기 결과
 - [ ] Table 4. Classic3 전체 자료의 방법별 적합·좌표 선택 결과
 
 ### G2. 본문 그림
 
 - [ ] Figure 1. Support decomposition
 - [ ] Figure 2. concentration 구조별 target-specific \(F_1\)
-- [ ] Figure 3. 표본크기별 oracle benchmark gap
+- [ ] Figure 3. $e_B=0.05,0.10$에서 E-CGL의 표본크기별 oracle benchmark gap
 - [ ] Figure 4. Classic3 전체 자료 E-CGL centered-\(\eta\) contrast
 
 기존 Study B boxplot과 full cell grid는 삭제하지 않고 Supplement figure로
@@ -1201,7 +1255,7 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 - [x] E-CGL과 E-ACGL의 역할이 구분됨
 - [x] main claim이 posterior-score contrast support로 제한됨
 - [x] simulation 숫자는 2026-08-03 frozen summary와 일치함
-- [x] simulation tuning과 최종 24-cell 실행 범위 확정
+- [~] simulation tuning은 확정; 현재 24개 cell 완료, 최종 26개 중 2개 실행 대기
 - [x] 수렴 성질의 주장 범위가 구현과 일치함
 - [x] limitation과 negative-control 결과가 포함됨
 - [~] simulation 본문 표·그림 inventory 확정; 최종 figure 제작과 Classic3
@@ -1235,11 +1289,13 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 | 17 | M-CGL/E-CGL matched rep=1 구조 진단 | 완료 | 16 |
 | 18 | M-CGL 다중해상도 runtime 및 사전 지정 panel rep=100 | 완료 | 17 |
 | 19 | 비교 구조와 원고 claim 재결정 | 완료: E-CGL 주방법, M-CGL companion | 18 |
-| 20 | Classic3 전체 자료 payload 검증 | 대기 | E1 |
-| 21 | Classic3 전체 자료 final guarded true-PG 적합 | 대기 | 20 |
-| 22 | 본문 Real data 절·Table 4·Figure 4 갱신 | 대기 | 21 |
-| 23 | five-split 결과를 Supplement 안정성 분석으로 이동 | 대기 | 22 |
-| 24 | Abstract·Discussion·최종 PDF 재검수 | 대기 | 22, 23 |
+| 20 | 4.4 $e_B=0.10$, $n=600,2000$ rep=100 확장 | 대기 | B1.1, B10 |
+| 21 | 4.4 E-CGL 12행 표와 표본크기 Figure 갱신 | 대기 | 20 |
+| 22 | Classic3 전체 자료 payload 검증 | 대기 | E1 |
+| 23 | Classic3 전체 자료 final guarded true-PG 적합 | 대기 | 22 |
+| 24 | 본문 Real data 절·Table 4·Figure 4 갱신 | 대기 | 23 |
+| 25 | five-split 결과를 Supplement 안정성 분석으로 이동 | 대기 | 24 |
+| 26 | Abstract·Discussion·최종 PDF 재검수 | 대기 | 21, 24, 25 |
 
 병렬 진행 가능 항목:
 
@@ -1253,7 +1309,7 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 
 ### 2026-08-03
 
-- 최종 원고용 simulation evidence를 동결했다.
+- 현재 원고용 simulation evidence를 동결했다.
   - 24개 고유 DGP cell, cell당 100회 반복
   - main jobs 236/236, method-repetition rows 15,500/15,500
   - selector groups 5,900/5,900, oracle paired rows 1,600/1,600
@@ -1264,6 +1320,12 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
     `docs/simulations/csda-final-simulation-results_260803.md`
   - 1--4절 원고 초안:
     `docs/meetings/csda-manuscript-draft-sections1-4_260803.md`
+- 4.4 본문 표를 E-CGL의 표본크기 회복에 집중하도록 개편했다.
+  - $e_B=0.05$의 equal/heterogeneous $\kappa$: $n=300,600,1000,2000$
+  - $e_B=0.10$의 heterogeneous $\kappa$: 같은 네 표본크기
+  - 기존 $n=300,1000$은 재사용하고 $n=600,2000$ 두 cell만 rep=100 추가
+  - M-CGL은 본문 4.4 표에서 제외하고 기존 결과를 Supplement에 유지
+  - 추가 cell은 아직 실행하지 않았으며, 완료 후 최종 범위는 26개 cell
 - Classic3 실자료 분석의 본문 구조를 통상적인 전체 자료 적용 방식으로
   변경하기로 확정했다.
   - 본 분석: near-duplicate 제거 후 전체 자료
