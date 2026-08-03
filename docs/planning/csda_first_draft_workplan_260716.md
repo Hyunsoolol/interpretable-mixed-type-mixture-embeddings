@@ -3,7 +3,7 @@
 - 작성일: 2026-07-16
 - 최종 갱신일: 2026-08-03
 - 현재 단계: Classic3 전체 자료 본 분석과 five-split Supplement 분석 분리 확정
-- 다음 작업: Classic3 전체 자료 payload 검증 후 current true-PG 최종 적합
+- 다음 작업: Classic3 전체 자료 payload 검증 후 final guarded true-PG 적합
 - 목표: CSDA 투고용 원고 초판과 Supplement 초안 완성
 
 ## 상태 표시
@@ -12,6 +12,10 @@
 - `[~]` 진행 중
 - `[ ]` 대기
 - `[!]` 결과 검토 또는 의사결정 필요
+
+최종 원고 용어는 `posterior-score contrast support` 또는
+`posterior-score coordinate selection`으로 통일한다. 아래 작업 기록의
+`posterior decision support`는 같은 추정 대상을 가리키는 과거 명칭이다.
 
 ## 계획 갱신 규칙
 
@@ -62,12 +66,15 @@
   - heterogeneous-\(\kappa\): population \(q_{H\mu}=8\), \(q_{H\eta}=12\)로 분리
   - same-\(\mu\)/different-\(\kappa\): E-CGL은 \(q_{H\eta}=12\)를 회복,
     M-CGL은 q=1을 선택; 성능 결론이 아닌 estimand 차이 진단
-- [~] M-CGL R prototype runtime 보완
-  - 작은 \(n=400,d=24\), path 21에서도 scenario당 약 33--347초
-  - Study B rep=5 전에 path/ADMM 계산량 축소와 회귀 검증 필요
-- [ ] Study B 대표 cell에서 M-L, M-GL, M-CGL 및 E-CGL matched rep=5 비교
-- [!] M-CGL 결과 확인 전에는 E-CGL의 우월성 또는 \(\eta\)-parameterization의
-  추가 이점을 확정하지 않음
+- [x] M-CGL Rcpp/ADMM 구현, 다중해상도 path 및 runtime 검증 완료
+  - 최종 1,100회에서 중앙 실행시간은 312.18초/rep
+  - 60점과 120점 path의 support 합집합을 refit하고, path 240은 민감도로 검증
+- [x] M-CGL을 사전 지정한 11개 estimand/sample-size cell에서 rep=100 평가
+  - common-\(\kappa\)에서는 M-CGL과 E-CGL의 target-specific 결과가 유사
+  - heterogeneous-\(\kappa\)에서는 \(S_\mu\)와 \(S_\eta\)의 차이를 확인
+- [x] 최종 원고 역할 확정: E-CGL은 주 방법, E-ACGL은 adaptive sensitivity,
+  M-CGL은 directional companion이며 M-ACGL은 제외
+- [x] 서로 다른 estimand의 \(F_1\)을 직접적인 우열 지표로 사용하지 않음
 
 감사 및 설계 문서:
 
@@ -82,14 +89,15 @@
 - [x] 본문이 Supplement에 실제로 제공되는 결과만 가리키도록 수정
   - cellwise uncertainty 제공 범위
   - 외부 비교 모형 및 수렴 진단 제공 범위
-- [x] posterior decision support의 좌표계 의존성 명시
+- [x] posterior-score contrast support의 좌표계 의존성 명시
   - component label permutation에는 불변
   - 임의의 feature-axis rotation에는 불변이 아님
   - token-aligned SPLADE 해석과 dense embedding 해석의 차이 명시
-- [x] \(\kappa\) 상한의 구현 범위 감사 및 원고 반영
-  - `kappa_cap=1e6`은 dense initialization과 unpenalized M-step target에 적용
-  - 현재 true-PG iterate에는 별도 projection이 없으므로 compact-parameter-space
-    convergence를 주장하지 않음
+- [x] \(\kappa\) 상한의 구현 범위 감사 및 최종 package에 반영
+  - `kappa_cap=1e6`을 초기값, accepted true-PG proposal 및 exact refit에 적용
+  - 상한을 넘는 proposal은 수용하지 않고 경계 도달 여부를 진단에 기록
+  - finite concentration bound를 사용하되 mixture 전역 최적성이나 전체
+    parameter sequence의 수렴은 주장하지 않음
 - [x] support-recovery 결과가 fixed \(K\)에 조건부라는 범위를 Abstract,
   Methods, Discussion에서 일관되게 유지
 - [x] 본문과 Supplement 재컴파일, reference·citation·layout 경고 0 확인
@@ -122,16 +130,17 @@
   - 기존 projected-update rep=20과 혼합하지 않고 final true-PG 결과로 교체
 - [ ] Rossi-style bridge를 rep=50 이상으로 확장하거나 본문 claim을 pilot 수준으로 축소
 - [ ] unbalanced mixing proportions 및 compressible-support robustness 추가
-- [ ] 외부 clustering baseline과 상세 convergence table을 Supplement에 넣을지,
-  본문의 해당 안내 문구를 제거할지 확정
+- [x] spherical \(k\)-means를 공통 simulation panel에 포함하고, 상세
+  convergence/runtime table은 Supplement에 배치
 
 ### 재현성 및 제출 패키지
 
-- [ ] 공개 entry point의 `eta_engine` 정책 확정
-  - 최종 실험은 `true_pg`
-  - 현재 package default는 `current`
-  - 공개 버전의 기본값·fallback·회귀 테스트를 함께 확정
-- [ ] Classic3 source, split, SPLADE model/version, vocabulary filter provenance 고정
+- [x] 공개 entry point의 `eta_engine` 정책 확정
+  - 최종 실험과 package default는 `true_pg`
+  - `current` engine은 과거 결과 재현 및 회귀 진단용으로만 유지
+  - true-PG 단위·통합·Rcpp 일치성 검증 완료
+- [~] Classic3 source, near-duplicate rule, SPLADE model/revision 및 vocabulary
+  filter provenance 문서화 완료; 전체 자료 payload checksum 고정 대기
 - [ ] frozen result checksum, 실행 명령 및 공개 code release 범위 정리
 - [ ] 교신 연락처, CRediT, data/code availability, AI-use disclosure는
   제출 직전 저자 확인 후 반영
@@ -152,7 +161,7 @@
   \qquad
   \bar\eta_j=K^{-1}\sum_{\ell=1}^K\eta_{\ell j}.
   $$
-- [x] posterior decision support 정의
+- [x] posterior-score contrast support 정의
   $$
   S_{\mathrm{dec}}
   =
@@ -180,7 +189,7 @@
 - [x] guarded engine switch 구현
   - `eta_engine="current"`
   - `eta_engine="true_pg"`
-- [x] 기본 fallback을 `current`로 유지
+- [x] package default를 `true_pg`로 전환하고 `current`는 명시적 호환 옵션으로 유지
 - [x] exact centered-support refit 구현
 - [x] BIC-after-refit 선택 절차 구현
 - [x] KKT 기반 true-PG lambda path 구현
@@ -353,9 +362,9 @@
 - `results/eta_true_pg_studyb_difficulty_combined_rep20_path120_260716/studyb_true_pg_method_contrasts.csv`
 - `results/eta_true_pg_studyb_difficulty_combined_rep20_path120_260716/studyb_true_pg_difficulty_notes.md`
 
-### A3. 최종 알고리즘 규칙 고정
+### A3. 2026-07-16 중간 알고리즘 규칙 기록
 
-- 상태: `[x]` 논문용 실행 규칙 확정 (2026-07-16)
+- 상태: `[x]` 당시 실행 규칙 기록; A4의 최종 규칙으로 대체됨
 
 - [x] E-CGL을 주 비적응 제안 모형으로 유지
 - [x] E-ACGL을 adaptive robustness 확장으로 유지
@@ -392,30 +401,84 @@
 - 기존 `current` 결과를 true-PG 결과로 소급해 표기하지 않는다.
 - true-PG를 채택하면 논문 핵심 simulation의 E 계열을 동일 engine으로 다시 계산한다.
 
+### A4. 원고용 최종 실행 규칙 (2026-08-03)
+
+- [x] E-CGL을 주 비적응 방법, E-ACGL을 adaptive sensitivity로 고정
+- [x] package와 원고 실행의 E-series engine을 `true_pg`로 고정
+- [x] M-L 및 E-series path를 240점으로 고정
+- [x] M-CGL은 60점과 120점 path의 support 합집합을 refit하고,
+  path 240을 민감도 분석으로 사용
+- [x] simulation dense initialization을 `nstart=10`으로 고정
+- [x] 모든 고유 support에 estimand-preserving exact refit을 적용
+- [x] `exact`는 support constraint의 정확한 적용을 뜻하며 global mixture
+  optimum을 뜻하지 않음을 명시
+- [x] 방법별 generic nominal dimension을 사용한 BIC-after-refit을 main
+  practical selector로 고정
+- [x] `kappa_cap=1e6`을 초기값, accepted true-PG proposal 및 refit에 적용
+- [x] fixed-\(K\) near-empty component는 `retain and record`로 처리
+- [x] E-ACGL은 \(\gamma=1\), \(\epsilon=10^{-6}\), median-normalized
+  frozen adaptive weights를 사용
+
+원고의 최종 성능 수치는 A4 규칙과 일치하는 2026-08-03 frozen results만
+사용한다. A3 이전의 path 120 및 `current` engine 결과는 개발·민감도 기록으로
+보존하며 최종 성능표와 혼합하지 않는다.
+
 ---
 
 ## B. 논문용 시뮬레이션 확정
 
 ### B1. 비교 모형 구성 재검토
 
-#### 본문 모형
+#### 본문 공통 패널
 
-- [x] Dense vMF
+- [x] spherical \(k\)-means: 외부 clustering 기준
+- [x] Dense vMF, shared/free \(\kappa\): density 기준
 - [x] M-L: Rossi sparse-prototype reference
-- [x] M-GL: raw-\(\mu\) coordinate-union diagnostic
-- [~] M-CGL: E-CGL과 centering/group 구조를 맞춘 핵심 비교 모형
-- [!] E-CGL: M-CGL matched comparison 뒤 주 제안 모형 지위 재확인
-- [x] E-ACGL
+- [x] E-CGL: posterior-score contrast support의 주 제안 방법
+- [x] E-ACGL: adaptive sensitivity; 일률적 우월성은 주장하지 않음
 
-#### Supplement 또는 ablation 모형
+#### 사전 지정 directional panel
 
-- [x] M-AGL
-- [!] E-CL: matched true-PG 구현 후 추가
-- [ ] spherical k-means
-- [ ] sparse k-means
-- [ ] dbmovMFs
+- [x] M-CGL: E-CGL과 centering/group 구조를 맞춘 directional companion
+- [x] common/heterogeneous \(\kappa\), estimand separation 및 표본크기 조건을
+  포함한 11개 고유 cell에서 rep=100 평가
 
-### B2. 최종 통합 runner
+#### Supplement, ablation 또는 제외
+
+- [x] E-CL: matched true-PG rep=100 ablation
+- [x] M-GL/M-AGL: 과거 raw-\(\mu\) diagnostic으로만 보존
+- [x] sparse \(k\)-means: 실자료 외부 기준으로 사용
+- [x] M-ACGL: 최종 원고 비교군과 simulation에서 제외
+- [x] dbmovMFs: 최종 공통 패널에서 제외
+
+### B1.1 원고용 최종 simulation evidence freeze (2026-08-03)
+
+- [x] 24개 고유 DGP cell, cell당 rep=100 완료
+- [x] main jobs 236/236, method-repetition rows 15,500/15,500
+- [x] selector groups 5,900/5,900, oracle paired rows 1,600/1,600
+- [x] missing, duplicate, unexpected key 및 ERROR row 모두 0
+- [x] M-L/E 계열 path 240, M-CGL 60·120 support 합집합 및 path 240 민감도
+- [x] BIC-after-refit, 방법별 nominal dimension 및 target-specific support 적용
+- [x] E-CGL 주 specification과 E-ACGL adaptive sensitivity 역할 확정
+
+핵심 범위:
+
+- sparse posterior-score 조건에서 E-CGL은 대부분 참 \(q_\eta=16\)에 근접
+- \(e_B=0.10,n=300\), heterogeneous \(\kappa\)에서 E-CGL
+  \(F_{1,\eta}=0.768\), E-ACGL \(F_{1,\eta}=0.948\)
+- \(n=2000\)에서 M-CGL과 E-CGL은 해당 표본크기 panel의 모든 조건에서
+  target-specific \(F_1=1\), exact-support rate 1
+- dense/high-dimensional 조건은 exact recovery가 성립하지 않는 적용 범위로 유지
+
+최종 근거 문서:
+
+- `docs/simulations/csda-final-simulation-results_260803.md`
+- `docs/meetings/csda-manuscript-draft-sections1-4_260803.md`
+
+### B2. 통합 runner의 초기 pilot 기록
+
+아래 rep=5 표는 2026-07-16의 실행 구조 점검 기록이며, 원고 성능 근거는
+B1.1의 rep=100 결과로 대체한다.
 
 - [x] 모든 비교 모형이 같은 simulated data와 seed를 사용
 - [x] 동일 dense initialization을 모든 방법에 제공
@@ -926,18 +989,24 @@ Focused E-series 및 repeated-holdout rep=10 확증:
   =
   d+(K-1)m_\lambda+(K-1)I(m_\lambda>0).
   $$
-- [~] exact effective df가 아니라 practical approximation임을 원고에 명시
+- [x] exact effective df가 아니라 generic nominal dimension에 기초한
+  practical approximation임을 원고에 명시
 
 ### D2. \(K\) 선택
 
-- [~] dense 또는 weakly penalized vMF에서 \(K\) 탐색
+- [x] main support-recovery claim은 참값에 고정한 \(K=K^\ast=4\)에 조건부
+- [x] \(K\)-selection은 support recovery와 분리한 diagnostic으로 수행
 - [x] AIC/BIC/EBIC/RIC/RICc/ICL과 independent test NLL rep=50 비교
-- [!] 고정 criterion 미정: AIC/test NLL은 \(K=4\), BIC/ICL/EBIC/RIC는
+- [x] criterion 충돌 기록: AIC/test NLL은 \(K=4\), BIC/ICL/EBIC/RIC는
   concentration 구조에 따라 과소선택
-- [x] repeated 80/20 holdout NLL rep=5 pilot 검증
-- [~] 실자료용 resampling NLL 규칙의 반복 확대 및 split 민감도 확인
-- [ ] \(K\) 고정 후 E-CGL path에서 \(\lambda_\eta\) 선택
-- [ ] all-in-one information criterion의 한계를 설명
+- [x] repeated 80/20 holdout NLL rep=5 pilot 및 rep=10 확장 검증
+- [x] split 민감도와 1-SE/minimum-NLL 차이를 기록하고 일반적 선택 규칙으로
+  확대하지 않음
+- [x] \(K\) 고정 후 E-CGL path에서 \(\lambda_\eta\)를 BIC-after-refit으로 선택
+- [x] all-in-one information criterion이 \(K\)와 sparsity를 교환할 수 있는
+  한계를 설명
+- [!] 본문 실자료는 benchmark \(K=3\) 고정 분석이며, 일반적인 data-driven
+  \(K\) 선택 규칙은 현재 논문의 주 기여로 주장하지 않음
 
 ---
 
@@ -959,14 +1028,15 @@ Focused E-series 및 repeated-holdout rep=10 확증:
 - [x] SPLADE 표현, 상위 \(d=2{,}000\) 좌표 및 row-wise unit normalization 고정
 - [ ] 동일 규칙으로 전체 자료 payload \(n=3{,}883,\ d=2{,}000\) 생성·검증
 - [ ] \(K=3\) 고정 분석과 별도 label-free \(K\)-selection diagnostic을 구분
-- [ ] current true-PG, nstart 30, path 240 및 exact BIC-after-refit 적용 확인
+- [ ] final guarded true-PG, nstart 30, path 240 및 exact
+  BIC-after-refit 적용 확인
 
 ### E2. 전체 자료 비교 적합
 
 - [ ] Dense vMF
 - [ ] spherical k-means
 - [ ] sparse k-means
-- [ ] M-L 및 원고에 유지하는 대표 M 계열
+- [ ] M-L 및 대표 directional comparator M-CGL
 - [ ] E-CGL: 주 방법
 - [ ] E-ACGL: adaptive extension
 - [ ] 동일 \(K\)와 initialization budget 적용
@@ -1004,17 +1074,17 @@ Focused E-series 및 repeated-holdout rep=10 확증:
 ### F1. 원고 구조
 
 - [x] 1. Introduction
-- [x] 2. Model and centered regularization
-- [x] 3. Estimation and properties
+- [x] 2. Model and methodology
+- [x] 3. Properties of the support target and algorithm
 - [x] 4. Numerical studies
-- [x] 5. Real data analysis
+- [x] 5. Real-data applications
 - [x] 6. Discussion
 - [x] Proposition 증명은 Appendix A로 분리
 
 ### F2. Introduction
 
 - [x] 고차원 directional mixture의 문제 제시
-- [x] sparse prototype과 sparse decision support의 차이
+- [x] sparse prototype과 posterior-score contrast support의 차이
 - [x] \(\mu\)와 \(\eta=\kappa\mu\)의 역할 차이
 - [x] centered group regularization의 필요성
 - [x] contribution을 3개 항목으로 정리
@@ -1029,17 +1099,17 @@ Focused E-series 및 repeated-holdout rep=10 확증:
 - [x] true-PG update와 backtracking
 - [x] exact support refit
 - [x] BIC-after-refit과 practical df
-- [x] practical \(K\)-selection procedure
+- [x] fixed-\(K\) claim과 별도 \(K\)-selection diagnostic의 범위
 
 ### F4. Simulation Studies
 
-- [x] simulation 질문을 study별로 명확히 구분
-- [x] Study A: literature bridge
-- [x] Study B: main decision-support recovery
-- [x] shared-background
-- [x] negative control
-- [x] \(K\) selection
-- [x] main 결과와 Supplement 결과 구분
+- [x] 4.1 Design and evaluation criteria
+- [x] 4.2 Posterior-score support recovery
+- [x] 4.3 Directional versus posterior-score estimands
+- [x] 4.4 Sample size, oracle benchmarks, and selector sensitivity
+- [x] 4.5 Stress conditions and computation
+- [x] Rossi bridge, 전체 selector/path 진단, 반복별 분포 및 \(K\)-selection을
+  Supplement로 분리
 
 ### F5. Classic3 Analysis
 
@@ -1052,7 +1122,7 @@ Focused E-series 및 repeated-holdout rep=10 확증:
 
 ### F6. Discussion
 
-- [x] posterior decision support 중심 claim
+- [x] posterior-score contrast support 중심 claim
 - [x] dense support, weak signal 및 small-\(n\) limitation
 - [x] \(K\) 선택과 sparsity 선택의 분리
 - [x] 계산 비용
@@ -1077,19 +1147,20 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 
 ### G1. 본문 표
 
-- [x] Table 1. 비교 모형과 penalty 정의
-- [x] Table 2. Simulation design
-- [x] Table 3. Study B main performance
-- [x] Table 4. Shared-background와 negative control
-- [ ] Table 5. Classic3 전체 자료 결과
+- [~] Table 1. 방법별 estimand, penalty 및 concentration 구조
+- [~] Table 2. Simulation design과 참 support
+- [~] Table 3. 주요 support recovery, estimand separation 및 표본크기 결과
+- [ ] Table 4. Classic3 전체 자료의 방법별 적합·좌표 선택 결과
 
 ### G2. 본문 그림
 
 - [ ] Figure 1. Support decomposition
-- [x] Figure 2. F1 by oracle Bayes error
-- [x] Figure 3. Selected noise q
-- [x] Figure 4. \(\log(\mathrm{MSE}_{\eta^c})\)
-- [ ] Figure 5. Classic3 전체 자료 selected terms 또는 contrast heatmap
+- [ ] Figure 2. concentration 구조별 target-specific \(F_1\)
+- [ ] Figure 3. 표본크기별 oracle benchmark gap
+- [ ] Figure 4. Classic3 전체 자료 E-CGL centered-\(\eta\) contrast
+
+기존 Study B boxplot과 full cell grid는 삭제하지 않고 Supplement figure로
+이동한다. 본문 표와 그림에는 같은 수치를 중복하여 제시하지 않는다.
 
 ### G3. Supplement
 
@@ -1106,10 +1177,12 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 ## H. 제출 형식과 재현성
 
 - [x] Elsevier/CSDA LaTeX 구조 적용
-- [!] 본문은 현재 표 7개, 그림 4개이며 최종 편집에서 표 1개를
-  Supplement로 더 이동할지 검토
+- [!] 아래 LaTeX/PDF 검수 완료 표시는 2026-07-22 패키지 기준이다.
+  2026-08-03의 새 1--4절과 Classic3 전체 자료 절을 이관한 뒤 다시 검수한다.
+- [~] 최종 본문 목표는 표 4개, 그림 4개이며 Classic3 전체 자료 결과 후
+  최종 중복·분량을 검수
 - [x] 수동 절 번호 제거
-- [x] 모든 equation, table 및 figure cross-reference 확인
+- [~] 모든 equation, table 및 figure cross-reference 확인; 최신 원고 이관 후 재검수
 - [x] bibliography와 author-year citation 정리
 - [!] data availability statement: Classic3 배포 가능 범위 확인 필요
 - [!] code availability statement: 공개 URL, release tag/DOI 및 license 필요
@@ -1117,23 +1190,24 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 - [x] funding statement: specific grant 없음으로 확인; 최종 제출본 반영 대기
 - [!] author contribution: CRediT 역할 확인 필요
 - [!] AI-use statement: 투고 시점 Elsevier 정책과 저자 승인 필요
-- [x] Supplement 별도 컴파일
-- [x] 최종 PDF에서 표·그림·수식 크기와 잘림 검증
+- [~] Supplement 별도 컴파일; 최신 원고 이관 후 재컴파일
+- [ ] 최종 PDF에서 표·그림·수식 크기와 잘림 재검증
 
 ---
 
 ## I. 원고 초판 완료 기준
 
-- [x] 모든 핵심 수식과 기호가 일관됨
+- [~] 1--4절의 핵심 수식과 기호는 일관됨; 5절 이관 후 전체 재검수
 - [x] E-CGL과 E-ACGL의 역할이 구분됨
-- [x] main claim이 posterior decision support로 제한됨
-- [~] simulation 숫자는 frozen summary와 일치함; Classic3 전체 자료 결과 대기
-- [~] simulation tuning은 확정; 실자료 전체 적합 규칙 반영 대기
+- [x] main claim이 posterior-score contrast support로 제한됨
+- [x] simulation 숫자는 2026-08-03 frozen summary와 일치함
+- [x] simulation tuning과 최종 24-cell 실행 범위 확정
 - [x] 수렴 성질의 주장 범위가 구현과 일치함
 - [x] limitation과 negative-control 결과가 포함됨
-- [~] simulation 표·그림 배치 완료; Classic3 표·그림 갱신 대기
-- [x] LaTeX가 오류 없이 컴파일됨
-- [x] 본문과 Supplement 초안이 모두 존재함
+- [~] simulation 본문 표·그림 inventory 확정; 최종 figure 제작과 Classic3
+  표·그림 갱신 대기
+- [~] 이전 LaTeX는 오류 없이 컴파일됨; 최신 1--5절 이관 후 재컴파일
+- [~] 이전 본문·Supplement와 최신 1--4절 초안이 존재함; 통합본 갱신 대기
 - [x] 내부 TODO와 저자 확인 항목이 별도 목록으로 정리됨
 
 ---
@@ -1148,7 +1222,7 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 | 4 | B1~B2 비교 모형 및 통합 runner 고정 | 완료 | A3 |
 | 5 | C 이론 절 초안 | 완료: 본문 proposition, Appendix A 증명 | A3, 방법론 수식 |
 | 6 | B3~B9 논문용 simulation 확정 | 완료: B3~B9 실행·검증 | B2 |
-| 7 | E Classic3 최종 분석 | 재개: 전체 자료 적합 대기 | A3, D |
+| 7 | E Classic3 최종 분석 | 재개: 전체 자료 적합 대기 | A4, D |
 | 8 | F1~F3 Introduction/Methods 작성 | 완료: 6절 구조와 Algorithm 1 반영 | A3 |
 | 9 | F4~F6 Results/Discussion 작성 | simulation 완료; Real data 재작성 대기 | B, E |
 | 10 | G 표·그림 정리 | 진행 | B, E |
@@ -1159,11 +1233,11 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 | 15 | M-CGL estimand·support·refit 명세 | 완료 | 14 |
 | 16 | M-CGL diagnostic optimizer 단위 검증 | 완료: exact refit·one-lambda·path PASS | 15 |
 | 17 | M-CGL/E-CGL matched rep=1 구조 진단 | 완료 | 16 |
-| 18 | M-CGL runtime 보완 및 Study B matched rep=5 | 진행 전 검토 | 17 |
-| 19 | 비교 구조와 원고 claim 재결정 | 대기 | 18 |
+| 18 | M-CGL 다중해상도 runtime 및 사전 지정 panel rep=100 | 완료 | 17 |
+| 19 | 비교 구조와 원고 claim 재결정 | 완료: E-CGL 주방법, M-CGL companion | 18 |
 | 20 | Classic3 전체 자료 payload 검증 | 대기 | E1 |
-| 21 | Classic3 전체 자료 current true-PG 적합 | 대기 | 20 |
-| 22 | 본문 Real data 절·Table 5·Figure 5 갱신 | 대기 | 21 |
+| 21 | Classic3 전체 자료 final guarded true-PG 적합 | 대기 | 20 |
+| 22 | 본문 Real data 절·Table 4·Figure 4 갱신 | 대기 | 21 |
 | 23 | five-split 결과를 Supplement 안정성 분석으로 이동 | 대기 | 22 |
 | 24 | Abstract·Discussion·최종 PDF 재검수 | 대기 | 22, 23 |
 
@@ -1179,11 +1253,22 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 
 ### 2026-08-03
 
+- 최종 원고용 simulation evidence를 동결했다.
+  - 24개 고유 DGP cell, cell당 100회 반복
+  - main jobs 236/236, method-repetition rows 15,500/15,500
+  - selector groups 5,900/5,900, oracle paired rows 1,600/1,600
+  - missing, duplicate, unexpected key 및 ERROR row 0
+  - E-CGL은 주 방법, E-ACGL은 adaptive sensitivity, M-CGL은 11개
+    사전 지정 cell의 directional companion으로 확정
+  - 최종 근거:
+    `docs/simulations/csda-final-simulation-results_260803.md`
+  - 1--4절 원고 초안:
+    `docs/meetings/csda-manuscript-draft-sections1-4_260803.md`
 - Classic3 실자료 분석의 본문 구조를 통상적인 전체 자료 적용 방식으로
   변경하기로 확정했다.
   - 본 분석: near-duplicate 제거 후 전체 자료
     \(n=3{,}883,\ d=2{,}000,\ K=3\) 1회 적합
-  - fitting/tuning: current true-PG, nstart 30, path 240,
+  - fitting/tuning: final guarded true-PG, nstart 30, path 240,
     method-specific exact BIC-after-refit
   - 평가: ARI, NMI, selected \(q\), \(q/d\), cluster size,
     observed log-likelihood 및 BIC
@@ -1193,9 +1278,9 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
 - 기존 five locked 80/20 splits는 삭제하지 않고 Supplement의
   prespecified stability and held-out assessment로 이동한다.
 - 기존 2026-07-11 전체 자료 결과는 이전 계산 경로의 참고치로만 유지한다.
-  최종 본문 수치는 current true-PG와 현재 BIC-after-refit 규칙으로
+  최종 본문 수치는 final guarded true-PG와 현재 BIC-after-refit 규칙으로
   재적합한 결과에서 확정한다.
-- 다음 작업은 전체 자료 payload 검증, 최종 all-method 적합, 본문 Table 5와
+- 다음 작업은 전체 자료 payload 검증, 최종 all-method 적합, 본문 Table 4와
   contrast figure 갱신 순서로 진행한다.
 
 ### 2026-07-20
@@ -1471,9 +1556,11 @@ density 결과는 Supplement 안정성 분석의 범위에서 기술한다.
   - posterior decision support가 component label permutation에는 불변이지만
     임의의 feature-axis rotation에는 불변이 아님을 Model과 Discussion에
     명시했다.
-  - `kappa_cap=1e6`은 dense initialization 및 unpenalized M-step target에
-    적용되고, true-PG iterate에는 별도 projection이 없음을 코드로 확인했다.
-    따라서 compactness나 전체 parameter-sequence boundedness를 주장하지 않는다.
+  - 2026-07-22 감사 당시 `kappa_cap=1e6`은 dense initialization 및
+    unpenalized M-step target에만 적용되었다. 이후 final package에서는
+    초기값, accepted true-PG proposal 및 exact refit에 같은 상한 검사를
+    적용하도록 보완했다. 이 유한 상한을 넘어 mixture 전역 최적성이나
+    전체 parameter-sequence convergence는 주장하지 않는다.
   - E-CGL support recovery는 fixed \(K\)에 조건부이고 component-number
     selection은 별도 diagnostic이라는 범위를 다시 고정했다.
   - Classic3 초록 문장을 1,347/2,000 coordinate 유지로 정량화했다.

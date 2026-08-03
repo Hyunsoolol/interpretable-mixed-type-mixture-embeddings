@@ -77,7 +77,7 @@ $$
 - 약어와 수식을 제목에서 사용하지 않음
 - 현재 작업 제목:
   *Centered Natural-Parameter Regularization for Posterior-Score
-  Heterogeneity in von Mises-Fisher Mixtures*
+  Coordinate Selection in von Mises-Fisher Mixtures*
 
 ### Abstract
 
@@ -119,7 +119,7 @@ E-CGL을 주방법으로 제시하며 M-CGL의 알고리즘을 독립 기여로 
 
 ## 2. Model and methodology
 
-### 2.1 von Mises-Fisher mixture
+### 2.1 von Mises-Fisher mixtures in natural parameters
 
 - vMF density와 mixture likelihood
 - $\|\boldsymbol{\mu}_{k}\|_2=1$, $\kappa_k\geq0$
@@ -147,7 +147,7 @@ $$
 S_{\eta} = \{j:\|\boldsymbol{c}_{j}^{(\eta)}\|_2>0\}
 $$
 
-### 2.3 E-CGL
+### 2.3 Centered-$\eta$ coordinate group lasso
 
 - centered-$\eta$ parameterization
 - coordinate-wise group penalty
@@ -161,14 +161,14 @@ $$
 - 선택 좌표의 의미
 - nonzero prototype 선택과의 차이
 
-### 2.4 E-ACGL
+### 2.4 Adaptive extension
 
 - adaptive weight 정의
 - $\gamma=1$과 median normalization
 - E-CGL의 보조 확장으로만 제시
 - E-ACGL이 항상 개선된다는 주장을 두지 않음
 
-### 2.5 Directional and prototype comparators
+### 2.5 Prototype and directional comparators
 
 세 비교 대상의 estimand를 한 표에서 구분한다.
 
@@ -190,7 +190,7 @@ $$
 - M-CGL의 목적함수와 단위구면 제약만 본문에 제시
 - M-CGL의 ADMM 및 manifold 반복식은 보충자료에 배치
 
-### 2.6 Estimation algorithm
+### 2.6 Guarded proximal generalized-EM estimation
 
 본문 Algorithm 1은 E-CGL/E-ACGL만 대상으로 한다.
 
@@ -205,13 +205,15 @@ $$
 Rcpp는 구현 세부로만 언급한다. 알고리즘 정의에 특정 프로그래밍 언어를
 포함하지 않는다.
 
-### 2.7 Support-constrained refit and selection
+### 2.7 Unpenalized refit under selected contrast constraints
 
 - 선택되지 않은 좌표에서 centered contrast만 0으로 제한
 - 공통 natural-parameter baseline 유지
 - support-constrained refit
 - BIC-after-refit
 - 명목 모형 차원은 exact effective degrees of freedom이 아님을 명시
+- `exact`는 선택 support의 equality constraint를 정확히 적용한다는 뜻이며,
+  비볼록 mixture likelihood의 전역 최적점을 뜻하지 않음
 
 $$
 \mathrm{df}_{\eta}(S) = d+(K-1)|S|+(K-1)\mathbf{1}(|S|>0)
@@ -220,9 +222,9 @@ $$
 - 같은 support를 생성하는 여러 $\lambda_{\eta}$의 처리 규칙
 - EBIC와 path sensitivity는 보충자료
 
-## 3. Theoretical properties
+## 3. Properties of the support target and algorithm
 
-### 3.1 Posterior-score cancellation
+### 3.1 Posterior-score cancellation and label invariance
 
 $$
 j\notin S_{\eta}
@@ -233,12 +235,12 @@ $$
 해당 좌표가 모든 pairwise posterior log-score의 feature-dependent
 선형항에서 소거됨을 보인다.
 
-### 3.2 Pairwise-dispersion identity and label invariance
+**Pairwise-dispersion identity.**
 
 - centered group norm과 모든 성분쌍 차이의 관계
 - 성분 label permutation에 대한 목적함수와 support의 불변성
 
-### 3.3 Relation between directional and posterior-score supports
+### 3.2 Directional and natural-parameter heterogeneity
 
 공통 concentration에서는 두 support가 일치한다.
 
@@ -249,7 +251,7 @@ $$
 이질적 concentration에서는 방향 차이, concentration 차이, 두 요인의
 상호작용으로 $S_{\mu}$와 $S_{\eta}$가 달라질 수 있음을 제시한다.
 
-### 3.4 Proximal and accepted-update properties
+### 3.3 Conditional optimization properties
 
 - fixed-responsibility smooth block의 convexity
 - centered group penalty의 closed-form proximal map
@@ -259,9 +261,9 @@ $$
 전체 mixture likelihood의 전역 최적점 또는 모든 parameter iterate의
 전역 수렴은 주장하지 않는다.
 
-### 3.5 Parameter-space and claim boundaries
+**Parameter-space and claim boundaries.**
 
-- finite concentration parameter space
+- 모든 accepted path/refit iterate에 적용하는 finite concentration bound
 - near-empty component 처리
 - mixture nonregularity
 - BIC의 practical model-selection approximation
@@ -281,8 +283,10 @@ $$
   `nstart=10`으로 고정한다.
 - 비볼록 M-CGL은 60점과 120점 warm-start path에서 얻은 support의 합집합을
   refit한 뒤 BIC로 선택한다. 별도 path 240은 민감도 분석에 사용한다.
-- 모든 likelihood 방법에 같은 finite-concentration parameter space와
-  초기값 예산을 적용하고, concentration 경계 도달률을 기록한다.
+- 모든 likelihood 방법에 같은 concentration bound
+  $0\leq\kappa_k\leq10^6$과 초기값 예산을 적용하고, 경계 도달률을
+  기록한다. E 계열은 초기값, accepted proximal-gradient proposal 및
+  support-constrained refit에서 이 조건을 검사한다.
 - M-L, M-CGL 및 E-CGL은 각 estimand를 보존하는 support-constrained
   refit과 방법별 nominal dimension을 사용하여 BIC-after-refit으로
   support를 선택한다.
@@ -312,10 +316,12 @@ M-CGL은 $S_{\mu}$와 $S_{\eta}$의 관계를 확인하는 directional companion
 | **합계** | **11** |
 
 이 범위는 common-$\kappa$ equivalence, heterogeneous-$\kappa$ divergence와
-표본크기 변화를 모두 포함한다. 대표 셀의 1회 소요시간은 다중해상도
-M-CGL 353.2초, E-CGL 54.1초, E-ACGL 42.5초였다. M-CGL의 60·120
-support 합집합은 세 대표 셀에서 별도 path 240과 같거나 더 낮은 refit
-BIC 후보를 포함했다. M-CGL은 기존 문헌
+표본크기 변화를 모두 포함한다. 최종 반복 전체의 중앙 실행시간은
+M-CGL 312.18초/rep, E-CGL 45.86초/rep, E-ACGL 41.20초/rep였다.
+M-CGL은 1,100회, E 계열은 각각 2,400회로 적용 범위가 다르므로 단순한
+paired runtime 비교로 해석하지 않는다. M-CGL의 60·120 support 합집합은
+세 대표 셀에서 별도 path 240과 같거나 더 낮은 refit BIC 후보를 포함했다.
+M-CGL은 기존 문헌
 baseline이 아니라 별도 estimand를 갖는 비교 방법이므로, 난이도 및 한계
 24개 cell 전체가 아닌 위의 사전 지정된 estimand panel에서 평가한다.
 
@@ -345,7 +351,7 @@ spherical $k$-means에는 support $F_1$을 부여하지 않는다. 공통 지표
 test NLL, Bayes excess classification error, ARI, 실행시간 및 실패율을
 포함한다.
 
-### 4.2 Main posterior-score support recovery
+### 4.2 Posterior-score support recovery
 
 참 좌표 구조는 다음과 같다.
 
@@ -367,7 +373,7 @@ error를 함께 저장한다. 본문에서는
 E-CGL의 $F_{1,\eta}$, exact-support rate, selected $q$, ARI, test NLL 및
 $\mathrm{MSE}_{\eta}$를 중심으로 보고한다.
 
-### 4.3 Estimand-separation diagnostics
+### 4.3 Directional versus posterior-score estimands
 
 | 진단 | 설정 | 참 support 관계 |
 |---|---|---|
@@ -387,7 +393,7 @@ eta-only 좌표에는 공통 방향계수 $\mu_{kj}=0.20$, mu-only 좌표에는
 공통 자연모수 $\eta_{kj}=8$을 사용한다. 이 cell의 achieved oracle error는
 약 0.0013이며 난이도별 성능 비교에는 사용하지 않는다.
 
-### 4.4 Oracle benchmark and sample-size behavior
+### 4.4 Sample size, oracle benchmarks, and selector sensitivity
 
 다음 조건을 고정한다.
 
@@ -418,7 +424,7 @@ $$
 증명이 아니라 표본크기 증가에 따른 empirical recovery behavior를
 평가한다.
 
-### 4.5 Computation and limitations
+### 4.5 Stress conditions and computation
 
 적용 범위와 한계는 다음 5개 cell에서 평가한다.
 
@@ -434,7 +440,7 @@ $$
 support recovery를 함께 보고한다. Weak-signal cell은 전체 Bayes 난이도와
 개별 좌표의 최소 신호를 구분하기 위한 진단이다.
 
-### 4.6 Final cell count and DGP validation
+**Final execution scope and DGP validation.**
 
 | 연구 | 새 고유 cell 수 |
 |---|---:|
@@ -467,7 +473,7 @@ Support를 구성한 뒤 전체 행을 다시 scaling하여 참 support가 달�
 objective trace, Rcpp equality, 전체 runtime 표, EBIC/df/path 민감도는
 보충자료에 둔다.
 
-### 4.7 Final rep=100 results
+**Rep=100 evidence freeze.**
 
 2026년 8월 3일 기준 24개 DGP cell과 M-CGL estimand panel의 최종 실행,
 selector audit 및 fixed-support oracle benchmark를 완료하였다.
@@ -559,7 +565,7 @@ $$
 - 선택되지 않았지만 공통 baseline이 큰 token의 해석
 - convergence, numerical warning 및 path-boundary diagnostic
 
-최종 표와 그림은 current true proximal-gradient E path와 현재
+최종 표와 그림은 final guarded proximal-gradient E path와 현재
 BIC-after-refit 규칙으로 전체 자료 적합을 다시 완료한 뒤 확정한다.
 
 ### 5.4 Supplementary stability and contrast analyses
@@ -603,7 +609,7 @@ E-CGL은 posterior-score 이질성을 추정한다는 차이로 정리한다.
 |---|---|
 | Table 1 | 방법별 estimand, penalty, concentration 구조 |
 | Table 2 | 시뮬레이션 설계와 참 support |
-| Table 3 | 주요 posterior-score support recovery 결과 |
+| Table 3 | 주요 support recovery, estimand separation 및 표본크기 결과 |
 | Table 4 | Classic3 전체 자료의 방법별 적합·좌표 선택 결과 |
 | Figure 1 | prototype, directional, posterior-score support 개념도 |
 | Figure 2 | concentration 구조별 target-specific $F_1$ |
