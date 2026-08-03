@@ -12,7 +12,6 @@
 | E-CGL | posterior-score contrast support $S_{\eta}$ | 주 제안 방법 |
 | E-ACGL | adaptive centered-$\eta$ support | 보조 확장 |
 | M-CGL | centered directional support $S_{\mu}$ | matched directional comparator |
-| M-ACGL | adaptive centered-$\mu$ support | 보조 비교 |
 | M-L | prototype support $S_P$ | Rossi 문헌 비교 |
 | Dense vMF | 전체 좌표를 사용하는 density model | 비정규화 기준 |
 
@@ -23,7 +22,7 @@ S_{\eta} = \{j:\|\boldsymbol{\eta}_{\cdot j}-\bar{\eta}_{j}\mathbf{1}_{K}\|_2>0\
 $$
 
 즉, 모든 성분쌍의 posterior log-score 비교에 실제로 들어가는 좌표를
-추정하는 것이 논문의 중심이다. M-CGL과 M-ACGL은 별도 주방법이 아니라
+추정하는 것이 논문의 중심이다. M-CGL은 별도 주방법이 아니라
 $S_{\mu}$와 $S_{\eta}$가 달라지는 원인을 확인하는 비교 방법으로 둔다.
 
 ## 구성 근거
@@ -186,7 +185,7 @@ S_{\mu} = \{j:\|\boldsymbol{c}_{j}^{(\mu)}\|_2>0\}
 $$
 
 - M-L: prototype support
-- M-CGL/M-ACGL: directional heterogeneity support
+- M-CGL: directional heterogeneity support
 - E-CGL/E-ACGL: posterior-score contrast support
 - M-CGL의 목적함수와 단위구면 제약만 본문에 제시
 - M-CGL의 ADMM 및 manifold 반복식은 보충자료에 배치
@@ -273,77 +272,236 @@ $$
 
 ### 4.1 Design and evaluation criteria
 
-- true $K$는 support-recovery 실험에서 고정
-- oracle Bayes error로 군집 난이도 설정
-- equal/heterogeneous concentration 결과를 분리
-- 반복 수와 Monte Carlo standard error 보고
+- 주 support-recovery 실험에서는 $K=K^\ast=4$로 고정한다.
+- 기본 혼합비율은 $\pi_k=0.25$이고 기본 차원은 $d=200$이다.
+- 각 고유 DGP cell은 $R=100$회 반복한다.
+- 각 반복에서 공통 학습자료와 독립 검증자료
+  $n_{\mathrm{test}}=5000$을 모든 방법에 동일하게 사용한다.
+- M-L과 E 계열의 penalized path length는 240, dense initialization은
+  `nstart=10`으로 고정한다.
+- 비볼록 M-CGL은 60점과 120점 warm-start path에서 얻은 support의 합집합을
+  refit한 뒤 BIC로 선택한다. 별도 path 240은 민감도 분석에 사용한다.
+- 모든 likelihood 방법에 같은 finite-concentration parameter space와
+  초기값 예산을 적용하고, concentration 경계 도달률을 기록한다.
+- M-L, M-CGL 및 E-CGL은 각 estimand를 보존하는 support-constrained
+  refit과 방법별 nominal dimension을 사용하여 BIC-after-refit으로
+  support를 선택한다.
+- E-CGL refit에서는 비선택 좌표의 centered contrast만 0으로 제한하고
+  공통 natural-parameter baseline은 유지한다.
+- equal 및 heterogeneous concentration 결과는 합치지 않는다.
+- 평균과 함께 Monte Carlo standard error를 보고한다.
 
-주 비교 방법:
+모든 24개 DGP cell에 적용하는 공통 패널은 다음과 같다.
 
 | 계열 | 방법 |
 |---|---|
+| External clustering | Spherical $k$-means |
 | Density baseline | Dense vMF, shared/free $\kappa$ |
 | Published sparse vMF | M-L |
-| Directional contrast | M-CGL |
 | Proposed | E-CGL |
-| Oracle reference | Oracle-$S_{\mu}$, Oracle-$S_{\eta}$ |
+| Adaptive sensitivity | E-ACGL |
 
-E-ACGL과 M-ACGL의 전체 결과는 보충자료에 둔다.
+M-CGL은 $S_{\mu}$와 $S_{\eta}$의 관계를 확인하는 directional companion으로
+다음 11개 고유 cell에 적용한다.
+
+| M-CGL 적용 범위 | 고유 cell 수 |
+|---|---:|
+| $e_B=0.05$, $n=300,1000$, equal/heterogeneous $\kappa$ | 4 |
+| Pure concentration, shared canonical background, crossed support | 3 |
+| $e_B=0.05$, $n=600,2000$, equal/heterogeneous $\kappa$ | 4 |
+| **합계** | **11** |
+
+이 범위는 common-$\kappa$ equivalence, heterogeneous-$\kappa$ divergence와
+표본크기 변화를 모두 포함한다. 대표 셀의 1회 소요시간은 다중해상도
+M-CGL 353.2초, E-CGL 54.1초, E-ACGL 42.5초였다. M-CGL의 60·120
+support 합집합은 세 대표 셀에서 별도 path 240과 같거나 더 낮은 refit
+BIC 후보를 포함했다. M-CGL은 기존 문헌
+baseline이 아니라 별도 estimand를 갖는 비교 방법이므로, 난이도 및 한계
+24개 cell 전체가 아닌 위의 사전 지정된 estimand panel에서 평가한다.
+
+E-ACGL은 E-CGL의 adaptive sensitivity로만 평가하고 전체 결과는
+보충자료에 둔다. M-ACGL은 논문 비교군과 최종 simulation에서 제외한다.
+Oracle-$S_{\mu}$와 Oracle-$S_{\eta}$는 경쟁 방법이 아니라
+support가 알려진 기준 적합으로 사용한다. Path oracle은 표본크기 진단에서만
+사용한다.
 
 평가 지표:
 
 $$
-F_{1,\eta},\quad F_{1,\mu},\quad \mathrm{ARI},\quad
-\mathrm{NLL}_{\mathrm{test}},\quad
-\mathrm{MSE}_{\eta},\quad \mathrm{MSE}_{\mu}
+F_{1,P},\quad F_{1,\mu},\quad F_{1,\eta},\quad
+\mathrm{ARI},\quad \mathrm{NMI}
 $$
 
-각 방법은 자신의 estimand에 대한 target-specific 성능과
-$S_{\eta}$에 대한 cross-target 성능을 구분하여 보고한다.
+$$
+\mathrm{NLL}_{\mathrm{test}},\quad
+\mathrm{MSE}_{\mu},\quad \mathrm{MSE}_{\kappa},\quad
+\mathrm{MSE}_{\eta}
+$$
+
+M-L은 $S_P$, M-CGL은 $S_{\mu}$, E-CGL과 E-ACGL은 $S_{\eta}$에
+대한 target-specific recovery를 우선 보고한다. 모든 sparse 방법의
+$S_{\eta}$ 기준 결과는 cross-target 성능으로 별도 표시한다. Dense vMF와
+spherical $k$-means에는 support $F_1$을 부여하지 않는다. 공통 지표에는
+test NLL, Bayes excess classification error, ARI, 실행시간 및 실패율을
+포함한다.
 
 ### 4.2 Main posterior-score support recovery
 
-- $n\in\{300,1000\}$
-- $d=200$
-- oracle Bayes error $e_B\in\{0.025,0.05,0.10\}$
-- common, decision, noise 좌표 분해
-- equal/heterogeneous $\kappa$를 별도 표 또는 panel로 제시
-- E-CGL의 $F_{1,\eta}$, selected $q$, ARI, MSE를 중심으로 보고
+참 좌표 구조는 다음과 같다.
+
+$$
+(q_C,q_D,q_N)=(4,16,180)
+$$
+
+| 요인 | 수준 |
+|---|---|
+| 표본크기 | $n\in\{300,1000\}$ |
+| oracle Bayes error | $e_B\in\{0.025,0.05,0.10\}$ |
+| equal concentration | $\boldsymbol{\kappa}=(45,45,45,45)$ |
+| heterogeneous concentration | $\boldsymbol{\kappa}=(30,40,50,60)$ |
+
+총 12개 고유 cell이다. 각 cell의 참 모수는 반복 전에 고정하고,
+oracle Bayes error는 독립 Monte Carlo 표본으로 재검증한다. 목표값과
+achieved value의 차이는 0.002 이내로 제한하고 Monte Carlo standard
+error를 함께 저장한다. 본문에서는
+E-CGL의 $F_{1,\eta}$, exact-support rate, selected $q$, ARI, test NLL 및
+$\mathrm{MSE}_{\eta}$를 중심으로 보고한다.
 
 ### 4.3 Estimand-separation diagnostics
 
-1. Common $\kappa$: $S_{\mu}=S_{\eta}$
-2. Pure concentration heterogeneity:
-   $S_{\mu}=\varnothing$, $S_{\eta}\neq\varnothing$
-3. Shared canonical background:
-   $S_{\mu}\supset S_{\eta}$가 가능한 경우
-4. Crossed support:
-   $\eta$-only, $\mu$-only, both, null
+| 진단 | 설정 | 참 support 관계 |
+|---|---|---|
+| Common $\kappa$ | 4.2의 $n=1000$, $e_B=0.05$, equal $\kappa$ cell 재사용 | $S_{\mu}=S_{\eta}$ |
+| Pure concentration | $n=1000$, $d=200$, $\mu_1=\cdots=\mu_4$, $\boldsymbol{\kappa}=(10,30,80,200)$, $\lvert\operatorname{supp}(\mu)\rvert=16$ | $S_{\mu}=\varnothing$, $S_{\eta}\neq\varnothing$ |
+| Shared canonical background | $n=1000$, $(q_C,q_D,q_N)=(80,20,100)$, heterogeneous $\kappa$, $e_B=0.05$ | $S_{\mu}\supset S_{\eta}$ 가능 |
+| Crossed support | $n=400$, $d=24$, $(q_{\eta\text{-only}},q_{\mu\text{-only}},q_{\mathrm{both}},q_0)=(4,4,8,8)$ | 두 support의 교차 구조 |
 
 이 절은 M-CGL과 E-CGL의 승패가 아니라 서로 다른 참 support를 복원하는지
-검증한다.
+검증한다. Common-$\kappa$ cell은 4.2에서 재사용하므로 새로운 고유 cell은
+3개이다. $S_{\mu}=\varnothing$인 pure-concentration cell에서는
+$F_{1,\mu}$ 대신 exact-empty rate와 false-positive coordinate 수를
+보고한다.
+
+Crossed-support cell은 estimand 분리만 확인하는 stylized diagnostic이다.
+eta-only 좌표에는 공통 방향계수 $\mu_{kj}=0.20$, mu-only 좌표에는
+공통 자연모수 $\eta_{kj}=8$을 사용한다. 이 cell의 achieved oracle error는
+약 0.0013이며 난이도별 성능 비교에는 사용하지 않는다.
 
 ### 4.4 Oracle benchmark and sample-size behavior
 
-- oracle-support refit
-- path oracle
-- BIC-selected support
-- path와 selector에서 발생하는 오차 분리
-- 표본 크기에 따른 support recovery와 estimation error
+다음 조건을 고정한다.
+
+$$
+d=200,\qquad e_B=0.05,\qquad(q_C,q_D,q_N)=(4,16,180)
+$$
+
+표본크기는 다음 네 수준으로 둔다.
+
+$$
+n\in\{300,600,1000,2000\}
+$$
+
+Equal 및 heterogeneous $\kappa$를 각각 실행한다. $n=300,1000$의 4개
+cell은 4.2에서 재사용하고, $n=600,2000$의 4개 cell을 추가한다.
+각 표본크기에서 BIC-selected support, path oracle 및 oracle-support refit을
+비교하여 path 생성 오차와 selector 오차를 분리한다.
+
+핵심 표본크기 지표는 다음과 같다.
+
+$$
+P(\widehat S_{\eta}=S_{\eta}),\quad F_{1,\eta},\quad
+\mathrm{MSE}_{\eta},\quad \Delta_{\mathrm{NLL}}
+$$
 
 `oracle property` 대신 `oracle-support comparison` 또는
-`oracle benchmark gap`을 사용한다.
+`oracle benchmark gap`을 사용한다. 이 절은 selection consistency의
+증명이 아니라 표본크기 증가에 따른 empirical recovery behavior를
+평가한다.
 
 ### 4.5 Computation and limitations
 
-- 수렴 성공률과 실패율
-- E-CGL 실행시간
-- path endpoint 선택률
-- dense weak-support negative control
-- 초기값 및 path sensitivity의 핵심 결과
+적용 범위와 한계는 다음 5개 cell에서 평가한다.
+
+| 진단 | $n,d$ | support | 난이도 및 concentration |
+|---|---|---|---|
+| Moderately dense 1 | $300,200$ | $(q_C,q_D,q_N)=(4,80,116)$ | $e_B=0.10$, heterogeneous $\kappa$ |
+| Moderately dense 2 | $1000,200$ | $(q_C,q_D,q_N)=(4,80,116)$ | $e_B=0.10$, heterogeneous $\kappa$ |
+| Strongly dense | $1000,200$ | $(q_C,q_D,q_N)=(4,160,36)$ | $e_B=0.10$, heterogeneous $\kappa$ |
+| High dimensional | $300,500$ | $(q_C,q_D,q_N)=(10,40,450)$ | $e_B=0.05$, $\boldsymbol{\kappa}=(45,60,75,90)$ |
+| Weak-signal beta-min | $1000,200$ | $q_D=16$: strong 4, weak 12 | weak/strong contrast norm ratio 0.25, $e_B=0.05$ |
+
+각 cell에서 수렴 성공률, 실패율, path endpoint 선택률, 실행시간 및
+support recovery를 함께 보고한다. Weak-signal cell은 전체 Bayes 난이도와
+개별 좌표의 최소 신호를 구분하기 위한 진단이다.
+
+### 4.6 Final cell count and DGP validation
+
+| 연구 | 새 고유 cell 수 |
+|---|---:|
+| Main posterior-score recovery | 12 |
+| Estimand separation | 3 |
+| Sample-size behavior | 4 |
+| Computation and limitations | 5 |
+| **합계** | **24** |
+
+최종 full simulation은 24개 고유 DGP cell과 cell당 100회 반복으로
+구성한다. 기존 결과는 DGP, 알고리즘, refit 및 selector가 모두 동일할
+때만 재사용한다.
+
+각 cell 생성 직후 다음 invariant와 참 support를 자동 검증한다.
+
+$$
+\|\boldsymbol{\mu}_k\|_2=1,\qquad
+\|\boldsymbol{\eta}_k\|_2=\kappa_k
+$$
+
+$$
+S_P,\qquad S_{\mu},\qquad S_{\eta}
+$$
+
+Achieved oracle Bayes error, active centered contrast의 최소 norm, pairwise
+KL divergence 및 oracle posterior confusion matrix를 함께 저장한다.
+Support를 구성한 뒤 전체 행을 다시 scaling하여 참 support가 달라지는
+생성 방식은 사용하지 않는다.
 
 objective trace, Rcpp equality, 전체 runtime 표, EBIC/df/path 민감도는
 보충자료에 둔다.
+
+### 4.7 Final rep=100 results
+
+2026년 8월 3일 기준 24개 DGP cell과 M-CGL estimand panel의 최종 실행,
+selector audit 및 fixed-support oracle benchmark를 완료하였다.
+
+| gate | 결과 | 판정 |
+|---|---:|---|
+| Main jobs | 236/236 | PASS |
+| Main method-repetition rows | 15,500/15,500 | PASS |
+| Selector groups | 5,900/5,900 | PASS |
+| Oracle paired rows | 1,600/1,600 | PASS |
+| Missing / duplicate / ERROR row | 0 / 0 / 0 | PASS |
+
+Main sparse-support 조건에서 E-CGL은 대부분 참 $q_{\eta}=16$에 가까운
+support를 선택하였다. $e_B=0.10$, $n=300$, heterogeneous $\kappa$에서는
+$F_{1,\eta}=0.768$로 낮아졌고 E-ACGL은 0.948이었다. 이 조건은 adaptive
+weighting의 이득과 E-CGL의 small-sample limitation을 함께 보여준다.
+
+표본크기 진단에서 E-CGL은 equal 및 heterogeneous $\kappa$ 모두
+$n=600$부터 $F_{1,\eta}\geq0.998$이었고, $n=2000$에서 exact-support
+rate 1을 기록하였다. M-CGL도 $n=2000$에서 두 concentration 구조 모두
+$F_{1,\mu}=1$과 exact-support rate 1을 기록하였다.
+
+Pure-concentration M-CGL path는 매 반복 empty support를 포함했으나 BIC의
+exact-empty rate는 0.24였다. $\mathrm{EBIC}_{1}$에서는 0.97이었다.
+Shared-canonical cell에서 M-CGL의 $F_{1,\mu}$는 0.348이었으며, E-CGL의
+$F_{1,\eta}$는 1이었다. 두 결과는 estimand와 selector에 따른 차이를
+분리하여 보고한다.
+
+Dense/high-dimensional 조건에서는 exact-support rate가 대부분 0이었다.
+E-ACGL은 일부 조건에서 false-positive를 줄였으나 strongly dense cell에서는
+E-CGL보다 낮았다. Adaptive extension의 일률적 우월성은 주장하지 않는다.
+
+전체 결과와 수치표는
+[`csda-final-simulation-results_260803.md`](../simulations/csda-final-simulation-results_260803.md)에 정리하였다.
 
 ## 5. Real-data applications
 
@@ -361,7 +519,7 @@ objective trace, Rcpp equality, 전체 runtime 표, EBIC/df/path 민감도는
 - spherical $k$-means
 - Dense vMF shared/free $\kappa$
 - M-L
-- M-CGL/M-ACGL
+- M-CGL
 - E-CGL/E-ACGL
 - held-out ARI, NMI, NLL/doc, selected $q$, support stability, runtime
 
@@ -371,7 +529,7 @@ objective trace, Rcpp equality, 전체 runtime 표, EBIC/df/path 민감도는
 
 ### 5.3 Classic3: primary application
 
-- 8개 방법의 평균과 표준편차
+- 7개 방법의 평균과 표준편차
 - E-CGL의 좌표 유지율
 - dense free-$\kappa_k$ 대비 paired ARI와 NLL 차이
 - 분할 간 support Jaccard
@@ -433,7 +591,7 @@ E-CGL은 posterior-score 이질성을 추정한다는 차이로 정리한다.
 ### S2. Complete algorithms
 
 - E-CGL/E-ACGL 상세 pseudocode
-- M-CGL/M-ACGL ADMM 및 manifold update
+- M-CGL ADMM 및 manifold update
 - Banerjee concentration approximation과 수치적 root solving
 - stopping rule과 failure handling
 
