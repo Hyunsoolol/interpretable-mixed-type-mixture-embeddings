@@ -5,6 +5,7 @@
 $$\text{Dense vMF}\quad\longrightarrow\quad\text{posterior-score contrast sparsification}$$
 
 $$S_\eta=\{j:\Vert{}H_K\eta_{\cdot j}\Vert{}_2>0\},\qquad S_\mu=\{j:\Vert{}H_K\mu_{\cdot j}\Vert{}_2>0\}$$
+
 확인 사항:
 
 $$\text{clustering 유지}\;+\;\vert{}S_\eta\vert{}\text{ 감소}\;+\;\text{common baseline 보존}$$
