@@ -17,8 +17,6 @@ $$\text{clustering 유지}+\vert{}S_\eta\vert{}\text{ 감소}+\text{common basel
 ### Classic3
 - 사용 배경: 방향성 문서 군집화(directional document clustering) 알고리즘 검증을 위해 널리 활용되는 벤치마크 데이터셋입니다.
 - 레퍼런스: Banerjee et al. (2005), Greene & Cunningham (2006).
-- 데이터 정제: 원본 문서에서 완전 중복(exact duplicates) 2개와 사전 지정된 유사 중복(near duplicates) 5개를 제거하여 총 $n=3{,}883$개의 데이터를 구축
-- 클래스별 분포: $(n_{\mathrm{CISI}},n_{\mathrm{CRAN}},n_{\mathrm{MED}})=(1454,1397,1032)$
 
 $$K=3\quad(\mathrm{CISI},\mathrm{CRAN},\mathrm{MED})$$
 
@@ -33,9 +31,6 @@ $$(n_{\mathrm{CISI}},n_{\mathrm{CRAN}},n_{\mathrm{MED}})=(1454,1397,1032)$$
 - 고정된 리비전의 SPLADE CoCondenser 모델(Formal et al., 2021)을 사용하여 문서를 어휘 기반(vocabulary-aligned) 벡터로 인코딩
 - SPLADE는 문맥이 반영된 vocabulary 단위의 sparse표현을 제공하므로, 피처 수준의 의미 해석에 적합
 - 사용 타당성: SPLADE의 출력값 $y_i$는 non-negative 특성을 가집니다. 이를 $L2$-정규화한 변환값 $x_i$는 단위 초구면($S^{p−1}$) 위에 위치하므로, vMF 분포 및 구면 k-평균(Spherical k-means) 모델의 입력 가정을 충족
-- 피처 필터링 및 정규화:2개 미만의 문서에 등장하는 좌표(coordinates)를 제거했습니다.
-- 라벨이 없는 정제된 데이터를 기준으로 분산 상위 2,000개의 좌표를 선택했습니다.
-- 각 벡터를 단위 유클리디안 노름($L_2$ norm)으로 정규화하여 데이터가 초구면 상에 위치하도록 변환했습니다. ($x_i \in \mathbb S^{1999}$)
 
 $$y_i=\mathrm{SPLADE}(t_i)\in\mathbb R_+^V$$
 
