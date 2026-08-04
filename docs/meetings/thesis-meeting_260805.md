@@ -20,7 +20,7 @@ $$K=3\quad(\mathrm{CISI},\mathrm{CRAN},\mathrm{MED})$$
 
 $$n_0=3{,}890$$
 
-$$n=3{,}890-2\;(\text{exact duplicates})-5\;(\text{near duplicates})=3{,}883$$
+$$n=3{,}890-2(\text{exact duplicates})-5(\text{near duplicates})=3{,}883$$
 
 $$(n_{\mathrm{CISI}},n_{\mathrm{CRAN}},n_{\mathrm{MED}})=(1454,1397,1032)$$
 
@@ -42,7 +42,7 @@ $$\text{zero row}=0,\quad\text{duplicate transformed row}=0,\quad\text{nonfinite
 
 Label 사용:
 
-$$\text{fitting / tuning / support selection}\;\perp\;\text{class label}$$
+$$\text{fitting / tuning / support selection}\perp\text{class label}$$
 
 $$\text{label}\rightarrow K=3,\mathrm{ARI},\mathrm{NMI},\text{post-fit component naming}$$
 
