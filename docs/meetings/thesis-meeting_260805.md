@@ -8,7 +8,7 @@ $$S_\eta=\{j:\Vert{}H_K\eta_{\cdot j}\Vert{}_2>0\},\qquad S_\mu=\{j:\Vert{}H_K\m
 
 확인 사항:
 
-$$\text{clustering 유지}\;+\;\vert{}S_\eta\vert{}\text{ 감소}\;+\;\text{common baseline 보존}$$
+$$\text{clustering 유지}+\vert{}S_\eta\vert{}\text{ 감소}+\text{common baseline 보존}$$
 
 ---
 
