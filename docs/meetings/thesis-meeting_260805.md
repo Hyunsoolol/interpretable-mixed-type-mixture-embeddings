@@ -26,6 +26,9 @@ $$(n_{\mathrm{CISI}},n_{\mathrm{CRAN}},n_{\mathrm{MED}})=(1454,1397,1032)$$
 
 ### SPLADE representation
 
+- 도입 목적: SPLADE는 문맥이 반영된 vocabulary 단위의 sparse표현을 제공하므로, 피처 수준의 의미 해석에 적합
+- 사용 타당성: SPLADE의 출력값 $y_i$는 non-negative 특성을 가집니다. 이를 $L2$-정규화한 변환값 $x_i$는 단위 초구면($S^{p−1}$) 위에 위치하므로, vMF 분포 및 구면 k-평균(Spherical k-means) 모델의 입력 가정을 충족
+
 $$y_i=\mathrm{SPLADE}(t_i)\in\mathbb R_+^V$$
 
 $$J=\mathrm{TopVar}_{2000}\left(Y_{\mathrm{clean}}\right)$$
