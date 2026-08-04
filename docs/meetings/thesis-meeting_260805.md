@@ -17,7 +17,7 @@ $$\text{clustering 유지}+\vert{}S_\eta\vert{}\text{ 감소}+\text{common basel
 ### Classic3
 - 사용 배경: 방향성 문서 군집화(directional document clustering) 알고리즘 검증을 위해 널리 활용되는 벤치마크 데이터셋입니다.
 - 레퍼런스: Banerjee et al. (2005), Greene & Cunningham (2006).
-- 데이터 정제: 원본 문서에서 완전 중복(exact duplicates) 2개와 사전 지정된 유사 중복(near duplicates) 5개를 제거하여 총 $n=3{,}883$개의 데이터를 구축했습니다.
+- 데이터 정제: 원본 문서에서 완전 중복(exact duplicates) 2개와 사전 지정된 유사 중복(near duplicates) 5개를 제거하여 총 $n=3{,}883$개의 데이터를 구축
 - 클래스별 분포: $(n_{\mathrm{CISI}},n_{\mathrm{CRAN}},n_{\mathrm{MED}})=(1454,1397,1032)$
 
 $$K=3\quad(\mathrm{CISI},\mathrm{CRAN},\mathrm{MED})$$
