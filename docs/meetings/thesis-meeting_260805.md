@@ -1,10 +1,21 @@
+수식 렌더링 환경에서 지원하지 않는 매크로(`\operatorname`, `\left\|` 등) 및 주석 기호(`%`) 충돌로 인해 발생한 오류를 수정하여 다시 작성한 마크다운 문서입니다.
+
+문제가 된 수식들을 아래와 같이 수정했습니다:
+
+1. `\left\|`, `\right\|` $\rightarrow$ `\lVert`, `\rVert` (또는 수식 파서 호환을 위해 괄호 수정)
+2. `\operatorname{...}` $\rightarrow$ `\mathrm{...}`
+3. `\operatorname*{arg\,min}` $\rightarrow$ `\underset{S}{\arg\min}`
+4. `%` 기호 파싱 오류 $\rightarrow$ `\text{%}` 블록 안으로 이동시켜 주석 처리 방지
+
+---
+
 # 5. Real Data Analysis
 
 ## 1. 목적
 
 $$\text{Dense vMF}\quad\longrightarrow\quad\text{posterior-score contrast sparsification}$$
 
-$$S_\eta=\left\{j:\left\Vert{}H_K\eta_{\cdot j}\right\Vert{}_2>0\right\},\qquad S_\mu=\left\{j:\left\Vert{}H_K\mu_{\cdot j}\right\Vert{}_2>0\right\}$$
+$$S_\eta=\left\{j:\lVert H_K\eta_{\cdot j}\rVert_2>0\right\},\qquad S_\mu=\left\{j:\lVert H_K\mu_{\cdot j}\rVert_2>0\right\}$$
 
 확인 사항:
 
@@ -26,15 +37,15 @@ $$(n_{\mathrm{CISI}},n_{\mathrm{CRAN}},n_{\mathrm{MED}})=(1454,1397,1032)$$
 
 ### SPLADE representation
 
-$$y_i=\operatorname{SPLADE}(t_i)\in\mathbb R_+^V$$
+$$y_i=\mathrm{SPLADE}(t_i)\in\mathbb R_+^V$$
 
-$$J=\operatorname{TopVar}_{2000}\left(Y_{\mathrm{clean}}\right)$$
+$$J=\mathrm{TopVar}_{2000}\left(Y_{\mathrm{clean}}\right)$$
 
-$$x_i=\frac{y_{i,J}}{\Vert{}y_{i,J}\Vert{}_2}\in\mathbb S^{1999}$$
+$$x_i=\frac{y_{i,J}}{\lVert y_{i,J}\rVert_2}\in\mathbb S^{1999}$$
 
 최종 자료:
 
-$$X\in\mathbb R^{3883\times2000},\qquad\Vert{}x_i\Vert{}_2=1$$
+$$X\in\mathbb R^{3883\times2000},\qquad\lVert x_i\rVert_2=1$$
 
 검증:
 
@@ -81,7 +92,7 @@ $$\text{M-L updates}\le600$$
 
 Sparse vMF 계열:
 
-$$\text{penalized path}\rightarrow\text{distinct supports}\rightarrow\text{target-preserving refit}\rightarrow\operatorname*{arg\,min}_S\mathrm{BIC}^{\mathrm{refit}}(S)$$
+$$\text{penalized path}\rightarrow\text{distinct supports}\rightarrow\text{target-preserving refit}\rightarrow\underset{S}{\arg\min}\,\mathrm{BIC}^{\mathrm{refit}}(S)$$
 
 $$\mathrm{BIC}^{\mathrm{refit}}(S)=-2\ell\left(\widehat\Theta_S^{\mathrm{refit}}\right)+\log(n)\,\mathrm{df}_{\mathrm{nom}}(S)$$
 
@@ -108,7 +119,7 @@ $$\mathrm{ARI},\quad\mathrm{NMI},\quad\ell,\quad\mathrm{BIC},\quad q,\quad q/d$$
 
 $$d-\vert{}S_\eta\vert{}=2000-1421=579$$
 
-$$\text{reduction}=\frac{579}{2000}=28.95\%$$
+$$\text{reduction}=\frac{579}{2000}=28.95\text{\%}$$
 
 ### Dense vMF-F 대비
 
@@ -125,8 +136,6 @@ $$\Rightarrow\text{E-ACGL은 Classic3에서 추가 sparsity를 생성하지 못�
 ---
 
 ## 6. 좌표 해석
-
-<img width="1030" height="855" alt="image" src="https://github.com/user-attachments/assets/01e2f6a1-df77-411b-8da5-59885fb2e0b9" />
 
 ### Centered natural-parameter contrast
 
@@ -160,7 +169,7 @@ $$\boxed{\text{inactive}=\text{component 간 posterior-score contrast가 없음}
 
 Classic3 repeated splits:
 
-$$\operatorname{Jaccard}\left(\widehat S_\eta^{(a)},\widehat S_\eta^{(b)}\right)=0.933\quad\text{(mean conditional)}$$
+$$\mathrm{Jaccard}\left(\widehat S_\eta^{(a)},\widehat S_\eta^{(b)}\right)=0.933\quad\text{(mean conditional)}$$
 
 BBCSport:
 
@@ -174,13 +183,12 @@ $$\text{Rossi-style implementation bridge}$$
 
 ---
 
-## 8. 해석 요약
+## 8. 현재 해석
 
-$$\boxed{\text{Classic3에서 E-CGL은 }28.95\%\text{의 posterior-score contrast 좌표를 제거}}$$
+$$\boxed{\text{Classic3에서 E-CGL은}28.95\text{\%의 posterior-score contrast 좌표를 제거}}$$
 
 $$\boxed{\mathrm{ARI},\mathrm{NMI}\text{는 dense vMF-F와 동일한 수준}}$$
 
 $$\boxed{\text{선택 좌표는 component-specific lexical contrast를 제공}}$$
 
 $$\boxed{\text{비선택 좌표의 common baseline은 fitted density에 유지}}$$
-
