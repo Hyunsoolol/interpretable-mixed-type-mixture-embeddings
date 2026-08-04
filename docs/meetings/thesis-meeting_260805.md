@@ -44,7 +44,7 @@ Label 사용:
 
 $$\text{fitting / tuning / support selection}\;\perp\;\text{class label}$$
 
-$$\text{label}\rightarrow K=3,\;\mathrm{ARI},\;\mathrm{NMI},\;\text{post-fit component naming}$$
+$$\text{label}\rightarrow K=3,\mathrm{ARI},\mathrm{NMI},\text{post-fit component naming}$$
 
 ---
 
