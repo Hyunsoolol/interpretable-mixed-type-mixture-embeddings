@@ -1,15 +1,4 @@
-수식 렌더링 환경에서 지원하지 않는 매크로(`\operatorname`, `\left\|` 등) 및 주석 기호(`%`) 충돌로 인해 발생한 오류를 수정하여 다시 작성한 마크다운 문서입니다.
-
-문제가 된 수식들을 아래와 같이 수정했습니다:
-
-1. `\left\|`, `\right\|` $\rightarrow$ `\lVert`, `\rVert` (또는 수식 파서 호환을 위해 괄호 수정)
-2. `\operatorname{...}` $\rightarrow$ `\mathrm{...}`
-3. `\operatorname*{arg\,min}` $\rightarrow$ `\underset{S}{\arg\min}`
-4. `%` 기호 파싱 오류 $\rightarrow$ `\text{%}` 블록 안으로 이동시켜 주석 처리 방지
-
----
-
-# 5. Real Data Analysis
+# Real Data Analysis
 
 ## 1. 목적
 
