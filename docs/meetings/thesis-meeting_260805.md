@@ -126,8 +126,6 @@ $$\Rightarrow\text{E-ACGL은 Classic3에서 추가 sparsity를 생성하지 못�
 
 ## 6. 좌표 해석
 
-<img width="1058" height="888" alt="image" src="https://github.com/user-attachments/assets/3ab2afb8-8116-4b77-b3e2-fc622ec9cb8f" />
-
 ### Centered natural-parameter contrast
 
 $$c_{kj}^{(\eta)}=\eta_{kj}-\bar\eta_j,\qquad\bar\eta_j=\frac1K\sum_{h=1}^K\eta_{hj}$$
@@ -153,3 +151,5 @@ $$\texttt{comparison,\ quantitative,\ behavior,\ patterns,\ frequency}$$
 $$\boxed{\text{inactive}\neq\text{density에서 제거}}$$
 
 $$\boxed{\text{inactive}=\text{component 간 posterior-score contrast가 없음}}$$
+
+<img width="1058" height="888" alt="image" src="https://github.com/user-attachments/assets/3ab2afb8-8116-4b77-b3e2-fc622ec9cb8f" />
