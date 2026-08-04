@@ -153,33 +153,3 @@ $$\texttt{comparison,\ quantitative,\ behavior,\ patterns,\ frequency}$$
 $$\boxed{\text{inactive}\neq\text{density에서 제거}}$$
 
 $$\boxed{\text{inactive}=\text{component 간 posterior-score contrast가 없음}}$$
-
----
-
-## 7. 보조 결과
-
-Classic3 repeated splits:
-
-$$\mathrm{Jaccard}\left(\widehat S_\eta^{(a)},\widehat S_\eta^{(b)}\right)=0.933\quad\text{(mean conditional)}$$
-
-BBCSport:
-
-$$\mathrm{NLL}_{\mathrm{sparse}}>\mathrm{NLL}_{\mathrm{dense}}$$
-
-$$\Rightarrow\text{sparsification이 항상 density fit을 개선하지는 않음}$$
-
-CSTR:
-
-$$\text{Rossi-style implementation bridge}$$
-
----
-
-## 8. 현재 해석
-
-$$\boxed{\text{Classic3에서 E-CGL은}28.95\text{\%의 posterior-score contrast 좌표를 제거}}$$
-
-$$\boxed{\mathrm{ARI},\mathrm{NMI}\text{는 dense vMF-F와 동일한 수준}}$$
-
-$$\boxed{\text{선택 좌표는 component-specific lexical contrast를 제공}}$$
-
-$$\boxed{\text{비선택 좌표의 common baseline은 fitted density에 유지}}$$
