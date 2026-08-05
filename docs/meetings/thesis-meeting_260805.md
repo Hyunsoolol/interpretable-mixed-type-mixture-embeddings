@@ -175,7 +175,7 @@ $$\boxed{\text{inactive}=\text{component 간 posterior-score contrast가 없음}
 
 **2. 투고 전 필수 원고 수정**
 
-- **초록(Abstract) 작성
+- **초록(Abstract) 작성**
     
 - **결과 수치 일괄 업데이트:** 단일 결과(CSV) 기반으로 Tables, Figures, Discussion 수치(예: Classic3 28.95% 등)를 자동 생성하여 하드코딩 오류 제거.
     
