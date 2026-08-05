@@ -187,7 +187,7 @@ $$\boxed{\text{inactive}=\text{component 간 posterior-score contrast가 없음}
         
 - **Path 및 파라미터 설정 통일:** Path 개수 $L=240$ 통일, 후보군에 Null support($\varnothing$) 반드시 포함, Estimator 정의에 finite-cap $\Theta_{\max}$ 반영.
     
-**지표 및 프로토콜 보완:** 평가 지표를 전체 $\eta$가 아닌 centered contrast 기준인 $\mathrm{MSE}_{\eta^c}$로 통일. SPLADE++, Sparse $k$-means 인용 추가 및 실데이터 프로토콜(중복 문서 처리 기준 등) 구체화.
+**지표 및 프로토콜 보완:** 평가 지표를 전체 $\eta$가 아닌 centered contrast 기준인 $\mathrm{MSE}_{\eta^c}$ 로 통일. SPLADE++, Sparse $k$-means 인용 추가 및 실데이터 프로토콜(중복 문서 처리 기준 등) 구체화.
 
 **3. Real Data**
 - 데이터 사례 추가
