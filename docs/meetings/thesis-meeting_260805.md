@@ -173,7 +173,7 @@ $$\boxed{\text{inactive}=\text{component 간 posterior-score contrast가 없음}
 - **Theorem 4 & Corollary (권장 통계 이론):** 실제 사용되는 refit 및 BIC 선택 절차에 맞춰 Candidate-path 조건부 BIC consistency 및 selected refit의 Oracle efficiency를 이론적으로 뒷받침.
     
 
-**2. 투고 전 필수 원고 수정**
+**2. 초안 본문 수정**
 
 - **초록(Abstract) 작성**
     
