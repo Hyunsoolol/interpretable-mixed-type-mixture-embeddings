@@ -166,16 +166,16 @@ $$\boxed{\text{inactive}=\text{component 간 posterior-score contrast가 없음}
 
 - **Theorem 1 (Estimator 존재성):** Finite cap($\kappa_{\max}$) 파라미터 공간($\Theta_{\max}$)을 정의하여 penalized estimator의 존재성 및 likelihood collapse 방지 증명.
     
-- **Theorem 2 (Proximal 수렴성):** Backtracking proximal-gradient sequence가 고정 responsibility 하에서 유일한 조건부 전역 최적해로 수렴함(수렴 속도 포함)을 명시.
+- **Theorem 2 (Proximal 수렴성):** Backtracking proximal-gradient sequence가 고정 responsibility 하에서 유일한 조건부 전역 최적해로 수렴함
     
-- **Theorem 3 (GEM Stationarity):** Guarded GEM 알고리즘이 수렴하며, 모든 accumulation point가 KKT stationary point임을 증명 (Global optimum 등 과도한 주장은 배제).
+- **Theorem 3 (GEM Stationarity):** Guarded GEM 알고리즘이 수렴하며, 모든 accumulation point가 KKT stationary point임을 증명
     
 - **Theorem 4 & Corollary (권장 통계 이론):** 실제 사용되는 refit 및 BIC 선택 절차에 맞춰 Candidate-path 조건부 BIC consistency 및 selected refit의 Oracle efficiency를 이론적으로 뒷받침.
     
 
 **2. 투고 전 필수 원고 수정**
 
-- **초록(Abstract) 작성
+- **초록(Abstract) 작성**
     
 - **결과 수치 일괄 업데이트:** 단일 결과(CSV) 기반으로 Tables, Figures, Discussion 수치(예: Classic3 28.95% 등)를 자동 생성하여 하드코딩 오류 제거.
     
@@ -188,3 +188,6 @@ $$\boxed{\text{inactive}=\text{component 간 posterior-score contrast가 없음}
 - **Path 및 파라미터 설정 통일:** Path 개수 $L=240$ 통일, 후보군에 Null support($\varnothing$) 반드시 포함, Estimator 정의에 finite-cap $\Theta_{\max}$ 반영.
     
 - **지표 및 프로토콜 보완:** 평가 지표를 전체 $\eta$가 아닌 centered contrast 기준인 $\operatorname{MSE}_{\eta^c}$로 통일. SPLADE++, Sparse $k$-means 인용 추가 및 실데이터 프로토콜(중복 문서 처리 기준 등) 구체화.
+
+**3. Read Data**
+- 데이터 사례 추가
