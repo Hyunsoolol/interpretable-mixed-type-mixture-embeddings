@@ -1,7 +1,0 @@
-"check","pass"
-"all_dense_panel_checks_pass",TRUE
-"all_ecgl_exact_fits_converged",TRUE
-"all_ecgl_support_counts_match",TRUE
-"all_train_tau_rows_sum_to_one",TRUE
-"all_test_tau_rows_sum_to_one",TRUE
-"labels_excluded_from_selection",TRUE

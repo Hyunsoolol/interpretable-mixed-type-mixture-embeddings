@@ -1,7 +1,0 @@
-"repeat_id","file","nrow_off","nrow_on","numeric_max_diff","n_num_diff_gt_1e8","n_num_diff_gt_1e10","all_char_same"
-1,"raw",300,300,1.01863406598568e-10,0,53,TRUE
-1,"summary",6,6,9.82254277914762e-11,0,0,TRUE
-2,"raw",300,300,1.01863406598568e-10,0,53,TRUE
-2,"summary",6,6,9.82254277914762e-11,0,0,TRUE
-3,"raw",300,300,1.01863406598568e-10,0,53,TRUE
-3,"summary",6,6,9.82254277914762e-11,0,0,TRUE
